@@ -1,0 +1,78 @@
+QuestionId_DQ,InterventionId,MetaDataId,Text,Sequence,MetaDataTagId,Label
+104614,10,13655,"Alex and Sophie are arguing about rounding 
+Alex says \( \mathbf{5 . 4 5 9 8} \) rounded to \( 1 \) decimal place is \( \mathbf{5 . 5} \) 
+Sophie says \( \mathbf{5 . 4 5 9 8} \) rounded to \( 2 \) decimal places is \( \mathbf{5 . 4 6} \) 
+Who is correct?",1,1,Question Text
+104614,10,13656,Only Alex,2,3,Answer A Text
+104614,10,13657,"Only
+Sophie",3,5,Answer B Text
+104614,10,13658,Both Alex and Sophie,4,7,Answer C Text
+104614,10,13659,Neither is correct,5,9,Answer D Text
+129129,14,4594,"What is the value of:
+\(
+\frac{54+58}{2}
+\)",1,1,Question Text
+129129,14,4595,\( 56 \),2,3,Answer A Text
+129129,14,4596,\( 224 \),3,5,Answer B Text
+129129,14,4597,\( 85 \),4,7,Answer C Text
+129129,14,4598,\( 51 \),5,9,Answer D Text
+147113,23,19712,Elijah makes a conjecture:,1,1,Question Text
+147113,23,19713,"To find the lowest common multiple of two numbers, you multiply the two numbers together",2,1,Question Text
+147113,23,19714,Is Elijah's conjecture...,3,1,Question Text
+147113,23,19715,Always true,4,3,Answer A Text
+147113,23,19716,Sometimes true,5,5,Answer B Text
+147113,23,19717,Never true,6,7,Answer C Text
+147113,23,19718,I don't know,7,9,Answer D Text
+108130,29,11574,"The table shows the numbers of TVs in the households of students in a different class.
+
+What is the range for the number of TVs?",1,1,Question Text
+108130,29,11575,"\begin{tabular}{|c|c|}
+\hline TVs & Frequency \\
+\hline \( 0 \) & \( 0 \) \\
+\hline \( 1 \) & \( 7 \) \\
+\hline \( 2 \) & \( 2 \) \\
+\hline \( 3 \) & \( 5 \) \\
+\hline \( 4 \) & \( 12 \) \\
+\hline
+\end{tabular}",2,1,Question Text
+108130,29,11576,\( 3 \),3,3,Answer A Text
+108130,29,11577,\( 12 \),4,5,Answer B Text
+108130,29,11578,\( 10 \),5,7,Answer C Text
+108130,29,11579,\( 4 \),6,9,Answer D Text
+104615,33,13660,What is \( \mathbf{3 . 1 5 3} \) rounded to the nearest \( \mathbf{0 . 0 2} \) ?,1,1,Question Text
+104615,33,13661,\( 3.2 \),2,3,Answer A Text
+104615,33,13662,\( 3.12 \),3,5,Answer B Text
+104615,33,13663,\( 3.16 \),4,7,Answer C Text
+104615,33,13664,\( 3.15 \),5,9,Answer D Text
+89558,42,2383,"Statement 1: \( \quad p \times(-q)=(-p) \times q \)
+Statement 2: \( \quad-(q)^{2}=q^{2} \)
+What can you say about the above statements, where \( p \) and \( q \) represent different numbers?",1,1,Question Text
+89558,42,2384,Only statement \( 1 \) is true,2,3,Answer A Text
+89558,42,2385,Only statement \( 2 \) is true,3,5,Answer B Text
+89558,42,2386,Both statements are true,4,7,Answer C Text
+89558,42,2387,Both statements are false,5,9,Answer D Text
+103042,59,12920,Which is the next prime number greater than \( 100 ? \),1,1,Question Text
+103042,59,12921,\( 101 \),2,3,Answer A Text
+103042,59,12922,\( 103 \),3,5,Answer B Text
+103042,59,12923,\( 105 \),4,7,Answer C Text
+103042,59,12924,\( 107 \),5,9,Answer D Text
+106909,69,24170,"Leo and Sophie are arguing about solving inequalities.
+Leo says \( -2 m>12 \) gives \( m>-6 \)
+Sophie says \( -2+m>12 \) gives \( m>14 \)
+Who is correct?",1,1,Question Text
+106909,69,24171,"Only
+Leo",2,3,Answer A Text
+106909,69,24172,Only Sophie,3,5,Answer B Text
+106909,69,24173,Both Leo and Sophie,4,7,Answer C Text
+106909,69,24174,Neither is correct,5,9,Answer D Text
+131463,77,15496,What is the volume of this cuboid?,1,1,Question Text
+131463,77,15497,"A cuboid with dimensions labelled 10cm, 4cm and 5cm",2,2,Question Image
+131463,77,15498,\( 19 \mathrm{~cm}^{3} \),3,3,Answer A Text
+131463,77,15499,\( 50 \mathrm{~cm}^{3} \),4,5,Answer B Text
+131463,77,15500,\( 200 \mathrm{~cm}^{3} \),5,7,Answer C Text
+131463,77,15501,\( 220 \mathrm{~cm}^{3} \),6,9,Answer D Text
+75997,80,31303,Which clock shows ten to twelve at night?,1,1,Question Text
+75997,80,31304,10:12,2,3,Answer A Text
+75997,80,31305,\( 12: 50 \),3,5,Answer B Text
+75997,80,31306,00:50,4,7,Answer C Text
+75997,80,31307,\( 23: 50 \),5,9,Answer D Text

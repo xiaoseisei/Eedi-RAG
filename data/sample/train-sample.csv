@@ -1,0 +1,289 @@
+InterventionId,TutorId,QuestionId_DQ,MessageSequence,IsTutor,MessageString,TalkMovePrediction
+10,749,104614,1,1,"Hello Lina, just wanted to check, you OK?",<None>
+10,749,104614,2,1,You don't have to have help if you don't want it but I am here if you need anything. ,<None>
+10,-1,104614,3,0,Hi I would you preferred to be called Lina Chen,
+10,-1,104614,4,0,I need help,
+10,-1,104614,5,0,On this question I am a bit stuck at this can you help me please,
+10,-1,104614,6,0,Thx u,
+10,749,104614,7,1,"Of course, thank you for correcting me on your name, give me a moment to have a look. ",<None>
+10,-1,104614,8,0,Ok thank you take your time,
+10,749,104614,9,1,Do you have any thoughts about what either Alex or Sophie said?,<Getting Student to Relate>
+10,749,104614,10,1,Do you think either of them is right or wrong?,<Getting Student to Relate>
+10,-1,104614,11,0,I think both are wrong,
+10,-1,104614,12,0,Is that right ???,
+10,749,104614,13,1,"OK. So if Alex is wrong, what do you think would be the right answer for his question?",<Getting Student to Relate>
+10,-1,104614,14,0,Both are wrong,
+10,-1,104614,15,0,Or Sophie is correct,
+10,749,104614,16,1,what do you think 5.4598 rounds to to 1dp?,<Press for Accuracy>
+10,-1,104614,17,0,5.45,
+10,-1,104614,18,0,Maybe or not sure,
+10,749,104614,19,1,"That's two decimal places, not one. ",<None>
+10,-1,104614,20,0,5.4510,
+10,-1,104614,21,0,Can you give me a clue,
+10,-1,104614,22,0,Please,
+10,749,104614,23,1,An answer to 1 decimal place should have only one digit after the decimal point. ,<None>
+10,-1,104614,24,0,What do you mean by that,
+10,749,104614,25,1,Have you worked on rounding before?,<Keep Together>
+10,-1,104614,26,0,Yes,
+10,749,104614,27,1,Can you round 5.45 to one decimal place?,<Press for Accuracy>
+10,-1,104614,28,0,54.5,
+10,749,104614,29,1,"No, the answer would be 5.5",<Revoicing>
+10,-1,104614,30,0,Oh I get it the now,
+10,749,104614,31,1,"I think maybe you multiplied by ten, is that right?",<Keep Together>
+10,-1,104614,32,0,How does this work,
+10,-1,104614,33,0,Because like 5.45 to one decimal should be the same no changes,
+10,749,104614,34,1,"To 1 decimal place, it's 5.5",<None>
+10,-1,104614,35,0,Ok,
+10,-1,104614,36,0,thank you so much,
+10,-1,104614,37,0,Take care,
+10,-1,104614,38,0,Enjoy the rest of your day,
+10,-1,104614,39,0,So nice to speak to you,
+10,749,104614,40,1,You're welcome. would you like to talk about Sophie's answer too or would you like me to hand you back to the lesson?,<Keep Together>
+10,-1,104614,41,0,Hand me back to lesson thanks,
+14,67,129129,1,1,"Hi Nathaniel, How are you today?",<None>
+14,-1,129129,2,0,"im good, im not sure how to solve this",
+14,67,129129,3,1,"good :) OK, let's have a look",<None>
+14,67,129129,4,1,What do you think this question is asking?,<Press for Accuracy>
+14,-1,129129,5,0,the value of 54+58/2,
+14,67,129129,6,1,super! what do you think we should do first?,<Press for Accuracy>
+14,-1,129129,7,0,i think add 54 and 58?,
+14,67,129129,8,1,"Yes, I agree! what answer does that give?",<Press for Accuracy>
+14,-1,129129,9,0,i think 114?,
+14,67,129129,10,1,not quite,<None>
+14,-1,129129,11,0,112,
+14,67,129129,12,1,Let's simplify... 54 = 50+4 and 58 = 50+8,<None>
+14,67,129129,13,1,🎉🎉,<None>
+14,67,129129,14,1,Great!!,<None>
+14,67,129129,15,1,"Now, what is the final part of the question?",<Press for Accuracy>
+14,-1,129129,16,0,we do something with the 2 and 112?,
+14,67,129129,17,1,so we have 112/2 ,<Revoicing>
+14,67,129129,18,1,what does that line mean?,<Press for Accuracy>
+14,-1,129129,19,0,halve?,
+14,67,129129,20,1,"well, the line with the 2 below it is a way of saying half",<None>
+14,67,129129,21,1,"but the line in the fraction, is another way of saying divide in Maths",<None>
+14,-1,129129,22,0,so we divide 112 by 2?,
+14,67,129129,23,1,That's it Nathaniel!! Well done!🎉😊,<None>
+14,67,129129,24,1,What answer will you get?,<Press for Accuracy>
+14,-1,129129,25,0,56,
+14,67,129129,26,1,Super work Nathaniel! How do you feel about this now you've worked through it?,<Keep Together>
+14,-1,129129,27,0,very good,
+14,67,129129,28,1,"👏🎉😊 well done, you've been super today! ",<None>
+14,-1,129129,29,0,thanks for the help,
+14,67,129129,30,1,Are you ready to go back and submit your answer?,<Keep Together>
+14,-1,129129,31,0,yup,
+14,67,129129,32,1,No problem!😊,<None>
+23,-1,147113,1,0,is it c,
+23,102,147113,2,1,"Hi, another wordy one! One sec while I read it through.",<None>
+23,-1,147113,3,0,kkkkkkkkk,
+23,102,147113,4,1,Ok think about an example... What's the lowest common multiply of 3 and 5?,<Press for Accuracy>
+23,102,147113,5,1,*multiple,<None>
+23,-1,147113,6,0,15,
+23,102,147113,7,1,"Yep, do we get that by multiplying them together?",<Keep Together>
+23,-1,147113,8,0,45,
+23,102,147113,9,1,"I mean multiplying 3 and 5 together gives us the lowest common multiple, 15",<None>
+23,-1,147113,10,0,oh so am i rigt or not,
+23,102,147113,11,1,"For the question, we're trying to decide if multiplying numbers together gives us their lowest common multiple",<None>
+23,102,147113,12,1,So did it work for 3 and 5?,<Keep Together>
+23,-1,147113,13,0,yes,
+23,102,147113,14,1,"Great, so it works at least sometimes...",<None>
+23,-1,147113,15,0,is it b,
+23,102,147113,16,1,Can you prove it?,<Press for Reasoning>
+23,-1,147113,17,0,no,
+23,102,147113,18,1,Is there an example where it doesn't work?,<Press for Accuracy>
+23,-1,147113,19,0,i dont know,
+23,-1,147113,20,0,d,
+23,102,147113,21,1,Let's try... 4 and 6. What's the lowest common multiple?,<Press for Accuracy>
+23,-1,147113,22,0,its d,
+23,-1,147113,23,0,24,
+23,-1,147113,24,0,12,
+23,102,147113,25,1,Yeah 12! Is that the same as multiplying 4 x 6?,<Keep Together>
+23,-1,147113,26,0,is it d,
+23,102,147113,27,1,"Well it worked for 3 and 5, but not 4 and 6",<None>
+23,102,147113,28,1,"So that's sometimes, right?",<Keep Together>
+23,-1,147113,29,0,so b,
+23,102,147113,30,1,Yep. I just wanted you to see why!,<None>
+23,-1,147113,31,0,is it b then],
+23,102,147113,32,1,"Yes, B",<Revoicing>
+23,102,147113,33,1,Bye!,<None>
+23,-1,147113,34,0,bye,
+29,283,108130,1,1,Hi Liam!,<None>
+29,-1,108130,2,0,Hi again,
+29,283,108130,3,1,"So, the range is...",<None>
+29,283,108130,4,1,the largest value minus the smallest value,<None>
+29,283,108130,5,1,But we need to think what the data is about...,<None>
+29,283,108130,6,1,it's about number of TVs,<None>
+29,283,108130,7,1,"So, we need to look at the highest and lowest number of TVs",<None>
+29,-1,108130,8,0,Would that be 4 and 2?,
+29,-1,108130,9,0,Wait 0,
+29,283,108130,10,1,Have another look...,<None>
+29,283,108130,11,1,At least one person has to have given that answer...,<None>
+29,283,108130,12,1,otherwise that number of TVs doesn't exist in this survey really...,<None>
+29,-1,108130,13,0,So 4 and 2?,
+29,283,108130,14,1,4 is correct...,<Revoicing>
+29,283,108130,15,1,"but some people have 1 Tv... can you see those 7 people who have 1 TV?
+",<Keep Together>
+29,-1,108130,16,0,Yes,
+29,283,108130,17,1,Great...,<None>
+29,283,108130,18,1,so the largest number of TVs is 4,<None>
+29,283,108130,19,1,And the lowest number of TVs that anyone has is 1.,<None>
+29,283,108130,20,1,"So, the range = 4-1",<None>
+29,283,108130,21,1,= ?,<Press for Accuracy>
+29,-1,108130,22,0,Ohh 3,
+29,283,108130,23,1,Great!,<None>
+29,283,108130,24,1,Does this all make sense?,<Keep Together>
+29,-1,108130,25,0,Yes thankyou,
+29,283,108130,26,1,Great!,<None>
+29,283,108130,27,1,Well done! Bye for now 👋,<None>
+33,17,104615,1,1,Hi again Zainab  😁👋,<None>
+33,17,104615,2,1,"How can I help?!
+",<Keep Together>
+33,-1,104615,3,0,I don't know how to work out this question.,
+33,17,104615,4,1,So for this one we need to think about the 0.02 times table values near 3.153 😃,<None>
+33,17,104615,5,1,Can you think about what value would be in the 0.02 times table near 3.153.. Any ideas? 💡,<Press for Accuracy>
+33,-1,104615,6,0,What is the 0.02 times table value?,
+33,17,104615,7,1,"I'll give you the value below, see if you can find the value above..",<None>
+33,17,104615,8,1,So the value in the 0.02 times table below 3.153 would be 3.14,<None>
+33,17,104615,9,1,Does that make sense? 😊👍,<Keep Together>
+33,-1,104615,10,0,I think so,
+33,17,104615,11,1,So what would the value above 3.153 be in the 0.02 times table? 🧠,<Press for Accuracy>
+33,17,104615,12,1,3.1 to 3.12 to 3.14 to ...,<Press for Accuracy>
+33,-1,104615,13,0,3.16,
+33,17,104615,14,1,Nailed it 🔨🔨🔨,<None>
+33,17,104615,15,1,So now we need to decide if 3.153 is closer to 3.14 or 3.16,<Press for Accuracy>
+33,17,104615,16,1,Can you work that out? 😃,<Press for Accuracy>
+33,-1,104615,17,0,3.16 ia closer,
+33,17,104615,18,1,Exactly so that's your answer ✅✅✅,<None>
+33,17,104615,19,1,3.153 rounded to the nearest 0.02 is 3.16 😁😁😁,<Revoicing>
+33,17,104615,20,1,"WELL DONE!!! 🏆😊✅👌👀🧠
+",<None>
+33,-1,104615,21,0,Thank you! This really helped. 😁,
+33,17,104615,22,1,So pleased to hear 😃👍,<None>
+33,17,104615,23,1,Ready to go back to eedi? 🤖,<None>
+33,-1,104615,24,0,Yes.,
+33,17,104615,25,1,Of course! Nice one for requesting help 😊👍 bye for now 👋👋👋,<None>
+42,624,89558,1,1,Hi How can I help?,<Keep Together>
+42,-1,89558,2,0,I’m a bit confused with this question,
+42,624,89558,3,1,"Ok, let's take a look together!",<None>
+42,624,89558,4,1,"So, what is p x - q?",<Press for Accuracy>
+42,-1,89558,5,0,Um well I know it would be a negative but I don’t really know the answer,
+42,624,89558,6,1,"That's what we need really, so it would be -pq",<Revoicing>
+42,624,89558,7,1,As if we multiply two letters we write them next to each other,<None>
+42,-1,89558,8,0,Ok,
+42,624,89558,9,1,Does -p x q give us the same answer?,<Keep Together>
+42,-1,89558,10,0,Yes,
+42,624,89558,11,1,"Great, so statement 1 is true",<None>
+42,-1,89558,12,0,Ok,
+42,624,89558,13,1,Now statement 2,<None>
+42,-1,89558,14,0,I don’t think it works,
+42,624,89558,15,1,"I don't think it does either, as the left one stays negative, but the right one is positive",<Revoicing>
+42,624,89558,16,1,So which answer do you think we need?,<Press for Accuracy>
+42,-1,89558,17,0,A,
+42,624,89558,18,1,I agree!,<None>
+42,624,89558,19,1,Well done Sophia :) ,<None>
+42,-1,89558,20,0,Ok thank you,
+59,1430,103042,1,1,Hey! How can I help? 😃,<Keep Together>
+59,-1,103042,2,0,I don't know my prime numbers past 40,
+59,1430,103042,3,1,"No worries, what do you know about prime numbers?",<Press for Accuracy>
+59,-1,103042,4,0,They can only be divided by one and Itself,
+59,1430,103042,5,1,perfect!,<None>
+59,1430,103042,6,1,"So looking at the answer options, is there any that you know can be divided by something other than 1 or itself?",<Press for Accuracy>
+59,1430,103042,7,1,Is there one that you could rule out?,<Press for Accuracy>
+59,-1,103042,8,0,103,
+59,1430,103042,9,1,What can you divided 103 by to get a whole number answer?,<Press for Accuracy>
+59,1430,103042,10,1,*divide,<None>
+59,-1,103042,11,0,6,
+59,1430,103042,12,1,103/6 = 17.1666...,<None>
+59,1430,103042,13,1,103 is actually prime.,<None>
+59,1430,103042,14,1,I was thinking we could rule out 105 as it ends in a 5,<None>
+59,-1,103042,15,0,Yes,
+59,1430,103042,16,1,Why can we rule it out as it ends in a 5?,<Press for Reasoning>
+59,-1,103042,17,0,Because 5 is in the 5 times tables,
+59,1430,103042,18,1,Brilliant!,<None>
+59,1430,103042,19,1,What about 101?,<Press for Accuracy>
+59,-1,103042,20,0,101 is the answer to the question,
+59,1430,103042,21,1,"It is, fantastic!",<None>
+59,1430,103042,22,1,Happy to go back to the lesson?,<Keep Together>
+59,-1,103042,23,0,Yes,
+59,1430,103042,24,1,😁👋,<None>
+69,1,106909,1,1,Hello :),<None>
+69,-1,106909,2,0,hi im really confused on this question,
+69,-1,106909,3,0,an you help me please,
+69,1,106909,4,1,of course!,<None>
+69,-1,106909,5,0,ok,
+69,1,106909,6,1,"So we need to work out -2m > 12 first, how can we do that? :)",<Press for Accuracy>
+69,-1,106909,7,0,find out what m is,
+69,1,106909,8,1,"Exactly, so m is being multiplied by -2",<Revoicing>
+69,1,106909,9,1,"So we need to do the opposite, which is?",<Press for Accuracy>
+69,-1,106909,10,0,divide by -2,
+69,1,106909,11,1,Super :) ,<None>
+69,1,106909,12,1,What does that give us ? :0,<Press for Accuracy>
+69,-1,106909,13,0,thank you what would i do next,
+69,-1,106909,14,0,would it be -1,
+69,1,106909,15,1,"Not quite, we need to do -6 divided by -2",<Revoicing>
+69,-1,106909,16,0,3,
+69,1,106909,17,1,Super :,<None>
+69,1,106909,18,1,:),<None>
+69,-1,106909,19,0,:),
+69,1,106909,20,1,"Now there's one other thing we need to do when we divide by negatives if we use inequalities, we have to flip the inequality sign around :)",<None>
+69,-1,106909,21,0,ok,
+69,1,106909,22,1,So what does that mean our inequality will be? :),<Press for Accuracy>
+69,-1,106909,23,0,would it be leos,
+69,1,106909,24,1,Yep it is Leo's that we're doing :),<Revoicing>
+69,-1,106909,25,0,sorry im still confused on how i know whether it is sophies or leoms or sophies and leos,
+69,1,106909,26,1,"Ok, so Leo and Sophie both have different questions",<Revoicing>
+69,-1,106909,27,0,oh wait i think i know,
+69,-1,106909,28,0,is the answer B,
+69,1,106909,29,1,It is :),<None>
+69,-1,106909,30,0,thank you for your help claire,
+69,1,106909,31,1,"I'll let you pop that in. Please take the lesson offered after you put in your answer, it will really help 😊",<None>
+69,1,106909,32,1,You're welcome! :),<None>
+77,-1,131463,1,0,what is the answer,
+77,102,131463,2,1,Hi! Can you see the feedback tells you which calculation to use?,<Keep Together>
+77,-1,131463,3,0,i dont get it,
+77,-1,131463,4,0,what feedback,
+77,-1,131463,5,0,???#,
+77,-1,131463,6,0,???,
+77,-1,131463,7,0,i did the area,
+77,-1,131463,8,0,add all the side areas,
+77,102,131463,9,1,D ❌ - I think you have found the surface area. Remember we multiply the length by the width by the height to find the volume of a cuboid,<Revoicing>
+77,102,131463,10,1,This question wants the volume not the area :),<None>
+77,-1,131463,11,0,I know its not D,
+77,-1,131463,12,0,oh ok,
+77,-1,131463,13,0,what is volume is it sound,
+77,102,131463,14,1,Volume is the space inside,<Revoicing>
+77,-1,131463,15,0,what is the space inside please,
+77,102,131463,16,1,"Like if you filled the shape with clay, how much clay could you fit inside",<None>
+77,-1,131463,17,0,how do you work it out,
+77,-1,131463,18,0,on this question,
+77,102,131463,19,1,"That's what the feedback tells you :) the ones I copied, it says multiply the length by the width by the height to find the volume",<None>
+77,-1,131463,20,0,10 X 5 is 50,
+77,102,131463,21,1,"Good, and x4?",<Press for Accuracy>
+77,-1,131463,22,0,200,
+77,-1,131463,23,0,so is it c,
+77,102,131463,24,1,"Great, that is correct :) Good to go?",<Keep Together>
+77,-1,131463,25,0,bye thanks for your help,
+77,102,131463,26,1,Bye!,<None>
+80,10,75997,1,1,Hi again :),<None>
+80,-1,75997,2,0,hello srry to disturb,
+80,10,75997,3,1,No need to apologise!,<None>
+80,-1,75997,4,0,i need help on this question,
+80,10,75997,5,1,"You went for A, which is 12 minutes past 10",<None>
+80,10,75997,6,1,What time does B show?,<Press for Accuracy>
+80,-1,75997,7,0,12 minute past 50,
+80,-1,75997,8,0,50 minutes past 12,
+80,10,75997,9,1,"Yes brilliant, 50 minutes past 12",<Revoicing>
+80,10,75997,10,1,which is 12 minutes to 1,<None>
+80,10,75997,11,1,Sorry 10 minutes to 1**,<None>
+80,10,75997,12,1,Which isn't what we are looking,<None>
+80,10,75997,13,1,how about C?,<Press for Accuracy>
+80,-1,75997,14,0,its 12 : 50 AM,
+80,10,75997,15,1,Excellent! so 10 to 1 again,<None>
+80,10,75997,16,1,"So it isn't A, B or C!",<None>
+80,10,75997,17,1,How about D? :),<Press for Accuracy>
+80,-1,75997,18,0,is it D?,
+80,10,75997,19,1,"D shows 10 to 12 at night-time, so yes, 10 to 12 at night :)",<Revoicing>
+80,10,75997,20,1,Super work!,<None>
+80,10,75997,21,1,Well done ⭐⭐⭐⭐⭐,<None>
+80,10,75997,22,1,Are you ok to return to the lesson now?,<Keep Together>
+80,-1,75997,23,0,will i get 100  coins this time>,
+80,10,75997,24,1,Sure thing,<None>

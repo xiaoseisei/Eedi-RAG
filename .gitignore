@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# IDE
+.idea/
+
+# 环境变量（父级 AgentLearn/.gitignore 已忽略，此处兜底）
+.env
+
+# 运行时生成的存储引擎数据（可由 pipeline 重建，不入库）
+data/chroma/
+data/db/

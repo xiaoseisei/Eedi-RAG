@@ -1,0 +1,12 @@
+configs:
+- config_name: anchored-dialogues
+  data_files:
+  - split: train
+    path: "anchored-dialogues/train.csv"
+  - split: test
+    path: "anchored-dialogues/test.csv"
+  default: true
+- config_name: dialogue-subjects
+  data_files: "dialogue-subjects.csv"
+- config_name: dq-question-metadata
+  data_files: "dq-question-metadata.csv"

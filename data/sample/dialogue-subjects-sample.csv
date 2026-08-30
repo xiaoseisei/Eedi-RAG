@@ -1,0 +1,54 @@
+InterventionId,SubjectId,ParentSubjectId,SubjectName,SubjectLevel,SubjectType
+10,32,3,Number,1,Subject
+10,141,32,Rounding and Estimating,2,Topic
+10,214,141,Rounding to Decimal Places,3,Subtopic
+14,32,3,Number,1,Subject
+14,71,3,Geometry and Measure,1,Subject
+14,144,32,Basic Arithmetic,2,Topic
+14,272,71,Similarity and Congruency,2,Topic
+14,204,144,Mental Multiplication and Division,3,Subtopic
+14,90,272,Length Scale Factors in Similar Shapes,3,Subtopic
+14,203,144,Mental Addition and Subtraction,3,Subtopic
+14,202,144,Place Value,3,Subtopic
+23,32,3,Number,1,Subject
+23,144,32,Basic Arithmetic,2,Topic
+23,37,32,"Factors, Multiples and Primes",2,Topic
+23,204,144,Mental Multiplication and Division,3,Subtopic
+23,221,37,Prime Numbers and Prime Factors,3,Subtopic
+23,220,37,Multiples and Lowest Common Multiple,3,Subtopic
+29,32,3,Number,1,Subject
+29,71,3,Geometry and Measure,1,Subject
+29,101,3,Data and Statistics,1,Subject
+29,37,32,"Factors, Multiples and Primes",2,Topic
+29,338,101,Data Processing,2,Topic
+29,74,71,Angles,2,Topic
+29,100,71,Volume and Surface Area,2,Topic
+29,189,100,Volume of Prisms,3,Subtopic
+29,181,74,"Basic Angle Facts (straight line, opposite, around a point, etc)",3,Subtopic
+29,221,37,Prime Numbers and Prime Factors,3,Subtopic
+29,340,338,Averages and Range from Frequency Table,3,Subtopic
+33,32,3,Number,1,Subject
+33,141,32,Rounding and Estimating,2,Topic
+33,214,141,Rounding to Decimal Places,3,Subtopic
+42,32,3,Number,1,Subject
+42,42,32,Negative Numbers,2,Topic
+42,212,42,Multiplying and Dividing Negative Numbers,3,Subtopic
+59,32,3,Number,1,Subject
+59,37,32,"Factors, Multiples and Primes",2,Topic
+59,221,37,Prime Numbers and Prime Factors,3,Subtopic
+69,49,3,Algebra,1,Subject
+69,59,49,Inequalities,2,Topic
+69,166,59,Solving Linear Inequalities,3,Subtopic
+77,71,3,Geometry and Measure,1,Subject
+77,100,71,Volume and Surface Area,2,Topic
+77,189,100,Volume of Prisms,3,Subtopic
+77,188,100,Surface Area of Prisms,3,Subtopic
+80,32,3,Number,1,Subject
+80,71,3,Geometry and Measure,1,Subject
+80,100,71,Volume and Surface Area,2,Topic
+80,98,71,Units of Measurement,2,Topic
+80,144,32,Basic Arithmetic,2,Topic
+80,189,100,Volume of Prisms,3,Subtopic
+80,197,98,Volume and Capacity Units,3,Subtopic
+80,202,144,Place Value,3,Subtopic
+80,209,98,Time,3,Subtopic

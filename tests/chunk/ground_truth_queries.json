@@ -1,0 +1,92 @@
+[
+  {
+    "query_id": "q1",
+    "query": "四舍五入到一位小数时，学生把 5.4598 错误地保留为 5.45 或 5.4510，名师如何提问引导？",
+    "query_en": "When rounding 5.4598 to 1 decimal place, student answers 5.45 or 5.4510, how does tutor prompt?",
+    "target_intervention_id": 10,
+    "target_turn_ids": [9, 10, 11, 12, 13],
+    "target_subject": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q2",
+    "query": "计算分式复合运算 (54+58)/2 时，导师如何分步引导学生先加分子再除以2？",
+    "query_en": "How does tutor guide student to calculate (54+58)/2 step by step by adding numerator first then dividing by 2?",
+    "target_intervention_id": 14,
+    "target_turn_ids": [5, 6, 7, 11, 13, 15],
+    "target_subject": "Number > Basic Arithmetic > Mental Addition and Subtraction",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q3",
+    "query": "两个数的最小公倍数 (LCM) 是否总是等于两数相乘？名师如何用反例(如 4 和 6)来启发学生？",
+    "query_en": "Is the lowest common multiple of two numbers always their product? How does tutor use counterexample 4 and 6?",
+    "target_intervention_id": 23,
+    "target_turn_ids": [16, 18, 20, 22],
+    "target_subject": "Number > Factors, Multiples and Primes > Multiples and Lowest Common Multiple",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q4",
+    "query": "在频数分布表中求电视机数量极差 (Range) 时，学生误将频数为 0 的行当作最小值，导师如何纠偏？",
+    "query_en": "In frequency table for TVs range, student mistakenly uses TV=0 with frequency 0, how does tutor correct?",
+    "target_intervention_id": 29,
+    "target_turn_ids": [3, 4, 5, 7, 9],
+    "target_subject": "Data and Statistics > Data Processing > Averages and Range from Frequency Table",
+    "query_type": "misconception"
+  },
+  {
+    "query_id": "q5",
+    "query": "将 3.153 四舍五入到最近的 0.02，学生不理解 0.02 的倍数，导师如何通过给出 3.14 和 3.16 进行区间启发？",
+    "query_en": "Rounding 3.153 to nearest 0.02, student does not understand 0.02 times table, how tutor scaffolds with 3.14 and 3.16?",
+    "target_intervention_id": 33,
+    "target_turn_ids": [3, 5, 7, 8, 9, 10, 11],
+    "target_subject": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q6",
+    "query": "关于负数乘法与平方运算 -(q)^2 与 q^2 的正负性判断，学生的困惑点与导师解释是什么？",
+    "query_en": "Statements on negative numbers p*(-q)=(-p)*q and -(q)^2=q^2, what is student confusion and tutor explanation?",
+    "target_intervention_id": 42,
+    "target_turn_ids": [3, 4, 5, 12, 13],
+    "target_subject": "Number > Negative Numbers > Multiplying and Dividing Negative Numbers",
+    "query_type": "misconception"
+  },
+  {
+    "query_id": "q7",
+    "query": "寻找大于 100 的下一个质数 (Prime Number)，导师如何引导学生根据末尾为 5 排除 105 并验证 101？",
+    "query_en": "Finding next prime number greater than 100, how tutor guides student to rule out 105 and verify 101?",
+    "target_intervention_id": 59,
+    "target_turn_ids": [5, 9, 11, 12, 13, 14],
+    "target_subject": "Number > Factors, Multiples and Primes > Prime Numbers and Prime Factors",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q8",
+    "query": "在解一元一次不等式 -2m > 12 时，为什么学生容易忘记两边除以负数需要反转不等号？",
+    "query_en": "When solving linear inequality -2m > 12, why does student forget to flip inequality sign when dividing by negative?",
+    "target_intervention_id": 69,
+    "target_turn_ids": [5, 7, 8, 11, 15, 17],
+    "target_subject": "Algebra > Inequalities > Solving Linear Inequalities",
+    "query_type": "misconception"
+  },
+  {
+    "query_id": "q9",
+    "query": "长方体 (Cuboid) 的体积计算公式中，学生如何根据长宽高 10cm, 4cm, 5cm 计算出 200 cm^3？",
+    "query_en": "Volume of cuboid with dimensions 10cm, 4cm and 5cm, how to calculate 200 cm^3?",
+    "target_intervention_id": 77,
+    "target_turn_ids": [1, 2, 3, 4],
+    "target_subject": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "query_type": "strategy"
+  },
+  {
+    "query_id": "q10",
+    "query": "Alex 认为 5.4598 保留一位小数是 5.5，Sophie 认为保留两位小数是 5.46，学生初期认为两人都错的深层错因？",
+    "query_en": "Alex says 5.4598 to 1dp is 5.5, Sophie says 5.4598 to 2dp is 5.46, student misconception thinking both wrong?",
+    "target_intervention_id": 10,
+    "target_turn_ids": [5, 6, 8, 10, 18],
+    "target_subject": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "query_type": "misconception"
+  }
+]
