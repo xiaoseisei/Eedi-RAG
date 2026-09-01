@@ -51,9 +51,10 @@ BENCHMARK_20_QUERIES = [
 def evaluate_retrieval(use_multi_perspective_rrf: bool = False):
     storage = DualEngineStorageManager(
         db_path="data/db/tutoring_knowledge.duckdb",
-        chroma_dir="data/chroma"
+        chroma_dir="data/chroma",
+        embedding_backend="deterministic",
     )
-    retriever = DualMetricRetriever(storage_manager=storage, alpha=0.5)
+    retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", alpha=0.5)
 
     hit_at_1_count = 0
     hit_at_3_count = 0

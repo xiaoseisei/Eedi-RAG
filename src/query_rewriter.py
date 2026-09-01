@@ -33,16 +33,20 @@ from src.models import MultiPerspectiveQueries
 
 logger = logging.getLogger(__name__)
 
+
+class QueryRewriteError(RuntimeError):
+    """LLM 查询改写失败或输出不符合严格契约。"""
+
 # ================================================================================
 # 1. 领域考纲知识树与专有名词映射库 (Domain Taxonomy & Glossary Map)
 # ================================================================================
 
 MATH_DOMAIN_GLOSSARY: List[Dict[str, Any]] = [
     {
-        "keywords": ["四舍五入", "保留", "小数", "近似", "5.4598", "3.153", "0.02", "rounding", "round"],
+        "keywords": ["四舍五入", "保留", "小数", "近似", "5.4598", "3.153", "0.02", "7.503", "356,958", "356958", "最近百位", "最近整数", "rounding", "round"],
         "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
-        "terms": ["Rounding", "Decimal Places", "Nearest Multiple", "Truncation vs Rounding"],
-        "canonical_examples": ["5.4598 rounded to 1dp is 5.5", "3.153 rounded to nearest 0.02 is 3.16"]
+        "terms": ["Rounding", "Decimal Places", "Nearest Multiple", "Rounding to the Nearest 10, 100, 1000", "Truncation vs Rounding", "Nearest Integer"],
+        "canonical_examples": ["5.4598 rounded to 1dp is 5.5", "3.153 rounded to nearest 0.02 is 3.16", "7.503 rounded to nearest integer is 8"]
     },
     {
         "keywords": ["公倍数", "最小公倍数", "因数与倍数", "互质", "lcm", "coprime", "factors and multiples"],
@@ -51,22 +55,58 @@ MATH_DOMAIN_GLOSSARY: List[Dict[str, Any]] = [
         "canonical_examples": ["LCM of 3 and 5 is 15 (coprime), but LCM of non-coprime numbers is not simply the product"]
     },
     {
-        "keywords": ["运算顺序", "四则运算", "先乘除", "分式", "除法", "加法", "order of operations", "bodmas", "bidmas"],
-        "subject_path": "Number > Fractions and Decimals > Order of Operations",
-        "terms": ["Order of Operations", "BIDMAS / BODMAS", "Fraction Operations"],
-        "canonical_examples": ["Division has higher precedence than addition in mixed expressions"]
+        "keywords": ["运算顺序", "四则运算", "先乘除", "分式", "分数线", "除法", "加法", "(54+58)/2", "n+4÷5", "(n+4)/5", "order of operations", "bodmas", "bidmas"],
+        "subject_path": "Number > Basic Arithmetic > BIDMAS",
+        "terms": ["Order of Operations", "BIDMAS / BODMAS", "Fraction Bar Division Precedence", "Parentheses Grouping"],
+        "canonical_examples": ["Fraction bar acts as grouping: (54+58)/2 requires adding numerator first before division", "n+4/5 vs (n+4)/5"]
     },
     {
-        "keywords": ["频数", "统计", "极差", "范围", "看电视", "调查", "frequency", "range", "survey"],
-        "subject_path": "Statistics > Data Presentation > Frequency Tables",
-        "terms": ["Frequency Tables", "Range (Maximum Value - Minimum Value)", "Frequency vs Data Value Confusion"],
-        "canonical_examples": ["Range is calculated from data values, not from the frequencies themselves"]
+        "keywords": ["去括号", "展开", "单项式", "4(3c+2)", "4(2x+1)", "-3(1-2p)", "expanding", "brackets", "single brackets"],
+        "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+        "terms": ["Expanding Single Brackets", "Distributive Property", "Multiplying Terms Inside Parentheses", "Negative Sign Distribution"],
+        "canonical_examples": ["4(3c+2) = 12c + 8", "-3(1-2p) = -3 + 6p", "4(2x+1) - (5x-9) = 8x + 4 - 5x + 9"]
     },
     {
-        "keywords": ["负数", "乘方", "指数", "括号", "负号", "(-q)^2", "-q^2", "-p", "power", "index", "indices"],
+        "keywords": ["异分母", "通分", "公分母", "分数减法", "分数加减", "5/7", "1/4", "fractions", "adding and subtracting fractions"],
+        "subject_path": "Number > Fractions and Decimals > Adding and Subtracting Fractions",
+        "terms": ["Adding and Subtracting Fractions", "Common Denominator", "Equivalent Fractions", "Revoicing"],
+        "canonical_examples": ["5/7 - 1/4 with common denominator 28 requires converting numerators to 20/28 - 7/28 = 13/28"]
+    },
+    {
+        "keywords": ["位值", "小数除法", "0.2÷0.4", "32×65", "3.2×6.5", "2080", "place value", "decimal multiplication"],
+        "subject_path": "Number > Basic Arithmetic > Place Value",
+        "terms": ["Place Value", "Multiplying and Dividing Decimals", "Decimal Point Movement", "Scaling by Powers of 10"],
+        "canonical_examples": ["32 x 65 = 2080 implies 3.2 x 6.5 = 20.8 (divide by 100 total)", "0.2 / 0.4 = 2 / 4 = 1/2 = 0.5"]
+    },
+    {
+        "keywords": ["速度", "距离", "路程", "时间", "40分钟", "40/60", "speed", "distance", "time"],
+        "subject_path": "Number > Proportion > Speed, Distance, Time",
+        "terms": ["Speed, Distance, Time", "Unit Conversion (Minutes to Fraction of Hour)", "Speed = Distance / Time"],
+        "canonical_examples": ["40 minutes is 40/60 = 2/3 of an hour, not 4/10"]
+    },
+    {
+        "keywords": ["密度", "质量", "体积", "单位", "g/cm3", "density", "mass", "volume"],
+        "subject_path": "Number > Proportion > Density",
+        "terms": ["Density = Mass / Volume", "Compound Units (g/cm3, kg/m3)", "Physical Quantities"],
+        "canonical_examples": ["Density = mass / volume; valid unit is g/cm3, not cm3/g"]
+    },
+    {
+        "keywords": ["折线图", "实际图像", "水杯", "深度", "斜率", "最高点", "real life graphs", "line graphs", "time series"],
+        "subject_path": "Algebra > Other Graphs > Real Life Graphs",
+        "terms": ["Real Life Graphs", "Gradient as Rate of Change", "Interpreting Slope vs Peak Value", "Container Filling Graphs"],
+        "canonical_examples": ["Steepest slope indicates fastest rate of filling, not the highest y-value"]
+    },
+    {
+        "keywords": ["频数", "统计", "极差", "范围", "看电视", "调查", "中位数", "平均数", "众数", "frequency", "range", "median", "mean", "mode", "averages"],
+        "subject_path": "Data and Statistics > Data Processing > Range and Interquartile Range from a List of Data",
+        "terms": ["Range (Maximum Value - Minimum Value)", "Frequency Tables", "Averages (mean, median, mode)", "Frequency vs Data Value Confusion"],
+        "canonical_examples": ["Range is calculated from data values (Max - Min), not by dividing or subtracting frequencies"]
+    },
+    {
+        "keywords": ["负数", "乘方", "指数", "括号", "负号", "(-q)^2", "-q^2", "-p", "p*(-q)", "power", "index", "indices"],
         "subject_path": "Algebra > Algebraic Expressions > Powers and Indices",
-        "terms": ["Powers and Indices", "Negative Base Exponentiation", "Parenthesis Scope in Powers"],
-        "canonical_examples": ["(-q)^2 = (-q)*(-q) = q^2 (positive), whereas -q^2 = -(q*q) (negative)", "Does -p x q give us the same answer?"]
+        "terms": ["Powers and Indices", "Negative Base Exponentiation", "Parenthesis Scope in Powers", "Multiplication with Negative Numbers"],
+        "canonical_examples": ["(-q)^2 = q^2 (positive), whereas -q^2 = -(q*q) (negative)", "p * (-q) = -pq"]
     },
     {
         "keywords": ["质数", "素数", "合数", "105", "末尾5", "尾数", "prime", "composite"],
@@ -75,10 +115,10 @@ MATH_DOMAIN_GLOSSARY: List[Dict[str, Any]] = [
         "canonical_examples": ["105 is not prime because it ends in 5 and is divisible by 5"]
     },
     {
-        "keywords": ["不等式", "除以负数", "翻转", "-12", "-2", "inequality", "inequalities"],
+        "keywords": ["不等式", "除以负数", "翻转", "-2x < 12", "-12", "-2", "inequality", "inequalities"],
         "subject_path": "Algebra > Inequalities > Solving Linear Inequalities",
         "terms": ["Solving Linear Inequalities", "Negative Division Rule", "Flipping Inequality Sign"],
-        "canonical_examples": ["Dividing both sides by a negative number requires reversing the inequality sign"]
+        "canonical_examples": ["Dividing both sides by a negative number reverses the inequality: -2x < 12 => x > -6"]
     },
     {
         "keywords": ["长方体", "体积", "表面积", "长宽高", "cuboid", "volume", "surface area", "prism"],
@@ -90,7 +130,7 @@ MATH_DOMAIN_GLOSSARY: List[Dict[str, Any]] = [
         "keywords": ["时间", "10 to 12", "钟表", "10点12分", "11:50", "clock", "time"],
         "subject_path": "Geometry and Measure > Time > Clocks and Analog Time",
         "terms": ["Analog Time Reading", "English Time Phrasing ('X to Y' means Y minus X minutes)"],
-        "canonical_examples": ["'ten to twelve' means 11:50, not 10:12"]
+        "canonical_examples": ["'ten to twelve' means 11:50 (or 23:50 at night), not 10:12"]
     }
 ]
 
@@ -159,12 +199,28 @@ class MultiPerspectiveQueryRewriter:
     def __init__(
         self,
         openai_client: Optional[Any] = None,
-        model_name: str = "gpt-4o-mini",
-        injector: Optional[DomainKnowledgeInjector] = None
+        model_name: Optional[str] = None,
+        injector: Optional[DomainKnowledgeInjector] = None,
+        mode: Optional[str] = None,
+        max_retries: int = 3,
     ):
+        if mode not in {"llm", "deterministic"}:
+            raise ValueError("mode 必须显式指定为 'llm' 或 'deterministic'")
+        if mode == "llm" and openai_client is None:
+            raise ValueError("llm 模式必须提供 openai_client")
+        if mode == "llm" and not model_name:
+            raise ValueError("llm 模式必须显式提供 model_name")
+        if max_retries < 1:
+            raise ValueError("max_retries 必须至少为 1")
         self.client = openai_client
         self.model_name = model_name
         self.injector = injector or DomainKnowledgeInjector()
+        self.mode = mode
+        self.max_retries = max_retries
+
+    @property
+    def backend_name(self) -> str:
+        return "llm" if self.mode == "llm" else "deterministic_rules"
 
     def rewrite(self, raw_query: str) -> MultiPerspectiveQueries:
         """
@@ -173,14 +229,18 @@ class MultiPerspectiveQueryRewriter:
         # 1. 前置动态知识注入
         injected_context, extracted_terms = self.injector.match_and_inject(raw_query)
 
-        # 2. 若无 LLM Client，走确定性离线增强扩展 (严格遵守不伪造、显式声明原则)
-        if self.client is None:
+        # 2. 仅调用方显式选择时执行确定性离线增强。
+        if self.mode == "deterministic":
+            logger.warning(
+                "[QueryRewrite] 使用调用方显式选择的 deterministic_rules 后端"
+            )
             return self._offline_rule_rewrite(raw_query, injected_context, extracted_terms)
 
         # 3. LLM 多视角派生与自纠校验循环
         user_prompt = f"{injected_context}\n\n【用户原始提问】: {raw_query}\n\n请按规范输出 JSON:"
         
-        for attempt in range(3):
+        last_error: Optional[Exception] = None
+        for attempt in range(1, self.max_retries + 1):
             try:
                 resp = self.client.chat.completions.create(
                     model=self.model_name,
@@ -199,13 +259,19 @@ class MultiPerspectiveQueryRewriter:
                 validated = MultiPerspectiveQueries.model_validate(raw_json)
                 logger.info(f"✨ [QueryRewrite] 成功派生多视角查询: 错因='{validated.misconception_query[:30]}...' | 策略='{validated.strategy_query[:30]}...'")
                 return validated
-            except (ValidationError, json.JSONDecodeError, Exception) as e:
-                logger.warning(f"⚠️ [QueryRewrite] 校验/解析失败 (第 {attempt+1} 次): {e}")
+            except Exception as e:
+                last_error = e
+                logger.warning(
+                    "[QueryRewrite] LLM 校验/解析失败 (%s/%s): %s",
+                    attempt,
+                    self.max_retries,
+                    e,
+                )
                 user_prompt += f"\n\n上次输出格式校验失败: {e}，请重新输出包含 misconception_query, strategy_query, curriculum_query, extracted_keywords 的严格合法 JSON。"
 
-        # 3 次自纠均失败，降级至规则增强改写
-        logger.warning("⚠️ [QueryRewrite] LLM 自纠重试耗尽，降级至确定性规则增强改写")
-        return self._offline_rule_rewrite(raw_query, injected_context, extracted_terms)
+        raise QueryRewriteError(
+            f"LLM 查询改写在 {self.max_retries} 次尝试后失败"
+        ) from last_error
 
     def _offline_rule_rewrite(
         self,
@@ -237,7 +303,7 @@ if __name__ == "__main__":
     
     print("🚀 测试多视角子查询生成与专业信息动态注入器...")
     
-    rewriter = MultiPerspectiveQueryRewriter()
+    rewriter = MultiPerspectiveQueryRewriter(mode="deterministic")
     
     test_queries = [
         "学生为什么会误以为任意两个数的最小公倍数就是它们的乘积？",

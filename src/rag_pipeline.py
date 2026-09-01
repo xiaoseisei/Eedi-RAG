@@ -1,0 +1,494 @@
+"""
+================================================================================
+模块名称: src/rag_pipeline.py
+业务定位: Step 5 - 基于真实课堂证据的 RAG 问答生成管道
+核心流程:
+  1. 多视角检索与 MMR 黄金装配
+  2. 结构化受限生成 (LLM 模式 / 调用方显式选择的确定性保真模态)
+  3. 真实对白防伪审计与全透明调试溯源区展示
+================================================================================
+"""
+
+import os
+import sys
+import json
+import logging
+from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+
+# 确保项目根目录在 sys.path 中
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from src.models import (
+    DialogueCitation,
+    PedagogicalGuidanceResponse,
+)
+from src.retriever import DualMetricRetriever
+from src.reranker import PedagogicalGoldAssembler, GoldAssembledContext
+
+logger = logging.getLogger(__name__)
+
+
+class RAGGenerationError(RuntimeError):
+    """生成依赖或 LLM 输出不可用，且未获调用方降级授权。"""
+
+
+class CitationAuditError(RAGGenerationError):
+    """回答中的任一引用无法逐字段映射到真实会话证据。"""
+
+
+class LLMCitationPayload(BaseModel):
+    """LLM 引用的严格传输契约；session_id 是跨会话消歧所必需。"""
+
+    model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=True)
+
+    session_id: int = Field(gt=0)
+    turn_id: int = Field(gt=0)
+    speaker: Literal["student", "tutor"]
+    quote_text: str = Field(min_length=1)
+
+
+class LLMGuidancePayload(BaseModel):
+    """LLM 原始 JSON 的严格契约，禁止缺字段、空内容和额外字段。"""
+
+    model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=True)
+
+    subject_path: str = Field(min_length=1)
+    answer_content: str = Field(min_length=1)
+    misconception_diagnosis: str = Field(min_length=1)
+    key_aha_question: str = Field(min_length=1)
+    recommended_talk_moves: List[str] = Field(min_length=1)
+    scaffolding_steps: List[str] = Field(min_length=1)
+    dialogue_citations: List[LLMCitationPayload] = Field(min_length=1)
+    transfer_question: str = Field(min_length=1)
+
+    @field_validator("recommended_talk_moves", "scaffolding_steps")
+    @classmethod
+    def reject_blank_list_items(cls, values: List[str]) -> List[str]:
+        if any(not isinstance(value, str) or not value.strip() for value in values):
+            raise ValueError("列表项不能为空")
+        return [value.strip() for value in values]
+
+
+SYSTEM_PEDAGOGICAL_PROMPT = """你是一名拥有 20 年一线教学与教研经验的资深中学数学教研专家兼苏格拉底式启发辅导导师。
+你的职责是：根据下方经由真实课堂检索提纯的【权威教研参考知识基座】，严格针对用户提问进行深度解答。
+
+【核心铁律】：
+1. 【根据提问语义自然聚焦】：
+   - 若提问侧重学生错因/误区 → 深入分析学情认知卡点与错因机理；
+   - 若提问侧重教法/引导策略 → 聚焦名师破局一问、脚手架与教学动作；
+   - 若提问同时涉及两者 → 综合呈现学情诊断 + 教法建议，按语义权重自然侧重。
+2. 【真实学生发问与对白引用】：
+   - 引用历史学生发问必须真实源于知识基座中的原声对白（带 [Turn N]），绝不凭空捏造。
+3. 【严格 JSON 输出】：
+   - 必须且仅能输出符合以下 JSON Schema 的纯 JSON 对象：
+
+{
+  "subject_path": "学科考纲路径或涵盖领域",
+  "answer_content": "针对用户具体问题展开的自然、深刻、结构化的完整回答正文 (支持 Markdown 丰富排版)",
+  "misconception_diagnosis": "学情认知误区提炼总结",
+  "key_aha_question": "推荐的核心破局一问 (如有)",
+  "recommended_talk_moves": ["<Press for Accuracy>", "<Revoicing>"],
+  "scaffolding_steps": ["步骤 1: ...", "步骤 2: ..."],
+  "dialogue_citations": [
+    {
+      "session_id": 10,
+      "turn_id": 9,
+      "speaker": "tutor",
+      "quote_text": "对白原文"
+    }
+  ],
+  "transfer_question": "同构变式巩固题 (如有)"
+}
+"""
+
+
+class EndToEndPedagogicalRAGPipeline:
+    """
+    端到端 RAG 问答与意图精准路由教研生成管道。
+    """
+
+    def __init__(
+        self,
+        retriever: Optional[DualMetricRetriever] = None,
+        assembler: Optional[PedagogicalGoldAssembler] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model_name: Optional[str] = None
+    ):
+        self.retriever = retriever
+        self.assembler = assembler or PedagogicalGoldAssembler(lambda_diversity=0.7)
+        self.api_key = api_key or os.getenv("LLM_API_KEY")
+        self.base_url = base_url or os.getenv("LLM_BASE_URL")
+        self.model_name = model_name or os.getenv("LLM_MODEL")
+
+    def _synthesize_deterministic_grounding(
+        self,
+        query: str,
+        gold_ctx: GoldAssembledContext,
+        retrieval_res: Dict[str, Any]
+    ) -> PedagogicalGuidanceResponse:
+        """
+        确定性保真模态 (Deterministic Grounding Mode)：
+        综合检索结果生成包含学情诊断与教法建议的完整回答。
+        """
+        misc_candidates = retrieval_res.get("misconceptions", [])
+        strat_candidates = retrieval_res.get("strategies", [])
+
+        misc = gold_ctx.selected_misconception or (misc_candidates[0] if misc_candidates else {})
+        strat = gold_ctx.selected_strategy or (strat_candidates[0] if strat_candidates else {})
+        m_meta = misc.get("metadata", {})
+        s_meta = strat.get("metadata", {})
+
+        session_id = m_meta.get("session_id") or s_meta.get("session_id")
+        subject_path = m_meta.get("subject_path") or s_meta.get("subject_path")
+        if session_id is None or not subject_path:
+            raise RAGGenerationError("确定性生成缺少 session_id 或 subject_path 真实来源")
+
+        citations: List[DialogueCitation] = []
+
+        # =========================================================================
+        # 综合生成：学情诊断 + 名师教法
+        # =========================================================================
+        misc_name = m_meta.get("misconception_name")
+        deep_mech = m_meta.get("deep_mechanism")
+        key_aha = s_meta.get("key_aha_question") or ""
+        err_choice = m_meta.get("error_choice", "")
+        choice_str = f"（学生典型误选为选项 `{err_choice}`）" if err_choice else ""
+        ped_goal = s_meta.get("pedagogical_goal") or ""
+        talk_moves_raw = s_meta.get("talk_moves", [])
+        recommended_moves = list(talk_moves_raw) if isinstance(talk_moves_raw, (list, tuple)) else []
+        scaff_raw = s_meta.get("scaffolding_steps")
+        scaffolding_steps = list(scaff_raw) if isinstance(scaff_raw, (list, tuple)) else []
+        if not misc_name or not deep_mech:
+            raise RAGGenerationError("确定性生成缺少真实 misconception_name 或 deep_mechanism")
+
+        answer_paragraphs = [
+            f"针对教研问题【{query}】，结合历史真实辅导数据分析如下：\n",
+        ]
+
+        # 学情错因诊断
+        answer_paragraphs.append(f"\n### 🔍 二、 学情认知卡点诊断 (Misconception Diagnosis)")
+        answer_paragraphs.append(f"- **误区命名**: **{misc_name}** {choice_str}")
+        answer_paragraphs.append(f"- **深层机理**: {deep_mech}")
+        answer_paragraphs.append(f"- **考纲知识点**: `{subject_path}`")
+
+        # 名师教法策略
+        answer_paragraphs.append(f"\n### 💡 三、 名师启发引导策略 (Tutor Intervention)")
+        if key_aha:
+            answer_paragraphs.append(f"- **核心破局一问**: 🎯 **「{key_aha}」**")
+        if ped_goal:
+            answer_paragraphs.append(f"- **教学目标**: {ped_goal}")
+        if scaffolding_steps:
+            answer_paragraphs.append("- **分步引导脚手架**:")
+            for step in scaffolding_steps:
+                answer_paragraphs.append(f"  • {step}")
+        if recommended_moves:
+            moves_str = ", ".join(f"`{m}`" for m in recommended_moves[:4])
+            answer_paragraphs.append(f"- **教学动作 (Talk Moves)**: {moves_str}")
+
+        answer_content = "\n".join(answer_paragraphs)
+
+        # 引用证据
+        for t in gold_ctx.evidence_turns:
+            citations.append(DialogueCitation(
+                session_id=t["session_id"],
+                turn_id=t["turn_id"],
+                speaker=t["speaker"],
+                quote_text=t["text"],
+                verifiable_in_duckdb=False,
+            ))
+
+        citations = list({
+            (c.session_id, c.turn_id, c.speaker, c.quote_text): c
+            for c in citations
+        }.values())
+        if not citations:
+            raise CitationAuditError("确定性生成没有可引用的真实对白")
+
+        # 构建调试原文来源明细
+        debug_sources = self._extract_debug_sources(retrieval_res)
+
+        transfer_q = s_meta.get("transfer_question") or m_meta.get("transfer_question")
+
+        resp = PedagogicalGuidanceResponse(
+            query=query,
+            subject_path=subject_path,
+            session_id=session_id,
+            answer_content=answer_content,
+            misconception_diagnosis=deep_mech,
+            key_aha_question=key_aha,
+            recommended_talk_moves=recommended_moves,
+            scaffolding_steps=scaffolding_steps,
+            dialogue_citations=citations,
+            transfer_question=transfer_q,
+            retrieved_sources_debug=debug_sources,
+            audit_status="PENDING",
+        )
+        resp.rendered_markdown = self._render_pretty_markdown(resp, gold_ctx, debug_sources)
+        return resp
+
+    def _generate_with_llm(
+        self,
+        query: str,
+        gold_ctx: GoldAssembledContext,
+        retrieval_res: Dict[str, Any],
+    ) -> PedagogicalGuidanceResponse:
+        """调用 LLM；两次尝试均失败时显式抛错，不在内部静默降级。"""
+        if not self.api_key:
+            raise RAGGenerationError("缺少 LLM_API_KEY，无法执行 LLM 生成")
+        if not self.model_name:
+            raise RAGGenerationError("缺少 LLM_MODEL，无法执行 LLM 生成")
+
+        try:
+            import openai
+            client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
+        except Exception as exc:
+            raise RAGGenerationError(f"LLM 客户端初始化失败: {exc}") from exc
+
+        user_prompt = (
+            f"【用户教研提问】: {query}\n\n"
+            f"{gold_ctx.prompt_context_markdown}\n\n"
+            "仅输出符合 system JSON Schema 的对象。每条 dialogue_citations 必须同时给出 "
+            "session_id、turn_id、speaker、quote_text，并逐字引用上下文。"
+        )
+        last_error: Optional[Exception] = None
+        payload: Optional[LLMGuidancePayload] = None
+        for attempt in range(2):
+            try:
+                llm_response = client.chat.completions.create(
+                    model=self.model_name,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PEDAGOGICAL_PROMPT},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=0.2,
+                    response_format={"type": "json_object"},
+                )
+                raw_content = llm_response.choices[0].message.content
+                if not raw_content:
+                    raise ValueError("LLM 返回空内容")
+                payload = LLMGuidancePayload.model_validate(json.loads(raw_content))
+                break
+            except (json.JSONDecodeError, ValidationError, ValueError, AttributeError, IndexError) as exc:
+                last_error = exc
+                logger.warning(
+                    "LLM 输出校验失败 (attempt %s/2): %s",
+                    attempt + 1,
+                    exc,
+                )
+            except Exception as exc:
+                last_error = exc
+                logger.warning("LLM 请求失败 (attempt %s/2): %s", attempt + 1, exc)
+
+        if payload is None:
+            raise RAGGenerationError(f"LLM 生成在 2 次尝试后失败: {last_error}") from last_error
+
+        citations = [DialogueCitation(
+            session_id=c.session_id,
+            turn_id=c.turn_id,
+            speaker=c.speaker,
+            quote_text=c.quote_text,
+            verifiable_in_duckdb=False,
+        ) for c in payload.dialogue_citations]
+        debug_sources = self._extract_debug_sources(retrieval_res)
+        response = PedagogicalGuidanceResponse(
+            query=query,
+            subject_path=payload.subject_path,
+            session_id=payload.dialogue_citations[0].session_id,
+            answer_content=payload.answer_content,
+            misconception_diagnosis=payload.misconception_diagnosis,
+            key_aha_question=payload.key_aha_question,
+            recommended_talk_moves=payload.recommended_talk_moves,
+            scaffolding_steps=payload.scaffolding_steps,
+            dialogue_citations=citations,
+            transfer_question=payload.transfer_question,
+            retrieved_sources_debug=debug_sources,
+            audit_status="PENDING",
+        )
+        response.rendered_markdown = self._render_pretty_markdown(response, gold_ctx, debug_sources)
+        return response
+
+    def _extract_debug_sources(self, retrieval_res: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """从检索结果中提取用于调试溯源展示的卡片明细。"""
+        debug_sources = []
+        
+        # 错因卡 (Top 5)
+        for c in retrieval_res.get("misconceptions", [])[:5]:
+            c_meta = c.get("metadata", {})
+            debug_sources.append({
+                "type": "student_misconception",
+                "session_id": c_meta.get("session_id"),
+                "similarity_score": round(c.get("rrf_score") or c.get("hybrid_score", 0.0), 4),
+                "subject_path": c_meta.get("subject_path"),
+                "title": c_meta.get("misconception_name"),
+                "document_text": c.get("document", ""),
+                "evidence_turns": c.get("evidence_turns", [])
+            })
+
+        # 策略卡 (Top 5)
+        for s in retrieval_res.get("strategies", [])[:5]:
+            s_meta = s.get("metadata", {})
+            debug_sources.append({
+                "type": "tutor_strategy",
+                "session_id": s_meta.get("session_id"),
+                "similarity_score": round(s.get("rrf_score") or s.get("hybrid_score", 0.0), 4),
+                "subject_path": s_meta.get("subject_path"),
+                "title": s_meta.get("key_aha_question"),
+                "document_text": s.get("document", ""),
+                "evidence_turns": s.get("evidence_turns", [])
+            })
+
+        return debug_sources
+
+    def _audit_citations(
+        self,
+        response: PedagogicalGuidanceResponse,
+        gold_ctx: GoldAssembledContext,
+        citation_records: Optional[List[Dict[str, Any]]] = None,
+    ) -> None:
+        """逐项精确校验 session、turn、speaker 和原文；任一失败即拒绝回答。"""
+        if not response.dialogue_citations:
+            response.audit_status = "GROUNDING_DEGRADED"
+            raise CitationAuditError("空引用不能通过审计")
+
+        records = citation_records or [citation.model_dump() for citation in response.dialogue_citations]
+        if len(records) != len(response.dialogue_citations):
+            response.audit_status = "GROUNDING_DEGRADED"
+            raise CitationAuditError("引用传输记录与响应引用数量不一致")
+
+        evidence_facts = {
+            (t.get("session_id"), t.get("turn_id"), t.get("speaker"), t.get("text"))
+            for t in gold_ctx.evidence_turns
+        }
+        if any(None in fact for fact in evidence_facts):
+            response.audit_status = "GROUNDING_DEGRADED"
+            raise CitationAuditError("证据缺少 session_id、turn_id、speaker 或原文")
+
+        invalid = []
+        for citation, record in zip(response.dialogue_citations, records):
+            fact = (
+                record.get("session_id"),
+                record.get("turn_id"),
+                record.get("speaker"),
+                record.get("quote_text"),
+            )
+            verified = fact[1] is not None and fact[1] > 0 and fact in evidence_facts
+            citation.verifiable_in_duckdb = verified
+            if not verified:
+                invalid.append(fact)
+
+        if invalid:
+            response.audit_status = "GROUNDING_DEGRADED"
+            raise CitationAuditError(f"引用未精确匹配真实会话证据: {invalid}")
+        response.audit_status = "AUDITED_100_VERIFIED"
+
+    def _render_pretty_markdown(
+        self,
+        resp: PedagogicalGuidanceResponse,
+        gold_ctx: GoldAssembledContext,
+        debug_sources: List[Dict[str, Any]]
+    ) -> str:
+        """
+        渲染包含【自然解答正文】与【全透明调试溯源区】的美化 Markdown。
+        """
+        main_title = "教研洞察与深度分析"
+
+        lines = [
+            f"# 🎓 Eedi-RAG {main_title}\n",
+            f"> **提问意图**: `{resp.query}`",
+            f"> **防伪审计**: `[{resp.audit_status}]`\n",
+            "---",
+            "## 📝 【教研深度解答 (AI Synthesis Answer)】\n",
+            resp.answer_content or resp.misconception_diagnosis,
+            ""
+        ]
+
+        if resp.transfer_question:
+            lines.append("---")
+            lines.append("### 📝 【课后变式训练】")
+            lines.append(f"{resp.transfer_question}\n")
+
+        # 调试溯源区
+        lines.append("---")
+        lines.append("## 📚 【检索索引的知识原文与原声证据 (Retrieved Grounding Sources & Debug Trace)】")
+        lines.append("> ℹ️ *以下为本次问答从底层 ChromaDB 向量库与 DuckDB 关系表检索命中的真实知识卡片原文与历史师生对话记录，供调试与教研白盒核验：*\n")
+
+        for idx, src in enumerate(debug_sources, 1):
+            type_tag = "🏷️ [学生错因卡]" if src["type"] == "student_misconception" else "💡 [名师策略卡]"
+            lines.append(f"### {idx}. {type_tag} 会话 Session #{src.get('session_id', 'N/A')} (相关度得分: {src.get('similarity_score', 0.0)})")
+            lines.append(f"- **考纲路径**: `{src.get('subject_path', '数学考纲')}`")
+            lines.append(f"- **卡片核心**: **{src.get('title', 'N/A')}**")
+            
+            lines.append(f"- **卡片向量文本切片**:")
+            lines.append("```text")
+            doc_lines = src.get("document_text", "").strip().split("\n")
+            lines.extend(doc_lines[:6])
+            if len(doc_lines) > 6:
+                lines.append(f"... (共 {len(doc_lines)} 行)")
+            lines.append("```")
+            
+            ev_turns = src.get("evidence_turns", [])
+            if ev_turns:
+                lines.append(f"- **DuckDB 关联历史对白实录 ({len(ev_turns)} 轮)**:")
+                for t in ev_turns[:4]:
+                    spk = "🎓 学生" if t["speaker"] == "student" else "👩‍🏫 导师"
+                    lines.append(f"  - `[Turn {t['turn_id']}]` **{spk}**: \"{t['text']}\"")
+                if len(ev_turns) > 4:
+                    lines.append(f"  - *... (其余 {len(ev_turns)-4} 轮已略)*")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def ask(
+        self,
+        query: str,
+        mode: str = "auto",
+        top_k_each: int = 5,
+        fetch_evidence: bool = True
+    ) -> PedagogicalGuidanceResponse:
+        """端到端问答核心入口；deterministic 必须由调用方显式选择。"""
+        if self.retriever is None:
+            raise RuntimeError("DualMetricRetriever 未初始化，无法执行检索！")
+        if mode not in {"auto", "llm", "deterministic"}:
+            raise ValueError("mode 必须是 auto、llm 或 deterministic")
+        if mode == "auto" and not self.api_key:
+            raise RAGGenerationError(
+                "auto 模式缺少 LLM_API_KEY；如需真实确定性生成，请显式传 mode='deterministic'"
+            )
+
+        logger.info(f"🚀 [Step5_RAG] 接收提问: '{query}' (mode={mode})")
+
+        # 1. 多视角检索
+        retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
+            raw_query=query,
+            top_k_each=top_k_each,
+            fetch_evidence=fetch_evidence
+        )
+
+        # 2. MMR 黄金装配
+        gold_ctx = self.assembler.assemble(
+            raw_query=query,
+            retrieval_results=retrieval_res
+        )
+
+        # 3. 生成
+        if mode in {"llm", "auto"}:
+            response = self._generate_with_llm(query, gold_ctx, retrieval_res)
+        else:
+            response = self._synthesize_deterministic_grounding(query, gold_ctx, retrieval_res)
+
+        # 4. 引用防伪审计
+        self._audit_citations(response, gold_ctx)
+        response.rendered_markdown = self._render_pretty_markdown(
+            response,
+            gold_ctx,
+            response.retrieved_sources_debug,
+        )
+
+        logger.info(f"✅ [Step5_RAG] 完成生成 | 溯源卡片数={len(response.retrieved_sources_debug)}")
+        return response

@@ -61,7 +61,7 @@ def mock_llm_response() -> dict:
             "deep_mechanism": "学生误认为保留一位小数等于取小数点后两位数，未理解一位小数定义。",
             "confusion_triggers": ["5.45", "1 decimal place"],
             "verbatim_student_quotes": ["5.45"],
-            "source_turn_ids": [17]
+            "source_turn_ids": [10]
         },
         "tutor_strategy": {
             "pedagogical_goal": "引导学生明确一位小数的定义并观察第二位数字决定进位",
@@ -71,7 +71,7 @@ def mock_llm_response() -> dict:
             "analogy_or_metaphor": None,
             "talk_moves": ["<Press for Accuracy>"],
             "resolution_outcome": "学生自主推导并回答出正确答案 5.5",
-            "source_turn_ids": [16, 18]
+            "source_turn_ids": [9]
         }
     }
 
@@ -83,16 +83,15 @@ class MockTestLLMClient:
     def generate_structured(self, prompt: Any) -> dict:
         resp = json.loads(json.dumps(self.response_dict))
         prompt_str = prompt if isinstance(prompt, str) else str(prompt)
-        # 根据不同会话的 Prompt 文本动态提供真实存在的子串引用
-        if "54+58" in prompt_str:
-            resp["misconception"]["verbatim_student_quotes"] = ["the value of 54+58/2"]
-        elif "Alex and Sophie" in prompt_str:
-            resp["misconception"]["verbatim_student_quotes"] = ["5.45"]
-        else:
-            import re
-            m = re.search(r"\[STUDENT\][^:]*:\s*([^\n]+)", prompt_str)
-            if m:
-                resp["misconception"]["verbatim_student_quotes"] = [m.group(1)[:15].strip()]
+        # 根据每场 Prompt 动态选择有角色、有轮次溯源的原文。
+        import re
+        student = re.search(r"\[Turn (\d+)\] \[STUDENT\](?: \(Moves: [^)]*\))?:\s*([^\n]+)", prompt_str)
+        tutor = re.search(r"\[Turn (\d+)\] \[TUTOR\](?: \(Moves: [^)]*\))?:\s*([^\n?]+\?[^\n]*)", prompt_str)
+        assert student and tutor
+        resp["misconception"]["verbatim_student_quotes"] = [student.group(2).strip()]
+        resp["misconception"]["source_turn_ids"] = [int(student.group(1))]
+        resp["tutor_strategy"]["key_aha_question"] = tutor.group(2).strip()
+        resp["tutor_strategy"]["source_turn_ids"] = [int(tutor.group(1))]
         return resp
 
 
@@ -185,14 +184,20 @@ def test_extract_knowledge_fails_fast_when_no_llm(sample_session: CleanedSession
     assert "严禁伪造执行" in str(exc_info.value)
 
 
-def test_extract_knowledge_returns_none_when_allowed(sample_session: CleanedSession, monkeypatch):
-    """测试当允许软失败 (allow_none_on_failure=True) 时，无 Key 返回 None 而非抛出或伪造数据。"""
+def test_extract_knowledge_never_soft_fails_when_no_llm(sample_session: CleanedSession, monkeypatch):
+    """旧软失败参数不能再把依赖缺失伪装成可继续的 None。"""
     monkeypatch.delenv("LLM_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     
-    result = extract_knowledge_from_session(sample_session, llm_client=None, api_key=None, allow_none_on_failure=True)
-    assert result is None
+    with pytest.raises(LLMUnavailableError):
+        extract_knowledge_from_session(sample_session, llm_client=None, api_key=None, allow_none_on_failure=True)
+
+
+def test_extract_knowledge_requires_explicit_model(sample_session: CleanedSession, monkeypatch):
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+    with pytest.raises(LLMUnavailableError, match="LLM_MODEL"):
+        extract_knowledge_from_session(sample_session, api_key="test-key", model=None)
 
 
 def test_extract_knowledge_with_mock_llm(sample_session: CleanedSession, mock_llm_response: dict):
@@ -204,7 +209,9 @@ def test_extract_knowledge_with_mock_llm(sample_session: CleanedSession, mock_ll
     assert extracted.extraction_status == "success"
     assert extracted.misconception.misconception_name == "四舍五入到一位小数时保留两位"
     assert extracted.tutor_strategy.strategy_category == "Socratic_Questioning"
-    assert "what do you think" in extracted.tutor_strategy.key_aha_question
+    source_turn = next(t for t in sample_session.turns if t.turn_id == extracted.tutor_strategy.source_turn_ids[0])
+    assert source_turn.is_tutor
+    assert extracted.tutor_strategy.key_aha_question in source_turn.text
 
 
 def test_extract_knowledge_self_correction_remediation(sample_session: CleanedSession, mock_llm_response: dict):
@@ -229,11 +236,11 @@ def test_extract_knowledge_self_correction_exhausted(sample_session: CleanedSess
     assert failing_client.call_count == 3  # 验证重试了满 3 次
     assert "3 次自纠尝试后仍然失败" in str(exc_info.value)
     
-    # 2. 软降级模式 ➔ 返回 None (供调度层切换纯规则滑动窗口)
+    # 2. 旧软降级参数也必须 Fail-Fast，不能返回空卡或 None
     failing_client_2 = MockAlwaysFailingLLMClient()
-    res = extract_knowledge_from_session(sample_session, llm_client=failing_client_2, max_retries=3, allow_none_on_failure=True)
+    with pytest.raises(LLMExtractionError):
+        extract_knowledge_from_session(sample_session, llm_client=failing_client_2, max_retries=3, allow_none_on_failure=True)
     assert failing_client_2.call_count == 3
-    assert res is None
 
 
 def test_extract_knowledge_grounding_gate_rejects_hallucinated_quotes(sample_session: CleanedSession, mock_llm_response: dict):
@@ -256,9 +263,59 @@ def test_extract_knowledge_grounding_gate_rejects_hallucinated_quotes(sample_ses
         
     assert "Grounding Gate Failed" in str(exc_info.value)
     
-    # 软降级模式下应返回 None
-    res = extract_knowledge_from_session(sample_session, llm_client=hallucinating_client, max_retries=3, allow_none_on_failure=True)
-    assert res is None
+    # 旧软降级参数也不得吞掉 grounding 失败
+    with pytest.raises(LLMExtractionError):
+        extract_knowledge_from_session(sample_session, llm_client=hallucinating_client, max_retries=3, allow_none_on_failure=True)
+
+
+@pytest.mark.parametrize(
+    "mutator",
+    [
+        lambda data: data.update({"unexpected_root": True}),
+        lambda data: data["misconception"].update({"unexpected_nested": True}),
+        lambda data: data["misconception"].update({"misconception_name": "   "}),
+        lambda data: data["tutor_strategy"].update({"scaffolding_steps": []}),
+    ],
+)
+def test_strict_response_schema_rejects_extra_or_empty_fields(
+    sample_session: CleanedSession, mock_llm_response: dict, mutator
+):
+    invalid = json.loads(json.dumps(mock_llm_response))
+    mutator(invalid)
+    with pytest.raises(LLMExtractionError):
+        extract_knowledge_from_session(
+            sample_session,
+            llm_client=MockTestLLMClient(invalid),
+            max_retries=1,
+        )
+
+
+def test_grounding_rejects_student_quote_bound_to_wrong_role_turn(
+    sample_session: CleanedSession, mock_llm_response: dict
+):
+    invalid = json.loads(json.dumps(mock_llm_response))
+    invalid["misconception"]["source_turn_ids"] = [9]  # tutor turn
+
+    class StaticClient:
+        def generate_structured(self, prompt):
+            return invalid
+
+    with pytest.raises(LLMExtractionError, match="学生"):
+        extract_knowledge_from_session(sample_session, llm_client=StaticClient(), max_retries=1)
+
+
+def test_grounding_rejects_aha_bound_to_wrong_or_unmatched_turn(
+    sample_session: CleanedSession, mock_llm_response: dict
+):
+    invalid = json.loads(json.dumps(mock_llm_response))
+    invalid["tutor_strategy"]["source_turn_ids"] = [11]
+
+    class StaticClient:
+        def generate_structured(self, prompt):
+            return invalid
+
+    with pytest.raises(LLMExtractionError, match="导师"):
+        extract_knowledge_from_session(sample_session, llm_client=StaticClient(), max_retries=1)
 
 
 def test_batch_extract_knowledge_with_mock_llm(tmp_path: Path, mock_llm_response: dict):
@@ -285,3 +342,22 @@ def test_batch_extract_knowledge_with_mock_llm(tmp_path: Path, mock_llm_response
         assert "misconception" in data
         assert "tutor_strategy" in data
 
+
+def test_batch_failure_preserves_existing_output_atomically(
+    tmp_path: Path, monkeypatch
+):
+    sample_file = project_root / "data" / "sample" / "cleaned_sessions_sample.jsonl"
+    output_file = tmp_path / "existing.jsonl"
+    output_file.write_text("trusted-existing-output\n", encoding="utf-8")
+
+    with pytest.raises(LLMExtractionError):
+        batch_extract_knowledge(
+            input_path=sample_file,
+            output_path=output_file,
+            max_samples=2,
+            llm_client=MockAlwaysFailingLLMClient(),
+            max_retries=1,
+        )
+
+    assert output_file.read_text(encoding="utf-8") == "trusted-existing-output\n"
+    assert list(tmp_path.glob("*.tmp")) == []

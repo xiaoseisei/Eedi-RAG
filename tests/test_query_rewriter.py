@@ -23,7 +23,11 @@ if str(project_root) not in sys.path:
 
 from src.models import CleanedSession, ExtractedPIU, Chunk, MultiPerspectiveQueries
 from src.storage_manager import DualEngineStorageManager
-from src.query_rewriter import DomainKnowledgeInjector, MultiPerspectiveQueryRewriter
+from src.query_rewriter import (
+    DomainKnowledgeInjector,
+    MultiPerspectiveQueryRewriter,
+    QueryRewriteError,
+)
 from src.retriever import DualMetricRetriever
 
 
@@ -69,7 +73,7 @@ def test_domain_knowledge_injector():
 
 def test_query_rewriter_offline_mode():
     """测试改写器离线增强模式及 Pydantic 契约校验。"""
-    rewriter = MultiPerspectiveQueryRewriter()
+    rewriter = MultiPerspectiveQueryRewriter(mode="deterministic")
     
     raw = "学生解不等式两边除以负数老是忘翻转符号"
     res = rewriter.rewrite(raw)
@@ -82,9 +86,41 @@ def test_query_rewriter_offline_mode():
     assert "Inequalities" in res.injected_domain_context
 
 
+def test_query_rewriter_requires_explicit_mode():
+    """不得因缺少 LLM client 而静默切到规则模式。"""
+    with pytest.raises(ValueError, match="mode"):
+        MultiPerspectiveQueryRewriter()
+
+
+def test_query_rewriter_llm_failure_does_not_auto_fallback():
+    """显式 LLM 模式失败后必须暴露失败，不能伪装为离线成功。"""
+    class BrokenCompletions:
+        def create(self, **kwargs):
+            raise RuntimeError("provider unavailable")
+
+    class BrokenClient:
+        class Chat:
+            completions = BrokenCompletions()
+
+        chat = Chat()
+
+    rewriter = MultiPerspectiveQueryRewriter(
+        openai_client=BrokenClient(),
+        model_name="test-model",
+        mode="llm",
+        max_retries=2,
+    )
+
+    with pytest.raises(QueryRewriteError, match="2"):
+        rewriter.rewrite("学生为什么会混淆分数？")
+
+
 def test_multi_perspective_rrf_retrieval(in_memory_storage):
     """测试 Multi-Query + RRF 融合检索完整闭环。"""
-    retriever = DualMetricRetriever(storage_manager=in_memory_storage)
+    retriever = DualMetricRetriever(
+        storage_manager=in_memory_storage,
+        rewriter=MultiPerspectiveQueryRewriter(mode="deterministic"),
+    )
     
     # 之前单纯靠原始向量漏召回的 LCM 问题 (#05)
     query = "学生为什么会误以为任意两个数的最小公倍数就是它们的乘积？"
@@ -99,3 +135,5 @@ def test_multi_perspective_rrf_retrieval(in_memory_storage):
     assert "rrf_score" in top_m
     assert top_m["rrf_score"] > 0.0
     assert len(top_m.get("evidence_turns", [])) > 0
+    assert res["execution_metadata"]["query_rewrite_backend"] == "deterministic_rules"
+    assert res["execution_metadata"]["embedding_backend"] == "fast_deterministic"

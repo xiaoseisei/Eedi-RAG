@@ -20,9 +20,17 @@
 
 import os
 import re
+import sys
 import json
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import pandas as pd
+
+# 确保项目根目录在 sys.path 中
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from src.models import SubjectHierarchy, Question, DialogueTurn, CleanedSession
 
 

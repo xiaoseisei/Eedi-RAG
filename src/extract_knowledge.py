@@ -10,8 +10,8 @@
   4. 支持多厂商路由 (OpenAI / DeepSeek / SiliconFlow / 阿里千问 / 本地 Ollama / vLLM)。
   5. 实现【自纠补救机制 (Self-Correction Feedback Loop)】：当 JSON 解析或 Pydantic 校验失败时，
      将精准错误信息反馈回多轮对话上下文，让大模型自纠重试 (默认最多 3 次)。
-  6. 严格遵守《反假可用与工程真实性守则》：重试耗尽后显式拒绝执行 (Fail-Fast 抛出 LLMExtractionError)
-     或返回受检 None 触发上层调度器切换为纯规则滑动窗口切块，绝不编写或返回任何形式的假数据！
+  6. 严格遵守《反假可用与工程真实性守则》：依赖缺失或重试耗尽后显式拒绝执行，
+     批处理在全部成功前不产出文件，绝不返回空卡、部分卡或模板伪造卡。
 ================================================================================
 """
 
@@ -20,17 +20,16 @@ import sys
 import json
 import argparse
 import logging
+import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
 
-# 自动载入 .env 文件
 try:
     from dotenv import load_dotenv
-    load_dotenv()
 except ImportError:
-    pass
+    load_dotenv = None
 
 # 确保项目根目录在 sys.path 中
 project_root = Path(__file__).resolve().parent.parent
@@ -56,6 +55,46 @@ class LLMUnavailableError(RuntimeError):
 class LLMExtractionError(RuntimeError):
     """当大模型抽取过程异常（如网络中断、响应格式非法、自纠重试耗尽仍然校验失败）时抛出。"""
     pass
+
+
+NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
+
+class _StrictMisconceptionPayload(BaseModel):
+    """LLM 边界专用契约；不能继承存储模型中的宽松默认值。"""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    misconception_name: NonEmptyStr
+    error_choice: Optional[NonEmptyStr] = None
+    deep_mechanism: NonEmptyStr
+    confusion_triggers: List[NonEmptyStr] = Field(min_length=1)
+    verbatim_student_quotes: List[NonEmptyStr] = Field(min_length=1)
+    source_turn_ids: List[int] = Field(min_length=1)
+
+
+class _StrictTutorStrategyPayload(BaseModel):
+    """LLM 边界专用契约，拒绝缺失、空值和未知字段。"""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    pedagogical_goal: NonEmptyStr
+    strategy_category: Literal[
+        "Socratic_Questioning", "Scaffolding", "Counter_Example", "Analogy", "Revoicing"
+    ]
+    key_aha_question: NonEmptyStr
+    scaffolding_steps: List[NonEmptyStr] = Field(min_length=1)
+    analogy_or_metaphor: Optional[NonEmptyStr] = None
+    talk_moves: List[NonEmptyStr] = Field(min_length=1)
+    resolution_outcome: NonEmptyStr
+    source_turn_ids: List[int] = Field(min_length=1)
+
+
+class _StrictExtractionPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    misconception: _StrictMisconceptionPayload
+    tutor_strategy: _StrictTutorStrategyPayload
 
 
 def build_extraction_prompt(session: CleanedSession) -> str:
@@ -155,12 +194,60 @@ def validate_verbatim_grounding(quote: str, turns: List[DialogueTurn]) -> Tuple[
     if not quote or not quote.strip():
         return False, None
         
-    cleaned_quote = quote.strip().lower()
+    cleaned_quote = quote.strip()
     for t in turns:
-        if cleaned_quote in t.text.lower():
+        if cleaned_quote in t.text:
             return True, t.turn_id
             
     return False, None
+
+
+def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU:
+    """严格解析一轮 LLM 响应，并将每条证据绑定到正确角色的声明轮次。"""
+    if isinstance(raw, str):
+        raw = json.loads(raw)
+    payload = _StrictExtractionPayload.model_validate(raw)
+    turns_by_id = {turn.turn_id: turn for turn in session.turns}
+
+    student_turns = []
+    for turn_id in payload.misconception.source_turn_ids:
+        turn = turns_by_id.get(turn_id)
+        if turn is None or turn.is_tutor:
+            raise ValueError(f"学生 source_turn_ids 包含不存在或非学生轮次: {turn_id}")
+        student_turns.append(turn)
+    for quote in payload.misconception.verbatim_student_quotes:
+        if not any(quote in turn.text for turn in student_turns):
+            raise ValueError(
+                f"学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): {quote!r}"
+            )
+
+    tutor_turns = []
+    for turn_id in payload.tutor_strategy.source_turn_ids:
+        turn = turns_by_id.get(turn_id)
+        if turn is None or not turn.is_tutor:
+            raise ValueError(f"导师 source_turn_ids 包含不存在或非导师轮次: {turn_id}")
+        tutor_turns.append(turn)
+    if not any(payload.tutor_strategy.key_aha_question in turn.text for turn in tutor_turns):
+        raise ValueError(
+            "导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 "
+            f"(Grounding Gate Failed): {payload.tutor_strategy.key_aha_question!r}"
+        )
+
+    misc_data = payload.misconception.model_dump()
+    misc_data.update(
+        session_id=session.intervention_id,
+        question_id=session.question_id,
+        subject_path=session.subjects.paths[0] if session.subjects.paths else "",
+    )
+    strategy_data = payload.tutor_strategy.model_dump()
+    strategy_data.update(session_id=session.intervention_id, question_id=session.question_id)
+    return ExtractedPIU(
+        session_id=session.intervention_id,
+        question_id=session.question_id,
+        misconception=StudentMisconceptionProfile.model_validate(misc_data),
+        tutor_strategy=TutorStrategyProfile.model_validate(strategy_data),
+        extraction_status="success",
+    )
 
 
 def extract_knowledge_from_session(
@@ -172,185 +259,112 @@ def extract_knowledge_from_session(
     temperature: float = 0.1,
     max_retries: int = 3,
     allow_none_on_failure: bool = False
-) -> Optional[ExtractedPIU]:
+) -> ExtractedPIU:
     """
     对单个 CleanedSession 执行知识蒸馏抽取，内置“错误反馈自纠重试循环 (Self-Correction Loop)”。
     
     真实性与补救闭环:
       1. 若模型输出遇到 JSON 语法错误或 Pydantic Schema 校验失败，将精准错误原因追加至对话历史，
          触发模型自我修正 (最多重试 max_retries 次)；
-      2. 若重试耗尽或未配置 API Key，按 allow_none_on_failure 决定抛出异常 (Fail-Fast)
-         或返回受检 None (触发调度层切换纯规则滑动窗口)，绝不编造任何假卡片。
+      2. 若重试耗尽或未配置 API Key / 模型 / 依赖，始终抛出明确异常 (Fail-Fast)。
     
     参数:
       session (CleanedSession): 输入会话对象
       llm_client (Any): 可选的 LLM 客户端包装类 (需提供 generate_structured(messages/prompt))
-      api_key (Optional[str]): API 密钥 (默认读取 LLM_API_KEY / OPENAI_API_KEY / DEEPSEEK_API_KEY)
-      base_url (Optional[str]): API 基础端点地址 (默认读取 LLM_BASE_URL / OPENAI_BASE_URL)
-      model (Optional[str]): 模型名称 (默认读取 LLM_MODEL，缺省为 'gpt-4o-mini')
+      api_key (Optional[str]): API 密钥 (默认只读取项目契约 LLM_API_KEY)
+      base_url (Optional[str]): API 基础端点地址 (默认读取 LLM_BASE_URL)
+      model (Optional[str]): 模型名称 (默认读取 LLM_MODEL；不存在隐式默认值)
       temperature (float): 采样温度 (默认 0.1)
       max_retries (int): 校验失败时的最大自纠重试次数 (默认 3 次)
-      allow_none_on_failure (bool): 为 True 时失败返回 None；为 False 时失败直接抛出异常
+      allow_none_on_failure (bool): 已废弃兼容参数；任何取值都始终 Fail-Fast
       
     返回:
-      Optional[ExtractedPIU]: 真实抽取校验成功的教学资产对象，或在允许软失败时返回 None
+      ExtractedPIU: 仅返回两张卡均通过严格 schema 与 grounding 的真实成功对象
     """
+    if max_retries < 1:
+        raise ValueError("max_retries 必须至少为 1")
+    if allow_none_on_failure:
+        logger.warning("allow_none_on_failure 已废弃；真实性门禁始终 Fail-Fast")
+
     prompt = build_extraction_prompt(session)
     messages: List[Dict[str, str]] = [
         {"role": "system", "content": "You are an expert pedagogical knowledge extractor. Output structured JSON only."},
         {"role": "user", "content": prompt}
     ]
     
-    # 1. 若提供了自定义 LLM Client (例如单元测试 Mock 或外部包装 Client)
-    if llm_client is not None and hasattr(llm_client, "generate_structured"):
-        for attempt in range(max_retries):
-            try:
-                # 兼容支持 messages 或 prompt 传参的 client
-                resp = llm_client.generate_structured(messages if hasattr(llm_client, "supports_messages") and llm_client.supports_messages else prompt)
-                resp_dict = resp if isinstance(resp, dict) else json.loads(resp)
-                
-                misc_data = resp_dict.get("misconception", {})
-                misc_data["session_id"] = session.intervention_id
-                misc_data["question_id"] = session.question_id
-                misc_data["subject_path"] = session.subjects.paths[0] if session.subjects.paths else ""
-                
-                strat_data = resp_dict.get("tutor_strategy", {})
-                strat_data["session_id"] = session.intervention_id
-                strat_data["question_id"] = session.question_id
-                
-                misconception_card = StudentMisconceptionProfile.model_validate(misc_data)
-                tutor_strategy_card = TutorStrategyProfile.model_validate(strat_data)
-                
-                # Grounding Gate: 校验原声引用是否真实存在于对话实录中
-                invalid_quotes = [q for q in misconception_card.verbatim_student_quotes if not validate_verbatim_grounding(q, session.turns)[0]]
-                if invalid_quotes:
-                    raise ValueError(
-                        f"原声引用未通过字面量真实性门禁 (Grounding Gate Failed): {invalid_quotes} 在会话实录中不存在精确子串匹配！"
-                        f"严禁杜撰或美化学生原声，必须摘录会话实录中学生实际发言的字面量子串。"
-                    )
-                
-                return ExtractedPIU(
-                    session_id=session.intervention_id,
-                    question_id=session.question_id,
-                    misconception=misconception_card,
-                    tutor_strategy=tutor_strategy_card,
-                    extraction_status="success"
-                )
-            except Exception as e:
-                err_msg = str(e)
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Session {session.intervention_id} 自定义 Client 抽取校验失败 (尝试 {attempt+1}/{max_retries}): {err_msg}。正在重试..."
-                    )
-                    messages.append({"role": "assistant", "content": json.dumps(resp_dict if 'resp_dict' in locals() else {}, ensure_ascii=False)})
-                    messages.append({
-                        "role": "user",
-                        "content": f"上次输出校验失败: {err_msg}。请严格按照 Schema 修正错误并重新输出完整合法 JSON。"
-                    })
-                else:
-                    final_msg = f"自定义 Client 在 {max_retries} 次自纠尝试后仍然失败 (Session {session.intervention_id}): {err_msg}"
-                    if allow_none_on_failure:
-                        logger.warning(final_msg)
-                        return None
-                    raise LLMExtractionError(final_msg) from e
-                    
-    # 2. 检查环境变量或入参中的 API 配置
-    effective_api_key = api_key or os.environ.get("LLM_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
-    effective_base_url = base_url or os.environ.get("LLM_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or os.environ.get("DEEPSEEK_BASE_URL")
-    effective_model = model or os.environ.get("LLM_MODEL") or "gpt-4o-mini"
-    
-    if not effective_api_key:
-        msg = (
-            f"未检测到有效的 LLM API Key (Session {session.intervention_id})。"
-            f"根据工程真实性守则，知识蒸馏层严禁伪造执行。"
-            f"请在 .env 中配置 LLM_API_KEY，或通过 CLI 参数 --api-key 传入。"
-        )
-        if allow_none_on_failure:
-            logger.warning(msg)
-            return None
-        raise LLMUnavailableError(msg)
-        
-    try:
-        from openai import OpenAI
-        client_kwargs = {"api_key": effective_api_key}
+    effective_model = model or os.environ.get("LLM_MODEL")
+    client = llm_client
+    if client is None:
+        effective_api_key = api_key or os.environ.get("LLM_API_KEY")
+        effective_base_url = base_url or os.environ.get("LLM_BASE_URL")
+        if not effective_api_key:
+            raise LLMUnavailableError(
+                f"未检测到有效的 LLM API Key (Session {session.intervention_id})；"
+                "请配置 LLM_API_KEY 或显式传入 api_key，严禁伪造执行。"
+            )
+        if not effective_model:
+            raise LLMUnavailableError(
+                f"未配置 LLM_MODEL (Session {session.intervention_id})；禁止使用隐式模型默认值。"
+            )
+        try:
+            from openai import OpenAI
+        except ImportError as exc:
+            raise LLMUnavailableError("缺少 openai 依赖，无法执行真实 LLM 抽取。") from exc
+        kwargs = {"api_key": effective_api_key}
         if effective_base_url:
-            client_kwargs["base_url"] = effective_base_url
-            
-        client = OpenAI(**client_kwargs)
-        
-        # 3. 带自纠反馈的多轮调用重试循环 (Self-Correction Loop)
-        for attempt in range(max_retries):
-            raw_content = "{}"
-            try:
+            kwargs["base_url"] = effective_base_url
+        client = OpenAI(**kwargs)
+
+    last_error: Optional[Exception] = None
+    last_raw: Any = {}
+    for attempt in range(1, max_retries + 1):
+        try:
+            if hasattr(client, "generate_structured"):
+                request = messages if getattr(client, "supports_messages", False) else prompt
+                last_raw = client.generate_structured(request)
+            elif hasattr(client, "chat") and hasattr(client.chat, "completions"):
+                if not effective_model:
+                    raise LLMUnavailableError("使用 OpenAI 兼容客户端时必须显式配置 LLM_MODEL。")
                 response = client.chat.completions.create(
                     model=effective_model,
                     messages=messages,
                     response_format={"type": "json_object"},
-                    temperature=temperature
+                    temperature=temperature,
                 )
-                raw_content = response.choices[0].message.content or "{}"
-                resp_dict = json.loads(raw_content)
-                
-                misc_data = resp_dict.get("misconception", {})
-                misc_data["session_id"] = session.intervention_id
-                misc_data["question_id"] = session.question_id
-                misc_data["subject_path"] = session.subjects.paths[0] if session.subjects.paths else ""
-                
-                strat_data = resp_dict.get("tutor_strategy", {})
-                strat_data["session_id"] = session.intervention_id
-                strat_data["question_id"] = session.question_id
-                
-                # 严格 Schema 校验
-                misconception_card = StudentMisconceptionProfile.model_validate(misc_data)
-                tutor_strategy_card = TutorStrategyProfile.model_validate(strat_data)
-                
-                # Grounding Gate: 校验原声引用是否真实存在于对话实录中
-                invalid_quotes = [q for q in misconception_card.verbatim_student_quotes if not validate_verbatim_grounding(q, session.turns)[0]]
-                if invalid_quotes:
-                    raise ValueError(
-                        f"原声引用未通过字面量真实性门禁 (Grounding Gate Failed): {invalid_quotes} 在会话实录中不存在精确子串匹配！"
-                        f"严禁杜撰或美化学生原声，必须摘录会话实录中学生实际发言的字面量子串。"
-                    )
-                
-                return ExtractedPIU(
-                    session_id=session.intervention_id,
-                    question_id=session.question_id,
-                    misconception=misconception_card,
-                    tutor_strategy=tutor_strategy_card,
-                    extraction_status="success"
+                last_raw = response.choices[0].message.content
+                if not last_raw:
+                    raise ValueError("LLM 返回空响应")
+            else:
+                raise LLMUnavailableError(
+                    "llm_client 必须实现 generate_structured() 或 OpenAI 兼容 chat.completions 接口。"
                 )
-            except (ValidationError, json.JSONDecodeError, KeyError, Exception) as e:
-                err_msg = str(e)
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Session {session.intervention_id} 抽取校验失败 (尝试 {attempt+1}/{max_retries}): {err_msg}。正在反馈错误给大模型进行自纠重试..."
-                    )
-                    # 将失败的响应与具体错误反馈追加至对话历史，触发模型自纠
-                    messages.append({"role": "assistant", "content": raw_content})
-                    messages.append({
-                        "role": "user",
-                        "content": (
-                            f"你的上一轮输出无法通过严格的 Pydantic 数据契约校验，错误明细如下:\n{err_msg}\n"
-                            f"请务必修正上述字段缺失或格式错误，严格按照规定的字段名称和数据类型，重新输出完整的合法 JSON。"
-                        )
-                    })
-                else:
-                    final_msg = f"大模型在 {max_retries} 次反馈自纠尝试后仍然抽取校验失败 (Session {session.intervention_id}): {err_msg}"
-                    if allow_none_on_failure:
-                        logger.error(final_msg)
-                        return None
-                    raise LLMExtractionError(final_msg) from e
-                    
-    except LLMUnavailableError:
-        raise
-    except LLMExtractionError:
-        raise
-    except Exception as general_err:
-        msg = f"大模型 API 网络或运行时严重异常 ({effective_model} @ {effective_base_url or 'default'}): {general_err}"
-        if allow_none_on_failure:
-            logger.error(msg)
-            return None
-        raise LLMExtractionError(msg) from general_err
+            return _parse_and_ground_payload(last_raw, session)
+        except LLMUnavailableError:
+            raise
+        except Exception as exc:
+            last_error = exc
+            if attempt < max_retries:
+                logger.warning(
+                    "Session %s 抽取校验失败 (尝试 %s/%s): %s；正在请求模型自纠",
+                    session.intervention_id,
+                    attempt,
+                    max_retries,
+                    exc,
+                )
+                serialized = last_raw if isinstance(last_raw, str) else json.dumps(last_raw, ensure_ascii=False)
+                messages.extend(
+                    [
+                        {"role": "assistant", "content": serialized},
+                        {
+                            "role": "user",
+                            "content": f"上次输出校验失败: {exc}。请按完整 schema 修正后重新输出。",
+                        },
+                    ]
+                )
+
+    raise LLMExtractionError(
+        f"LLM 在 {max_retries} 次自纠尝试后仍然失败 (Session {session.intervention_id}): {last_error}"
+    ) from last_error
 
 
 def batch_extract_knowledge(
@@ -376,13 +390,14 @@ def batch_extract_knowledge(
       base_url (Optional[str]): API Base URL
       model (Optional[str]): 模型名称
       max_retries (int): 失败自纠重试上限
-      allow_skip_on_error (bool): 为 True 时跳过抽取失败的会话；为 False 时遇错立即中断 (Fail-Fast)
+      allow_skip_on_error (bool): 已废弃；传 True 会显式拒绝，批量任务必须原子失败
       
     返回:
       List[ExtractedPIU]: 真实抽取成功的对象列表
     """
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    extracted_results = []
+    if allow_skip_on_error:
+        raise ValueError("allow_skip_on_error 已禁用：批量抽取必须原子失败，不能跳过坏数据后伪装完整")
+    extracted_results: List[ExtractedPIU] = []
     
     with open(input_path, "r", encoding="utf-8") as fin:
         for idx, line in enumerate(fin):
@@ -401,29 +416,51 @@ def batch_extract_knowledge(
                 base_url=base_url,
                 model=model,
                 max_retries=max_retries,
-                allow_none_on_failure=allow_skip_on_error
+                allow_none_on_failure=False
             )
-            if extracted is not None:
-                extracted_results.append(extracted)
+            if extracted.extraction_status != "success" or extracted.misconception is None or extracted.tutor_strategy is None:
+                raise LLMExtractionError(
+                    f"Session {session.intervention_id} 未生成两张真实成功卡，拒绝批量产出"
+                )
+            extracted_results.append(extracted)
+
+    if not extracted_results:
+        raise ValueError("输入中没有可抽取的会话，拒绝覆盖输出为空结果")
             
-    # 写入输出 JSONL (只写入真实成功的卡片)
-    with open(output_path, "w", encoding="utf-8") as fout:
-        for item in extracted_results:
-            fout.write(json.dumps(item.model_dump(), ensure_ascii=False) + "\n")
+    # 全部成功后才原子替换输出；任一失败时保留旧文件且不留下部分 JSONL。
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_name: Optional[str] = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=output_path.parent,
+            prefix=f".{output_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as fout:
+            temp_name = fout.name
+            for item in extracted_results:
+                fout.write(json.dumps(item.model_dump(), ensure_ascii=False) + "\n")
+        os.replace(temp_name, output_path)
+    finally:
+        if temp_name and os.path.exists(temp_name):
+            os.unlink(temp_name)
             
     return extracted_results
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Eedi-RAG LLM 教学知识结构化蒸馏抽取脚本 (带自纠补救与真实降级)")
+    if load_dotenv is not None:
+        load_dotenv()
+    parser = argparse.ArgumentParser(description="Eedi-RAG LLM 教学知识结构化蒸馏抽取脚本 (严格 Fail-Fast)")
     parser.add_argument("--input", type=str, default="data/sample/cleaned_sessions_sample.jsonl", help="输入 CleanedSession JSONL 路径")
     parser.add_argument("--output", type=str, default="data/sample/extracted_pius_sample.jsonl", help="输出 ExtractedPIU JSONL 路径")
     parser.add_argument("--api-key", type=str, default=None, help="LLM API Key (也可在 .env 中设置 LLM_API_KEY)")
     parser.add_argument("--base-url", type=str, default=None, help="LLM Base URL (例如 https://api.deepseek.com)")
-    parser.add_argument("--model", type=str, default=None, help="模型名称 (例如 deepseek-chat 或 gpt-4o-mini)")
+    parser.add_argument("--model", type=str, default=None, help="模型名称（必填，或设置 LLM_MODEL）")
     parser.add_argument("--max-retries", type=int, default=3, help="校验失败时的最大自纠重试次数 (默认 3)")
     parser.add_argument("--max-samples", type=int, default=None, help="最大抽样处理会话数")
-    parser.add_argument("--allow-skip", action="store_true", help="是否允许跳过失败/无Key的单条会话")
     
     args = parser.parse_args()
     
@@ -440,7 +477,6 @@ if __name__ == "__main__":
             base_url=args.base_url,
             model=args.model,
             max_retries=args.max_retries,
-            allow_skip_on_error=args.allow_skip
         )
         print(f"✅ 抽取完成! 真实成功提取: {len(results)} 场会话的知识卡片。")
     except Exception as err:

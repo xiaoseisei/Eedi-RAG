@@ -105,6 +105,7 @@ class DualMetricRetriever:
         self,
         storage_manager: Optional[DualEngineStorageManager] = None,
         rewriter: Optional[MultiPerspectiveQueryRewriter] = None,
+        query_rewrite_mode: Optional[str] = None,
         alpha: float = 0.5
     ):
         """
@@ -116,13 +117,21 @@ class DualMetricRetriever:
           alpha: 余弦相似度权重 (1-alpha 为欧氏相似度权重，默认 0.5)
         """
         self.alpha = max(0.0, min(1.0, alpha))
-        if storage_manager is not None:
-            self.storage = storage_manager
-        else:
-            self.storage = DualEngineStorageManager()
+        if storage_manager is None:
+            raise ValueError("必须显式传入已配置 embedding 后端的 storage_manager")
+        self.storage = storage_manager
             
-        self.embedding_fn = self.storage.embedding_function or FastDeterministicEmbeddingFunction()
-        self.rewriter = rewriter or MultiPerspectiveQueryRewriter()
+        self.embedding_fn = self.storage.embedding_function
+        if rewriter is not None and query_rewrite_mode is not None:
+            raise ValueError("rewriter 与 query_rewrite_mode 只能指定一个")
+        if rewriter is not None:
+            self.rewriter = rewriter
+        elif query_rewrite_mode == "deterministic":
+            self.rewriter = MultiPerspectiveQueryRewriter(mode="deterministic")
+        else:
+            raise ValueError(
+                "必须显式传入 rewriter，或设置 query_rewrite_mode='deterministic'"
+            )
 
     def _rank_collection_candidates(
         self,
@@ -284,9 +293,10 @@ class DualMetricRetriever:
         # 1. 多视角派生与专业注入
         rewritten: MultiPerspectiveQueries = self.rewriter.rewrite(raw_query)
 
-        # 2. 错因库多视角检索与 RRF 融合
-        misc_ranks_p1 = self.retrieve_misconceptions(rewritten.misconception_query, top_k=10, fetch_evidence=False)
-        misc_ranks_p2 = self.retrieve_misconceptions(rewritten.curriculum_query, top_k=10, fetch_evidence=False)
+        # 2. 错因库多视角检索与 RRF 融合 (3-Way: misconception + curriculum + raw_query)
+        misc_ranks_p1 = self.retrieve_misconceptions(rewritten.misconception_query, top_k=15, fetch_evidence=False)
+        misc_ranks_p2 = self.retrieve_misconceptions(rewritten.curriculum_query, top_k=15, fetch_evidence=False)
+        misc_ranks_p3 = self.retrieve_misconceptions(raw_query, top_k=15, fetch_evidence=False)
         
         misc_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(misc_ranks_p1, start=1):
@@ -303,6 +313,13 @@ class DualMetricRetriever:
             misc_rrf_map[cid]["rrf_score"] += 1.0 / (k_constant + rank_idx)
             misc_rrf_map[cid]["perspective_hits"].append(f"curriculum_perspective(#Rank{rank_idx})")
 
+        for rank_idx, cand in enumerate(misc_ranks_p3, start=1):
+            cid = cand["chunk_id"]
+            if cid not in misc_rrf_map:
+                misc_rrf_map[cid] = {"candidate": cand, "rrf_score": 0.0, "perspective_hits": []}
+            misc_rrf_map[cid]["rrf_score"] += 1.0 / (k_constant + rank_idx)
+            misc_rrf_map[cid]["perspective_hits"].append(f"raw_query_perspective(#Rank{rank_idx})")
+
         fused_misc = sorted(misc_rrf_map.values(), key=lambda x: x["rrf_score"], reverse=True)
         top_misc_results = []
         for item in fused_misc[:top_k_each]:
@@ -317,9 +334,10 @@ class DualMetricRetriever:
                     c["evidence_turns"] = self.storage.get_dialogue_turns(sess_id, turn_ids)
             top_misc_results.append(c)
 
-        # 3. 策略库多视角检索与 RRF 融合
-        strat_ranks_p1 = self.retrieve_strategies(rewritten.strategy_query, top_k=10, fetch_evidence=False)
-        strat_ranks_p2 = self.retrieve_strategies(rewritten.curriculum_query, top_k=10, fetch_evidence=False)
+        # 3. 策略库多视角检索与 RRF 融合 (3-Way: strategy + curriculum + raw_query)
+        strat_ranks_p1 = self.retrieve_strategies(rewritten.strategy_query, top_k=15, fetch_evidence=False)
+        strat_ranks_p2 = self.retrieve_strategies(rewritten.curriculum_query, top_k=15, fetch_evidence=False)
+        strat_ranks_p3 = self.retrieve_strategies(raw_query, top_k=15, fetch_evidence=False)
         
         strat_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(strat_ranks_p1, start=1):
@@ -335,6 +353,13 @@ class DualMetricRetriever:
                 strat_rrf_map[cid] = {"candidate": cand, "rrf_score": 0.0, "perspective_hits": []}
             strat_rrf_map[cid]["rrf_score"] += 1.0 / (k_constant + rank_idx)
             strat_rrf_map[cid]["perspective_hits"].append(f"curriculum_perspective(#Rank{rank_idx})")
+
+        for rank_idx, cand in enumerate(strat_ranks_p3, start=1):
+            cid = cand["chunk_id"]
+            if cid not in strat_rrf_map:
+                strat_rrf_map[cid] = {"candidate": cand, "rrf_score": 0.0, "perspective_hits": []}
+            strat_rrf_map[cid]["rrf_score"] += 1.0 / (k_constant + rank_idx)
+            strat_rrf_map[cid]["perspective_hits"].append(f"raw_query_perspective(#Rank{rank_idx})")
 
         fused_strat = sorted(strat_rrf_map.values(), key=lambda x: x["rrf_score"], reverse=True)
         top_strat_results = []
@@ -352,6 +377,10 @@ class DualMetricRetriever:
 
         return {
             "raw_query": raw_query,
+            "execution_metadata": {
+                "query_rewrite_backend": self.rewriter.backend_name,
+                "embedding_backend": self.storage.embedding_backend,
+            },
             "rewritten_queries": rewritten.model_dump(),
             "misconceptions": top_misc_results,
             "strategies": top_strat_results,
@@ -366,10 +395,11 @@ if __name__ == "__main__":
     
     storage = DualEngineStorageManager(
         db_path="data/db/tutoring_knowledge.duckdb",
-        chroma_dir="data/chroma"
+        chroma_dir="data/chroma",
+        embedding_backend="deterministic",
     )
     
-    retriever = DualMetricRetriever(storage_manager=storage, alpha=0.5)
+    retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", alpha=0.5)
     
     raw_query = "学生为什么会误以为任意两个数的最小公倍数就是它们的乘积？"
     res = retriever.retrieve_multi_perspective_rrf(raw_query, top_k_each=1, fetch_evidence=True)

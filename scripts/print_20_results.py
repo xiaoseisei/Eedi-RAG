@@ -21,9 +21,10 @@ from scripts.eval_20_queries import BENCHMARK_20_QUERIES
 def main():
     storage = DualEngineStorageManager(
         db_path="data/db/tutoring_knowledge.duckdb",
-        chroma_dir="data/chroma"
+        chroma_dir="data/chroma",
+        embedding_backend="deterministic",
     )
-    retriever = DualMetricRetriever(storage_manager=storage, alpha=0.5)
+    retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", alpha=0.5)
 
     print("================================================================================")
     print("📋 20 条真实教研提问端到端检索输出详单 (Dual-Metric: Cosine + Euclidean L2)")

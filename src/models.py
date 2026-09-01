@@ -10,8 +10,9 @@
 ================================================================================
 """
 
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class SubjectHierarchy(BaseModel):
@@ -139,7 +140,6 @@ class CleanedSession(BaseModel):
         description="导师发言轮次数"
     )
     has_valid_tutoring: bool = Field(
-        default=True,
         description="质量门禁标志: 是否构成实质性双向多轮辅导 (例如师生双方均至少发言 1 次且总轮次 >= 2)"
     )
 
@@ -156,17 +156,22 @@ class StudentMisconceptionProfile(BaseModel):
       从整场辅导对话中提纯学生暴露出的深层思维认知障碍、误选选项、困惑触发概念，
       并提取 100% 原始发言字面量子串作为绝对溯源证据 (Grounding Citation)。
     """
+    model_config = ConfigDict(extra="forbid")
+
     session_id: int = Field(
+        ge=1,
         description="关联辅导会话唯一业务 ID (InterventionId)"
     )
     question_id: int = Field(
+        ge=1,
         description="关联考题 ID (QuestionId_DQ)"
     )
     subject_path: str = Field(
-        default="",
+        min_length=1,
         description="学科考纲完整路径"
     )
     misconception_name: str = Field(
+        min_length=1,
         description="学术化标准错因命名 (例如: '四舍五入数位保留规则混淆' 或 '小数位数与数值大小误判')"
     )
     error_choice: Optional[str] = Field(
@@ -174,6 +179,7 @@ class StudentMisconceptionProfile(BaseModel):
         description="学生初试或对话中误选的选项字母 (例如: 'B', 'D' 或 'Sophie')"
     )
     deep_mechanism: str = Field(
+        min_length=1,
         description="深层思维认知障碍机理剖析 (解释学生为什么会产生这个误区，其思维模型错在哪里)"
     )
     confusion_triggers: List[str] = Field(
@@ -181,13 +187,21 @@ class StudentMisconceptionProfile(BaseModel):
         description="触发学生困惑的核心术语、概念词或关键数值 (例如: ['5.45', '1 decimal place'])"
     )
     verbatim_student_quotes: List[str] = Field(
-        default_factory=list,
+        min_length=1,
         description="学生暴露出该错误时的原始发言直接引用 (Exact Quotes，必须为真实发言子串)"
     )
     source_turn_ids: List[int] = Field(
-        default_factory=list,
+        min_length=1,
         description="对应的学生发言轮次序号列表 (1-based Turn IDs)"
     )
+
+    @model_validator(mode="after")
+    def validate_grounding_fields(self) -> "StudentMisconceptionProfile":
+        if any(turn_id < 1 for turn_id in self.source_turn_ids):
+            raise ValueError("source_turn_ids 必须全部为正整数")
+        if any(not quote.strip() for quote in self.verbatim_student_quotes):
+            raise ValueError("verbatim_student_quotes 不允许空字符串")
+        return self
 
 
 class TutorStrategyProfile(BaseModel):
@@ -198,24 +212,35 @@ class TutorStrategyProfile(BaseModel):
       提炼授课导师在辅导过程中展现出的核心破局灵魂提问 (Aha Moment Prompt)、
       分步引导脚手架 (Scaffolding)、生活化比喻、教学动作与引导效果。
     """
+    model_config = ConfigDict(extra="forbid")
+
     session_id: int = Field(
+        ge=1,
         description="关联辅导会话唯一业务 ID (InterventionId)"
     )
     question_id: int = Field(
+        ge=1,
         description="关联考题 ID (QuestionId_DQ)"
     )
     pedagogical_goal: str = Field(
+        min_length=1,
         description="阶段性教学引导目标 (例如: '引导学生理解 1 位小数的精确定义并完成进位')"
     )
-    strategy_category: str = Field(
-        default="Scaffolding",
+    strategy_category: Literal[
+        "Socratic_Questioning",
+        "Scaffolding",
+        "Counter_Example",
+        "Analogy",
+        "Revoicing",
+    ] = Field(
         description="教学法标准分类 (如: 'Socratic_Questioning', 'Scaffolding', 'Counter_Example', 'Analogy', 'Revoicing')"
     )
     key_aha_question: str = Field(
+        min_length=1,
         description="名师破局核心提问 (Aha Moment Prompt / 灵魂一问，促成学生顿悟的关键句)"
     )
     scaffolding_steps: List[str] = Field(
-        default_factory=list,
+        min_length=1,
         description="分步搭建的脚手架引导步骤链 (例如: ['Step 1: 圈出目标小数位', 'Step 2: 观察后一位是舍还是入'])"
     )
     analogy_or_metaphor: Optional[str] = Field(
@@ -227,13 +252,21 @@ class TutorStrategyProfile(BaseModel):
         description="涉及的官方教学动作预测标签 (例如: ['<Press for Accuracy>', '<Keep Together>'])"
     )
     resolution_outcome: str = Field(
-        default="",
+        min_length=1,
         description="最终辅导结果与转化状态 (例如: '学生自主推导出正确选项并理解四舍五入规则')"
     )
     source_turn_ids: List[int] = Field(
-        default_factory=list,
+        min_length=1,
         description="涉及的导师关键引导轮次序号列表 (1-based Turn IDs)"
     )
+
+    @model_validator(mode="after")
+    def validate_strategy_grounding(self) -> "TutorStrategyProfile":
+        if any(turn_id < 1 for turn_id in self.source_turn_ids):
+            raise ValueError("source_turn_ids 必须全部为正整数")
+        if any(not step.strip() for step in self.scaffolding_steps):
+            raise ValueError("scaffolding_steps 不允许空字符串")
+        return self
 
 
 class ExtractedPIU(BaseModel):
@@ -244,10 +277,14 @@ class ExtractedPIU(BaseModel):
       将单场 CleanedSession 经 LLM 抽取后的两大物理隔离卡片与基础元数据统一聚合，
       作为 Step 2 的标准输出物与 Step 3 写入双引擎存储的直接输入源。
     """
+    model_config = ConfigDict(extra="forbid")
+
     session_id: int = Field(
+        ge=1,
         description="会话全局唯一 ID (InterventionId)"
     )
     question_id: int = Field(
+        ge=1,
         description="考题 ID (QuestionId_DQ)"
     )
     misconception: Optional[StudentMisconceptionProfile] = Field(
@@ -258,10 +295,20 @@ class ExtractedPIU(BaseModel):
         default=None,
         description="名师启发式策略卡片"
     )
-    extraction_status: str = Field(
-        default="success",
-        description="抽取状态: 'success' (成功), 'partial' (部分成功), 'fallback' (规则降级抽取)"
+    extraction_status: Literal["success", "partial", "failed", "skipped"] = Field(
+        description="抽取状态；必须与卡片载荷严格一致"
     )
+
+    @model_validator(mode="after")
+    def validate_status_payload_consistency(self) -> "ExtractedPIU":
+        present_count = int(self.misconception is not None) + int(self.tutor_strategy is not None)
+        if self.extraction_status == "success" and present_count != 2:
+            raise ValueError("success 状态必须同时包含 misconception 与 tutor_strategy")
+        if self.extraction_status == "partial" and present_count != 1:
+            raise ValueError("partial 状态必须且只能包含一张卡片")
+        if self.extraction_status in {"failed", "skipped"} and present_count != 0:
+            raise ValueError(f"{self.extraction_status} 状态不允许携带知识卡片")
+        return self
 
 
 class Chunk(BaseModel):
@@ -313,16 +360,22 @@ class MultiPerspectiveQueries(BaseModel):
       接收用户的口语短提问，通过注入领域专有名词与学科考纲，
       同时生成 3 个正交视角的专业检索表达，配合 RRF 融合彻底攻克词表鸿沟与语义弥散。
     """
+    model_config = ConfigDict(extra="forbid")
+
     raw_query: str = Field(
+        min_length=1,
         description="用户原始输入提问 (Raw User Query)"
     )
     misconception_query: str = Field(
+        min_length=1,
         description="视角 1 (学情错因诊断): 聚焦学生深层认知障碍、易混淆规则与典型错选机理"
     )
     strategy_query: str = Field(
+        min_length=1,
         description="视角 2 (名师教法启发): 聚焦名师破局一问、引导脚手架步骤链与苏格拉底反问"
     )
     curriculum_query: str = Field(
+        min_length=1,
         description="视角 3 (学科考纲题型): 聚焦考纲完整层级路径、中英专有名词对照与核心数值约束"
     )
     extracted_keywords: List[str] = Field(
@@ -332,5 +385,83 @@ class MultiPerspectiveQueries(BaseModel):
     injected_domain_context: str = Field(
         default="",
         description="前置动态注入的学科知识树与中英术语映射上下文"
+    )
+
+
+# ================================================================================
+# Step 5: 端到端 RAG 教研问答与生成契约 (End-to-End Pedagogical Generation Contracts)
+# ================================================================================
+
+class DialogueCitation(BaseModel):
+    """
+    真实师生对白引用凭据契约 (Dialogue Citation Contract)。
+    """
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    session_id: int = Field(ge=1, description="引用所属会话 ID")
+    turn_id: int = Field(ge=1, description="对话轮次序号 (例如: 9)")
+    speaker: Literal["student", "tutor"] = Field(description="说话人角色")
+    quote_text: str = Field(min_length=1, description="引用的对白原文 (必须 100% 对应 DuckDB 底表)")
+    verifiable_in_duckdb: bool = Field(default=False, description="是否通过 DuckDB 事实表真伪校验")
+
+
+class PedagogicalGuidanceResponse(BaseModel):
+    """
+    Step 5 最终权威教研备课指南与名师破局锦囊契约 (Pedagogical Guidance Response)。
+    """
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    query: str = Field(
+        min_length=1,
+        description="教师原始输入提问"
+    )
+    subject_path: str = Field(
+        min_length=1,
+        description="学科考纲完整路径 (如 'Number > Rounding and Estimating > Rounding to Decimal Places')"
+    )
+    session_id: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="关联的历史辅导会话 ID"
+    )
+    misconception_diagnosis: str = Field(
+        min_length=1,
+        description="【教研三段论·段落一】学情认知误区深度诊断 (揭示错因机理与思维盲区)"
+    )
+    key_aha_question: str = Field(
+        min_length=1,
+        description="【教研三段论·段落二】名师核心破局一问 (Key Aha Question，直接用于课堂点拨)"
+    )
+    recommended_talk_moves: List[str] = Field(
+        default_factory=list,
+        description="建议使用的名师教学动作 (Talk Moves，如 ['<Press for Accuracy>', '<Revoicing>'])"
+    )
+    scaffolding_steps: List[str] = Field(
+        default_factory=list,
+        description="分步启发式脚手架引导步骤链 (按序呈现教学动作)"
+    )
+    dialogue_citations: List[DialogueCitation] = Field(
+        min_length=1,
+        description="【教研三段论·段落三】不可篡改历史真实对白溯源引用列表 (带 [Turn N] 证据)"
+    )
+    transfer_question: Optional[str] = Field(
+        default=None,
+        description="【课后延伸】同构变式巩固训练题 (用于检验学生是否真正攻克该误区)"
+    )
+    audit_status: Literal["PENDING", "AUDITED_100_VERIFIED", "GROUNDING_DEGRADED"] = Field(
+        default="PENDING",
+        description="防伪溯源审计状态；仅完整审计后可设为 AUDITED_100_VERIFIED"
+    )
+    answer_content: Optional[str] = Field(
+        default=None,
+        description="针对用户提问动态生成的自然教研深度解答 (摆脱僵化模板)"
+    )
+    retrieved_sources_debug: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="用于调试与白盒核验的底层索引知识卡片与 DuckDB 原声证据明细"
+    )
+    rendered_markdown: Optional[str] = Field(
+        default=None,
+        description="即用型美化排版 Markdown 备课卡片"
     )
 

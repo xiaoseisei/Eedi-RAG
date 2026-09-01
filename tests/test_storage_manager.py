@@ -197,3 +197,46 @@ def test_search_parallel_and_fuse_with_evidence(in_memory_manager: DualEngineSto
     assert "evidence_turns" in top_strat
     assert isinstance(top_strat["evidence_turns"], list)
     assert len(top_strat["evidence_turns"]) > 0
+
+
+def test_ingest_all_rejects_non_success_before_any_write(sample_sessions, sample_extracted):
+    manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    invalid = sample_extracted[0].model_copy(
+        update={"extraction_status": "failed", "misconception": None, "tutor_strategy": None}
+    )
+
+    with pytest.raises(ValueError, match="拒绝写入"):
+        manager.ingest_all(sample_sessions, [invalid])
+
+    assert manager.duck_conn.execute("SELECT COUNT(*) FROM tutoring_sessions").fetchone()[0] == 0
+    assert manager.duck_conn.execute("SELECT COUNT(*) FROM misconception_chunks").fetchone()[0] == 0
+    manager.close()
+
+
+def test_direct_card_ingest_enforces_evidence_roles(sample_sessions, sample_extracted):
+    manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    initial_vector_count = manager.coll_misconceptions.count()
+    session = next(s for s in sample_sessions if s.intervention_id == sample_extracted[0].session_id)
+    tutor_turn = next(turn.turn_id for turn in session.turns if turn.is_tutor)
+    bad_misc = sample_extracted[0].misconception.model_copy(update={"source_turn_ids": [tutor_turn]})
+    invalid = sample_extracted[0].model_copy(update={"misconception": bad_misc})
+
+    with pytest.raises(ValueError, match="学生证据"):
+        manager.ingest_extracted_pius([invalid], sessions_map={session.intervention_id: session})
+
+    assert manager.duck_conn.execute("SELECT COUNT(*) FROM misconception_chunks").fetchone()[0] == 0
+    assert manager.coll_misconceptions.count() == initial_vector_count
+    manager.close()
+
+
+def test_direct_card_ingest_requires_sessions_for_grounding(sample_extracted):
+    manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    with pytest.raises(ValueError, match="sessions_map"):
+        manager.ingest_extracted_pius([sample_extracted[0]])
+    manager.close()
+
+
+def test_storage_exposes_embedding_backend():
+    manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    assert manager.embedding_backend == "fast_deterministic"
+    manager.close()

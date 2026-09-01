@@ -163,8 +163,8 @@ def print_report(raw_res, rrf_res):
 
 
 def main():
-    storage = DualEngineStorageManager(db_path="data/db/tutoring_knowledge.duckdb", chroma_dir="data/chroma")
-    retriever = DualMetricRetriever(storage_manager=storage, alpha=0.5)
+    storage = DualEngineStorageManager(db_path="data/db/tutoring_knowledge.duckdb", chroma_dir="data/chroma", embedding_backend="deterministic")
+    retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", alpha=0.5)
 
     raw_res = evaluate_top_k(retriever, top_k=5, use_rrf=False)
     rrf_res = evaluate_top_k(retriever, top_k=5, use_rrf=True)
@@ -176,4 +176,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

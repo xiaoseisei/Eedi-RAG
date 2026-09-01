@@ -80,7 +80,7 @@ def test_math_metric_functions():
 
 def test_retriever_misconception_retrieval(in_memory_storage):
     """测试原始问题直接检索错因卡片。"""
-    retriever = DualMetricRetriever(storage_manager=in_memory_storage, alpha=0.5)
+    retriever = DualMetricRetriever(storage_manager=in_memory_storage, query_rewrite_mode="deterministic", alpha=0.5)
     
     raw_query = "四舍五入 5.4598 到 1 位小数学生容易犯什么错？"
     hits = retriever.retrieve_misconceptions(raw_query, top_k=2, fetch_evidence=True)
@@ -98,7 +98,7 @@ def test_retriever_misconception_retrieval(in_memory_storage):
 
 def test_retriever_strategy_retrieval(in_memory_storage):
     """测试原始问题直接检索名师策略卡片。"""
-    retriever = DualMetricRetriever(storage_manager=in_memory_storage, alpha=0.6)
+    retriever = DualMetricRetriever(storage_manager=in_memory_storage, query_rewrite_mode="deterministic", alpha=0.6)
     
     raw_query = "名师如何提问引导四舍五入保留一位小数？"
     hits = retriever.retrieve_strategies(raw_query, top_k=2, fetch_evidence=True)
@@ -113,7 +113,7 @@ def test_retriever_strategy_retrieval(in_memory_storage):
 
 def test_retriever_fallback_windows(in_memory_storage):
     """测试纯原文滑动窗口直接检索。"""
-    retriever = DualMetricRetriever(storage_manager=in_memory_storage)
+    retriever = DualMetricRetriever(storage_manager=in_memory_storage, query_rewrite_mode="deterministic")
     
     raw_query = "Alex and Sophie are arguing about rounding"
     hits = retriever.retrieve_fallback_windows(raw_query, top_k=2)
@@ -124,7 +124,7 @@ def test_retriever_fallback_windows(in_memory_storage):
 
 def test_retriever_hybrid_full_contract(in_memory_storage):
     """测试 retrieve_hybrid 主入口输出契约与多路召回。"""
-    retriever = DualMetricRetriever(storage_manager=in_memory_storage, alpha=0.5)
+    retriever = DualMetricRetriever(storage_manager=in_memory_storage, query_rewrite_mode="deterministic", alpha=0.5)
     
     raw_query = "学生把 5.4598 算成 5.45 怎么引导？"
     res = retriever.retrieve_hybrid(raw_query, top_k_each=2, fetch_evidence=True)

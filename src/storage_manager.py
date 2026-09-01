@@ -154,6 +154,7 @@ class DualEngineStorageManager:
         db_path: Union[str, Path] = "data/db/tutoring_knowledge.duckdb",
         chroma_dir: Optional[Union[str, Path]] = "data/chroma",
         embedding_function: Any = None,
+        embedding_backend: Optional[str] = None,
         in_memory: bool = False
     ):
         """
@@ -166,6 +167,22 @@ class DualEngineStorageManager:
           in_memory: 是否运行纯内存模式 (用于单元测试和极速沙盒验证)
         """
         self.in_memory = in_memory
+        if embedding_function is not None and embedding_backend is not None:
+            raise ValueError("embedding_function 与 embedding_backend 只能指定一个")
+        if embedding_function is not None:
+            self.embedding_function = embedding_function
+            name_method = getattr(embedding_function, "name", None)
+            self.embedding_backend = name_method() if callable(name_method) else type(embedding_function).__name__
+        elif embedding_backend == "deterministic" or (in_memory and embedding_backend is None):
+            self.embedding_function = FastDeterministicEmbeddingFunction()
+            self.embedding_backend = self.embedding_function.name()
+            logger.warning(
+                "[Storage] 使用显式/测试 deterministic 特征哈希 embedding 后端"
+            )
+        else:
+            raise ValueError(
+                "持久化存储必须显式提供 embedding_function，或设置 embedding_backend='deterministic'"
+            )
         
         # 1. 初始化 DuckDB 关系底表
         if in_memory or str(db_path) == ":memory:":
@@ -179,7 +196,6 @@ class DualEngineStorageManager:
         self._init_duckdb_schema()
         
         # 2. 初始化 ChromaDB 多向量集合
-        self.embedding_function = embedding_function or FastDeterministicEmbeddingFunction()
         if in_memory:
             self.chroma_client = chromadb.Client()
             self.chroma_dir = None
@@ -403,6 +419,9 @@ class DualEngineStorageManager:
         """
         将大模型蒸馏抽取出的知识卡片，分别持久化至 DuckDB 关系表与 ChromaDB 双向量集合。
         """
+        if sessions_map is None:
+            raise ValueError("写入知识卡必须提供 sessions_map 以验证外键和逐字证据")
+        self._validate_extracted_pius(extracted_list, sessions_map)
         logger.info(f"[step=Step3_Storage|action=ingest_cards] 🧠 正在持久化 {len(extracted_list)} 份双卡片知识资产 (DuckDB + ChromaDB)...")
         misc_duck_rows = []
         strat_duck_rows = []
@@ -416,7 +435,7 @@ class DualEngineStorageManager:
         strat_chroma_metas = []
         
         for item in extracted_list:
-            sess = sessions_map.get(item.session_id) if sessions_map else None
+            sess = sessions_map[item.session_id]
             q_text = sess.question.question_text if sess else ""
             subj_p = item.misconception.subject_path or (sess.subjects.paths[0] if sess and sess.subjects.paths else "")
             
@@ -478,6 +497,9 @@ class DualEngineStorageManager:
                 "subject_path": subj_p,
                 "misconception_name": misc.misconception_name,
                 "error_choice": misc.error_choice or "",
+                "deep_mechanism": misc.deep_mechanism,
+                "confusion_triggers": json.dumps(misc.confusion_triggers, ensure_ascii=False),
+                "verbatim_student_quotes": json.dumps(misc.verbatim_student_quotes, ensure_ascii=False),
                 "source_turn_ids": json.dumps(misc.source_turn_ids)
             })
             
@@ -490,6 +512,10 @@ class DualEngineStorageManager:
                 "subject_path": subj_p,
                 "strategy_category": strat.strategy_category,
                 "key_aha_question": strat.key_aha_question,
+                "pedagogical_goal": strat.pedagogical_goal,
+                "scaffolding_steps": json.dumps(strat.scaffolding_steps, ensure_ascii=False),
+                "talk_moves": json.dumps(strat.talk_moves, ensure_ascii=False),
+                "resolution_outcome": strat.resolution_outcome,
                 "source_turn_ids": json.dumps(strat.source_turn_ids)
             })
             
@@ -589,15 +615,61 @@ class DualEngineStorageManager:
         """一站式批量摄取全生命周期资产。"""
         logger.info(f"🚀 [step=Step3_Storage|action=ingest_all] 开始双引擎全资产摄取: {len(cleaned_sessions)} 场会话, {len(extracted_pius)} 份抽取卡片...")
         sessions_map = {s.intervention_id: s for s in cleaned_sessions}
-        
+
+        if len(sessions_map) != len(cleaned_sessions):
+            raise ValueError("cleaned_sessions 包含重复 intervention_id")
+        self._validate_extracted_pius(extracted_pius, sessions_map)
+
         self.ingest_sessions(cleaned_sessions)
         self.ingest_extracted_pius(extracted_pius, sessions_map=sessions_map)
         if chunks:
             self.ingest_sliding_window_chunks(chunks)
-            
+
         # 输出白盒持久化审计快照
         self.get_storage_audit_snapshot()
         logger.info("🎉 [step=Step3_Storage|status=SUCCESS] 双引擎存储摄取与持久化 100% 同步完成！")
+
+    @staticmethod
+    def _validate_extracted_pius(
+        extracted_pius: List[ExtractedPIU],
+        sessions_map: Dict[int, CleanedSession],
+    ) -> None:
+        """在任何关系库或向量库写入前校验知识卡的状态、外键、角色与逐字证据。"""
+        for item in extracted_pius:
+            if item.extraction_status != "success":
+                raise ValueError(
+                    f"Session {item.session_id} extraction_status={item.extraction_status}，拒绝写入知识卡库"
+                )
+            if item.misconception is None or item.tutor_strategy is None:
+                raise ValueError(f"Session {item.session_id} 缺少完整双卡片")
+            session = sessions_map.get(item.session_id)
+            if session is None:
+                raise ValueError(f"Session {item.session_id} 没有对应的 CleanedSession")
+            if item.question_id != session.question_id:
+                raise ValueError(f"Session {item.session_id} question_id 外键不一致")
+            if item.misconception.session_id != item.session_id or item.tutor_strategy.session_id != item.session_id:
+                raise ValueError(f"Session {item.session_id} 卡片 session_id 外键不一致")
+            if item.misconception.question_id != item.question_id or item.tutor_strategy.question_id != item.question_id:
+                raise ValueError(f"Session {item.session_id} 卡片 question_id 外键不一致")
+            turn_map = {turn.turn_id: turn for turn in session.turns}
+            for turn_id in item.misconception.source_turn_ids:
+                turn = turn_map.get(turn_id)
+                if turn is None or turn.is_tutor:
+                    raise ValueError(f"Session {item.session_id} 学生证据 Turn {turn_id} 不存在或角色错误")
+            for turn_id in item.tutor_strategy.source_turn_ids:
+                turn = turn_map.get(turn_id)
+                if turn is None or not turn.is_tutor:
+                    raise ValueError(f"Session {item.session_id} 导师证据 Turn {turn_id} 不存在或角色错误")
+            student_texts = {turn_map[turn_id].text for turn_id in item.misconception.source_turn_ids}
+            missing_quotes = [
+                quote for quote in item.misconception.verbatim_student_quotes
+                if quote not in student_texts
+            ]
+            if missing_quotes:
+                raise ValueError(f"Session {item.session_id} 学生引用不是声明轮次的逐字原文")
+            tutor_texts = {turn_map[turn_id].text for turn_id in item.tutor_strategy.source_turn_ids}
+            if item.tutor_strategy.key_aha_question not in tutor_texts:
+                raise ValueError(f"Session {item.session_id} 破局问题不是声明导师轮次的逐字原文")
 
 
     # =========================================================================
@@ -628,6 +700,41 @@ class DualEngineStorageManager:
             WHERE intervention_id = {int(session_id)}
             ORDER BY turn_id ASC;
             """
+        df = self.duck_conn.execute(query).fetchdf()
+        return df.to_dict(orient="records")
+
+    def get_student_questions_and_confusions(
+        self,
+        session_ids: Optional[List[int]] = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        定向提取学生角色在辅导过程中的真实发问与困惑表述。
+        支撑【学生最常提出的问题是什么】等纯学情洞察。
+        """
+        sess_clause = ""
+        if session_ids and len(session_ids) > 0:
+            sess_list_str = ",".join(str(int(s)) for s in session_ids)
+            sess_clause = f"AND intervention_id IN ({sess_list_str})"
+
+        query = f"""
+        SELECT turn_id, speaker, text, talk_moves, intervention_id AS session_id
+        FROM session_dialogue_turns
+        WHERE speaker = 'student'
+          {sess_clause}
+          AND (
+              text LIKE '%?%'
+              OR LOWER(text) LIKE '%know%'
+              OR LOWER(text) LIKE '%not sure%'
+              OR LOWER(text) LIKE '%confus%'
+              OR LOWER(text) LIKE '%why%'
+              OR LOWER(text) LIKE '%how%'
+              OR LOWER(text) LIKE '%maybe%'
+          )
+          AND is_greeting_or_noise = FALSE
+        ORDER BY intervention_id ASC, turn_id ASC
+        LIMIT {limit};
+        """
         df = self.duck_conn.execute(query).fetchdf()
         return df.to_dict(orient="records")
 
@@ -831,7 +938,8 @@ if __name__ == "__main__":
     
     manager = DualEngineStorageManager(
         db_path="data/db/tutoring_knowledge.duckdb",
-        chroma_dir="data/chroma"
+        chroma_dir="data/chroma",
+        embedding_backend="deterministic",
     )
     
     manager.ingest_all(sessions, extracted, chunks)
