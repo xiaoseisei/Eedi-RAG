@@ -4,6 +4,12 @@ __pycache__/
 .pytest_cache/
 .venv/
 
+# Test/evaluation runtime output (archive under reports/runtime when retained)
+.test-tmp*/
+.audit-tmp*/
+.uv-cache-audit/
+reports/runtime/
+
 # IDE
 .idea/
 
@@ -12,4 +18,5 @@ __pycache__/
 
 # 运行时生成的存储引擎数据（可由 pipeline 重建，不入库）
 data/chroma/
+data/chroma-backups/
 data/db/

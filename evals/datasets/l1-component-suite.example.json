@@ -1,0 +1,73 @@
+{
+  "schema_version": "l1-component-suite/v1",
+  "context": {
+    "run_id": "example-l1-suite-v1",
+    "dataset_version": "component-fixture-v1",
+    "qrels_version": "qrels-fixture-v1",
+    "system_config_hash": "c851e93e023fd62be7c59a75fd64bbe267faaa7ae45dd7a010fbd069a03138b0",
+    "system_config": {
+      "component": "fixture",
+      "embedding_backend": "deterministic",
+      "purpose": "contract-example"
+    }
+  },
+  "chunking_cases": [
+    {
+      "case_id": "chunk-example-1",
+      "query": "arithmetic evidence",
+      "target_turns": [
+        {
+          "session_id": 1,
+          "turn_id": 1
+        }
+      ],
+      "ranked_chunks": [
+        {
+          "chunk_id": "chunk-target",
+          "session_id": 1,
+          "source_turn_ids": [1],
+          "token_count": 50
+        }
+      ],
+      "original_token_count": 100,
+      "emitted_chunk_token_count": 50,
+      "latency_ms": 5,
+      "slices": {
+        "strategy": "fixture"
+      }
+    }
+  ],
+  "rewrite_cases": [
+    {
+      "case_id": "rewrite-example-1",
+      "raw_query": "Why does 2 + 2 equal 4?",
+      "rewritten_query": "Diagnose why 2 + 2 equals 4 in arithmetic.",
+      "protected_tokens": [
+        "2",
+        "4"
+      ],
+      "critical_entities": [
+        "equal"
+      ],
+      "intent_preserved": true,
+      "intent_label_source": "human",
+      "domain_injection_expected": false,
+      "injected_domain_context": "",
+      "raw_ranked_ids": [
+        "noise",
+        "target"
+      ],
+      "rewritten_ranked_ids": [
+        "target",
+        "noise"
+      ],
+      "qrels": {
+        "target": 3
+      },
+      "latency_ms": 2,
+      "slices": {
+        "mode": "fixture"
+      }
+    }
+  ]
+}
