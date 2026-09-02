@@ -22,7 +22,8 @@
 4. `docs/L0_DeepEval_L1_Component_Baseline.md`：评测设计、质量门禁及历史证据。
 5. `docs/L1_Component_Evaluation_Construction_Guide.md`：当前 L1 评测施工状态、artifact 保护和后续顺序。
 6. `docs/L1_Component_Evaluation_V2_Implementation_Plan.md`：L1 v2 指标口径修正、Hybrid Retrieval 和验收施工说明书。
-7. 本文件的“当前真实状态”和“下一步计划”。
+7. `docs/Embedding_方案选型与Benchmark计划.md`：Embedding 候选、统一对照实验、成本/延迟/质量评分和落地规则。
+8. 本文件的“当前真实状态”和“下一步计划”。
 
 源码阅读顺序：
 
@@ -550,6 +551,8 @@ schema_version
 建议第一阶段门槛：Candidate Recall@20 ≥95%、Recall@5 ≥80%、Noise@5 ≤15%；达到稳定后再把发布门槛提升到更严格水平。不要直接把历史理想门槛当成当前成绩。
 
 ### P1-B：检索升级
+
+Embedding 方案选择按 `docs/Embedding_方案选型与Benchmark计划.md` 执行：先在 `embedding-benchmark` 分支固定 artifact 和运行环境，比较 deterministic、multilingual-e5-base、BGE-M3，再决定是否加入 small/large/MiniLM；所有候选使用隔离索引和同一 qrels，不能把未实测模型写成已选方案。
 
 只有 L1 v2 口径和 graded qrels 就绪后，才按以下顺序做消融：
 
