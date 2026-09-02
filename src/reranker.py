@@ -49,6 +49,9 @@ class GoldAssembledContext(BaseModel):
     evidence_turns: List[Dict[str, Any]] = Field(default_factory=list, description="不可篡改的 DuckDB 真实师生对白证据列表")
     estimated_token_count: int = Field(default=0, description="装配后的预估 Token 消耗数")
     compression_ratio: float = Field(default=0.0, description="相比全量候选的 Token 压缩率")
+    budget_violation: bool = False
+    truncation_loss: int = 0
+    token_count_source: str = "estimated"
 
 
 def compute_text_jaccard_similarity(text_a: str, text_b: str) -> float:
@@ -291,6 +294,19 @@ class PedagogicalGoldAssembler:
         char_count = len(prompt_markdown)
         word_count = len(re.findall(r"\w+", prompt_markdown))
         est_tokens = int(char_count * 0.5 + word_count * 0.5)
+        budget_violation = est_tokens > self.max_prompt_tokens
+        truncation_loss = 0
+        if budget_violation:
+            # Deterministic tokenizer-independent enforcement.  The exact
+            # model tokenizer can be supplied by the caller later; until then
+            # we conservatively cap the emitted context and expose the loss.
+            target_chars = max(1, int(self.max_prompt_tokens / max(0.5, (char_count + word_count) / max(1, char_count))))
+            target_chars = min(target_chars, self.max_prompt_tokens * 2)
+            truncation_loss = max(0, len(prompt_markdown) - target_chars)
+            prompt_markdown = prompt_markdown[:target_chars].rstrip() + "\n[Context truncated to token budget]"
+            new_chars = len(prompt_markdown)
+            new_words = len(re.findall(r"\w+", prompt_markdown))
+            est_tokens = min(self.max_prompt_tokens, int(new_chars * 0.5 + new_words * 0.5))
 
         raw_candidates_chars = sum(len(c.get("document", "")) for c in misc_candidates + strat_candidates)
         compression_ratio = round(1.0 - (char_count / max(1, raw_candidates_chars)), 2)
@@ -302,7 +318,9 @@ class PedagogicalGoldAssembler:
             selected_strategy=selected_strat,
             evidence_turns=sorted_evidence,
             estimated_token_count=est_tokens,
-            compression_ratio=max(0.0, compression_ratio)
+            compression_ratio=max(0.0, compression_ratio),
+            budget_violation=budget_violation,
+            truncation_loss=truncation_loss,
         )
 
 

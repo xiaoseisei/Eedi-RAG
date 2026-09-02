@@ -41,6 +41,25 @@ from src.storage_manager import DualEngineStorageManager, FastDeterministicEmbed
 logger = logging.getLogger(__name__)
 
 
+def rrf_ranked_ids(rankings: list[list[Dict[str, Any]]], k_constant: int) -> list[str]:
+    """Return a deterministic RRF ordering for trace/evaluation comparison."""
+    if k_constant <= 0:
+        raise ValueError("k_constant must be positive")
+    scores: Dict[str, float] = {}
+    first_seen: Dict[str, int] = {}
+    order = 0
+    for ranking in rankings:
+        for rank, candidate in enumerate(ranking, start=1):
+            chunk_id = str(candidate["chunk_id"])
+            scores[chunk_id] = scores.get(chunk_id, 0.0) + 1.0 / (k_constant + rank)
+            first_seen.setdefault(chunk_id, order)
+            order += 1
+    return [
+        chunk_id
+        for chunk_id, _ in sorted(scores.items(), key=lambda item: (-item[1], first_seen[item[0]], item[0]))
+    ]
+
+
 def compute_cosine_similarity(vec_a: List[float], vec_b: List[float]) -> float:
     """
     计算两个浮点向量之间的余弦相似度 (Cosine Similarity)，输出范围 [-1.0, 1.0]。
@@ -338,6 +357,39 @@ class DualMetricRetriever:
         strat_ranks_p1 = self.retrieve_strategies(rewritten.strategy_query, top_k=15, fetch_evidence=False)
         strat_ranks_p2 = self.retrieve_strategies(rewritten.curriculum_query, top_k=15, fetch_evidence=False)
         strat_ranks_p3 = self.retrieve_strategies(raw_query, top_k=15, fetch_evidence=False)
+
+        lane_trace = {
+            "misconception": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(misc_ranks_p1, start=1)
+            ],
+            "misconception_curriculum": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(misc_ranks_p2, start=1)
+            ],
+            "misconception_raw": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(misc_ranks_p3, start=1)
+            ],
+            "strategy": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(strat_ranks_p1, start=1)
+            ],
+            "strategy_curriculum": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(strat_ranks_p2, start=1)
+            ],
+            "strategy_raw": [
+                {"chunk_id": str(c["chunk_id"]), "rank": rank, "score": c.get("hybrid_score")}
+                for rank, c in enumerate(strat_ranks_p3, start=1)
+            ],
+        }
+        fused_trace = {
+            "misconception_rewrite_only": rrf_ranked_ids([misc_ranks_p1, misc_ranks_p2], k_constant),
+            "misconception_raw_inclusive": rrf_ranked_ids([misc_ranks_p1, misc_ranks_p2, misc_ranks_p3], k_constant),
+            "strategy_rewrite_only": rrf_ranked_ids([strat_ranks_p1, strat_ranks_p2], k_constant),
+            "strategy_raw_inclusive": rrf_ranked_ids([strat_ranks_p1, strat_ranks_p2, strat_ranks_p3], k_constant),
+        }
         
         strat_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(strat_ranks_p1, start=1):
@@ -382,6 +434,14 @@ class DualMetricRetriever:
                 "embedding_backend": self.storage.embedding_backend,
             },
             "rewritten_queries": rewritten.model_dump(),
+            "trace": {
+                "expanded_queries": rewritten.model_dump(),
+                "lanes": lane_trace,
+                "fused_rankings": fused_trace,
+                "fusion": "raw-inclusive-rrf",
+                "rrf_k": k_constant,
+                "candidate_count": len(top_misc_results) + len(top_strat_results),
+            },
             "misconceptions": top_misc_results,
             "strategies": top_strat_results,
             "total_retrieved": len(top_misc_results) + len(top_strat_results)
