@@ -23,7 +23,8 @@
 5. `docs/L1_Component_Evaluation_Construction_Guide.md`：当前 L1 评测施工状态、artifact 保护和后续顺序。
 6. `docs/L1_Component_Evaluation_V2_Implementation_Plan.md`：L1 v2 指标口径修正、Hybrid Retrieval 和验收施工说明书。
 7. `docs/Embedding_方案选型与Benchmark计划.md`：Embedding 候选、统一对照实验、成本/延迟/质量评分和落地规则。
-8. 本文件的“当前真实状态”和“下一步计划”。
+8. `docs/Embedding_选型实测报告_20260902.md`：deterministic、e5-small、e5-base 的真实 CPU 结果和选择依据。
+9. 本文件的“当前真实状态”和“下一步计划”。
 
 源码阅读顺序：
 
@@ -553,6 +554,8 @@ schema_version
 ### P1-B：检索升级
 
 Embedding 方案选择按 `docs/Embedding_方案选型与Benchmark计划.md` 执行：先在 `embedding-benchmark` 分支固定 artifact 和运行环境，比较 deterministic、multilingual-e5-base、BGE-M3，再决定是否加入 small/large/MiniLM；所有候选使用隔离索引和同一 qrels，不能把未实测模型写成已选方案。
+
+2026-09-02 已完成第一轮真实 CPU benchmark，详见 `docs/Embedding_选型实测报告_20260902.md`：deterministic、`intfloat/multilingual-e5-small`、`intfloat/multilingual-e5-base` 均有真实结果；BGE-M3 因 2.27GB 权重和当前 CPU/网络成本中止下载，保持 `UNMEASURED`。当前不直接切生产，下一步用 e5-small/e5-base 做 BM25+Dense RRF 对照，并在 GPU/高速网络环境补测 BGE-M3。
 
 只有 L1 v2 口径和 graded qrels 就绪后，才按以下顺序做消融：
 

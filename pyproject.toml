@@ -13,6 +13,11 @@ dependencies = [
     "openai>=1.0.0",
 ]
 
+[project.optional-dependencies]
+embedding-benchmark = [
+    "sentence-transformers==6.0.1",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 log_cli = true
