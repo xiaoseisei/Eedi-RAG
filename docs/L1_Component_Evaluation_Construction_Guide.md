@@ -514,6 +514,16 @@ $env:PYTHONPATH='.'
 该报告证明 metadata contract、ID parity 与 orphan 门禁在迁移副本上通过；源目录
 仍保持只读基线，是否切换生产索引需另行审批。
 
+随后在释放 `src/cli.py` 文件锁后完成受控切换。当前生产 Chroma 为
+`data/chroma`，完整 artifact hash 为
+`af6798c5c4aa815b1515bfa1da697fc0849c4fa966a8d3ada87d0a9d427ae839`；切换前的原始
+目录已保存在
+`data/chroma-backups/chroma-pre-migration-20260902-105043`，备份 hash 为
+`4a035072ab418fd72a928aa6f9cb9f8e766472ba03cf030a7fdfb6d534a0aed3`。生产路径复测
+报告为 `reports/eval/l1-storage-production-20260902-105043`，结果为
+`7 SUCCESS / 0 FAILED / 0 UNMEASURED`、`release_status=PASSED`、退出码 `0`。
+备份未删除，仍可通过反向重命名恢复。
+
 ## 10. 指标到施工方向
 
 | 观察 | 归因 | 下一项施工 |
@@ -534,7 +544,7 @@ $env:PYTHONPATH='.'
 
 - [x] 从 DuckDB 原卡片生成 metadata dry-run diff，并在隔离副本完成迁移。
 - [x] 迁移副本 Storage L1 达到 metadata contract 100%、ID parity 100%、orphan 0。
-- [ ] 审批并将迁移副本作为新的生产 artifact；切换前重新计算 artifact hash。
+- [x] 审批并将迁移副本作为新的生产 artifact；切换前重新计算 artifact hash。
 - [ ] 修复卡片引用，使每条证据拥有显式四元组。
 
 验收：Storage 三类 ID parity/metadata 均 100%，orphan=0；Grounding 四项均 100%。
