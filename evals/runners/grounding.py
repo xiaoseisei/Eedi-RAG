@@ -20,6 +20,7 @@ class GroundingThresholds:
     citation_recall: float = 1.0
     role_accuracy: float = 1.0
     quote_grounding_precision: float = 1.0
+    candidate_authorization_rate: float = 1.0
 
 
 class GroundingRunner:
@@ -39,6 +40,7 @@ class GroundingRunner:
                 required_evidence=case.required_evidence,
                 expected_speaker=case.expected_speaker,
                 quote_match_mode=case.quote_match_mode,
+                retrieved_evidence=case.retrieved_evidence,
             )
             evidence = [f"invalid_output_citation_index:{item}" for item in audit.invalid_citation_indexes]
             for metric_name, value, threshold in (
@@ -49,6 +51,11 @@ class GroundingRunner:
                     "quote_grounding_precision",
                     audit.quote_grounding_precision,
                     self.thresholds.quote_grounding_precision,
+                ),
+                (
+                    "candidate_authorization_rate",
+                    audit.candidate_authorization_rate,
+                    self.thresholds.candidate_authorization_rate,
                 ),
             ):
                 if value is None:
@@ -61,7 +68,11 @@ class GroundingRunner:
                             threshold=threshold,
                             operator=ComparisonOperator.GTE,
                             hard_gate=True,
-                            reason="output citation list is empty; metric denominator is zero",
+                            reason=(
+                                "output citation list is empty; metric denominator is zero"
+                                if metric_name != "candidate_authorization_rate"
+                                else "retrieved candidate evidence was not supplied"
+                            ),
                             slices=case.slices,
                         )
                     )
@@ -87,6 +98,7 @@ class GroundingRunner:
             ("citation_recall", self.thresholds.citation_recall),
             ("role_accuracy", self.thresholds.role_accuracy),
             ("quote_grounding_precision", self.thresholds.quote_grounding_precision),
+            ("candidate_authorization_rate", self.thresholds.candidate_authorization_rate),
         ):
             observations.append(
                 aggregate_case_observations(
@@ -101,4 +113,3 @@ class GroundingRunner:
                 )
             )
         return observations
-

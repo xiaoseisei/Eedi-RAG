@@ -164,7 +164,11 @@ def test_assembler_runner_measures_retention_precision_budget_and_compression(co
 
     observations = AssemblerRunner().run(context, [case])
 
-    assert _observation(observations, "candidate_recall_retention").value == 1.0
+    # Two positive candidates arrived (direct + supporting); only one was
+    # retained, so retention is 1/2 rather than a boolean hit flag.
+    assert _observation(observations, "candidate_recall_retention").value == 0.5
+    assert _observation(observations, "retriever_miss_rate").value == 0.0
+    assert _observation(observations, "assembler_drop_rate").value == 0.5
     assert _observation(observations, "final_evidence_recall").value == 1.0
     assert _observation(observations, "selection_precision").value == 1.0
     assert _observation(observations, "noise_ratio").value == 0.0

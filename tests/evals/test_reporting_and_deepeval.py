@@ -46,11 +46,15 @@ def test_report_is_blocked_by_failed_hard_gate_and_writes_auditable_files(tmp_pa
     assert (run_dir / "run.json").exists()
     assert (run_dir / "observations.jsonl").exists()
     assert (run_dir / "failures.jsonl").exists()
+    assert (run_dir / "summary.md").exists()
 
     manifest = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
     failure = json.loads((run_dir / "failures.jsonl").read_text(encoding="utf-8"))
     assert manifest["release_status"] == "BLOCKED"
     assert failure["metric_name"] == "metadata_contract_rate"
+    summary = (run_dir / "summary.md").read_text(encoding="utf-8")
+    assert "Release status: **BLOCKED**" in summary
+    assert "metadata_contract_rate" in summary
 
 
 def test_deepeval_probe_marks_missing_dependency_unmeasured_without_fake_score() -> None:
@@ -87,4 +91,3 @@ def test_deepeval_payload_uses_only_final_context_seen_by_generator() -> None:
         "expected_output": "The student confused one and two decimal places.",
         "retrieval_context": ["final assembled context"],
     }
-

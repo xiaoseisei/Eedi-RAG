@@ -17,6 +17,10 @@ from evals.runners.common import aggregate_case_observations
 @dataclass(frozen=True)
 class AssemblerThresholds:
     candidate_recall_retention: float = 0.98
+    # Diagnostic-only rates; thresholds are informational and do not block
+    # release until qrels and slot semantics are formally calibrated.
+    retriever_miss_rate: float = 1.0
+    assembler_drop_rate: float = 1.0
     final_evidence_recall: float = 0.95
     selection_precision: float = 0.95
     noise_ratio: float = 0.05
@@ -43,6 +47,8 @@ class AssemblerRunner:
         observations = list(case_observations)
         aggregate_specs = (
             ("candidate_recall_retention", ComparisonOperator.GTE, True, None),
+            ("retriever_miss_rate", ComparisonOperator.LTE, False, None),
+            ("assembler_drop_rate", ComparisonOperator.LTE, False, None),
             ("final_evidence_recall", ComparisonOperator.GTE, True, None),
             ("selection_precision", ComparisonOperator.GTE, True, None),
             ("noise_ratio", ComparisonOperator.LTE, True, None),
@@ -75,6 +81,99 @@ class AssemblerRunner:
         input_positive = positive.intersection(case.input_ranked_ids)
         final_positive = positive.intersection(case.final_context_ids)
 
+        # Keep upstream retrieval misses separate from assembler drops.  A
+        # missing positive candidate is measured as a retriever miss; drop
+        # rate is only defined when at least one positive candidate arrived.
+        observations.append(observation_from_measurement(
+            context=context,
+            case_id=case.case_id,
+            stage=self.stage,
+            metric_name="retriever_miss_rate",
+            value=float(not input_positive),
+            threshold=1.0,
+            operator=ComparisonOperator.LTE,
+            hard_gate=False,
+            slices=case.slices,
+        ))
+        if input_positive:
+            retention = len(final_positive.intersection(input_positive)) / len(input_positive)
+            observations.append(observation_from_measurement(
+                context=context,
+                case_id=case.case_id,
+                stage=self.stage,
+                metric_name="assembler_drop_rate",
+                value=1.0 - retention,
+                threshold=1.0,
+                operator=ComparisonOperator.LTE,
+                hard_gate=False,
+                slices=case.slices,
+            ))
+        else:
+            observations.append(unmeasured_observation(
+                context=context,
+                case_id=case.case_id,
+                stage=self.stage,
+                metric_name="assembler_drop_rate",
+                threshold=1.0,
+                operator=ComparisonOperator.LTE,
+                hard_gate=False,
+                reason="retriever supplied no positive candidate; assembler drop is undefined",
+                slices=case.slices,
+            ))
+
+        # v2 evaluates each semantic slot independently.  This prevents a
+        # strategy card from masking a missing misconception card (and vice
+        # versa) when the assembler emits multiple fixed slots.
+        for slot in ("misconception", "strategy", "fallback_window"):
+            slot_positive = {
+                doc_id for doc_id, relevance in case.qrels.items()
+                if relevance > 0 and case.slot_by_id.get(doc_id) == slot
+            }
+            slot_final = {
+                doc_id for doc_id in case.final_context_ids
+                if case.slot_by_id.get(doc_id) == slot
+            }
+            if not slot_positive:
+                for metric_name in (f"{slot}_slot_precision", f"{slot}_slot_recall"):
+                    observations.append(unmeasured_observation(
+                        context=context,
+                        case_id=case.case_id,
+                        stage=self.stage,
+                        metric_name=metric_name,
+                        threshold=1.0,
+                        operator=ComparisonOperator.GTE,
+                        hard_gate=True,
+                        reason=f"no positive qrels for {slot} slot",
+                        slices=case.slices,
+                    ))
+                continue
+            precision = len(slot_final.intersection(slot_positive)) / len(slot_final) if slot_final else 0.0
+            recall = len(slot_final.intersection(slot_positive)) / len(slot_positive)
+            observations.extend([
+                observation_from_measurement(
+                    context=context,
+                    case_id=case.case_id,
+                    stage=self.stage,
+                    metric_name=f"{slot}_slot_precision",
+                    value=precision,
+                    threshold=1.0,
+                    operator=ComparisonOperator.GTE,
+                    hard_gate=True,
+                    slices=case.slices,
+                ),
+                observation_from_measurement(
+                    context=context,
+                    case_id=case.case_id,
+                    stage=self.stage,
+                    metric_name=f"{slot}_slot_recall",
+                    value=recall,
+                    threshold=1.0,
+                    operator=ComparisonOperator.GTE,
+                    hard_gate=True,
+                    slices=case.slices,
+                ),
+            ])
+
         if not input_positive:
             observations.append(
                 unmeasured_observation(
@@ -96,7 +195,7 @@ class AssemblerRunner:
                     case_id=case.case_id,
                     stage=self.stage,
                     metric_name="candidate_recall_retention",
-                    value=float(bool(final_positive)),
+                    value=len(final_positive.intersection(input_positive)) / len(input_positive),
                     threshold=1.0,
                     operator=ComparisonOperator.GTE,
                     hard_gate=True,
@@ -226,4 +325,3 @@ class AssemblerRunner:
                 )
             )
         return observations
-

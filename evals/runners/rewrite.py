@@ -6,6 +6,7 @@ from evals.contracts import (
     ComparisonOperator,
     MetricObservation,
     RewriteEvalCase,
+    FusionEvalCase,
     RunContext,
     observation_from_measurement,
     unmeasured_observation,
@@ -35,23 +36,89 @@ class RewriteRunner:
     def __init__(self, thresholds: RewriteThresholds | None = None) -> None:
         self.thresholds = thresholds or RewriteThresholds()
 
-    def run(self, context: RunContext, cases: list[RewriteEvalCase]) -> list[MetricObservation]:
+    def run(self, context: RunContext, cases: list[RewriteEvalCase | FusionEvalCase]) -> list[MetricObservation]:
         if not cases:
             raise ValueError("rewrite runner requires at least one case")
         case_observations: list[MetricObservation] = []
         for case in cases:
-            case_observations.extend(self._evaluate_case(context, case))
+            if isinstance(case, FusionEvalCase):
+                case_observations.extend(self._evaluate_fusion_case(context, case))
+            else:
+                case_observations.extend(self._evaluate_case(context, case))
 
         observations = list(case_observations)
-        observations.extend(self._aggregate(context, case_observations, scope="aggregate", slices=None))
-        slice_groups: dict[tuple[str, str], set[str]] = {}
-        for case in cases:
-            for key, value in case.slices.items():
-                slice_groups.setdefault((key, value), set()).add(case.case_id)
-        for (key, value), case_ids in sorted(slice_groups.items()):
-            selected = [item for item in case_observations if item.case_id in case_ids]
-            observations.extend(self._aggregate(context, selected, scope="slice", slices={key: value}))
+        if any(isinstance(case, RewriteEvalCase) for case in cases):
+            observations.extend(self._aggregate(context, case_observations, scope="aggregate", slices=None))
+        if any(isinstance(case, FusionEvalCase) for case in cases):
+            observations.extend(self._aggregate_fusion(context, case_observations))
+        if any(isinstance(case, RewriteEvalCase) for case in cases):
+            slice_groups: dict[tuple[str, str], set[str]] = {}
+            for case in cases:
+                if isinstance(case, RewriteEvalCase):
+                    for key, value in case.slices.items():
+                        slice_groups.setdefault((key, value), set()).add(case.case_id)
+            for (key, value), case_ids in sorted(slice_groups.items()):
+                selected = [item for item in case_observations if item.case_id in case_ids]
+                observations.extend(self._aggregate(context, selected, scope="slice", slices={key: value}))
         return observations
+
+    def _aggregate_fusion(self, context: RunContext, case_observations: list[MetricObservation]) -> list[MetricObservation]:
+        result = []
+        for metric_name in (
+            "raw_rrf_mrr",
+            "rewrite_only_rrf_mrr",
+            "raw_inclusive_rrf_mrr",
+            "rewrite_only_rrf_mrr_lift",
+            "raw_inclusive_rrf_mrr_lift",
+            "raw_inclusive_rrf_recall_at_5_lift",
+        ):
+            matching = [item for item in case_observations if item.metric_name == metric_name]
+            if not matching:
+                continue
+            result.append(aggregate_case_observations(
+                context=context,
+                case_observations=matching,
+                source_metric_name=metric_name,
+                aggregate_metric_name=None,
+                stage="fusion",
+                threshold=0.0,
+                operator=ComparisonOperator.GTE,
+                hard_gate=metric_name.startswith("raw_inclusive"),
+            ))
+        return result
+
+    def _evaluate_fusion_case(self, context: RunContext, case: FusionEvalCase) -> list[MetricObservation]:
+        raw = case.lane_ranked_ids["raw"]
+        raw_mrr = mean_reciprocal_rank(raw, case.qrels)
+        rewrite_mrr = mean_reciprocal_rank(case.rewrite_only_ranked_ids, case.qrels)
+        inclusive_mrr = mean_reciprocal_rank(case.raw_inclusive_ranked_ids, case.qrels)
+        raw_recall = recall_at_k(raw, case.qrels, 5)
+        inclusive_recall = recall_at_k(case.raw_inclusive_ranked_ids, case.qrels, 5)
+        values = {
+            "raw_rrf_mrr": raw_mrr,
+            "rewrite_only_rrf_mrr": rewrite_mrr,
+            "raw_inclusive_rrf_mrr": inclusive_mrr,
+            "rewrite_only_rrf_mrr_lift": rewrite_mrr - raw_mrr,
+            "raw_inclusive_rrf_mrr_lift": inclusive_mrr - raw_mrr,
+            "raw_inclusive_rrf_recall_at_5_lift": inclusive_recall - raw_recall,
+            "latency_ms": case.latency_ms,
+        }
+        result: list[MetricObservation] = []
+        for metric_name, value in values.items():
+            threshold = self.thresholds.latency_p95_ms if metric_name == "latency_ms" else 0.0
+            operator = ComparisonOperator.LTE if metric_name == "latency_ms" else ComparisonOperator.GTE
+            result.append(observation_from_measurement(
+                context=context,
+                case_id=case.case_id,
+                stage="fusion",
+                metric_name=metric_name,
+                value=value,
+                threshold=threshold,
+                operator=operator,
+                hard_gate=False,
+                slices={**case.slices, "intent": case.intent},
+            ))
+        return result
 
     def _evaluate_case(self, context: RunContext, case: RewriteEvalCase) -> list[MetricObservation]:
         observations: list[MetricObservation] = []
@@ -214,4 +281,3 @@ def _coverage(expected: set[str], rewritten_casefold: str) -> float | None:
         return None
     hits = sum(item.casefold() in rewritten_casefold for item in expected)
     return hits / len(expected)
-

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 from evals.contracts import EvidenceRef, normalize_whitespace
@@ -16,6 +16,8 @@ class GroundingAudit:
     required_evidence_count: int
     covered_required_count: int
     invalid_citation_indexes: list[int]
+    candidate_authorization_rate: float | None = None
+    unauthorized_citation_indexes: list[int] = field(default_factory=list)
 
 
 def _quote_matches(candidate: str, source: str, mode: Literal["exact", "substring"]) -> bool:
@@ -32,6 +34,7 @@ def audit_grounding(
     required_evidence: list[EvidenceRef],
     expected_speaker: Literal["student", "tutor"] | None = None,
     quote_match_mode: Literal["exact", "substring"] = "substring",
+    retrieved_evidence: list[EvidenceRef] | None = None,
 ) -> GroundingAudit:
     if not authoritative_turns:
         raise ValueError("authoritative_turns must not be empty")
@@ -48,15 +51,30 @@ def audit_grounding(
     quote_hits = 0
     valid_indexes: set[int] = set()
     invalid_indexes: list[int] = []
+    unauthorized_indexes: list[int] = []
+    retrieved_keys = None
+    if retrieved_evidence is not None:
+        retrieved_keys = {
+            (item.session_id, item.turn_id, item.speaker, normalize_whitespace(item.quote_text))
+            for item in retrieved_evidence
+        }
     for index, citation in enumerate(output_citations):
         source = by_turn.get(citation.turn_key)
         role_matches = bool(source and citation.speaker == source.speaker)
         if expected_speaker is not None:
             role_matches = role_matches and citation.speaker == expected_speaker
         quote_matches = bool(source and _quote_matches(citation.quote_text, source.quote_text, quote_match_mode))
+        authorized = retrieved_keys is None or any(
+            citation.turn_key == item.turn_key
+            and citation.speaker == item.speaker
+            and _quote_matches(citation.quote_text, item.quote_text, quote_match_mode)
+            for item in (retrieved_evidence or [])
+        )
+        if not authorized:
+            unauthorized_indexes.append(index)
         role_hits += int(role_matches)
         quote_hits += int(quote_matches)
-        if role_matches and quote_matches:
+        if role_matches and quote_matches and authorized:
             valid_indexes.add(index)
         else:
             invalid_indexes.append(index)
@@ -81,5 +99,10 @@ def audit_grounding(
         required_evidence_count=len(required_evidence),
         covered_required_count=covered_required,
         invalid_citation_indexes=invalid_indexes,
+        candidate_authorization_rate=(
+            (output_count - len(unauthorized_indexes)) / output_count
+            if retrieved_evidence is not None and output_count
+            else None
+        ),
+        unauthorized_citation_indexes=unauthorized_indexes,
     )
-

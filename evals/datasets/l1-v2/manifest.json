@@ -1,0 +1,52 @@
+{
+  "schema_version": "l1-component-suite/v2",
+  "dataset_version": "golden30-v2",
+  "qrels_version": "golden-verbatim-v2-derived-document-v1",
+  "generated_at": "2026-09-02T09:42:18.705170Z",
+  "source_files": {
+    "data\\golden_test_set.json": "035e4fbb35ad00b75661a792688f8b16821b3d4014c13a9a1839d1ce4555f6b9",
+    "data\\cleaned_sessions.jsonl": "71bfc9c1e3b63144d618335f057f2667a328b04c6ddcadbda63c706beaa24903"
+  },
+  "source_session_count": 1576,
+  "indexed_session_count": 100,
+  "golden_case_count": 30,
+  "message_count": 37186,
+  "component_case_counts": {
+    "grounding": 30,
+    "chunk_structure": 100,
+    "chunking": 30,
+    "rewrite": 30,
+    "fusion": 30,
+    "assembler": 30
+  },
+  "input_artifact_hashes": {
+    "duckdb_sha256": "09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad",
+    "chroma_sha256": "b1e5ac252179a80daaa96f3536eff980efd2b0ea7a5afa453b280342c100ffea",
+    "combined_sha256": "711f1ed14e8f7014a2a57421665c08037fd8189c80bf922217209b7789718fa4"
+  },
+  "artifact_hashes": {
+    "duckdb_sha256": "09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad",
+    "chroma_sha256": "e75501b89ac872d0905363e3ea59ff15a54d36ec5265700722d3b2c24d7461ca",
+    "combined_sha256": "911eab1ee8d2af67dbbe28de4e23312adcc371ccdff06fd5c5e4c30c14b46cc0"
+  },
+  "artifact_mutated_during_build": true,
+  "system_config_hash": "7b14b9e1dfd8222b4883ad0c6efd8b42902f2fd4aefc32e39b017c38b896e089",
+  "embedding": {
+    "backend": "deterministic",
+    "model": "FastDeterministicEmbeddingFunction",
+    "version": "128d-v1"
+  },
+  "retrieval_config": {
+    "query_rewrite_mode": "deterministic_rules",
+    "mmr_lambda": 0.7,
+    "retrieval_backend": "dense-only-chroma"
+  },
+  "grounding_output_policy": "explicit-deterministic-system-trace",
+  "qrels_provenance": {
+    "document_labels": "derived_from_human_quote",
+    "multi_relevance_annotated": false,
+    "quote_evidence_rows": 85,
+    "unique_query_document_pairs": 30,
+    "limitation": "document relevance is derived from human quote/session evidence; independent multi-document human judgments are not present"
+  }
+}

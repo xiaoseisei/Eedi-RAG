@@ -1,0 +1,1318 @@
+{
+  "schema_version": "l1-component-suite/v2",
+  "context": {
+    "run_id": "golden30-chunk_structure",
+    "dataset_version": "golden30-v2",
+    "qrels_version": "golden-verbatim-v2-derived-document-v1",
+    "system_config_hash": "1cc5f69d288524f0d1e0674fb461b2a7e20188808d5e829949011a1ac97b20da",
+    "system_config": {
+      "source": "golden_test_set.json",
+      "case_count": 100,
+      "embedding_backend": "deterministic",
+      "query_rewrite_mode": "deterministic_rules",
+      "mmr_lambda": 0.7
+    }
+  },
+  "chunk_structural_cases": [
+    {
+      "case_id": "session-10-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.92987012987013,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-14-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.8987341772151898,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-23-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.725663716814159,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-29-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.286516853932584,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-33-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.736220472440945,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-42-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.596273291925466,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-59-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.659217877094972,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-69-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.346303501945525,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-77-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.318840579710145,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-80-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.46875,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-85-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.3927893738140416,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-97-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.5086206896551726,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-99-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.00990099009901,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-100-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.6184210526315788,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-109-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.844827586206897,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-115-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.796992481203008,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-118-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.933333333333333,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-122-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.2814814814814817,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-143-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.0120481927710845,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-147-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.4728033472803346,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-154-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.967741935483871,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-159-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.184027777777778,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-162-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.3706896551724137,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-179-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.390243902439025,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-188-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 6.351111111111111,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-201-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.3515625,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-206-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.362559241706161,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-214-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.625514403292181,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-247-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.101010101010101,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-255-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.415584415584416,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-258-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.7106227106227108,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-275-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.3059360730593608,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-276-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.163346613545817,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-278-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.4386617100371746,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-282-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.1894484412470026,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-286-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.353070175438597,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-287-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.9684044233807265,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-288-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.228187919463087,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-308-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.785009861932939,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-421-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.872413793103448,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-423-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.136986301369863,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-431-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.948453608247423,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-436-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.965936739659367,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-443-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.5382830626450117,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-463-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.559055118110236,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-464-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.1666666666666665,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-469-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.556603773584905,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-477-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.474541751527495,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-478-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.16256157635468,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-492-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.595628415300546,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-495-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.252918287937743,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-497-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.947089947089947,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-509-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.35978835978836,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-539-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.072649572649573,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-555-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.97,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-568-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.4075471698113207,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-573-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.0764331210191083,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-576-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.5945205479452054,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-603-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.603286384976526,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-607-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.364485981308412,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-617-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.173728813559322,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-637-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.9562841530054644,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-657-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.903114186851211,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-658-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.422360248447205,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-663-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.251552795031056,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-664-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.4897196261682244,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-668-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.258064516129032,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-671-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.878787878787879,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-672-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.946236559139785,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-681-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.578645235361653,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-684-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.473821989528796,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-686-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.519774011299435,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-689-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.693548387096774,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-691-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.7218543046357615,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-699-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.152492668621701,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-706-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.1063291139240508,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-707-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.619217081850534,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-716-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.072368421052632,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-720-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.5232558139534884,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-721-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.7567567567567566,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-730-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.0104166666666665,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-735-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.16358024691358,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-737-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.878172588832487,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-739-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.9347826086956523,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-741-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.131868131868132,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-754-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.8947368421052633,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-776-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.6790697674418604,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-798-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.159509202453988,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-819-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.6923076923076925,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-859-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.038759689922481,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-866-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 2.6515151515151514,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-870-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.185022026431718,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-872-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.055276381909548,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-903-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.8367729831144466,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-973-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.35754189944134,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-976-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 5.183098591549296,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-1009-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.66839378238342,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-1011-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.364864864864865,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-1021-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 3.6184210526315788,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    },
+    {
+      "case_id": "session-1023-chunk-structure",
+      "pointer_validity": 1.0,
+      "verbatim_integrity": 1.0,
+      "turn_coverage": 1.0,
+      "boundary_integrity": 1.0,
+      "inflation_ratio": 4.456,
+      "orphan_count": 0,
+      "out_of_bounds_turn_count": 0,
+      "slices": {
+        "strategy": "sliding-window-production"
+      }
+    }
+  ]
+}

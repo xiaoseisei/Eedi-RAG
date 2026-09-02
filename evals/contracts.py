@@ -251,6 +251,10 @@ class GroundingEvalCase(StrictContract):
     required_evidence: list[EvidenceRef] = Field(min_length=1)
     expected_speaker: Literal["student", "tutor"] | None = None
     quote_match_mode: Literal["exact", "substring"] = "substring"
+    # Optional for v1 fixtures; required by the v2 grounding adapter.  When
+    # present, citations are authorized only if their full fact appears here.
+    retrieved_evidence: list[EvidenceRef] | None = None
+    execution_error: str | None = None
     slices: dict[str, str] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -289,6 +293,11 @@ class ChunkingEvalCase(StrictContract):
     original_token_count: int = Field(gt=0)
     emitted_chunk_token_count: int = Field(ge=0)
     latency_ms: float = Field(ge=0.0)
+    # Retrieval ranking cases do not measure chunk-generation inflation; the
+    # denominator is a different object (a retrieved candidate set).  Keep the
+    # field explicit so an inapplicable value becomes UNMEASURED rather than a
+    # fabricated ratio.
+    inflation_applicable: bool = True
     slices: dict[str, str] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -304,6 +313,20 @@ class ChunkingEvalCase(StrictContract):
         if sum(item.token_count for item in self.ranked_chunks) > self.emitted_chunk_token_count:
             raise ValueError("ranked chunk tokens cannot exceed total emitted chunk tokens")
         return self
+
+
+class ChunkStructuralEvalCase(StrictContract):
+    """Non-ranking structural audit of windows emitted by the production chunker."""
+
+    case_id: str = Field(min_length=1)
+    pointer_validity: float = Field(ge=0.0, le=1.0)
+    verbatim_integrity: float = Field(ge=0.0, le=1.0)
+    turn_coverage: float = Field(ge=0.0, le=1.0)
+    boundary_integrity: float = Field(ge=0.0, le=1.0)
+    inflation_ratio: float = Field(ge=0.0)
+    orphan_count: int = Field(ge=0)
+    out_of_bounds_turn_count: int = Field(ge=0)
+    slices: dict[str, str] = Field(default_factory=dict)
 
 
 class RewriteEvalCase(StrictContract):
@@ -341,6 +364,36 @@ class RewriteEvalCase(StrictContract):
             ("raw_ranked_ids", self.raw_ranked_ids),
             ("rewritten_ranked_ids", self.rewritten_ranked_ids),
         ):
+            if len(ranking) != len(set(ranking)):
+                raise ValueError(f"{field_name} contains duplicate document IDs")
+        _validate_qrels(self.qrels)
+        return self
+
+
+class FusionEvalCase(StrictContract):
+    """Paired multi-lane retrieval evidence for the v2 rewrite/fusion suite."""
+
+    case_id: str = Field(min_length=1)
+    raw_query: str = Field(min_length=1)
+    intent: Literal["STUDENT_INSIGHT", "TUTOR_INTERVENTION", "CONTENT_IMPROVEMENT", "UNKNOWN"]
+    lane_ranked_ids: dict[str, list[str]]
+    rewrite_only_ranked_ids: list[str]
+    raw_inclusive_ranked_ids: list[str]
+    qrels: dict[str, int]
+    latency_ms: float = Field(ge=0.0)
+    slices: dict[str, str] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def fusion_case_is_consistent(self) -> "FusionEvalCase":
+        if not self.raw_query.strip():
+            raise ValueError("raw_query must not be blank")
+        if not self.lane_ranked_ids or "raw" not in self.lane_ranked_ids:
+            raise ValueError("lane_ranked_ids must include the raw lane")
+        for lane, ranking in self.lane_ranked_ids.items():
+            if len(ranking) != len(set(ranking)):
+                raise ValueError(f"lane {lane} contains duplicate document IDs")
+        for field_name in ("rewrite_only_ranked_ids", "raw_inclusive_ranked_ids"):
+            ranking = getattr(self, field_name)
             if len(ranking) != len(set(ranking)):
                 raise ValueError(f"{field_name} contains duplicate document IDs")
         _validate_qrels(self.qrels)
@@ -419,6 +472,10 @@ class AssemblerEvalCase(StrictContract):
     final_context_ids: list[str]
     qrels: dict[str, int]
     required_evidence_ids: set[str] = Field(min_length=1)
+    slot_by_id: dict[str, Literal["misconception", "strategy", "fallback_window"]] = Field(default_factory=dict)
+    final_evidence_turns: list[EvidenceRef] = Field(default_factory=list)
+    actual_prompt_context: str = ""
+    trace: dict[str, Any] = Field(default_factory=dict)
     candidate_char_count: int = Field(ge=0)
     assembled_char_count: int = Field(ge=0)
     estimated_tokens: int = Field(ge=0)
@@ -442,6 +499,8 @@ class AssemblerEvalCase(StrictContract):
             raise ValueError("required evidence must have positive relevance")
         if self.candidate_char_count == 0 and self.assembled_char_count > 0:
             raise ValueError("assembled characters cannot exist without candidate characters")
+        if self.slot_by_id and set(self.slot_by_id) - (set(self.input_ranked_ids) | set(self.qrels)):
+            raise ValueError("slot_by_id keys must be input candidates or labeled qrels")
         return self
 
 
@@ -566,12 +625,14 @@ class L1ComponentReport(StrictContract):
 
 
 class L1ComponentSuiteSpec(StrictContract):
-    schema_version: Literal["l1-component-suite/v1"] = "l1-component-suite/v1"
+    schema_version: Literal["l1-component-suite/v1", "l1-component-suite/v2"] = "l1-component-suite/v1"
     context: RunContext
     storage: StorageEvalSnapshot | None = None
     grounding_cases: list[GroundingEvalCase] = Field(default_factory=list)
     chunking_cases: list[ChunkingEvalCase] = Field(default_factory=list)
+    chunk_structural_cases: list[ChunkStructuralEvalCase] = Field(default_factory=list)
     rewrite_cases: list[RewriteEvalCase] = Field(default_factory=list)
+    fusion_cases: list[FusionEvalCase] = Field(default_factory=list)
     retrieval_cases: list[RetrievalEvalCase] = Field(default_factory=list)
     assembler_cases: list[AssemblerEvalCase] = Field(default_factory=list)
 
@@ -582,7 +643,9 @@ class L1ComponentSuiteSpec(StrictContract):
                 self.storage,
                 self.grounding_cases,
                 self.chunking_cases,
+                self.chunk_structural_cases,
                 self.rewrite_cases,
+                self.fusion_cases,
                 self.retrieval_cases,
                 self.assembler_cases,
             )

@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from evals.contracts import L1ComponentReport, L1ComponentSuiteSpec
 from evals.runners.assembler import AssemblerRunner
 from evals.runners.chunking import ChunkingRunner
+from evals.runners.chunk_structure import ChunkStructureRunner
 from evals.runners.grounding import GroundingRunner
 from evals.runners.retrieval import RetrievalRunner
 from evals.runners.rewrite import RewriteRunner
@@ -24,9 +25,15 @@ def run_component_suite(spec: L1ComponentSuiteSpec) -> L1ComponentReport:
     if spec.chunking_cases:
         observations.extend(ChunkingRunner().run(spec.context, spec.chunking_cases))
         executed_modules.append("chunking")
+    if spec.chunk_structural_cases:
+        observations.extend(ChunkStructureRunner().run(spec.context, spec.chunk_structural_cases))
+        executed_modules.append("chunk_structure")
     if spec.rewrite_cases:
         observations.extend(RewriteRunner().run(spec.context, spec.rewrite_cases))
         executed_modules.append("rewrite")
+    if spec.fusion_cases:
+        observations.extend(RewriteRunner().run(spec.context, spec.fusion_cases))
+        executed_modules.append("fusion")
     if spec.retrieval_cases:
         observations.extend(RetrievalRunner().run(spec.context, spec.retrieval_cases))
         executed_modules.append("retrieval")

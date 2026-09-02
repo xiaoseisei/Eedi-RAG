@@ -30,6 +30,21 @@ class ChunkingRunner:
         case_observations: list[MetricObservation] = []
         for case in cases:
             for metric_name, value in self._case_values(case).items():
+                if metric_name == "inflation_ratio" and not case.inflation_applicable:
+                    from evals.contracts import unmeasured_observation
+
+                    case_observations.append(unmeasured_observation(
+                        context=context,
+                        case_id=case.case_id,
+                        stage=self.stage,
+                        metric_name=metric_name,
+                        threshold=self.thresholds.inflation_ratio,
+                        operator=ComparisonOperator.LTE,
+                        hard_gate=False,
+                        reason="retrieval candidate expansion is not chunk-generation inflation",
+                        slices=case.slices,
+                    ))
+                    continue
                 threshold, operator, hard_gate = self._gate(metric_name, per_case=True)
                 case_observations.append(
                     observation_from_measurement(
@@ -140,4 +155,3 @@ class ChunkingRunner:
                 )
             )
         return result
-
