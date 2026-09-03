@@ -1,0 +1,1038 @@
+{
+  "schema_version": "l1-component-suite/v1",
+  "context": {
+    "run_id": "golden30-assembler-v1",
+    "dataset_version": "golden30-v1",
+    "qrels_version": "golden-verbatim-v1",
+    "system_config_hash": "075f641064f52d494e0b604a0125b4f879dbf9c24db226530a1d893908298f64",
+    "system_config": {
+      "source": "golden_test_set.json",
+      "case_count": 30,
+      "embedding_backend": "deterministic",
+      "query_rewrite_mode": "deterministic_rules",
+      "mmr_lambda": 0.7
+    }
+  },
+  "assembler_cases": [
+    {
+      "case_id": "golden-01-assembler",
+      "input_ranked_ids": [
+        "session_10_misconception",
+        "session_206_misconception",
+        "session_214_misconception",
+        "session_664_misconception",
+        "session_735_misconception",
+        "session_10_tutor_strategy",
+        "session_206_tutor_strategy",
+        "session_154_tutor_strategy",
+        "session_603_tutor_strategy",
+        "session_1011_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_10_misconception",
+        "session_206_tutor_strategy"
+      ],
+      "qrels": {
+        "session_10_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_10_misconception"
+      ],
+      "candidate_char_count": 6713,
+      "assembled_char_count": 1411,
+      "estimated_tokens": 352,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 100.102,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-02-assembler",
+      "input_ranked_ids": [
+        "session_258_misconception",
+        "session_69_misconception",
+        "session_59_misconception",
+        "session_716_misconception",
+        "session_741_misconception",
+        "session_735_tutor_strategy",
+        "session_1023_tutor_strategy",
+        "session_741_tutor_strategy",
+        "session_162_tutor_strategy",
+        "session_59_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_258_misconception",
+        "session_735_tutor_strategy"
+      ],
+      "qrels": {
+        "session_23_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_23_tutor_strategy"
+      ],
+      "candidate_char_count": 6431,
+      "assembled_char_count": 1284,
+      "estimated_tokens": 321,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 108.182,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-03-assembler",
+      "input_ranked_ids": [
+        "session_33_misconception",
+        "session_735_misconception",
+        "session_568_misconception",
+        "session_206_misconception",
+        "session_214_misconception",
+        "session_33_tutor_strategy",
+        "session_735_tutor_strategy",
+        "session_603_tutor_strategy",
+        "session_154_tutor_strategy",
+        "session_739_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_33_misconception",
+        "session_154_tutor_strategy"
+      ],
+      "qrels": {
+        "session_33_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_33_tutor_strategy"
+      ],
+      "candidate_char_count": 6245,
+      "assembled_char_count": 1118,
+      "estimated_tokens": 279,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 80.358,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-04-assembler",
+      "input_ranked_ids": [
+        "session_1009_misconception",
+        "session_423_misconception",
+        "session_691_misconception",
+        "session_14_misconception",
+        "session_463_misconception",
+        "session_14_tutor_strategy",
+        "session_423_tutor_strategy",
+        "session_1023_tutor_strategy",
+        "session_436_tutor_strategy",
+        "session_201_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_1009_misconception",
+        "session_201_tutor_strategy"
+      ],
+      "qrels": {
+        "session_14_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_14_misconception"
+      ],
+      "candidate_char_count": 5654,
+      "assembled_char_count": 1321,
+      "estimated_tokens": 330,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 79.071,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-05-assembler",
+      "input_ranked_ids": [
+        "session_287_misconception",
+        "session_115_misconception",
+        "session_568_misconception",
+        "session_872_misconception",
+        "session_691_misconception",
+        "session_287_tutor_strategy",
+        "session_607_tutor_strategy",
+        "session_308_tutor_strategy",
+        "session_872_tutor_strategy",
+        "session_282_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_287_misconception",
+        "session_607_tutor_strategy"
+      ],
+      "qrels": {
+        "session_287_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_287_misconception"
+      ],
+      "candidate_char_count": 6482,
+      "assembled_char_count": 1228,
+      "estimated_tokens": 307,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 82.729,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-06-assembler",
+      "input_ranked_ids": [
+        "session_568_misconception",
+        "session_872_misconception",
+        "session_691_misconception",
+        "session_657_misconception",
+        "session_776_misconception",
+        "session_308_tutor_strategy",
+        "session_657_tutor_strategy",
+        "session_681_tutor_strategy",
+        "session_477_tutor_strategy",
+        "session_872_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_568_misconception",
+        "session_308_tutor_strategy"
+      ],
+      "qrels": {
+        "session_477_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_477_misconception"
+      ],
+      "candidate_char_count": 6591,
+      "assembled_char_count": 1499,
+      "estimated_tokens": 374,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 94.979,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-07-assembler",
+      "input_ranked_ids": [
+        "session_69_misconception",
+        "session_657_misconception",
+        "session_10_misconception",
+        "session_568_misconception",
+        "session_691_misconception",
+        "session_69_tutor_strategy",
+        "session_469_tutor_strategy",
+        "session_657_tutor_strategy",
+        "session_287_tutor_strategy",
+        "session_159_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_69_misconception",
+        "session_469_tutor_strategy"
+      ],
+      "qrels": {
+        "session_637_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_637_tutor_strategy"
+      ],
+      "candidate_char_count": 7416,
+      "assembled_char_count": 1473,
+      "estimated_tokens": 368,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 93.914,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-08-assembler",
+      "input_ranked_ids": [
+        "session_872_misconception",
+        "session_69_misconception",
+        "session_730_misconception",
+        "session_568_misconception",
+        "session_681_misconception",
+        "session_69_tutor_strategy",
+        "session_159_tutor_strategy",
+        "session_681_tutor_strategy",
+        "session_720_tutor_strategy",
+        "session_469_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_69_misconception",
+        "session_159_tutor_strategy"
+      ],
+      "qrels": {
+        "session_69_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_69_misconception"
+      ],
+      "candidate_char_count": 7137,
+      "assembled_char_count": 1684,
+      "estimated_tokens": 421,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 87.148,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-09-assembler",
+      "input_ranked_ids": [
+        "session_776_misconception",
+        "session_258_misconception",
+        "session_672_misconception",
+        "session_10_misconception",
+        "session_162_misconception",
+        "session_214_tutor_strategy",
+        "session_100_tutor_strategy",
+        "session_681_tutor_strategy",
+        "session_308_tutor_strategy",
+        "session_162_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_258_misconception",
+        "session_214_tutor_strategy"
+      ],
+      "qrels": {
+        "session_258_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_258_tutor_strategy"
+      ],
+      "candidate_char_count": 7312,
+      "assembled_char_count": 1409,
+      "estimated_tokens": 352,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 84.674,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-10-assembler",
+      "input_ranked_ids": [
+        "session_706_misconception",
+        "session_720_misconception",
+        "session_443_misconception",
+        "session_707_misconception",
+        "session_870_misconception",
+        "session_286_tutor_strategy",
+        "session_463_tutor_strategy",
+        "session_706_tutor_strategy",
+        "session_859_tutor_strategy",
+        "session_819_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_706_misconception",
+        "session_463_tutor_strategy"
+      ],
+      "qrels": {
+        "session_276_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_276_tutor_strategy"
+      ],
+      "candidate_char_count": 5961,
+      "assembled_char_count": 909,
+      "estimated_tokens": 227,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 82.473,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-11-assembler",
+      "input_ranked_ids": [
+        "session_206_misconception",
+        "session_663_misconception",
+        "session_33_misconception",
+        "session_10_misconception",
+        "session_1009_misconception",
+        "session_469_tutor_strategy",
+        "session_206_tutor_strategy",
+        "session_154_tutor_strategy",
+        "session_10_tutor_strategy",
+        "session_741_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_206_misconception",
+        "session_469_tutor_strategy"
+      ],
+      "qrels": {
+        "session_469_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_469_misconception"
+      ],
+      "candidate_char_count": 6224,
+      "assembled_char_count": 1256,
+      "estimated_tokens": 314,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 86.154,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-12-assembler",
+      "input_ranked_ids": [
+        "session_555_misconception",
+        "session_721_misconception",
+        "session_681_misconception",
+        "session_147_misconception",
+        "session_716_misconception",
+        "session_469_tutor_strategy",
+        "session_421_tutor_strategy",
+        "session_201_tutor_strategy",
+        "session_1021_tutor_strategy",
+        "session_555_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_555_misconception",
+        "session_469_tutor_strategy"
+      ],
+      "qrels": {
+        "session_1021_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_1021_misconception"
+      ],
+      "candidate_char_count": 6727,
+      "assembled_char_count": 1343,
+      "estimated_tokens": 335,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 85.064,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-13-assembler",
+      "input_ranked_ids": [
+        "session_10_misconception",
+        "session_716_misconception",
+        "session_147_misconception",
+        "session_568_misconception",
+        "session_691_misconception",
+        "session_735_tutor_strategy",
+        "session_282_tutor_strategy",
+        "session_716_tutor_strategy",
+        "session_1011_tutor_strategy",
+        "session_469_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_10_misconception",
+        "session_735_tutor_strategy"
+      ],
+      "qrels": {
+        "session_716_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_716_misconception"
+      ],
+      "candidate_char_count": 6936,
+      "assembled_char_count": 1407,
+      "estimated_tokens": 351,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 104.055,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-14-assembler",
+      "input_ranked_ids": [
+        "session_739_misconception",
+        "session_436_misconception",
+        "session_77_misconception",
+        "session_162_misconception",
+        "session_872_misconception",
+        "session_436_tutor_strategy",
+        "session_739_tutor_strategy",
+        "session_100_tutor_strategy",
+        "session_162_tutor_strategy",
+        "session_872_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_739_misconception",
+        "session_436_tutor_strategy"
+      ],
+      "qrels": {
+        "session_77_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_77_misconception"
+      ],
+      "candidate_char_count": 6104,
+      "assembled_char_count": 1134,
+      "estimated_tokens": 283,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 88.726,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-15-assembler",
+      "input_ranked_ids": [
+        "session_568_misconception",
+        "session_33_misconception",
+        "session_657_misconception",
+        "session_872_misconception",
+        "session_1009_misconception",
+        "session_59_tutor_strategy",
+        "session_162_tutor_strategy",
+        "session_100_tutor_strategy",
+        "session_423_tutor_strategy",
+        "session_469_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_568_misconception",
+        "session_162_tutor_strategy"
+      ],
+      "qrels": {
+        "session_80_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_80_misconception"
+      ],
+      "candidate_char_count": 6286,
+      "assembled_char_count": 1539,
+      "estimated_tokens": 384,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 88.171,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-16-assembler",
+      "input_ranked_ids": [
+        "session_147_misconception",
+        "session_469_misconception",
+        "session_539_misconception",
+        "session_716_misconception",
+        "session_555_misconception",
+        "session_469_tutor_strategy",
+        "session_739_tutor_strategy",
+        "session_147_tutor_strategy",
+        "session_716_tutor_strategy",
+        "session_1021_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_469_misconception",
+        "session_739_tutor_strategy"
+      ],
+      "qrels": {
+        "session_29_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_29_tutor_strategy"
+      ],
+      "candidate_char_count": 6894,
+      "assembled_char_count": 1436,
+      "estimated_tokens": 359,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 89.847,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-17-assembler",
+      "input_ranked_ids": [
+        "session_691_misconception",
+        "session_663_misconception",
+        "session_568_misconception",
+        "session_1009_misconception",
+        "session_576_misconception",
+        "session_288_tutor_strategy",
+        "session_159_tutor_strategy",
+        "session_423_tutor_strategy",
+        "session_469_tutor_strategy",
+        "session_1011_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_663_misconception",
+        "session_288_tutor_strategy"
+      ],
+      "qrels": {
+        "session_188_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_188_misconception"
+      ],
+      "candidate_char_count": 6768,
+      "assembled_char_count": 1094,
+      "estimated_tokens": 273,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 84.099,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-18-assembler",
+      "input_ranked_ids": [
+        "session_576_misconception",
+        "session_423_misconception",
+        "session_776_misconception",
+        "session_739_misconception",
+        "session_1009_misconception",
+        "session_776_tutor_strategy",
+        "session_735_tutor_strategy",
+        "session_576_tutor_strategy",
+        "session_14_tutor_strategy",
+        "session_423_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_576_misconception",
+        "session_735_tutor_strategy"
+      ],
+      "qrels": {
+        "session_707_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_707_tutor_strategy"
+      ],
+      "candidate_char_count": 5588,
+      "assembled_char_count": 1240,
+      "estimated_tokens": 310,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 80.612,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-19-assembler",
+      "input_ranked_ids": [
+        "session_423_misconception",
+        "session_122_misconception",
+        "session_278_misconception",
+        "session_903_misconception",
+        "session_206_misconception",
+        "session_278_tutor_strategy",
+        "session_275_tutor_strategy",
+        "session_664_tutor_strategy",
+        "session_903_tutor_strategy",
+        "session_1009_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_423_misconception",
+        "session_1009_tutor_strategy"
+      ],
+      "qrels": {
+        "session_275_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_275_tutor_strategy"
+      ],
+      "candidate_char_count": 5598,
+      "assembled_char_count": 1177,
+      "estimated_tokens": 294,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 78.82,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-20-assembler",
+      "input_ranked_ids": [
+        "session_143_misconception",
+        "session_658_misconception",
+        "session_716_misconception",
+        "session_870_misconception",
+        "session_1021_misconception",
+        "session_657_tutor_strategy",
+        "session_686_tutor_strategy",
+        "session_278_tutor_strategy",
+        "session_99_tutor_strategy",
+        "session_707_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_143_misconception",
+        "session_657_tutor_strategy"
+      ],
+      "qrels": {
+        "session_143_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_143_misconception"
+      ],
+      "candidate_char_count": 6014,
+      "assembled_char_count": 1252,
+      "estimated_tokens": 313,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 76.649,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-21-assembler",
+      "input_ranked_ids": [
+        "session_10_misconception",
+        "session_143_misconception",
+        "session_798_misconception",
+        "session_206_misconception",
+        "session_492_misconception",
+        "session_573_tutor_strategy",
+        "session_10_tutor_strategy",
+        "session_469_tutor_strategy",
+        "session_866_tutor_strategy",
+        "session_118_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_10_misconception",
+        "session_573_tutor_strategy"
+      ],
+      "qrels": {
+        "session_573_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_573_misconception"
+      ],
+      "candidate_char_count": 6832,
+      "assembled_char_count": 1517,
+      "estimated_tokens": 379,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 82.431,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-22-assembler",
+      "input_ranked_ids": [
+        "session_14_misconception",
+        "session_201_misconception",
+        "session_423_misconception",
+        "session_463_misconception",
+        "session_699_misconception",
+        "session_201_tutor_strategy",
+        "session_464_tutor_strategy",
+        "session_14_tutor_strategy",
+        "session_423_tutor_strategy",
+        "session_436_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_14_misconception",
+        "session_464_tutor_strategy"
+      ],
+      "qrels": {
+        "session_278_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_278_tutor_strategy"
+      ],
+      "candidate_char_count": 5472,
+      "assembled_char_count": 1165,
+      "estimated_tokens": 291,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 88.814,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-23-assembler",
+      "input_ranked_ids": [
+        "session_664_misconception",
+        "session_288_misconception",
+        "session_568_misconception",
+        "session_10_misconception",
+        "session_69_misconception",
+        "session_866_tutor_strategy",
+        "session_664_tutor_strategy",
+        "session_1009_tutor_strategy",
+        "session_69_tutor_strategy",
+        "session_282_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_664_misconception",
+        "session_664_tutor_strategy"
+      ],
+      "qrels": {
+        "session_288_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_288_misconception"
+      ],
+      "candidate_char_count": 7498,
+      "assembled_char_count": 1619,
+      "estimated_tokens": 404,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 82.94,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-24-assembler",
+      "input_ranked_ids": [
+        "session_59_misconception",
+        "session_492_misconception",
+        "session_664_misconception",
+        "session_707_misconception",
+        "session_247_misconception",
+        "session_509_tutor_strategy",
+        "session_436_tutor_strategy",
+        "session_492_tutor_strategy",
+        "session_308_tutor_strategy",
+        "session_159_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_59_misconception",
+        "session_509_tutor_strategy"
+      ],
+      "qrels": {
+        "session_59_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_59_tutor_strategy"
+      ],
+      "candidate_char_count": 7431,
+      "assembled_char_count": 1111,
+      "estimated_tokens": 277,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 81.328,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-25-assembler",
+      "input_ranked_ids": [
+        "session_42_misconception",
+        "session_286_misconception",
+        "session_14_misconception",
+        "session_162_misconception",
+        "session_872_misconception",
+        "session_14_tutor_strategy",
+        "session_247_tutor_strategy",
+        "session_720_tutor_strategy",
+        "session_42_tutor_strategy",
+        "session_872_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_42_misconception",
+        "session_14_tutor_strategy"
+      ],
+      "qrels": {
+        "session_42_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_42_misconception"
+      ],
+      "candidate_char_count": 5974,
+      "assembled_char_count": 1190,
+      "estimated_tokens": 297,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 79.972,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-26-assembler",
+      "input_ranked_ids": [
+        "session_664_misconception",
+        "session_720_misconception",
+        "session_214_misconception",
+        "session_423_misconception",
+        "session_308_misconception",
+        "session_664_tutor_strategy",
+        "session_495_tutor_strategy",
+        "session_1023_tutor_strategy",
+        "session_671_tutor_strategy",
+        "session_282_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_664_misconception",
+        "session_671_tutor_strategy"
+      ],
+      "qrels": {
+        "session_671_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_671_misconception"
+      ],
+      "candidate_char_count": 6590,
+      "assembled_char_count": 1367,
+      "estimated_tokens": 341,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 81.042,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-27-assembler",
+      "input_ranked_ids": [
+        "session_739_misconception",
+        "session_77_misconception",
+        "session_691_misconception",
+        "session_162_misconception",
+        "session_859_misconception",
+        "session_739_tutor_strategy",
+        "session_100_tutor_strategy",
+        "session_859_tutor_strategy",
+        "session_162_tutor_strategy",
+        "session_872_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_739_misconception",
+        "session_100_tutor_strategy"
+      ],
+      "qrels": {
+        "session_739_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_739_tutor_strategy"
+      ],
+      "candidate_char_count": 6406,
+      "assembled_char_count": 1171,
+      "estimated_tokens": 292,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 78.224,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-28-assembler",
+      "input_ranked_ids": [
+        "session_33_misconception",
+        "session_735_misconception",
+        "session_214_misconception",
+        "session_568_misconception",
+        "session_206_misconception",
+        "session_469_tutor_strategy",
+        "session_436_tutor_strategy",
+        "session_214_tutor_strategy",
+        "session_59_tutor_strategy",
+        "session_735_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_33_misconception",
+        "session_59_tutor_strategy"
+      ],
+      "qrels": {
+        "session_603_tutor_strategy": 3
+      },
+      "required_evidence_ids": [
+        "session_603_tutor_strategy"
+      ],
+      "candidate_char_count": 6224,
+      "assembled_char_count": 1226,
+      "estimated_tokens": 306,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 84.971,
+      "slices": {
+        "category": "TUTOR_INTERVENTION"
+      }
+    },
+    {
+      "case_id": "golden-29-assembler",
+      "input_ranked_ids": [
+        "session_735_misconception",
+        "session_308_misconception",
+        "session_206_misconception",
+        "session_33_misconception",
+        "session_214_misconception",
+        "session_33_tutor_strategy",
+        "session_735_tutor_strategy",
+        "session_154_tutor_strategy",
+        "session_1011_tutor_strategy",
+        "session_603_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_206_misconception",
+        "session_33_tutor_strategy"
+      ],
+      "qrels": {
+        "session_206_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_206_misconception"
+      ],
+      "candidate_char_count": 6118,
+      "assembled_char_count": 1160,
+      "estimated_tokens": 290,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 79.002,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    },
+    {
+      "case_id": "golden-30-assembler",
+      "input_ranked_ids": [
+        "session_214_misconception",
+        "session_664_misconception",
+        "session_206_misconception",
+        "session_33_misconception",
+        "session_10_misconception",
+        "session_214_tutor_strategy",
+        "session_735_tutor_strategy",
+        "session_689_tutor_strategy",
+        "session_154_tutor_strategy",
+        "session_866_tutor_strategy"
+      ],
+      "final_context_ids": [
+        "session_206_misconception",
+        "session_214_tutor_strategy"
+      ],
+      "qrels": {
+        "session_214_misconception": 3
+      },
+      "required_evidence_ids": [
+        "session_214_misconception"
+      ],
+      "candidate_char_count": 6975,
+      "assembled_char_count": 1180,
+      "estimated_tokens": 295,
+      "max_prompt_tokens": 1500,
+      "evidence_count": 2,
+      "latency_ms": 77.837,
+      "slices": {
+        "category": "STUDENT_INSIGHT"
+      }
+    }
+  ]
+}

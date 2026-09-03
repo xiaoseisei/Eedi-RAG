@@ -12,9 +12,16 @@
 import os
 import sys
 import time
+import argparse
 import logging
 from pathlib import Path
 from typing import Optional
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # 确保项目根目录在 sys.path 中
 project_root = Path(__file__).resolve().parent.parent
@@ -77,11 +84,15 @@ class PedagogicalCLI:
         self,
         db_path: str = "data/db/tutoring_knowledge.duckdb",
         chroma_dir: str = "data/chroma",
-        default_mode: str = "auto"
+        default_mode: str = "auto",
+        embedding_backend: str = "deterministic",
     ):
         self.db_path = db_path
         self.chroma_dir = chroma_dir
         self.mode = default_mode
+        if embedding_backend not in {"deterministic", "siliconflow"}:
+            raise ValueError("embedding_backend must be deterministic or siliconflow")
+        self.embedding_backend = embedding_backend
         self.storage: Optional[DualEngineStorageManager] = None
         self.retriever: Optional[DualMetricRetriever] = None
         self.pipeline: Optional[EndToEndPedagogicalRAGPipeline] = None
@@ -92,7 +103,7 @@ class PedagogicalCLI:
         self.storage = DualEngineStorageManager(
             db_path=self.db_path,
             chroma_dir=self.chroma_dir,
-            embedding_backend="deterministic",
+            embedding_backend=self.embedding_backend,
         )
         self.retriever = DualMetricRetriever(
             storage_manager=self.storage,
@@ -180,7 +191,12 @@ class PedagogicalCLI:
 
 
 def main():
-    cli = PedagogicalCLI()
+    parser = argparse.ArgumentParser(description="Eedi-RAG interactive pedagogical CLI")
+    parser.add_argument("--db-path", default="data/db/tutoring_knowledge.duckdb")
+    parser.add_argument("--chroma-dir", default="data/chroma")
+    parser.add_argument("--embedding-backend", choices=("deterministic", "siliconflow"), default="deterministic")
+    args = parser.parse_args()
+    cli = PedagogicalCLI(db_path=args.db_path, chroma_dir=args.chroma_dir, embedding_backend=args.embedding_backend)
     cli.run()
 
 

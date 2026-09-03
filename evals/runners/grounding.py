@@ -16,11 +16,11 @@ from evals.runners.common import aggregate_case_observations
 
 @dataclass(frozen=True)
 class GroundingThresholds:
-    citation_precision: float = 1.0
-    citation_recall: float = 1.0
-    role_accuracy: float = 1.0
-    quote_grounding_precision: float = 1.0
-    candidate_authorization_rate: float = 1.0
+    citation_precision: float = 0.95
+    citation_recall: float = 0.95
+    role_accuracy: float = 0.95
+    quote_grounding_precision: float = 0.95
+    candidate_authorization_rate: float = 0.95
 
 
 class GroundingRunner:

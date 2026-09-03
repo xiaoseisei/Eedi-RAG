@@ -18,9 +18,11 @@
 import os
 import sys
 import json
+import re
 import argparse
 import logging
 import tempfile
+import unicodedata
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
 
@@ -180,6 +182,16 @@ def build_extraction_prompt(session: CleanedSession) -> str:
     return prompt
 
 
+def _canonicalize_evidence_text(text: str) -> str:
+    value = unicodedata.normalize("NFKC", str(text)).replace("\u200b", "")
+    value = re.sub(r"\s+", " ", value).strip()
+    while value and unicodedata.category(value[0]) in {"So", "Sk"}:
+        value = value[1:].lstrip()
+    while value and unicodedata.category(value[-1]) in {"So", "Sk"}:
+        value = value[:-1].rstrip()
+    return value
+
+
 def validate_verbatim_grounding(quote: str, turns: List[DialogueTurn]) -> Tuple[bool, Optional[int]]:
     """
     校验给定的原声引用是否真实存在于对话轮次中 (Exact Substring Validation)。
@@ -194,9 +206,9 @@ def validate_verbatim_grounding(quote: str, turns: List[DialogueTurn]) -> Tuple[
     if not quote or not quote.strip():
         return False, None
         
-    cleaned_quote = quote.strip()
+    cleaned_quote = _canonicalize_evidence_text(quote)
     for t in turns:
-        if cleaned_quote in t.text:
+        if cleaned_quote in _canonicalize_evidence_text(t.text):
             return True, t.turn_id
             
     return False, None
@@ -216,7 +228,7 @@ def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU
             raise ValueError(f"学生 source_turn_ids 包含不存在或非学生轮次: {turn_id}")
         student_turns.append(turn)
     for quote in payload.misconception.verbatim_student_quotes:
-        if not any(quote in turn.text for turn in student_turns):
+        if not any(validate_verbatim_grounding(quote, [turn])[0] for turn in student_turns):
             raise ValueError(
                 f"学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): {quote!r}"
             )
@@ -227,7 +239,11 @@ def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU
         if turn is None or not turn.is_tutor:
             raise ValueError(f"导师 source_turn_ids 包含不存在或非导师轮次: {turn_id}")
         tutor_turns.append(turn)
-    if not any(payload.tutor_strategy.key_aha_question in turn.text for turn in tutor_turns):
+    if not any(
+        _canonicalize_evidence_text(payload.tutor_strategy.key_aha_question)
+        in _canonicalize_evidence_text(turn.text)
+        for turn in tutor_turns
+    ):
         raise ValueError(
             "导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 "
             f"(Grounding Gate Failed): {payload.tutor_strategy.key_aha_question!r}"

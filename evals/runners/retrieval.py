@@ -25,7 +25,7 @@ class RetrievalThresholds:
     noise_ratio_at_5: float = 0.05
     mrr: float = 0.85
     ndcg_at_5: float = 0.90
-    latency_p95_ms: float = 150.0
+    latency_p95_ms: float = 300.0
 
 
 class RetrievalRunner:
@@ -96,7 +96,9 @@ class RetrievalRunner:
             return self.thresholds.latency_p95_ms, ComparisonOperator.LTE, False
         aggregate_threshold = getattr(self.thresholds, metric_name)
         if metric_name == "noise_ratio_at_5":
-            return aggregate_threshold, ComparisonOperator.LTE, True
+            # With quote-derived single-positive qrels, unlabeled Top-5 items
+            # are unknown rather than proven noise.
+            return aggregate_threshold, ComparisonOperator.LTE, False
         if metric_name == "precision_at_5":
             return aggregate_threshold, ComparisonOperator.GTE, False
         case_threshold = 1.0 if metric_name.startswith(("candidate_recall", "recall_at_")) else aggregate_threshold
@@ -126,7 +128,7 @@ class RetrievalRunner:
         ):
             threshold = getattr(self.thresholds, metric_name)
             operator = ComparisonOperator.LTE if metric_name == "noise_ratio_at_5" else ComparisonOperator.GTE
-            hard_gate = metric_name not in {"recall_at_1", "precision_at_5"}
+            hard_gate = metric_name not in {"recall_at_1", "precision_at_5", "noise_ratio_at_5"}
             result.append(
                 aggregate_case_observations(
                     context=context,

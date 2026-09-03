@@ -32,7 +32,8 @@ from src.retriever import (
     compute_cosine_similarity,
     compute_euclidean_distance,
     compute_euclidean_similarity,
-    compute_hybrid_score
+    compute_hybrid_score,
+    numeric_formula_exact_score,
 )
 
 
@@ -135,3 +136,57 @@ def test_retriever_hybrid_full_contract(in_memory_storage):
     assert len(res["misconceptions"]) > 0
     assert len(res["strategies"]) > 0
     assert res["total_retrieved"] == len(res["misconceptions"]) + len(res["strategies"])
+
+
+def test_multi_lane_retrieval_embeds_unique_queries_in_one_batch(in_memory_storage):
+    class RecordingEmbedding:
+        def __init__(self, delegate):
+            self.delegate = delegate
+            self.calls = []
+
+        def __call__(self, texts):
+            self.calls.append(list(texts))
+            return self.delegate(texts)
+
+    retriever = DualMetricRetriever(
+        storage_manager=in_memory_storage,
+        query_rewrite_mode="deterministic",
+    )
+    recording = RecordingEmbedding(in_memory_storage.embedding_function)
+    retriever.embedding_fn = recording
+
+    result = retriever.retrieve_multi_perspective_rrf(
+        "学生把 5.4598 算成 5.45 怎么引导？",
+        top_k_each=2,
+        fetch_evidence=False,
+    )
+
+    assert len(recording.calls) == 1
+    assert len(recording.calls[0]) == len(set(recording.calls[0]))
+    assert len(recording.calls[0]) <= 4
+    assert result["trace"]["embedding"]["unique_query_count"] == len(recording.calls[0])
+
+
+def test_numeric_formula_exact_score_prefers_dialogue_match_over_question_anchor():
+    query = "学生为什么把 5.45 当成一位小数？"
+    question_only = "[考题原题]: Round 5.45 to one decimal place\n[对话片段 (Turn 1 ~ 2)]:\nI do not know"
+    dialogue_match = "[考题原题]: Round 5.45 to one decimal place\n[对话片段 (Turn 3 ~ 4)]:\nStudent: I chose 5.45"
+
+    assert numeric_formula_exact_score(query, dialogue_match) > numeric_formula_exact_score(query, question_only)
+
+
+def test_raw_first_fusion_cannot_demote_raw_top_results(in_memory_storage):
+    query = "学生把 5.4598 算成 5.45 怎么引导？"
+    retriever = DualMetricRetriever(
+        storage_manager=in_memory_storage,
+        query_rewrite_mode="deterministic",
+        fusion_strategy="raw_first",
+    )
+    raw_misc = retriever.retrieve_misconceptions(query, top_k=3, fetch_evidence=False)
+    raw_strategy = retriever.retrieve_strategies(query, top_k=3, fetch_evidence=False)
+
+    result = retriever.retrieve_multi_perspective_rrf(query, top_k_each=3, fetch_evidence=False)
+
+    assert [item["chunk_id"] for item in result["misconceptions"]] == [item["chunk_id"] for item in raw_misc]
+    assert [item["chunk_id"] for item in result["strategies"]] == [item["chunk_id"] for item in raw_strategy]
+    assert result["trace"]["fusion"] == "raw_first"

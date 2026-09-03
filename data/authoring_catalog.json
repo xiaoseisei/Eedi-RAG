@@ -1,0 +1,6751 @@
+[
+  {
+    "session_id": 115,
+    "question_id": 77771,
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "question_text": "Expand \\( 4(3 c+2) \\)",
+    "options": {
+      "A": "\\( 7 c+6 \\)",
+      "B": "\\( 12 c+8 \\)",
+      "C": "\\( 12 c+6 \\)",
+      "D": "\\( 12 c+2 \\)"
+    },
+    "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "how are you this evening?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "I think I got this ques toin right"
+      },
+      {
+        "turn_id": 5,
+        "quote": "fine how is yours"
+      },
+      {
+        "turn_id": 7,
+        "quote": "muptiple"
+      },
+      {
+        "turn_id": 13,
+        "quote": "no I pressed the wrong button its 12c = 8 \"=\""
+      },
+      {
+        "turn_id": 17,
+        "quote": "12c + 8"
+      },
+      {
+        "turn_id": 19,
+        "quote": "I pressed the wrong button thx am good now"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 4,
+        "quote": "how are you this evening?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 6,
+        "quote": "good thank you let's have a look at this question? What does expand mean?",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "if yoy put it all together... you* What do you get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 20,
+        "quote": "Fab - shall I send you back?",
+        "talk_moves": []
+      }
+    ]
+  },
+  {
+    "session_id": 287,
+    "question_id": 105520,
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "question_text": "Liam and Emma are arguing about expanding single brackets.\nLiam says \\( -3(1-2 p) \\equiv-3+6 p \\)\nEmma says \\( -3(1-2 p) \\equiv 6 p-3 \\)\nWho is correct?",
+    "options": {
+      "A": "Only Liam",
+      "B": "Only Emma",
+      "C": "Both Liam and Emma",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Let's work out the answer to -3(1-2p) = ?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hii!"
+      },
+      {
+        "turn_id": 4,
+        "quote": "okayy i dont really get it because it has a minus in it"
+      },
+      {
+        "turn_id": 6,
+        "quote": "yes i think"
+      },
+      {
+        "turn_id": 8,
+        "quote": "uhh the first one is -4 and the bottom one is 6p?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "oh -3 sorry"
+      },
+      {
+        "turn_id": 12,
+        "quote": "uhm is it 3p"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "Let's work out the answer to -3(1-2p) = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "So you now are doing these sums... -3 x 1 = ? -3 x -2p = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Can you give me the answers to these sums? 🧠🧠🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Be careful.. We are multiplying... Not adding,,, What is -3 x 1 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 477,
+    "question_id": 77775,
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "question_text": "Expand and simplify:\n\\[\n4(2 x+1)-(5 x-9)\n\\]",
+    "options": {
+      "A": "\\( 3 x-5 \\)",
+      "B": "\\( 3 x+13 \\)",
+      "C": "\\( 13 x-5 \\)",
+      "D": "\\( 13 x+13 \\)"
+    },
+    "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello again 😁👋 How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i don't understand the steps of how to calculate the answer"
+      },
+      {
+        "turn_id": 4,
+        "quote": "wouldn't the answer be 9 4 2=8 =4x2 +1 =9"
+      },
+      {
+        "turn_id": 6,
+        "quote": "sorry which one 1 or 2 4 x 2x =8x"
+      },
+      {
+        "turn_id": 8,
+        "quote": "4 x 1=4"
+      },
+      {
+        "turn_id": 12,
+        "quote": "8x + 4\n8x + 4\nyes"
+      },
+      {
+        "turn_id": 14,
+        "quote": "-13x ???"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello again 😁👋 How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Of course, let's look together 👀👀 Let's start by expanding the first bracket.. 4(2x + 1) = ? Any ideas how to expand this? 💡💡💡",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "We need to multiply everything in the bracket by the 4 outside the bracket 😊 4 x 2x = ? 4 x 1 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "EX CELLENT 😁 And 4 x 1 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 637,
+    "question_id": 77776,
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "question_text": "Expand and simplify\n\\[\n2 a-4(3-a)\n\\]",
+    "options": {
+      "A": "\\( -2 a-12 \\)",
+      "B": "\\( 6 a-12 \\)",
+      "C": "\\( -6 a \\)",
+      "D": "\\( a-12 \\)"
+    },
+    "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "are you having fun doing algebra? would you like us to work through this question together?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "yes please"
+      },
+      {
+        "turn_id": 6,
+        "quote": "2a-12-a so is the answer a-12"
+      },
+      {
+        "turn_id": 10,
+        "quote": "6a-12"
+      },
+      {
+        "turn_id": 12,
+        "quote": "thank you for your help"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "are you having fun doing algebra? would you like us to work through this question together?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "so, could you type for me your first attempt at multiplying out the bracket? It will start 2a-..........",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "yes, tyhe total number of a's is 6 😀 when you multiply out the bracket you get 2a-12+4a does that make sense?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 706,
+    "question_id": 77778,
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "question_text": "Which of the following statements is incorrect?",
+    "options": {
+      "A": "\\( 4 x+9=5 x+1 \\)",
+      "B": "\\( x=8 \\)",
+      "C": "Area \\( =5 x^{2}+1 \\)",
+      "D": "Perimeter \\( =10 x+18 \\)"
+    },
+    "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "i dont understand"
+      },
+      {
+        "turn_id": 6,
+        "quote": "not sure"
+      },
+      {
+        "turn_id": 10,
+        "quote": "which are the following statements are wron?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "a, 4x+9=5x+1 b, x=8 c, area =5x to the power of 2 +1 d, perimeter= 10x+18"
+      },
+      {
+        "turn_id": 16,
+        "quote": "i dont"
+      },
+      {
+        "turn_id": 20,
+        "quote": "6x squered"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "I can't quite see what the last question was for some reason! What is it that you don't understand?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Is it an expanding brackets question?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "What does the question say? For some reason it isn't coming up for me.",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 97,
+    "question_id": 147373,
+    "subject_path": "Algebra > Formula > Substitution into Formula",
+    "question_text": "Liam and Emma are discussing this function machine\nLiam says the function could be \\( +2 m \\)\nEmma says the function could be \\( \\times 3 \\)\nWho do you agree with?",
+    "options": {
+      "A": "Only\nLiam",
+      "B": "Only Emma",
+      "C": "Both Liam and Emma",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Substitution into Formula 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I’m not sure on how to solve this as I find questions like this hard"
+      },
+      {
+        "turn_id": 6,
+        "quote": "I’m not sure"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "So if we start with m + 2. Liam says we +2m what would m + 2 + 2m be?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ooh not quite We could add the m and the 2m? What would that get? Remember what number is technically in front of the m by itself",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "That's okay So if we've got m that's the same as 1m Are you happy with that?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 617,
+    "question_id": 129181,
+    "subject_path": "Algebra > Formula > Substitution into Formula",
+    "question_text": "A formula is given by:\n\n\\[\nF=3 p\n\\]\n\nWhat is the value of \\( F \\) when \\( p=4 \\) ?",
+    "options": {
+      "A": "\\( 12 \\)",
+      "B": "\\( 7 \\)",
+      "C": "\\( 34 \\)",
+      "D": "\\( 81 \\)"
+    },
+    "misconception_name": "Substitution into Formula 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] - How are you today?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Good thanks"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Yes please"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Nothing 😢"
+      },
+      {
+        "turn_id": 8,
+        "quote": "3 x p?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "3 x 4 = 12?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "but if F is 12 it doesnt make sense 12 - 34 ?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] - How are you today?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Glad to hear it Do you need some help with the question above?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "ok, so this is substitution F = 3p what do you understand by 3p?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Excellent Sophia!! How do you feel now?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 681,
+    "question_id": 106936,
+    "subject_path": "Algebra > Inequalities > Graphing Linear Inequalities (Shading Regions)",
+    "question_text": "The diagram on the right shows the lines \\( y=x+2 \\) and \\( x=1 \\)\n\nWhich of the following coordinates satisfies the following inequalities?\n\\[\ny<x+2 \\text { and } x>1\n\\]",
+    "options": {
+      "A": "\\( (1,3) \\)",
+      "B": "\\( (2,-1) \\)",
+      "C": "\\( (2,5) \\)",
+      "D": "\\( (-1,-1) \\)"
+    },
+    "misconception_name": "Graphing Linear Inequalities (Shading Regions) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "So for this one, you need to use your skills of substitution 👌 For example for A.. The coordinate (1,3) means x is what and y is what? 🧠",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 6,
+        "quote": "ok i dont get it"
+      },
+      {
+        "turn_id": 8,
+        "quote": "working it out"
+      },
+      {
+        "turn_id": 10,
+        "quote": "2,-1"
+      },
+      {
+        "turn_id": 12,
+        "quote": "x = -1 y = 2"
+      },
+      {
+        "turn_id": 20,
+        "quote": "sorry"
+      },
+      {
+        "turn_id": 26,
+        "quote": "false oh no its true"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "So for this one, you need to use your skills of substitution 👌 For example for A.. The coordinate (1,3) means x is what and y is what? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "No worries, I will try help 🙂 what are you struggling with???",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 9,
+        "quote": "OK so what is the coordinate in B? 👀",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Great so what is the x value and what is the y value? 🧠 Great so what is the x value and what is the y value? 🧠 Great so what is the x value and what is the y value? 🧠 Great so what is the x value and what is the y value? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 69,
+    "question_id": 106909,
+    "subject_path": "Algebra > Inequalities > Solving Linear Inequalities",
+    "question_text": "Leo and Sophie are arguing about solving inequalities.\nLeo says \\( -2 m>12 \\) gives \\( m>-6 \\)\nSophie says \\( -2+m>12 \\) gives \\( m>14 \\)\nWho is correct?",
+    "options": {
+      "A": "Only\nLeo",
+      "B": "Only Sophie",
+      "C": "Both Leo and Sophie",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "不等式两边除以负数时未反转符号，且解题目标混淆",
+    "error_choice": "B",
+    "key_aha_question": "Super :) What does that give us ? :0 (引导学生计算 -12 ÷ -2 的具体结果，并在后续步骤中引出‘除以负数需翻转符号’的关键规则)",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi im really confused on this question an you help me please"
+      },
+      {
+        "turn_id": 6,
+        "quote": "find out what m is"
+      },
+      {
+        "turn_id": 8,
+        "quote": "divide by -2"
+      },
+      {
+        "turn_id": 10,
+        "quote": "thank you what would i do next would it be -1"
+      },
+      {
+        "turn_id": 18,
+        "quote": "would it be leos"
+      },
+      {
+        "turn_id": 20,
+        "quote": "sorry im still confused on how i know whether it is sophies or leoms or sophies and leos"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 5,
+        "quote": "So we need to work out -2m > 12 first, how can we do that? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Exactly, so m is being multiplied by -2 So we need to do the opposite, which is?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Super :) What does that give us ? :0",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 17,
+        "quote": "So what does that mean our inequality will be? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 258,
+    "question_id": 131721,
+    "subject_path": "Algebra > Other Graphs > Real Life Graphs",
+    "question_text": "Water is poured into a glass at a constant rate.\n\nThis graph shows how the depth \\( (d) \\) of water in a glass changes over time \\( (t) \\).\n\nWhich of the following glasses is this most likely to be the graph of?",
+    "options": {},
+    "misconception_name": "Real Life Graphs 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi Z :) How are you doing?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "all right"
+      },
+      {
+        "turn_id": 4,
+        "quote": "yeah please I really don't get the question"
+      },
+      {
+        "turn_id": 6,
+        "quote": "wide?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "oh ok"
+      },
+      {
+        "turn_id": 10,
+        "quote": "so the answer is d but I still don't understand how you figured it out when I find it difficult umm Sophia,are you there?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "so the answer is d"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi Z :) How are you doing?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Shall we look at the question above?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "ok so let's look at the graph, the depth of water increases quite quickly at the start and then slows down Imagine pouring water into a glass... If it fills quickly would you expect the bottom of the glass to be narrow or wide?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "my job is to help you understand - the shape of the glass will change how the water comes into the glass Does that make sense?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 100,
+    "question_id": 147255,
+    "subject_path": "Algebra > Sequences > Linear Sequences (nth term)",
+    "question_text": "Which sequence matches this graph?",
+    "options": {},
+    "misconception_name": "Linear Sequences (nth term) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] 😁👋 How can I help?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]"
+      },
+      {
+        "turn_id": 3,
+        "quote": "i don’t understand the question or the graph"
+      },
+      {
+        "turn_id": 11,
+        "quote": "Ohhh C ??"
+      },
+      {
+        "turn_id": 13,
+        "quote": "Yeah 😊😊"
+      },
+      {
+        "turn_id": 15,
+        "quote": "Yeah x"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi [STUDENT_NAME] 😁👋 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 4,
+        "quote": "OK so the graph gives the position and value of the term 😁👌 So in position 1 what is the value of the term? 👀",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Brilliant so the first term in the sequence needs to have 4 things in it 😃👌 What about term 2?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "FANTASTIC WORKING OUT 😃🏆👍💥⭐😊😁✅ So can you see a sequence from A, B, C and D that has 4 in its first term and 7 in the second?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 308,
+    "question_id": 147295,
+    "subject_path": "Algebra > Sequences > Linear Sequences (nth term)",
+    "question_text": "This is a linear sequence\n\nWhat should replace the star?",
+    "options": {
+      "A": "\\( 35 \\)",
+      "B": "\\( 102 \\)",
+      "C": "\\( 38 \\)",
+      "D": "\\( 73 \\)"
+    },
+    "misconception_name": "Linear Sequences (nth term) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi again Opal you've been working hard! this question is a bit of a puzzle isn't it! Let's look at it together are you here?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 8,
+        "quote": "it would be subtracting 70 each time"
+      },
+      {
+        "turn_id": 10,
+        "quote": "108, 38, -32"
+      },
+      {
+        "turn_id": 14,
+        "quote": "you would take 99 each time"
+      },
+      {
+        "turn_id": 16,
+        "quote": "108, 9"
+      },
+      {
+        "turn_id": 18,
+        "quote": "which means it would be c because it isn't a"
+      },
+      {
+        "turn_id": 20,
+        "quote": "5 35"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi again Opal you've been working hard! this question is a bit of a puzzle isn't it! Let's look at it together are you here?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "yippee! are you ok for us to do this question together? how do you think we could start?",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "I can see the sequence starts with a 108 and after a few steps it's at 3 so are you happy that some number is being subtracted each time?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "lovely 👍 so, as the quetsion is multiple choice we can use the options they give us to help us decide which one is correct let's start for example with the 73 is the sequence went 108, ___, 73, 3, ... can you work out what the rule would be? that means, what is being taken away each time (use the 73, 3 to help you work that out)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 798,
+    "question_id": 91695,
+    "subject_path": "Algebra > Sequences > Sequences-Others",
+    "question_text": "Dots have been arranged in these patterns:\nHow many dots would there be in Pattern \\( 6 \\) ?",
+    "options": {
+      "A": "\\( 26 \\)",
+      "B": "\\( 20 \\)",
+      "C": "\\( 36 \\)",
+      "D": "\\( 22 \\)"
+    },
+    "misconception_name": "Sequences-Others 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey! How can I help? 😃",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi what do i do"
+      },
+      {
+        "turn_id": 12,
+        "quote": "it go up in 6 10 14"
+      },
+      {
+        "turn_id": 14,
+        "quote": "2 then 4"
+      },
+      {
+        "turn_id": 18,
+        "quote": "26 thank you"
+      },
+      {
+        "turn_id": 20,
+        "quote": "bye bye"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey! How can I help? 😃",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Let's make a number sequence from the dots How many dots in pattern 1?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Great , now pattern 2?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Fab! Now pattern 3?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 691,
+    "question_id": 147438,
+    "subject_path": "Algebra > Solving Equations > Function Machines",
+    "question_text": "Jack and Emma are discussing the output of this 2-step function machine\nJack says the output is \\( 2(\\boldsymbol{p}-\\mathbf{3}) \\)\n\nEmma says the output is \\( \\mathbf{2 p - 6} \\)\n\nWho is correct?",
+    "options": {
+      "A": "Only Jack",
+      "B": "Only Emma",
+      "C": "Both Jack and Emma",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Function Machines 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "HEYY umm according to my calculation i thought jack was right"
+      },
+      {
+        "turn_id": 4,
+        "quote": "2p-3"
+      },
+      {
+        "turn_id": 6,
+        "quote": "oh so can u give me time to workout"
+      },
+      {
+        "turn_id": 8,
+        "quote": "2p-6 i think"
+      },
+      {
+        "turn_id": 10,
+        "quote": "emma is"
+      },
+      {
+        "turn_id": 12,
+        "quote": "or both"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "You are correct that Jack is correct, well done! but... if you multiplied out the brackets... what would you get?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "yes, great! So, who is correct?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "Yes,🌟 Is this all ok?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 159,
+    "question_id": 131778,
+    "subject_path": "Algebra > Solving Equations > Linear Equations",
+    "question_text": "Max and Lily are discussing identities\nMax says this is an identity: \\( 2 x+1 \\equiv 3 \\)\nLily says this is an identity: \\( 2 x+x \\equiv 3 x \\)\nWho is correct?",
+    "options": {
+      "A": "Only\nMax",
+      "B": "Only Lily",
+      "C": "Both Max and Lily",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! This is Leo one of the tutors at Eedi 😊. How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i don't understand this question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "no..."
+      },
+      {
+        "turn_id": 6,
+        "quote": "yes i mean when there is a number replacing x"
+      },
+      {
+        "turn_id": 16,
+        "quote": "5x lily? is she correct?"
+      },
+      {
+        "turn_id": 24,
+        "quote": "how do you move on from question 1"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! This is Leo one of the tutors at Eedi 😊. How can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "No worries Do you know what an identity is?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "We use an identity symbol (the three lines) when something is always true So Max is saying that 2x + 1 is always equal to 3 Is this true?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "What if x = 3, what would 2x + 1 be?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 607,
+    "question_id": 89557,
+    "subject_path": "Algebra > Solving Equations > Linear Equations",
+    "question_text": "Which calculation is equal to \\( -20 \\) ?",
+    "options": {
+      "A": "\\( 2 \\times(-2)-(-4) \\times 4 \\)",
+      "B": "\\( -28-(-4) \\times 2 \\)",
+      "C": "\\( (-5)^{2}+5 \\)",
+      "D": "\\( (-42) \\div(-2)+1 \\)"
+    },
+    "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi there ! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I was stuck on the question I was just doing, please could you help?"
+      },
+      {
+        "turn_id": 14,
+        "quote": "Hmmmm give me one sec Would the answer be 20?"
+      },
+      {
+        "turn_id": 16,
+        "quote": "Yea! 😊"
+      },
+      {
+        "turn_id": 18,
+        "quote": "Oh yea"
+      },
+      {
+        "turn_id": 22,
+        "quote": "Does it change to a +"
+      },
+      {
+        "turn_id": 26,
+        "quote": "Oh yea thanks!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi there ! How can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Are you unsure how B is the correct answer? :)",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "How do we go about doing this question?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 21,
+        "quote": "so now we have -28 - -8 what happens with the - and - which are touching?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 689,
+    "question_id": 106659,
+    "subject_path": "Algebra > Solving Equations > Linear Equations",
+    "question_text": "Jack and Emma are arguing about a first step to solve this equation:\n\\(1-4 v=3-9 v\\)\n\nJack says you can write: \\( 1+5 v=3 \\)\n\nEmma says you can write: \\( -4 v=2-9 v \\)\n\nWho is correct?",
+    "options": {
+      "A": "Only Jack",
+      "B": "Only\nEmma",
+      "C": "Both Jack and Emma",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey hey hey 🦄🦄🦄 What's up [STUDENT_NAME]?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Im not too sure how to work this question out"
+      },
+      {
+        "turn_id": 4,
+        "quote": "letter"
+      },
+      {
+        "turn_id": 6,
+        "quote": "add 4 both sides"
+      },
+      {
+        "turn_id": 8,
+        "quote": "add 9 to both sides so 1 - 13v = 3"
+      },
+      {
+        "turn_id": 10,
+        "quote": "4 the answer is 5"
+      },
+      {
+        "turn_id": 12,
+        "quote": "1- 5v = 3"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey hey hey 🦄🦄🦄 What's up [STUDENT_NAME]?!",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "OK, let's have a look together 👀 There are two ways we can start this question Would you like to look at the number way or the letter way first? 😁",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "OK great! So to get all the letters onto one side, what do we need to do? Any ideas? 💡",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "You can add 4v to both sides but it's nicer to work with positive values so it will be better later on if you do the opposite of -9v.. What would that be? 😃",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 286,
+    "question_id": 106720,
+    "subject_path": "Algebra > Solving Equations > Quadratic Equations",
+    "question_text": "Mariana is trying to solve the equation below.\n\nHere are her steps.\n\nWhich steps, if any, are correct?\n\\(\np^{2}+64=0\n\\)\n\nStep \\( 1 \\quad(p+8)(p+8)=0 \\)\n\nStep \\( 2 \\quad p=8 \\)",
+    "options": {
+      "A": "Only step \\( 1 \\)",
+      "B": "Only step \\( 2 \\)",
+      "C": "Both steps are correct",
+      "D": "Both steps are incorrect"
+    },
+    "misconception_name": "Quadratic Equations 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], you have cancelled your help request - did you mean to?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I did not mean to."
+      },
+      {
+        "turn_id": 4,
+        "quote": "So i been having some issues with the factorization. I did P squared=-64. Then you square it all which is 8."
+      },
+      {
+        "turn_id": 8,
+        "quote": "p×p=P squared, p×8=p8. Then we do 8×p=8p,8×8=64 And thats the bit i dont get because i cant isolate the P."
+      },
+      {
+        "turn_id": 10,
+        "quote": "Yes."
+      },
+      {
+        "turn_id": 12,
+        "quote": "On most qustions."
+      },
+      {
+        "turn_id": 14,
+        "quote": "x squared + 64."
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], you have cancelled your help request - did you mean to?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "ahh ok how can I help you?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "do you think step 1 is correct?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "why not?",
+        "talk_moves": [
+          "<Press for Reasoning>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 720,
+    "question_id": 131837,
+    "subject_path": "Algebra > Solving Equations > Simultaneous Equations",
+    "question_text": "What is the value of \\( p \\) in these simultaneous equations?\n\\(\n\\begin{array}{c}\np+q=19 \\\\\n3 p-q=5\n\\end{array}\n\\)",
+    "options": {
+      "A": "\\( p=6 \\)",
+      "B": "\\( p=4 \\)",
+      "C": "\\( p=13 \\)",
+      "D": "\\( p=7 \\)"
+    },
+    "misconception_name": "Simultaneous Equations 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I'm not sure where to start with this"
+      },
+      {
+        "turn_id": 6,
+        "quote": "yes both p and q have nothing in front of them"
+      },
+      {
+        "turn_id": 8,
+        "quote": "adding the q"
+      },
+      {
+        "turn_id": 12,
+        "quote": "add the 19 and the 5"
+      },
+      {
+        "turn_id": 14,
+        "quote": "4p=14"
+      },
+      {
+        "turn_id": 16,
+        "quote": "no 19-5 is 14"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! How can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "No problem! Let's take a look together Have you worked with simultaneous equations before?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ok, so our first step is to see if we have the same number in front of either our p or q terms What do you think?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Great! Now we have to choose whether adding or subtracting our equations will get rid of q Any idea which one we want?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 672,
+    "question_id": 144059,
+    "subject_path": "Algebra > Straight Line Graphs > Gradient as change in y over change in x",
+    "question_text": "What do you need to add on to the curved surface area of the cylinder to get the total surface area?",
+    "options": {
+      "A": "\\( 20 \\pi \\mathrm{cm}^{2} \\)",
+      "B": "\\( 250 \\pi \\mathrm{cm}^{2} \\)",
+      "C": "\\( 50 \\pi \\mathrm{cm}^{2} \\)",
+      "D": "\\( 25 \\pi \\mathrm{cm}^{2} \\)"
+    },
+    "misconception_name": "Gradient as change in y over change in x 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] 👋👋👋 How can I help?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "im stuck"
+      },
+      {
+        "turn_id": 4,
+        "quote": "im st"
+      },
+      {
+        "turn_id": 6,
+        "quote": "are you real?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "on skibidi"
+      },
+      {
+        "turn_id": 10,
+        "quote": "circle innit"
+      },
+      {
+        "turn_id": 12,
+        "quote": "25pi can i get some bonus coins g"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] 👋👋👋 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Let's have a look 👀 So we have the curved surface area, happy with what the question means by that? 😁",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "That's the rectangle part that curves round... So what other faces do we have on the cylinder? 🧠👀😊👍",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Let's stay focused and sensible 😊 What other faces do we need to include? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 721,
+    "question_id": 107177,
+    "subject_path": "Algebra > Straight Line Graphs > Plotting Lines from Tables of Values",
+    "question_text": "What is the gradient of this line?",
+    "options": {
+      "A": "\\( -2 \\)",
+      "B": "\\( -3 \\)",
+      "C": "\\( -1.5 \\)",
+      "D": "\\( -\\frac{1}{3} \\)"
+    },
+    "misconception_name": "Plotting Lines from Tables of Values 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi, i’m confused on what the gradient means"
+      },
+      {
+        "turn_id": 4,
+        "quote": "okay"
+      },
+      {
+        "turn_id": 6,
+        "quote": "so the difference between 1 and 2 is 1"
+      },
+      {
+        "turn_id": 10,
+        "quote": "no 3"
+      },
+      {
+        "turn_id": 12,
+        "quote": "ohhh okay thank you"
+      },
+      {
+        "turn_id": 14,
+        "quote": "yeah okay thanks for your help"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "what would the difference there be ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 492,
+    "question_id": 131353,
+    "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+    "question_text": "Leo and Lila are discussing how to say: \\( 3 q+p q \\)\n\nLeo says it is: \\( 3 \\) multiplied by \\( q \\), plus \\( p \\) plus \\( q \\)\n\nLila says it is: \\( 3 \\) multiplied by \\( q \\), plus \\( p \\) multiplied by \\( q \\)\n\n\nWho is correct?",
+    "options": {
+      "A": "Only Leo",
+      "B": "Only Lila",
+      "C": "Both Leo and Lila",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] :) How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "👋 hi 👋 l need help on the argue question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "ummm ummm no ... what does it mean"
+      },
+      {
+        "turn_id": 8,
+        "quote": "is it p×q I think 🤔"
+      },
+      {
+        "turn_id": 10,
+        "quote": "ok is it Both ?"
+      },
+      {
+        "turn_id": 14,
+        "quote": "So is it Lila"
+      },
+      {
+        "turn_id": 16,
+        "quote": "okeh"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] :) How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "No problem :) Do you know what 3q means?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "3 lots of q Using the same logic what would 'pq' mean?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Not quite. Look at what Leo says at the end What does he think 'pq' means?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 657,
+    "question_id": 146324,
+    "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+    "question_text": "Leo and Sophie are discussing this equation:\n\\(\nx+y=12\n\\)\nLeo uses the equation to write:\n\\(\nx+y+2=10\n\\)\nSophie uses the equation to write:\n\\(\n\\frac{x+y}{2}=6\n\\)\nWho do you agree with?",
+    "options": {
+      "A": "Only Leo",
+      "B": "Only Sophie",
+      "C": "Both Leo and Sophie",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "If we x (x+y)/2 by 2 what do we get?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "Im really sorry for bothering you but how would i work this out?"
+      },
+      {
+        "turn_id": 5,
+        "quote": "so x + y + 12??"
+      },
+      {
+        "turn_id": 7,
+        "quote": "Sorry i struggle with math so -2"
+      },
+      {
+        "turn_id": 9,
+        "quote": "8 on 1 side"
+      },
+      {
+        "turn_id": 11,
+        "quote": "dont you need to minus on both sides?? so what abt th x y part"
+      },
+      {
+        "turn_id": 13,
+        "quote": "So 2x + 2y = 8??"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 16,
+        "quote": "If we x (x+y)/2 by 2 what do we get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 20,
+        "quote": "the other side was 6 so if we x2 what do we get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 866,
+    "question_id": 147360,
+    "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+    "question_text": "Which of the following is the correct way to describe \\( \\frac{8}{p} \\)",
+    "options": {
+      "A": "\\( 8 \\) divided by \\( p \\)",
+      "B": "\\( 8 \\) subtract \\( p \\)",
+      "C": "\\( p \\) divided by \\( 8 \\)",
+      "D": "\\( 8 \\) multiplied by \\( p \\)"
+    },
+    "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "I see you chose B before, are there any other choices that you think definitely isn't the answer? :)",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "i think D"
+      },
+      {
+        "turn_id": 6,
+        "quote": "help please"
+      },
+      {
+        "turn_id": 12,
+        "quote": "and a"
+      },
+      {
+        "turn_id": 14,
+        "quote": "8 divided be p is 2"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "I see you chose B before, are there any other choices that you think definitely isn't the answer? :)",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ok you're right, D isn't correct either. 8 multiplied by p can be written as 8 x p or as 8p :) So we're just left with A and C - which both say divided. And that's correct We can remind ourselves of fractions to help - 1/2 of a cake means 1 whole cake divided in to 2 😊 So is 8/p going to be 8 divided by p or p divided by 8? :) Are you still with me Leo-Marcus? 😊 Hello [STUDENT_NAME]-Marcus, how can I help?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "So, you know B is wrong. Are there any other answers you think are wrong?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "Can you tell me why a is wrong?",
+        "talk_moves": [
+          "<Press for Reasoning>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 870,
+    "question_id": 104952,
+    "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+    "question_text": "If we want to write \n\"\\( m \\) multiplied by \\( 7 \\)\" \nusing algebra, this would be:",
+    "options": {
+      "A": "\\( m^{7} \\)",
+      "B": "\\( 7 m \\)",
+      "C": "\\( m \\times 7 \\)",
+      "D": "\\( m 7 \\)"
+    },
+    "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "hi how can I help with your Maths just now?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i cant do it i need help"
+      },
+      {
+        "turn_id": 12,
+        "quote": "thanks c"
+      },
+      {
+        "turn_id": 14,
+        "quote": "you said its mx7"
+      },
+      {
+        "turn_id": 16,
+        "quote": "oh m7"
+      },
+      {
+        "turn_id": 18,
+        "quote": "its fine wHAT IS THE RULE"
+      },
+      {
+        "turn_id": 22,
+        "quote": "its ok"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "hi how can I help with your Maths just now?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "m multiplied by 7,, is that the one you're doing?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 23,
+        "quote": "you ok with the answer being 7m? just remember we write the number first and we don't write the times sign we just put the letter right after the number",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 25,
+        "quote": "👍shall I leave so you can type in the answer and continueyour lesson?",
+        "talk_moves": []
+      }
+    ]
+  },
+  {
+    "session_id": 276,
+    "question_id": 107852,
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "question_text": "The mean of the following numbers is \\( 4 \\), what is the missing number?\n\\[\n2, ___ , 3,8,6\n\\]",
+    "options": {
+      "A": "\\( 1 \\)",
+      "B": "\\( 3 \\)",
+      "C": "\\( 4 \\)",
+      "D": "Need more information"
+    },
+    "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "So how many numbers are there? 😀",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]"
+      },
+      {
+        "turn_id": 3,
+        "quote": "Im stuck you see what sums do you need to do?"
+      },
+      {
+        "turn_id": 5,
+        "quote": "5 including the missing one. 😀"
+      },
+      {
+        "turn_id": 7,
+        "quote": "That's where I am stuck! 🟩🟦⬛ hee"
+      },
+      {
+        "turn_id": 9,
+        "quote": "yep i remember [STUDENT_NAME] yep"
+      },
+      {
+        "turn_id": 11,
+        "quote": "by subtracting them so 1=A si or no?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 4,
+        "quote": "So how many numbers are there? 😀",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Great and if their mean is 4... What does that mean the total of the numbers will be? 🤩",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "Remember an earlier question where we had 7 numbers and the average was 4 so we did 7 x 4 = 28 for the total? 😀",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "So we now have a mean of 4 and 5 numbers... How will we work out the total? 😁",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 469,
+    "question_id": 107895,
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "question_text": "What is the mode of the following numbers?\n\\(\n0.4, \\quad \\frac{1}{4}, \\quad 2.5, \\quad \\frac{2}{5}\n\\)",
+    "options": {
+      "A": "\\( \\frac{1}{4} \\)",
+      "B": "\\( \\frac{2}{5} \\)",
+      "C": "\\( 0.4 \\) and \\( 2.5 \\)",
+      "D": "There is no mode"
+    },
+    "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "im stuck on this question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "he most common number"
+      },
+      {
+        "turn_id": 10,
+        "quote": "0.25"
+      },
+      {
+        "turn_id": 16,
+        "quote": "1/10"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "This is an interesting one! What are you looking for in the list when you're finding the mode?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Right! In this question, it's helpful to think of it as the most common value. Can you see any numbers there that have the same value as each other?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Have you tried converting the fractions into decimals?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 555,
+    "question_id": 77633,
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "question_text": "The median of these four numbers is \\( 5 \\).\n\\(\n\\begin{array}{cccc}\n3&12&1&?\n\\end{array}\n\\)\nFind the value of the missing number.",
+    "options": {
+      "A": "\\( 7 \\)",
+      "B": "\\( 4 \\)",
+      "C": "\\( 16 \\)",
+      "D": "\\( 6.5 \\)"
+    },
+    "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I dont know how to work out median"
+      },
+      {
+        "turn_id": 4,
+        "quote": "ohh also 1 more question"
+      },
+      {
+        "turn_id": 6,
+        "quote": "if i can ask this are you also AI generated or are you a real person?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Ohh okk thank youu :0"
+      },
+      {
+        "turn_id": 12,
+        "quote": "yess"
+      },
+      {
+        "turn_id": 14,
+        "quote": "You can leave me to it!!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Yes?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Do you think you can work out the answer now?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "Great! Do you want to check it with me, or shall I leave you to it?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 1021,
+    "question_id": 77920,
+    "subject_path": "Data and Statistics > Data Processing > Averages and Range from Grouped Data",
+    "question_text": "\\begin{tabular}{|c|c|}\n\\hline Test score & Frequency \\( (f) \\) \\\\\n\\hline \\( 0-4 \\) & \\( 4 \\) \\\\\n\\hline \\( 5-9 \\) & \\( 6 \\) \\\\\n\\hline \\( 10-14 \\) & \\( 13 \\) \\\\\n\\hline \\( 15-19 \\) & \\( 17 \\) \\\\\n\\hline \\( 20-24 \\) & \\( 10 \\) \\\\\n\\hline\n\\end{tabular}\nIn which class interval will the median be found?",
+    "options": {
+      "A": "\\( 15-19 \\)",
+      "B": "\\( 25 \\)",
+      "C": "\\( 10-14 \\)",
+      "D": "\\( 17 \\)"
+    },
+    "misconception_name": "Averages and Range from Grouped Data 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Ok, so you've moved onto median now. Do you know what a median is?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi [STUDENT_NAME]"
+      },
+      {
+        "turn_id": 4,
+        "quote": "That's okay"
+      },
+      {
+        "turn_id": 8,
+        "quote": "I am not sure is it B or A🤔 50 50 tests"
+      },
+      {
+        "turn_id": 10,
+        "quote": "I don't really know how to explain"
+      },
+      {
+        "turn_id": 14,
+        "quote": "Erm..."
+      },
+      {
+        "turn_id": 18,
+        "quote": "Yes Thank You"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 5,
+        "quote": "Ok, so you've moved onto median now. Do you know what a median is?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "👍 So, as the feedback says: imagine these test papers in order, from lowest to highest score. The median result will be in the middle position. We need to work out what the middle position will be. How many tests were taken?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "ok, so we're looking for the middle piece of data out of 50 pieces of data. So, are you thinking that the middle pieces of data will be the 25th and 26th? This is where I think your 25 will have come from.",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "👍 Ok, so for the median, we want to make sure that we're choosing a value that is relevant to the data collected. So, imagine you were collecting the data for this table - what would you be asking people?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 716,
+    "question_id": 107904,
+    "subject_path": "Data and Statistics > Data Processing > Range and Interquartile Range from a List of Data",
+    "question_text": "What is the range of the following numbers?\n\\( 2,2,4,17,10 \\)",
+    "options": {
+      "A": "\\( 15 \\)",
+      "B": "\\( 8 \\)",
+      "C": "\\( 2 \\)",
+      "D": "\\( 19 \\)"
+    },
+    "misconception_name": "Range and Interquartile Range from a List of Data 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I am stuck"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Divide biggest number by the smallest number"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Subtracted"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Subtraction"
+      },
+      {
+        "turn_id": 12,
+        "quote": "2-17"
+      },
+      {
+        "turn_id": 14,
+        "quote": "17-2=15"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Ok. Let me just have a read of the question you're on! One moment... Ok, great. It asks you about the RANGE. Do you know what that is?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "So what do you think you need to do here?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "? - ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 1009,
+    "question_id": 131546,
+    "subject_path": "Data and Statistics > Data Representation > Pictogram",
+    "question_text": "This pictogram shows the different types of music Hank has in his music collection.\n\nHow many Jazz CDs does Hank have?",
+    "options": {
+      "A": "\\( 3 \\)",
+      "B": "\\( 3.25 \\)",
+      "C": "\\( 12.25 \\)",
+      "D": "\\( 13 \\)"
+    },
+    "misconception_name": "Pictogram 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I'm confused on this question."
+      },
+      {
+        "turn_id": 12,
+        "quote": "I don't know."
+      },
+      {
+        "turn_id": 14,
+        "quote": "Yeah."
+      },
+      {
+        "turn_id": 16,
+        "quote": "Wait! Is the answer 13?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Righto lets take a look. So on the pictogram how many cds is each circle worth?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Brill So how many circles do we have for Jazz?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Not quite How many whole circles for Jazz?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 1023,
+    "question_id": 131550,
+    "subject_path": "Data and Statistics > Data Representation > Pictogram",
+    "question_text": "This pictogram shows the different types of music Jake has in his music collection.\n\nWhich of the following numbers of CDs could Jake represent with whole symbols?",
+    "options": {
+      "A": "\\( 1 \\)",
+      "B": "\\( 14 \\)",
+      "C": "\\( 24 \\)",
+      "D": "\\( 34 \\)"
+    },
+    "misconception_name": "Pictogram 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "im stuck heloo]"
+      },
+      {
+        "turn_id": 4,
+        "quote": "4 are you their?"
+      },
+      {
+        "turn_id": 6,
+        "quote": "ok im sorry"
+      },
+      {
+        "turn_id": 12,
+        "quote": "yay 👍"
+      },
+      {
+        "turn_id": 14,
+        "quote": "yes please"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Hello! So, ONE symbol represents how many CDs?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So which of the four numbers could be represented with whole symbols? '4' could be, but that's not an option.",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "Shall I pass you back?",
+        "talk_moves": []
+      }
+    ]
+  },
+  {
+    "session_id": 282,
+    "question_id": 76888,
+    "subject_path": "Data and Statistics > Data Representation > Pie Chart",
+    "question_text": "This pie chart shows how the employees of a company travel to work.\n\nWhich of the following can not be found from this pie chart?",
+    "options": {
+      "A": "The angle of each of the sector",
+      "B": "The modal form of transport",
+      "C": "The fraction who take each form of transport",
+      "D": "The mean form of transport"
+    },
+    "misconception_name": "Pie Chart 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello [STUDENT_NAME], how are you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Im great thank you how are you?"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Yes please and also on wednesday i got told that next year in year 9 im going to be set 2 maths!! im really pleased with my progress and grateful for the help of the eedi tutors"
+      },
+      {
+        "turn_id": 8,
+        "quote": "in summer im just trying to get some practice in for year 9"
+      },
+      {
+        "turn_id": 10,
+        "quote": "i know the fraction the angle im pretty sure"
+      },
+      {
+        "turn_id": 12,
+        "quote": "10/100"
+      },
+      {
+        "turn_id": 16,
+        "quote": "with a protractor?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello [STUDENT_NAME], how are you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "i'm brilliant, thank you for asking :) do you need help with this pie chart? Are there any your know that you can find looking at the pie chart?",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "Super which is the same as 1/10...now how many degrees are there in a whole pie chart?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "Amazing, is there a way we can find the angle is we know that train is 1/10?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 443,
+    "question_id": 76894,
+    "subject_path": "Data and Statistics > Data Representation > Pie Chart",
+    "question_text": "\\(120 \\) blue sheep and \\( 90 \\) yellow sheep are tested for a disease.\nThe pie charts show the results for each type of sheep.\n\nFrom the tested sheep, are there more blue or yellow with the disease? By how many?",
+    "options": {
+      "A": "More blue, by \\( 30 \\)",
+      "B": "More blue, by \\( 55 \\)",
+      "C": "More blue, by \\( 35 \\)",
+      "D": "More yellow,\nby \\( 25 \\)"
+    },
+    "misconception_name": "Pie Chart 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] can I help?! 😁",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi I've already calculated that 120% of the yellow sheep have been diagnosed with disease and that 270% of the blue sheep have got the disease but that is all i have so far"
+      },
+      {
+        "turn_id": 4,
+        "quote": "i am stuck on what i should do next"
+      },
+      {
+        "turn_id": 6,
+        "quote": "270/360"
+      },
+      {
+        "turn_id": 8,
+        "quote": "360/360"
+      },
+      {
+        "turn_id": 10,
+        "quote": "i dont kno w"
+      },
+      {
+        "turn_id": 12,
+        "quote": "oh 120"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] can I help?! 😁",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "What fraction of the pie chart for blue is diseased sheep? 🐏",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Your percentages are incorrect I'm afraid as percent is out 100 but the pie chart is out of 360 so we need to do it a different way 😊 Great so we've got 270/360 then how many blue sheep were there altogether?!",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "There was only 1 sheep?! That's what 360/360 means.... How many sheep were there? You're very close I'm just being picky😊",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 147,
+    "question_id": 79107,
+    "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+    "question_text": "How many months have an average temperature above 23⁰C ?",
+    "options": {
+      "A": "\\( 7 \\)",
+      "B": "\\( 4 \\)",
+      "C": "\\( 5 \\)",
+      "D": "\\( 8 \\)"
+    },
+    "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello [STUDENT_NAME] 👋👋👋 Can I help you with these types of questions?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "yes please"
+      },
+      {
+        "turn_id": 6,
+        "quote": "it is less than 23?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "how many moths have an have an average temperature above 23 degries c"
+      },
+      {
+        "turn_id": 12,
+        "quote": "okay 4"
+      },
+      {
+        "turn_id": 16,
+        "quote": "okay"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello [STUDENT_NAME] 👋👋👋 Can I help you with these types of questions?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Of course 😊👌 Do you know where 23 degrees is on the y-axis?!",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Great if you move your finger across the graph... How many dots are above this line? 🧠 Remember 23 degrees is not MORE than 23....",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "It is 23... So we can't count it as more than 23. If that makes sense? 😊 So how many months are there? 🧠",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 495,
+    "question_id": 77639,
+    "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+    "question_text": "How many metres did the rocket travel between \\( 10 \\) and \\( 40 \\) seconds?",
+    "options": {
+      "A": "\\( 60 \\)",
+      "B": "\\( 50 \\)",
+      "C": "\\( 30 \\)",
+      "D": "\\( 40 \\)"
+    },
+    "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "If you go to 10 seconds on the horizontal axis, and then up to the graph, and then across to the vertical axis, what is the value there? Right, great Now let's do the same for 40 second",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "i need help pleasd"
+      },
+      {
+        "turn_id": 5,
+        "quote": "please"
+      },
+      {
+        "turn_id": 7,
+        "quote": "10 meteres"
+      },
+      {
+        "turn_id": 9,
+        "quote": "50 meteres"
+      },
+      {
+        "turn_id": 11,
+        "quote": "50 meteres"
+      },
+      {
+        "turn_id": 13,
+        "quote": "40 meteres"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 8,
+        "quote": "If you go to 10 seconds on the horizontal axis, and then up to the graph, and then across to the vertical axis, what is the value there? Right, great Now let's do the same for 40 second",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "Ok, so it had already travelled 10 metres in the first 10 seconds. Then by 40 seconds it had travelled 50 metres in total So how far did it travel between 10 and 40 seconds?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "Exactly. We need to subtract the distance it had already travelled from the total distance at the end of the 40 seconds So 50 - 10 = 40 Are you happy with how we got to that answer?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 973,
+    "question_id": 77643,
+    "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+    "question_text": "How many months have an average temperature below 25⁰C ?",
+    "options": {
+      "A": "\\( 3 \\)",
+      "B": "\\( 4 \\)",
+      "C": "\\( 8 \\)",
+      "D": "\\( 9 \\)"
+    },
+    "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "no I don't think so, let's go through them all January?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "idk what to do ughh"
+      },
+      {
+        "turn_id": 3,
+        "quote": "oml ty"
+      },
+      {
+        "turn_id": 5,
+        "quote": "is it 3"
+      },
+      {
+        "turn_id": 7,
+        "quote": "ok no"
+      },
+      {
+        "turn_id": 9,
+        "quote": "yh feb: no mar no"
+      },
+      {
+        "turn_id": 17,
+        "quote": "22 4!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 6,
+        "quote": "no I don't think so, let's go through them all January?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "What temp is feb?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "Remember - temps below 25 :) So that is jan and feb so far what temp is march?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 16,
+        "quote": "so below 25 :) that is 3 so far Brill april?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 976,
+    "question_id": 146708,
+    "subject_path": "Data and Statistics > Data Representation > Venn Diagrams",
+    "question_text": "\\( \\begin{array}{c}\\xi=\\begin{array}{c}\\text {\\{ integers between } 1 \\\\ \\text { and } 10 \\text { inclusive }\\}\\end{array} \\\\ A=\\{\\text { odd numbers }\\} \\\\ B=\\{\\text { factors of } 30\\}\\end{array} \\)\nIn which region does \\( 4 \\) belong?",
+    "options": {
+      "A": "A",
+      "B": "B",
+      "C": "C",
+      "D": "D"
+    },
+    "misconception_name": "Venn Diagrams 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey! How can I help? 😃",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Is it c"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Nope Is it a"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Hi i need help on this question"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey! How can I help? 😃",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Let me check Is 4 a factor of 30?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "A would mean that it is odd. Is 4 odd?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So 4 is not odd and it is not a factor of 30 Where must it go on the Venn diagram? Hey! How can I help? 😃",
+        "talk_moves": [
+          "<Press for Accuracy>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 1011,
+    "question_id": 78706,
+    "subject_path": "Data and Statistics > Probability > Experimental Probability and Relative Frequency",
+    "question_text": "A card is picked from a pack of \\( 52 \\) playing cards.\nWhat is the probability a Jack, Queen or King is picked given that the card is a Club.",
+    "options": {
+      "A": "\\( \\frac{3}{52} \\)",
+      "B": "\\( \\frac{13}{52} \\)",
+      "C": "\\( \\frac{3}{13} \\)",
+      "D": "\\( \\frac{12}{52} \\)"
+    },
+    "misconception_name": "Experimental Probability and Relative Frequency 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "How are you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "Good thank you, very confused on this question. How are you?"
+      },
+      {
+        "turn_id": 6,
+        "quote": "I have a feeling it's A looking back at it and what the teacher comment was there are 52 cards in the pack"
+      },
+      {
+        "turn_id": 10,
+        "quote": "10 or 12 i can't remember how many Jacks there are"
+      },
+      {
+        "turn_id": 12,
+        "quote": "ok would you then divide that by 4 because it's asking about clubs only, so would it be 3/52?"
+      },
+      {
+        "turn_id": 14,
+        "quote": "oh so would it be 3/13 ?"
+      },
+      {
+        "turn_id": 16,
+        "quote": "thankyou for all your help 😊"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "How are you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Let's have a look ok - do you know how many of these cards are in a pack?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "There are... how many Kings?",
+        "talk_moves": [
+          "<Restating>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "good how many queens, kings and jacks in total?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 576,
+    "question_id": 78699,
+    "subject_path": "Data and Statistics > Probability > Tree Diagrams with Independent Events",
+    "question_text": "What is the probability of winning only one of the cards games of snap or chase the ace? The results of the games are independent of each other.",
+    "options": {
+      "A": "\\( \\frac{11}{20} \\)",
+      "B": "\\( \\frac{14}{20} \\)",
+      "C": "\\( \\frac{40}{20}=2 \\)",
+      "D": "\\( \\frac{9}{20} \\)"
+    },
+    "misconception_name": "Tree Diagrams with Independent Events 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! I'm here to help students this morning so I thought I'd pop in and say hi and ask if you'd like me to work on this question with you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "yes please"
+      },
+      {
+        "turn_id": 4,
+        "quote": "winning snap and loosing ace \nand winning ace and loosing snap"
+      },
+      {
+        "turn_id": 6,
+        "quote": "times them together?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "9/20"
+      },
+      {
+        "turn_id": 10,
+        "quote": "2/5x1/4= 2/20?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "=11/20"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! I'm here to help students this morning so I thought I'd pop in and say hi and ask if you'd like me to work on this question with you?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "great! I've just read it - there are 2 ways of winning just one game can you tell me what those 2 ways are?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "perfect😊 so, lets look at the first option first how do we work out the probability of winning snap and then losing ace?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "yes well done so we times 3/5 x 3/4 what is the answer to that?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 255,
+    "question_id": 129099,
+    "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > 2D Names and Properties of Shapes-Others",
+    "question_text": "Ben and Maria are discussing regular polygons.\nBen says this is a regular polygon\nMaria says this is a regular polygon\nWho is correct?",
+    "options": {
+      "A": "Only Ben",
+      "B": "Only Maria",
+      "C": "Both Ben and Maria",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "2D Names and Properties of Shapes-Others 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi this is Leo one of the tutors at Eedi How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "i dont get the questtio question"
+      },
+      {
+        "turn_id": 5,
+        "quote": "ok sure"
+      },
+      {
+        "turn_id": 11,
+        "quote": "yep7"
+      },
+      {
+        "turn_id": 17,
+        "quote": "but would maria be correct"
+      },
+      {
+        "turn_id": 21,
+        "quote": "so only ben would be correct"
+      },
+      {
+        "turn_id": 23,
+        "quote": "thanks for your help"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi this is Leo one of the tutors at Eedi How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "Using this is Ben's shape regular?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 18,
+        "quote": "What about Marias? Is that shape regular?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 20,
+        "quote": "👍 How do we know it isn't regular?",
+        "talk_moves": [
+          "<Press for Reasoning>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 819,
+    "question_id": 106636,
+    "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals",
+    "question_text": "Elijah is trying to solve the equation on the right.\n\\( 15=1+4 k \\)\nHere are his steps.\nStep \\( 1 \\quad 14=4 k \\)\n\nStep \\( 2 \\quad \\frac{14}{4}=k \\)\nWhich steps, if any, are correct?",
+    "options": {
+      "A": "Only step \\( 1 \\)",
+      "B": "Only step \\( 2 \\)",
+      "C": "Both steps are correct",
+      "D": "Both step.s are incorrect"
+    },
+    "misconception_name": "Properties of Quadrilaterals 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help today? 😊",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "imstuck"
+      },
+      {
+        "turn_id": 8,
+        "quote": "okay"
+      },
+      {
+        "turn_id": 10,
+        "quote": "im stuck on that too"
+      },
+      {
+        "turn_id": 12,
+        "quote": "divide"
+      },
+      {
+        "turn_id": 20,
+        "quote": "u can go now"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! How can I help today? 😊",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "No worries we want to solve 15 = 1 + 4k we want to get the 4k by itself so the 1 is in the way how do we deal with +1?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Excellent If we -1 from both sides of 15 = 1 + 4k what would we get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "what does 4k mean?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 872,
+    "question_id": 79038,
+    "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals",
+    "question_text": "How many edges are there in the following 3D shape?",
+    "options": {
+      "A": "\\( 18 \\)",
+      "B": "\\( 12 \\)",
+      "C": "\\( 13 \\)",
+      "D": "\\( 8 \\)"
+    },
+    "misconception_name": "Properties of Quadrilaterals 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] how are you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "Good"
+      },
+      {
+        "turn_id": 5,
+        "quote": "I need help with understanding what are vertices face and etc"
+      },
+      {
+        "turn_id": 7,
+        "quote": "The corner of the shape?"
+      },
+      {
+        "turn_id": 9,
+        "quote": "Lines which join the corners of the shape"
+      },
+      {
+        "turn_id": 15,
+        "quote": "Okay"
+      },
+      {
+        "turn_id": 17,
+        "quote": "10? Is it 10"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi [STUDENT_NAME] how are you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 4,
+        "quote": "Can you tell me what you understand by edges?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "ok, this question asks about edges what do you think the edges of a shape are?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "how many edges does this shape have? Don't forget the back too :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 162,
+    "question_id": 91621,
+    "subject_path": "Geometry and Measure > Angles > Angle Facts with Parallel Lines",
+    "question_text": "Jack and Lily are arguing about the result of this Function Machine:\nJack says the output is: \\( 3 n-12 \\)\nLily says the output is: \\( 3(n-4) \\)\nWho is correct?",
+    "options": {
+      "A": "Only Jack",
+      "B": "Only\nLily",
+      "C": "Both Jack and Lily",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Angle Facts with Parallel Lines 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "What made you originally think that Jack was right and Lily was wrong?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi ! What’s the answer be b"
+      },
+      {
+        "turn_id": 4,
+        "quote": "I’m not really too sure it was kind of a guess"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Nope !"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Hmm No"
+      },
+      {
+        "turn_id": 12,
+        "quote": "I meant both Jack and Lily are correct"
+      },
+      {
+        "turn_id": 14,
+        "quote": "It couldn’t of been nitrous correct because Lily is correct so it has to be both I meant neither is correct"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "What made you originally think that Jack was right and Lily was wrong?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Fair enough! Have you learned how to multiply out brackets yet?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "That's OK, we can approach this another way. Have you learned about BIDMAS? Or maybe you call it BODMAS?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "OK! So if we want to subtract 4 then multiply ALL of our answer by 3 (like the arrows say), Lily's answer would be correct because we use the brackets to make sure ALL of n - 4 gets multiplied by 3. So Lily is correct. The question is, is Jack right too or not?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 497,
+    "question_id": 129168,
+    "subject_path": "Geometry and Measure > Angles > Angles in Triangles",
+    "question_text": "What is the size of angle \\( p \\) in this quadrilateral?",
+    "options": {
+      "A": "\\( 75^{\\degree} \\)",
+      "B": "\\( 60^{\\degree} \\)",
+      "C": "\\( 30^{\\degree} \\)",
+      "D": "Not enough information to work it out"
+    },
+    "misconception_name": "Angles in Triangles 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "How are you getting on?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi sophia"
+      },
+      {
+        "turn_id": 4,
+        "quote": "im noy sure on the question"
+      },
+      {
+        "turn_id": 6,
+        "quote": "not really"
+      },
+      {
+        "turn_id": 8,
+        "quote": "okay👍"
+      },
+      {
+        "turn_id": 10,
+        "quote": "yes🙂"
+      },
+      {
+        "turn_id": 14,
+        "quote": "okay thanks"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "How are you getting on?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ok so, do you know what the sum of the angles in any quadrilateral is?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "we know that two of the angle in this quadrilateral are 150 and 60 degrees if we take those angles away from 360, then that will tell us how much is left for the other two angles 360 - 150 - 60 = 150 So the other two angles together add up to 150 degrees Happy so far?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Great Now, those little lines on the side of the kite means that the two shorter sides are both the same length, and the two longer sides are both the same length which means that a kite is symmetrical - we can chop it in half and the two sides are mirror images of each other in this case, we could draw a line of symmetry horizontally across the kite, going through the angles of 150 and 60 degrees Okay with that?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 122,
+    "question_id": 76840,
+    "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+    "question_text": "Angle \\( \\square=50^{\\circ} \\) because",
+    "options": {
+      "A": "Angles at a point sum to \\( 360^{\\circ} \\)",
+      "B": "Adjacent angles are equal",
+      "C": "Angles on a straight line sum to \\( 180^{\\circ} \\)",
+      "D": "Vertically opposite angles are equal"
+    },
+    "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] :) How can I help you? :)",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I'm confused on this question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "I'm not sure how to find the answer"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Yes I think"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Oh so the answer is A"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Not really"
+      },
+      {
+        "turn_id": 12,
+        "quote": "170 and 50"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] :) How can I help you? :)",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ok, let's go through and check if they work for us. A says angles at a point sum to 360 Do we have angles around a point on the diagram?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Because all the angles there are around exactly one point. Do we know every angle except one of them? :)",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Which ones don't we know? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 539,
+    "question_id": 93387,
+    "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+    "question_text": "What is the size of angle \\( n \\) ?",
+    "options": {
+      "A": "\\( 132^{\\circ} \\)",
+      "B": "\\( 142^{\\circ} \\)",
+      "C": "\\( 102^{\\circ} \\)",
+      "D": "\\( 312^{\\circ} \\)"
+    },
+    "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i dont get the quistion"
+      },
+      {
+        "turn_id": 4,
+        "quote": "its on a straight ine"
+      },
+      {
+        "turn_id": 8,
+        "quote": "take away"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Super! And do you know how many degrees make up a straight line?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Great! So how can that help us find n?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Not quite. We know the angles need to add up to 180. We have 48 + n = 180 So what calculation will help us find n?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 776,
+    "question_id": 145978,
+    "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+    "question_text": "What is the size of angle \\( x \\) ?",
+    "options": {
+      "A": "\\( 42^{\\degree} \\)",
+      "B": "\\( 132^{\\degree} \\)",
+      "C": "\\( 48^{\\degree} \\)",
+      "D": "\\( 52^{\\degree} \\)"
+    },
+    "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi MArcus 😁👋 How can I help?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I don’t know how to find the point"
+      },
+      {
+        "turn_id": 4,
+        "quote": "228 from the angles that are there"
+      },
+      {
+        "turn_id": 6,
+        "quote": "110+118=228"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Oh ok Is 62 the answer"
+      },
+      {
+        "turn_id": 18,
+        "quote": "42 42 degrees is the answer"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi MArcus 😁👋 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "What do the angles around a point add up to? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "What is the value of the angle with the square marker on it? 👀😁",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "How much have we got with the 3 angles all together? 😃",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 903,
+    "question_id": 107597,
+    "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+    "question_text": "How should you write \\( 5 \\) kilograms and \\( 7 \\) grams in tonnes?",
+    "options": {
+      "A": "\\( 5007 t \\)",
+      "B": "\\( 0.05007 t \\)",
+      "C": "\\( 5.007 t \\)",
+      "D": "\\( 0.005007 t \\)"
+    },
+    "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] :) How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hello :D 😀 Can I please get help with this question?"
+      },
+      {
+        "turn_id": 4,
+        "quote": "1000g in 1kg!!"
+      },
+      {
+        "turn_id": 6,
+        "quote": "7kg? I think 🤔"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Okay thank"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Ohhh Okay!! So 7 divided by 1000 = 0.007!!"
+      },
+      {
+        "turn_id": 14,
+        "quote": "5000.007 kg!! I think 🤔 :)"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] :) How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Of course! Let's start with the grams. Do you know how many grams there are in a kg?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Super! So how could we write the 7g in kg?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "So we have 5kg and 0.007kg How many kg do we have altogether?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 421,
+    "question_id": 130192,
+    "subject_path": "Geometry and Measure > Circles > Parts of a Circle",
+    "question_text": "Which of the following diagrams shows the radius of a circle?",
+    "options": {},
+    "misconception_name": "Parts of a Circle 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "hi there how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i dont get it"
+      },
+      {
+        "turn_id": 14,
+        "quote": "the straight line from the centre of circle to its circumference"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "hi there how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "oh can you remember what the radius of a circle is?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "you chose C but the red lline in that diagram is called a tangent let me explain what a radius is a radius is a line that is drawn from the centre of a circle to its edge which diagram shows a line from the centre to the edge of the circle?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "remind me again the description of a radius?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 431,
+    "question_id": 95518,
+    "subject_path": "Geometry and Measure > Circles > Parts of a Circle",
+    "question_text": "What is the length of the side marked \\( k \\) ?",
+    "options": {
+      "A": "\\( 2 \\mathrm{~cm} \\)",
+      "B": "\\( 2.5 \\mathrm{~cm} \\)",
+      "C": "\\( 3 \\mathrm{~cm} \\)",
+      "D": "Not enough information"
+    },
+    "misconception_name": "Parts of a Circle 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] I'm Olivia, one of the tutors here at Eedi :) How can I help you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi [STUDENT_NAME]! :) Could you tell me of the best approach that I could use to work out this question. This is the first I have seen of its kind."
+      },
+      {
+        "turn_id": 4,
+        "quote": "No, sorry"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Radius"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Yes - the length k"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Yes - part of the horizontal line is the radius of the bigger circle it has a length of 3 cm meaning the larger circle has a radius of 3"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Sorry, quick question"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] I'm Olivia, one of the tutors here at Eedi :) How can I help you?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Of course, let's have a look together! What do you know that the length k is in relation to the circle?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "What do we call the distance from the centre of the circle to the outside? It's okay if you aren't sure!",
+        "talk_moves": [
+          "<Press for Accuracy>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Great! Can you see the radius anywhere else on the larger circle?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 739,
+    "question_id": 107919,
+    "subject_path": "Geometry and Measure > Compound Measures > Density",
+    "question_text": "Which of the following is not a measure of density?",
+    "options": {
+      "A": "Kilograms per metre squared",
+      "B": "Grams per centimetre cubed",
+      "C": "Tonnes per kilometre cubed",
+      "D": "Milligrams per millimetre cubed"
+    },
+    "misconception_name": "Density 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "sorry, but what is density"
+      },
+      {
+        "turn_id": 3,
+        "quote": "v3 V cube"
+      },
+      {
+        "turn_id": 5,
+        "quote": "but here is nothing volume and mass"
+      },
+      {
+        "turn_id": 7,
+        "quote": "no mass or volume"
+      },
+      {
+        "turn_id": 9,
+        "quote": "centimetre is not volume nor mass"
+      },
+      {
+        "turn_id": 11,
+        "quote": "understand but let me look at the question again i got it its d"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "So for example B is definitely a measure of density as it is grams per centimetre cubed So grams is a mass and \"Centimetre cubed\" is volume Does that last bit make sense?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "So does D mention mass?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 16,
+        "quote": "are a measurement of mass :) and per millimetre cubed is a measurement of volume are there any that aren't volume?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 671,
+    "question_id": 75988,
+    "subject_path": "Geometry and Measure > Compound Measures > Speed, Distance, Time",
+    "question_text": "A tuk tuk's highest speed is \\( 30 \\mathrm{mph} \\).\nHow many miles does a \\( 40 \\) minute tuk tuk ride travel at top speed?",
+    "options": {
+      "A": "\\( 1200 \\)",
+      "B": "\\( 20 \\)",
+      "C": "\\( 12 \\)",
+      "D": "\\( 45 \\)"
+    },
+    "misconception_name": "Speed, Distance, Time 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello again Liam 😊👋 How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi is it d"
+      },
+      {
+        "turn_id": 4,
+        "quote": "4/10👍 4/6 🤫🧏‍♂️"
+      },
+      {
+        "turn_id": 8,
+        "quote": "ok b"
+      },
+      {
+        "turn_id": 10,
+        "quote": "is it b ?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello again Liam 😊👋 How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "It is not, no 😊 40 minutes is how much of an hour? 🧠",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Not quite, there are not 100 minutes in an hour... How many are there?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Ready to go back to eedi again? 🤖",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 179,
+    "question_id": 98488,
+    "subject_path": "Geometry and Measure > Perimeter and Area > Area of Simple Shapes",
+    "question_text": "Which of the following triangles does not have the same area as the others?",
+    "options": {
+      "D": "They all have the same area"
+    },
+    "misconception_name": "Area of Simple Shapes 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "i dont understand"
+      },
+      {
+        "turn_id": 9,
+        "quote": "1/2 it i think"
+      },
+      {
+        "turn_id": 17,
+        "quote": "D because it letter"
+      },
+      {
+        "turn_id": 21,
+        "quote": "send meeeeee back"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 4,
+        "quote": "Did you find the area of triangle A?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Good, and what about B?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "we need the base and height, so the that's the line that's straight along and the one that's straight up 3 x 6, right? And then what's the second step for area of a triangle?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 85,
+    "question_id": 131361,
+    "subject_path": "Geometry and Measure > Similarity and Congruency > Length Scale Factors in Similar Shapes",
+    "question_text": "Liam and Sophie are discussing similar shapes\nLiam says these two shapes are similar:\nSophie says these two shapes are similar:\nWho is correct?",
+    "options": {
+      "A": "Only Liam",
+      "B": "Only Sophie",
+      "C": "Both Liam and Sophie",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Length Scale Factors in Similar Shapes 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] :)\nHow can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "hi again..."
+      },
+      {
+        "turn_id": 3,
+        "quote": "iam stuck in this question"
+      },
+      {
+        "turn_id": 5,
+        "quote": "okay"
+      },
+      {
+        "turn_id": 7,
+        "quote": "yeah i guess it like shapes that have the same perimeter and area i guess"
+      },
+      {
+        "turn_id": 13,
+        "quote": "so i am trying to think and i think its is c C"
+      },
+      {
+        "turn_id": 15,
+        "quote": "both has the same angle and the have 5,5 and 6,6 i gues i guess"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi [STUDENT_NAME] :)\nHow can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Do you know what 'similar shapes' are?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "As long as they also had the same angles then they will be similar. One is just 10 times bigger than the other So take another look at the question. Can you spot a pattern like that with any of the lengths?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "What's the pattern between Liam's triangles?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 478,
+    "question_id": 107595,
+    "subject_path": "Geometry and Measure > Units of Measurement > Weight Units",
+    "question_text": "Martha has answered a question on mass and got an answer of \\( 500 \\).\n\nBehind the star she has written the units that she used.\nWhich of the following units is definitely wrong?\n\\( 500 \\bigstar \\)",
+    "options": {
+      "A": "\\( g \\)",
+      "B": "\\( t \\)",
+      "C": "\\( m \\)",
+      "D": "\\( \\mathrm{kg} \\)"
+    },
+    "misconception_name": "Weight Units 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hello, I am stuck on this problem and im confused what it means."
+      },
+      {
+        "turn_id": 4,
+        "quote": "i think it was C, but i got confused"
+      },
+      {
+        "turn_id": 8,
+        "quote": "grams, metres and kilograms"
+      },
+      {
+        "turn_id": 10,
+        "quote": "yes. i think so."
+      },
+      {
+        "turn_id": 12,
+        "quote": "b and a?"
+      },
+      {
+        "turn_id": 14,
+        "quote": "ohh okay, would mean the answer is C"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Do you know what any of them stand for?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "fantastic! Are any of them units of mass?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Which ones?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 29,
+    "question_id": 108130,
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "question_text": "The table shows the numbers of TVs in the households of students in a different class.\n\nWhat is the range for the number of TVs?\n\\begin{tabular}{|c|c|}\n\\hline TVs & Frequency \\\\\n\\hline \\( 0 \\) & \\( 0 \\) \\\\\n\\hline \\( 1 \\) & \\( 7 \\) \\\\\n\\hline \\( 2 \\) & \\( 2 \\) \\\\\n\\hline \\( 3 \\) & \\( 5 \\) \\\\\n\\hline \\( 4 \\) & \\( 12 \\) \\\\\n\\hline\n\\end{tabular}",
+    "options": {
+      "A": "\\( 3 \\)",
+      "B": "\\( 12 \\)",
+      "C": "\\( 10 \\)",
+      "D": "\\( 4 \\)"
+    },
+    "misconception_name": "范围计算中频率与数据值的混淆",
+    "error_choice": "B",
+    "key_aha_question": "At least one person has to have given that answer... otherwise that number of TVs doesn't exist in this survey really... can you see those 7 people who have 1 TV?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi again"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Would that be 4 and 2? Wait 0"
+      },
+      {
+        "turn_id": 6,
+        "quote": "So 4 and 2?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Ohh 3"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Yes thankyou"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 7,
+        "quote": "4 is correct... but some people have 1 Tv... can you see those 7 people who have 1 TV?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Great... so the largest number of TVs is 4 And the lowest number of TVs that anyone has is 1. So, the range = 4-1 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Great! Does this all make sense?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 77,
+    "question_id": 131463,
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "question_text": "What is the volume of this cuboid?",
+    "options": {
+      "A": "\\( 19 \\mathrm{~cm}^{3} \\)",
+      "B": "\\( 50 \\mathrm{~cm}^{3} \\)",
+      "C": "\\( 200 \\mathrm{~cm}^{3} \\)",
+      "D": "\\( 220 \\mathrm{~cm}^{3} \\)"
+    },
+    "misconception_name": "体积与表面积概念混淆",
+    "error_choice": "D",
+    "key_aha_question": "Remember we multiply the length by the width by the height to find the volume of a cuboid This question wants the volume not the area :)",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "what is the answer"
+      },
+      {
+        "turn_id": 3,
+        "quote": "i dont get it what feedback ???# ??? i did the area add all the side areas"
+      },
+      {
+        "turn_id": 5,
+        "quote": "I know its not D oh ok what is volume is it sound"
+      },
+      {
+        "turn_id": 7,
+        "quote": "what is the space inside please"
+      },
+      {
+        "turn_id": 9,
+        "quote": "how do you work it out on this question"
+      },
+      {
+        "turn_id": 11,
+        "quote": "10 X 5 is 50"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi! Can you see the feedback tells you which calculation to use?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "Good, and x4?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "Great, that is correct :) Good to go?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 80,
+    "question_id": 75997,
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "question_text": "Which clock shows ten to twelve at night?",
+    "options": {
+      "A": "10:12",
+      "B": "\\( 12: 50 \\)",
+      "C": "00:50",
+      "D": "\\( 23: 50 \\)"
+    },
+    "misconception_name": "时间表述中的分钟-小时倒装与12/24小时制混淆",
+    "error_choice": "A",
+    "key_aha_question": "Which time does B show?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "i need help on this question"
+      },
+      {
+        "turn_id": 6,
+        "quote": "12 minute past 50 50 minutes past 12"
+      },
+      {
+        "turn_id": 8,
+        "quote": "its 12 : 50 AM"
+      },
+      {
+        "turn_id": 10,
+        "quote": "is it D?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "will i get 100 coins this time>"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 5,
+        "quote": "You went for A, which is 12 minutes past 10 What time does B show?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Yes brilliant, 50 minutes past 12 which is 12 minutes to 1 Sorry 10 minutes to 1** Which isn't what we are looking how about C?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Excellent! so 10 to 1 again So it isn't A, B or C! How about D? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "D shows 10 to 12 at night-time, so yes, 10 to 12 at night :) Super work! Well done ⭐⭐⭐⭐⭐ Are you ok to return to the lesson now?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 859,
+    "question_id": 154582,
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "question_text": "The area of these shapes are equal.\nWhich of these are correct?",
+    "options": {
+      "A": "\\( 10 x+2=12 x-1 \\)",
+      "B": "\\( 10 x+10=15 x-5 \\)",
+      "C": "\\( 10 x+10=12 x-4 \\)",
+      "D": "\\( 2 x+7=3 x+3 \\)"
+    },
+    "misconception_name": "Volume of Prisms 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey! How can I help? 😃",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i dont know what to do"
+      },
+      {
+        "turn_id": 4,
+        "quote": "okay"
+      },
+      {
+        "turn_id": 6,
+        "quote": "so is it b"
+      },
+      {
+        "turn_id": 10,
+        "quote": "so its d"
+      },
+      {
+        "turn_id": 14,
+        "quote": "10x + 10"
+      },
+      {
+        "turn_id": 18,
+        "quote": "bye love u❤️❤️❤️❤️ yes"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey! How can I help? 😃",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "what is the height of the bottom parallelogram?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 17,
+        "quote": "Are you ready to go back to the lesson?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 188,
+    "question_id": 134802,
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "question_text": "Jake and Lisa are discussing the order of operations\nJake says: \\( \\frac{1}{2}+\\frac{1}{3} \\times \\frac{1}{4} \\equiv\\left(\\frac{1}{2}+\\frac{1}{3}\\right) \\times \\frac{1}{4} \\)\nLisa says: \\( \\frac{1}{2}+\\frac{1}{3} \\times \\frac{1}{4} \\equiv \\frac{1}{2}+\\left(\\frac{1}{3} \\times \\frac{1}{4}\\right) \\)\nWho is correct?",
+    "options": {
+      "A": "Only\nJake",
+      "B": "Only\nLisa",
+      "C": "Both Jake and Lisa",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi 😃😃😃 How can I help?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "i dont get the question 😀"
+      },
+      {
+        "turn_id": 7,
+        "quote": "is it A"
+      },
+      {
+        "turn_id": 9,
+        "quote": "yes wait no"
+      },
+      {
+        "turn_id": 11,
+        "quote": "wait yes yes"
+      },
+      {
+        "turn_id": 13,
+        "quote": "is it A no its not is it B"
+      },
+      {
+        "turn_id": 15,
+        "quote": "im not"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi 😃😃😃 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 4,
+        "quote": "Can you remember the order of operations? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "So we need to do the multiplication before the addition, does that make sense? 🙂👍",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "It doesn't make sense?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 658,
+    "question_id": 95781,
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "question_text": "\\( \\frac{0.3-0.1}{0.5}= \\)",
+    "options": {
+      "A": "\\( 0.5 \\)",
+      "B": "\\( 0.25 \\)",
+      "C": "\\( 0.4 \\)",
+      "D": "\\( 0.2 \\)"
+    },
+    "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I’m not sure how to divide decimals"
+      },
+      {
+        "turn_id": 14,
+        "quote": "So it would be 0.4"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME]! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Ok, no worries, let's have a look So, you've done 0.3 - 0.1 already?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So, instead... let's do this because it's easier: 20 ÷ 5 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Great....now we need to get this the correct size... So, 20 ÷ 5 = 4..... s0 2 ÷ 5 = ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 707,
+    "question_id": 89334,
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "question_text": "Think of a number, then add \\(4\\), next divide by \\( 5 \\).\nAmy says you can write this as:\n\\(\nn+4 \\div 5\n\\)\nPaul says you can write this as:\n\\(\n\\frac{n+4}{5}\n\\)\nWho is correct?",
+    "options": {
+      "A": "Only\nJo",
+      "B": "Only Henry",
+      "C": "Both Amy and Henry",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello again Clara 😁👋 Need a little help on this one?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hello [STUDENT_NAME], yes please do I need to do BIDMAS? wait now I don't think so"
+      },
+      {
+        "turn_id": 4,
+        "quote": "oops never mind what I said😂 4/5 then add n(6)"
+      },
+      {
+        "turn_id": 8,
+        "quote": "I originally thought that but I just did 4/5 +6 and got 6.8"
+      },
+      {
+        "turn_id": 10,
+        "quote": "for Henry would the answer be 2?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Henry's"
+      },
+      {
+        "turn_id": 14,
+        "quote": "Yay, thank you Emma!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello again Clara 😁👋 Need a little help on this one?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "BIDMAS will certainly help you 😁👌 thinking about BIDMAS then, what would we have to do first in Amy's sum?!",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So have you added 4 then divided by 5 in Amy's sum?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "It would indeed, well done... Thinking about the methods then, who's sum added 4 and then divided by 2 in the way it was laid out? 😊",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 754,
+    "question_id": 95813,
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "question_text": "\\( \\frac{3}{4}-\\frac{1}{4} \\times \\frac{1}{5}= \\)",
+    "options": {
+      "A": "\\( \\frac{2}{16} \\)",
+      "B": "\\( \\frac{1}{10} \\)",
+      "C": "\\( \\frac{7}{10} \\)",
+      "D": "\\( \\frac{5}{10} \\)"
+    },
+    "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "I know you didn't request help yet, but I've been watching your lesson and you're doing great! Just wanted to give you some help for this last question Is that ok?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 6,
+        "quote": "how to get the denominator right cause I got 20 but there is no answers with a denominator 20"
+      },
+      {
+        "turn_id": 8,
+        "quote": "multiply"
+      },
+      {
+        "turn_id": 10,
+        "quote": "1/20"
+      },
+      {
+        "turn_id": 12,
+        "quote": "times 4 by 5 to get 20 and do the same to the numerator which is 15"
+      },
+      {
+        "turn_id": 14,
+        "quote": "15/20"
+      },
+      {
+        "turn_id": 16,
+        "quote": "14/20"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "I know you didn't request help yet, but I've been watching your lesson and you're doing great! Just wanted to give you some help for this last question Is that ok?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Super :) So which bit do we need to do first?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "great! Then we need to do 3/4 - 1/20 so this is the bit where we need common denominators what would we do?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "amazing What would that give us as our answer?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 275,
+    "question_id": 101869,
+    "subject_path": "Number > Basic Arithmetic > Mental Addition and Subtraction",
+    "question_text": "\\( 204-36= \\)",
+    "options": {
+      "A": "\\( 156 \\)",
+      "B": "\\( 178 \\)",
+      "C": "\\( 240 \\)",
+      "D": "\\( 168 \\)"
+    },
+    "misconception_name": "Mental Addition and Subtraction 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hello I’m finding this a bit difficult to work out very quickly And not sure how I can store all the information"
+      },
+      {
+        "turn_id": 4,
+        "quote": "I think maybe I should minus the ones then the tens? So then I’d get 78 I mean *178"
+      },
+      {
+        "turn_id": 8,
+        "quote": "So…168! Ah - I see I think because I school they teach us in column subtraction to subtract the ones then the tens. *at Thank you for helping me :)"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Yes 100%"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Yes, definitely! Thank you!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Ok, so it's best to start with the tens... So what is 204-30?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 14,
+    "question_id": 129129,
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "question_text": "What is the value of:\n\\(\n\\frac{54+58}{2}\n\\)",
+    "options": {
+      "A": "\\( 56 \\)",
+      "B": "\\( 224 \\)",
+      "C": "\\( 85 \\)",
+      "D": "\\( 51 \\)"
+    },
+    "misconception_name": "运算顺序混淆与分数符号认知不清",
+    "error_choice": "C",
+    "key_aha_question": "what do you think this question is asking?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "im good, im not sure how to solve this"
+      },
+      {
+        "turn_id": 4,
+        "quote": "the value of 54+58/2"
+      },
+      {
+        "turn_id": 6,
+        "quote": "i think add 54 and 58?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "i think 114?"
+      },
+      {
+        "turn_id": 12,
+        "quote": "we do something with the 2 and 112?"
+      },
+      {
+        "turn_id": 14,
+        "quote": "halve?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], How are you today?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "good :) OK, let's have a look What do you think this question is asking?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "super! what do you think we should do first?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Yes, I agree! what answer does that give?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 23,
+    "question_id": 147113,
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "question_text": "Elijah makes a conjecture:\nTo find the lowest common multiple of two numbers, you multiply the two numbers together\nIs Elijah's conjecture...",
+    "options": {
+      "A": "Always true",
+      "B": "Sometimes true",
+      "C": "Never true",
+      "D": "I don't know"
+    },
+    "misconception_name": "将特定条件下的正确规律泛化为普遍规律",
+    "error_choice": "C",
+    "key_aha_question": "Is there an example where it doesn't work?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "is it c"
+      },
+      {
+        "turn_id": 3,
+        "quote": "kkkkkkkkk"
+      },
+      {
+        "turn_id": 9,
+        "quote": "oh so am i rigt or not"
+      },
+      {
+        "turn_id": 13,
+        "quote": "is it b"
+      },
+      {
+        "turn_id": 17,
+        "quote": "i dont know d"
+      },
+      {
+        "turn_id": 19,
+        "quote": "its d 24 12"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 4,
+        "quote": "Ok think about an example... What's the lowest common multiply of 3 and 5? *multiple",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Yep, do we get that by multiplying them together?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "For the question, we're trying to decide if multiplying numbers together gives us their lowest common multiple So did it work for 3 and 5?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "Can you prove it?",
+        "talk_moves": [
+          "<Press for Reasoning>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 143,
+    "question_id": 77590,
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "question_text": "At the start of the day, there was \\( £ 1,578 \\) in the till. \\( £ 6,537 \\) was taken and \\( £ 3,485 \\) was handed out. How much money was left?",
+    "options": {
+      "A": "\\( £ 11,660 \\)",
+      "B": "\\( £ 1,474 \\)",
+      "C": "\\( £ 4,630 \\)",
+      "D": "\\( £ 3,052 \\)"
+    },
+    "misconception_name": "Mental Multiplication and Division 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey [STUDENT_NAME] :) How are you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Good How are you"
+      },
+      {
+        "turn_id": 4,
+        "quote": "You cannot subtract 6537 from 1578 without it going into negative"
+      },
+      {
+        "turn_id": 6,
+        "quote": "6537 has been taken from 1578"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Oh so it's been added"
+      },
+      {
+        "turn_id": 10,
+        "quote": "And then subtracted"
+      },
+      {
+        "turn_id": 14,
+        "quote": "Yes!!!!!!!!!!!!!!!!!!!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey [STUDENT_NAME] :) How are you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "How are you getting on with this question? I'm good thanks :)",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "let's look at what the questions says to start there is £1,578 in the till £6,537 is taken what does that mean?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "shall we get to the answer to check?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 247,
+    "question_id": 130049,
+    "subject_path": "Number > Basic Arithmetic > Place Value",
+    "question_text": "Which number line shows a good estimate for the position of the number shown?",
+    "options": {},
+    "misconception_name": "Place Value 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi again! Have you found any answers that definitely NOT right?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "yes The questionsthat are not rihht are A, and C"
+      },
+      {
+        "turn_id": 4,
+        "quote": "for A it is wrong because 857 is no where near 10000"
+      },
+      {
+        "turn_id": 6,
+        "quote": "also i changed my mind on c because i loked at it more carefully D is defintley wrong because 8967 shoud be more close to 10000 then 5000"
+      },
+      {
+        "turn_id": 8,
+        "quote": "oh, i looked at B more nd its wrong becase 450 should be before 500 not after"
+      },
+      {
+        "turn_id": 10,
+        "quote": "that leaves C which is pretty accurate since its inbetween 1000 and 2000 so C is the correct one"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Thank u for helping me again and yes it good to go now"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi again! Have you found any answers that definitely NOT right?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Can you explain why?",
+        "talk_moves": [
+          "<Press for Reasoning>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Exactly, yes What about B?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Good explanations! So does C work, now we have discounted everything else?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 463,
+    "question_id": 101851,
+    "subject_path": "Number > Basic Arithmetic > Place Value",
+    "question_text": "What number is the arrow pointing to?",
+    "options": {
+      "A": "\\( 145 \\)",
+      "B": "\\( 140 \\)",
+      "C": "\\( 149 \\)",
+      "D": "\\( 148 \\)"
+    },
+    "misconception_name": "Place Value 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi there! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i am confused on the question i have been given 😭"
+      },
+      {
+        "turn_id": 6,
+        "quote": "I am so confused 😭😭😭😭😭"
+      },
+      {
+        "turn_id": 10,
+        "quote": "125 is half of 150 And th"
+      },
+      {
+        "turn_id": 12,
+        "quote": "oppsies"
+      },
+      {
+        "turn_id": 14,
+        "quote": "they are 29 away from eachother"
+      },
+      {
+        "turn_id": 16,
+        "quote": "i am not sure"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi there! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "okay lets have a look! so the arrow is between 125 and 150. How many intervals (gaps) are there between 125 and 150?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "good! what is the difference between 125 and 150?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "no probs! What is the difference between 125 and 150?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 573,
+    "question_id": 103770,
+    "subject_path": "Number > Basic Arithmetic > Place Value",
+    "question_text": "If\n\n\\(\n32 \\times 65=2080 \n\\)\n\nthen\n\n\\(\n3.2 \\times 6.5=\n\\)",
+    "options": {
+      "A": "\\( 208 \\)",
+      "B": "\\( 2.08 \\)",
+      "C": "\\( 20.8 \\)",
+      "D": "\\( 2080 \\)"
+    },
+    "misconception_name": "Place Value 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "im gay heloo"
+      },
+      {
+        "turn_id": 5,
+        "quote": "no can i have 20000 coins"
+      },
+      {
+        "turn_id": 7,
+        "quote": "can i have some4 help-"
+      },
+      {
+        "turn_id": 9,
+        "quote": "3.2x6.5"
+      },
+      {
+        "turn_id": 11,
+        "quote": "divide 10"
+      },
+      {
+        "turn_id": 13,
+        "quote": "miriam are u a real person or ai are u here"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi! How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 4,
+        "quote": "ok. Would you like any help with the maths?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Sorry Eli :) got a lot of people to help with maths! Have a go and then ask for help if you're stuck Hi [STUDENT_NAME]! Need any help with the maths yet?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "Sure! Which bit are you stuck with?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 737,
+    "question_id": 99570,
+    "subject_path": "Number > Basic Arithmetic > Written Multiplication",
+    "question_text": "If you list the multiples of \\( 14 \\) in ascending order, what is the \\( 3^{\\text {rd }} \\) number in the list?",
+    "options": {
+      "A": "\\( 28 \\)",
+      "B": "\\( 42 \\)",
+      "C": "\\( 56 \\)",
+      "D": "\\( 7 \\)"
+    },
+    "misconception_name": "Written Multiplication 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "umm... i am stuck in this question"
+      },
+      {
+        "turn_id": 6,
+        "quote": "i do not know my fourteen time table"
+      },
+      {
+        "turn_id": 8,
+        "quote": "stage 1-check in"
+      },
+      {
+        "turn_id": 14,
+        "quote": "I got 52"
+      },
+      {
+        "turn_id": 16,
+        "quote": "would we get 42"
+      },
+      {
+        "turn_id": 18,
+        "quote": "is it oh tanks"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Not a problem! What are multiples?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "what question do we need the answer to?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Yes sorry, I mean 14 x what?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 741,
+    "question_id": 89784,
+    "subject_path": "Number > Factors, Multiples and Primes > Factors and Highest Common Factor",
+    "question_text": "\"If you multiply a square number by \\( 9 \\), you get a square number\"\nIs this statement...",
+    "options": {
+      "A": "always true",
+      "B": "sometimes true",
+      "C": "never true",
+      "D": "Impossible to\nsay"
+    },
+    "misconception_name": "Factors and Highest Common Factor 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello again Leonardo, how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "helo i need ur help"
+      },
+      {
+        "turn_id": 4,
+        "quote": "i neeeed my streak"
+      },
+      {
+        "turn_id": 8,
+        "quote": "252 without calculator😎😎🆒"
+      },
+      {
+        "turn_id": 10,
+        "quote": "waaaaaaat 342???"
+      },
+      {
+        "turn_id": 12,
+        "quote": "waaaaaat"
+      },
+      {
+        "turn_id": 14,
+        "quote": "18,17.19? u like my new drip"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello again Leonardo, how can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "No problem! Can you think of an exampe for this question?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Nearly. Have another go?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "It's a day for shocks. You really might want a calculator for the next bit - is 324 a square number?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 59,
+    "question_id": 103042,
+    "subject_path": "Number > Factors, Multiples and Primes > Prime Numbers and Prime Factors",
+    "question_text": "Which is the next prime number greater than \\( 100 ? \\)",
+    "options": {
+      "A": "\\( 101 \\)",
+      "B": "\\( 103 \\)",
+      "C": "\\( 105 \\)",
+      "D": "\\( 107 \\)"
+    },
+    "misconception_name": "质数概念与倍数特征应用模糊",
+    "error_choice": "C",
+    "key_aha_question": "Why can we rule it out as it ends in a 5?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I don't know my prime numbers past 40"
+      },
+      {
+        "turn_id": 4,
+        "quote": "They can only be divided by one and Itself"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Because 5 is in the 5 times tables"
+      },
+      {
+        "turn_id": 14,
+        "quote": "101 is the answer to the question"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hey! How can I help? 😃",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "No worries, what do you know about prime numbers?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "perfect! So looking at the answer options, is there any that you know can be divided by something other than 1 or itself? Is there one that you could rule out?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "What can you divided 103 by to get a whole number answer? *divide",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 278,
+    "question_id": 156974,
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "question_text": "\\( 3 \\frac{3}{7}+1 \\frac{5}{7}= \\)",
+    "options": {
+      "A": "\\( 5 \\frac{1}{7} \\)",
+      "B": "\\( 3 \\frac{15}{49} \\)",
+      "C": "\\( 4 \\frac{8}{14} \\)",
+      "D": "\\( 4 \\frac{1}{7} \\)"
+    },
+    "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "have you had a look at the video, it's really similar?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "Wsg Idk how to work dis out"
+      },
+      {
+        "turn_id": 5,
+        "quote": "Yeah I did, I still don’t get it."
+      },
+      {
+        "turn_id": 7,
+        "quote": "4 wholes"
+      },
+      {
+        "turn_id": 9,
+        "quote": "8 over 7 That’s an improper fraction ?"
+      },
+      {
+        "turn_id": 11,
+        "quote": "1 and 1 over 7 ? Idk man"
+      },
+      {
+        "turn_id": 13,
+        "quote": "Uh D?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 4,
+        "quote": "have you had a look at the video, it's really similar?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "Ok so let's start with the none fraction parts, the whole numbers, and add those up what do you get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "awesome! now add the fractions?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "it is, well done! so if 7 make 1 whole how can we write 8/7 instead?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 288,
+    "question_id": 101075,
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "question_text": "Work out:\n\\( \\frac{5}{7}-\\frac{1}{4} \\)\nGive your answer in the simplest form.",
+    "options": {
+      "A": "\\( \\frac{27}{28} \\)",
+      "B": "\\( \\frac{4}{3} \\)",
+      "C": "\\( \\frac{13}{28} \\)",
+      "D": "\\( \\frac{1}{7} \\)"
+    },
+    "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Great, well done, that's right, you need the denominators to be the same. So, you need to write 5/7 as an equivalent fraction over 28 You have to multiply the top and bottom of 5/7 by the same number. What has the 7 been multiplied by to get 28?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "hi again mila, glad you joined i think your the most helpful!!"
+      },
+      {
+        "turn_id": 4,
+        "quote": "i know i multiply the bottom and got to 28 but not sure on the rest"
+      },
+      {
+        "turn_id": 6,
+        "quote": "4 7x4 = 28"
+      },
+      {
+        "turn_id": 8,
+        "quote": "20/28 - 4/28"
+      },
+      {
+        "turn_id": 10,
+        "quote": "ohhhh, i thought i was doing 4x4 7"
+      },
+      {
+        "turn_id": 12,
+        "quote": "both of them or just the one we are on about"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 5,
+        "quote": "Great, well done, that's right, you need the denominators to be the same. So, you need to write 5/7 as an equivalent fraction over 28 You have to multiply the top and bottom of 5/7 by the same number. What has the 7 been multiplied by to get 28?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Nearly....yes 20/28 is correct.well done! So, then for 1/4, what has the 4 been multiplied by to get 28?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "yes, perfect! Does this make sense? Once you've worked out what the new denominator is (28), you then have to look at each fraction individually, to see what it needs to be multiplied by.",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 663,
+    "question_id": 101074,
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "question_text": "The perimeter of this isosceles triangle is \\( \\frac{1}{2} \\) \nFind the length of the side labelled with an \\( x \\).",
+    "options": {
+      "A": "\\( \\frac{1}{5} \\)",
+      "B": "\\( \\frac{1}{10} \\)",
+      "C": "\\( \\frac{3}{10} \\)",
+      "D": "There is no possible answer"
+    },
+    "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hello [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "i dont understand this question"
+      },
+      {
+        "turn_id": 5,
+        "quote": "perimeter"
+      },
+      {
+        "turn_id": 7,
+        "quote": "so how do i work out this question"
+      },
+      {
+        "turn_id": 9,
+        "quote": "the lines through the sides"
+      },
+      {
+        "turn_id": 13,
+        "quote": "ohh oke so would i have to do 1/5 - 1/5"
+      },
+      {
+        "turn_id": 17,
+        "quote": "im not sure"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hello [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 4,
+        "quote": "not a problem, are there any words in the question that you're not sure of?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "OK. When you look at the diagram, there are some symbols. Are there any you don't know the meaning of?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "The lines going across the sides of the triangle?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 664,
+    "question_id": 76747,
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "question_text": "Which fraction is closest to \\( 1 \\) ?",
+    "options": {
+      "A": "\\( 1 \\frac{1}{3} \\)",
+      "B": "\\( \\frac{9}{10} \\)",
+      "C": "\\( \\frac{4}{5} \\)",
+      "D": "\\( 1 \\frac{1}{7} \\)"
+    },
+    "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME] :) How are you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hello!! :D I'm good!! How are you? :)"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Oh sorry I disconnected."
+      },
+      {
+        "turn_id": 6,
+        "quote": "😊😊 Can I please get help with this question"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Maybe check how much the fraction is away from 1! :)"
+      },
+      {
+        "turn_id": 10,
+        "quote": "Okay! I'm not sure what else 🤔 we could do!!"
+      },
+      {
+        "turn_id": 12,
+        "quote": "I think 1/3 away from 1 is 2/3 but I'm not entirely sure."
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] :) How are you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Good thank you Let's look at your question Which of these fractions are closest to 1? How do you think we could start this question?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "of course.. out of the fractions shown, how do you think we could decide if they are close to 1?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "let's compare the fractions... how far is 1 and 1/3 away from 1?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 201,
+    "question_id": 103831,
+    "subject_path": "Number > Fractions > Converting Mixed Number and Improper Fractions",
+    "question_text": "What mixed number fraction is represented below?",
+    "options": {
+      "A": "\\( 2 \\frac{3}{6} \\)",
+      "B": "\\( 3 \\frac{5}{6} \\)",
+      "C": "\\( \\frac{23}{6} \\)",
+      "D": "\\( 4 \\frac{5}{6} \\)"
+    },
+    "misconception_name": "Converting Mixed Number and Improper Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Have you watched the video?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "HII! I need help with this whole question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Yeah"
+      },
+      {
+        "turn_id": 10,
+        "quote": "mhm-hm! OHH 3 then?x"
+      },
+      {
+        "turn_id": 12,
+        "quote": "yeah"
+      },
+      {
+        "turn_id": 14,
+        "quote": "yeah"
+      },
+      {
+        "turn_id": 18,
+        "quote": "oh I'm on a laptop btw"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "Have you watched the video?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 7,
+        "quote": "It wants the answer as a mixed number, so thats some number of wholes and a fraction How many whole rectangles are there? As in, fully shaded ones",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "So yes there are 23 little rectangles I meant if you look at the big rectangles, how many are completely coloured in?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 23,
+        "quote": "That's option B Can you see how it's written like that?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 668,
+    "question_id": 101067,
+    "subject_path": "Number > Fractions > Dividing Fractions",
+    "question_text": "Cliff has two fraction cards.\n\\( \\frac{3}{7} \\quad \\square\\)\nThe product of the cards is \\( \\frac{2}{5} \\) What is the other card?",
+    "options": {
+      "A": "\\( \\frac{29}{35} \\)",
+      "B": "\\( \\frac{14}{15} \\)",
+      "C": "\\( \\frac{1}{35} \\)",
+      "D": "\\( \\frac{6}{35} \\)"
+    },
+    "misconception_name": "Dividing Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Do you know what product means? 🧠",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "heyy"
+      },
+      {
+        "turn_id": 4,
+        "quote": "i forgot how to do tis"
+      },
+      {
+        "turn_id": 6,
+        "quote": "is it multiply"
+      },
+      {
+        "turn_id": 8,
+        "quote": "do you divide?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "yess tyy is the answer 14/15"
+      },
+      {
+        "turn_id": 12,
+        "quote": "thankssss"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "Do you know what product means? 🧠",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "No worries at all! Do you know what product means? 😁",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "It is indeed, well done 👍👍👍 So we have... 3/7 x ?/? = 2/5",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 9,
+        "quote": "What is the opposite of multiplying? 👀 EXACTLY ✅✅✅✅ So we need to do 2/5 divide by 3/7 to get the answer! Any idea how to do that? 😁",
+        "talk_moves": [
+          "<Press for Accuracy>",
+          "<Revoicing>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 423,
+    "question_id": 131357,
+    "subject_path": "Number > Fractions > Equivalent Fractions",
+    "question_text": "What percentage of this shape is shaded?",
+    "options": {
+      "A": "\\( 30 \\% \\)",
+      "B": "\\( 60 \\% \\)",
+      "C": "\\( 3 \\% \\)",
+      "D": "\\( 55 \\% \\)"
+    },
+    "misconception_name": "Equivalent Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Do you have an idea about this one?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "No I have learnt something similar"
+      },
+      {
+        "turn_id": 8,
+        "quote": "3/10"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Oh I know now that it is not out of 10"
+      },
+      {
+        "turn_id": 14,
+        "quote": "60% is 60/100 which is 6/10 and 6/10 makes 3/5"
+      },
+      {
+        "turn_id": 16,
+        "quote": "Ok thank you I will carry on"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "Do you have an idea about this one?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So 30% would be 30/100. Can you simplify that fraction?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Good, and what fraction of the diagram is shaded? Is it equivalent to 3/10?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Hmm, what fraction did you get for the diagram?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 464,
+    "question_id": 100594,
+    "subject_path": "Number > Fractions > Ordering Fractions",
+    "question_text": "Which of these fractions could \\(\\ not \\) be placed between the fractions marked on the number line?",
+    "options": {
+      "A": "\\( \\frac{2}{5} \\)",
+      "B": "\\( \\frac{75}{150} \\)",
+      "C": "\\( \\frac{1}{4} \\)",
+      "D": "\\( \\frac{10}{15} \\)"
+    },
+    "misconception_name": "Ordering Fractions 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Now we want to think of 75/150....is there anything we can do with this fraction?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi again, i finished the questions on that lesson, so ive found another ordering fractions i havent done but already im confused as its a numberline"
+      },
+      {
+        "turn_id": 6,
+        "quote": "3/4?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "26? 25**"
+      },
+      {
+        "turn_id": 16,
+        "quote": "would it be before 1/5?? wait no"
+      },
+      {
+        "turn_id": 18,
+        "quote": "1/5 is less than a half so would 1/2 be on the line 10?"
+      },
+      {
+        "turn_id": 20,
+        "quote": "yep!"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 5,
+        "quote": "Now we want to think of 75/150....is there anything we can do with this fraction?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "This is 75/150...what could we divide both by to simplify this fraction?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Excellent and what would this give us simplified?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "Ok brilliant, and what if we divided both of these by 3? it is the same as ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 99,
+    "question_id": 89436,
+    "subject_path": "Number > Negative Numbers > Adding and Subtracting Negative Numbers",
+    "question_text": "What is the value of \\( a \\) ?",
+    "options": {
+      "A": "\\( -1 \\)",
+      "B": "\\( -6 \\)",
+      "C": "\\( -5 \\)",
+      "D": "\\( -7 \\)"
+    },
+    "misconception_name": "Adding and Subtracting Negative Numbers 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi this is Leo one of the tutors at Eedi How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 3,
+        "quote": "👋 this question"
+      },
+      {
+        "turn_id": 5,
+        "quote": "😀this is my first time with you I know that you are a good tutor"
+      },
+      {
+        "turn_id": 9,
+        "quote": "and we minus 4 from it ?"
+      },
+      {
+        "turn_id": 11,
+        "quote": "5 steps backwards"
+      },
+      {
+        "turn_id": 13,
+        "quote": "so it is c"
+      },
+      {
+        "turn_id": 15,
+        "quote": "4 thank you😄"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hi this is Leo one of the tutors at Eedi How can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 6,
+        "quote": "So, we are start at 4 and go back 3 spaces, what number do we get to?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "👍 How do we get from 1 to -5?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "Not quite, if we are at 1 and minus 4 we would get to -3, we want to get to -5 From 1 we could minus 1 and that would get us to 0 How many would we have to take away to get from 0 to -5?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 603,
+    "question_id": 103735,
+    "subject_path": "Number > Negative Numbers > Adding and Subtracting Negative Numbers",
+    "question_text": "\\( 0.2 \\div 0.4= \\)",
+    "options": {
+      "A": "\\( 0.08 \\)",
+      "B": "\\( 0.5 \\)",
+      "C": "\\( 0.8 \\)",
+      "D": "\\( 2 \\)"
+    },
+    "misconception_name": "Adding and Subtracting Negative Numbers 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "hello how can I help you?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i dont know what to do"
+      },
+      {
+        "turn_id": 8,
+        "quote": "im still confused❓"
+      },
+      {
+        "turn_id": 10,
+        "quote": "0.02"
+      },
+      {
+        "turn_id": 16,
+        "quote": "1/2 or 0.5"
+      },
+      {
+        "turn_id": 18,
+        "quote": "are you a real human"
+      },
+      {
+        "turn_id": 20,
+        "quote": "bye love you"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "hello how can I help you?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 9,
+        "quote": "if I times the fraction 0.2/0.4 top and bottom by 10 what do we get? what is 0.2 x 10=?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "👍😊 yes well done Elena, 0.2x10=2 now what about 0.4x10=?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "👍great! so 0.2/0.4 has become 2/4 by timesing both top and bottom by 10 now look at 2/4, can you simplify that? or do you know what it is as a decimal?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 42,
+    "question_id": 89558,
+    "subject_path": "Number > Negative Numbers > Multiplying and Dividing Negative Numbers",
+    "question_text": "Statement 1: \\( \\quad p \\times(-q)=(-p) \\times q \\)\nStatement 2: \\( \\quad-(q)^{2}=q^{2} \\)\nWhat can you say about the above statements, where \\( p \\) and \\( q \\) represent different numbers?",
+    "options": {
+      "A": "Only statement \\( 1 \\) is true",
+      "B": "Only statement \\( 2 \\) is true",
+      "C": "Both statements are true",
+      "D": "Both statements are false"
+    },
+    "misconception_name": "负数幂运算中负号处理规则混淆",
+    "error_choice": "C",
+    "key_aha_question": "Does -p x q give us the same answer?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I’m a bit confused with this question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Um well I know it would be a negative but I don’t really know the answer"
+      },
+      {
+        "turn_id": 12,
+        "quote": "I don’t think it works"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME] can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Ok, let's take a look together! So, what is p x - q?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Does -p x q give us the same answer?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "I don't think it does either, as the left one stays negative, but the right one is positive So which answer do you think we need?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 436,
+    "question_id": 75909,
+    "subject_path": "Number > Negative Numbers > Ordering Negative Numbers",
+    "question_text": "What is the value of B?",
+    "options": {
+      "A": "\\( -7 \\)",
+      "B": "\\( -1 \\)",
+      "C": "\\( -4 \\)",
+      "D": "\\( 8 \\)"
+    },
+    "misconception_name": "Ordering Negative Numbers 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 4,
+        "quote": "Yes please."
+      },
+      {
+        "turn_id": 6,
+        "quote": "How many numbers are in each bar?"
+      },
+      {
+        "turn_id": 8,
+        "quote": "The - Mjnus5"
+      },
+      {
+        "turn_id": 10,
+        "quote": "5 not counting the 10 or 2"
+      },
+      {
+        "turn_id": 12,
+        "quote": "2 is lower and 10 is higher"
+      },
+      {
+        "turn_id": 14,
+        "quote": "Kind of Wait yes"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Hi! Would you like help with this question?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So, the scale is going from -10 up to 2. What is the difference between these numbers?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "So, we need to know how far it is from -10 up to 2 and then we can divide that by the number of gaps and that will tell us what each bar is worth. So how far is it from -10 up to 0?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 509,
+    "question_id": 89405,
+    "subject_path": "Number > Negative Numbers > Ordering Negative Numbers",
+    "question_text": "Which statement about the temperatures \\( -7^{\\circ} \\mathrm{C} \\) and \\( 5^{\\circ} \\mathrm{C} \\) is true?",
+    "options": {
+      "A": "\\( 5^{\\circ} \\mathrm{C} \\) is \\( 2^{\\circ} \\mathrm{C} \\) \ncolder than \n\\( -7^{\\circ} \\mathrm{C} \\)",
+      "B": "\\( 5^{\\circ} \\mathrm{C} \\) is \\( 12^{\\circ} \\mathrm{C} \\) \ncolder than \n\\( -7^{\\circ} \\mathrm{C} \\)",
+      "C": "\\( 5^{\\circ} \\mathrm{C} \\) is \\( 2^{\\circ} \\mathrm{C} \\)\nhotter than\n\\( -7^{\\circ} \\mathrm{C} \\)",
+      "D": "\\( 5^{\\circ} \\mathrm{C} \\) is \\( 12^{\\circ} \\mathrm{C} \\) \nhotter than\n\\( -7^{\\circ} \\mathrm{C} \\)"
+    },
+    "misconception_name": "Ordering Negative Numbers 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Well lets think about A, do you think it is true or false:?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "hi im not sure on how to answer this"
+      },
+      {
+        "turn_id": 7,
+        "quote": "false"
+      },
+      {
+        "turn_id": 9,
+        "quote": "can i come back in 30 min going out sorry"
+      },
+      {
+        "turn_id": 13,
+        "quote": "hi sorry about that im back now"
+      },
+      {
+        "turn_id": 19,
+        "quote": "i think its d now"
+      },
+      {
+        "turn_id": 21,
+        "quote": "thanks for helping me"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 6,
+        "quote": "Well lets think about A, do you think it is true or false:?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 8,
+        "quote": "Brilliant, and what about B? do you think 5 is colder than -7",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 14,
+        "quote": "So we know that 5 is hotter than -7 How much hotter is it?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 16,
+        "quote": "Amazing, so which one do you think is correct ?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 118,
+    "question_id": 143355,
+    "subject_path": "Number > Percentages > Percentage Increase and Decrease",
+    "question_text": "Lina buys a painting for \\( £ 80 \\) and sells it for \\( £ 140 \\).\nWhat percentage profit is this?",
+    "options": {
+      "A": "\\( 43 \\% \\)",
+      "B": "\\( 60 \\% \\)",
+      "C": "\\( 33 \\% \\)",
+      "D": "\\( 75 \\% \\)"
+    },
+    "misconception_name": "Percentage Increase and Decrease 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i dont understand the question to work it out"
+      },
+      {
+        "turn_id": 4,
+        "quote": "i did that and the percentage isnt on there"
+      },
+      {
+        "turn_id": 12,
+        "quote": "thank you for your help😀"
+      },
+      {
+        "turn_id": 14,
+        "quote": "yes 75%"
+      },
+      {
+        "turn_id": 16,
+        "quote": "no thank you"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "okay what is the difference in price?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "not quite, she buys the painting for £80 & sells it for £140 what is the difference?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "okay good, now what is the original price?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 735,
+    "question_id": 76812,
+    "subject_path": "Number > Percentages > Repeated Percentages and Compound Interest",
+    "question_text": "\\( £ 13000 \\) is invested at \\( 5 \\% \\) compound interest per annum. What is the total interest earned after \\( 4 \\) years?",
+    "options": {
+      "A": "\\( £ 2600 \\)",
+      "B": "\\( £ 2801.58 \\)",
+      "C": "\\( £ 15600 \\)",
+      "D": "\\( £ 15801.58 \\)"
+    },
+    "misconception_name": "Repeated Percentages and Compound Interest 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Ok, so what's the multiplier for increasing by 5%?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "how do you do compund interest"
+      },
+      {
+        "turn_id": 4,
+        "quote": "0.05"
+      },
+      {
+        "turn_id": 6,
+        "quote": "1.05"
+      },
+      {
+        "turn_id": 10,
+        "quote": "1.22"
+      },
+      {
+        "turn_id": 14,
+        "quote": "what is the original amount again?"
+      },
+      {
+        "turn_id": 16,
+        "quote": "ok 15860"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "Ok, so what's the multiplier for increasing by 5%?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Which answer do you get when you do that?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "And then which answer do you get?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 23,
+        "quote": "Yes, but 1.22 is rounded and so I think it's not coming up with an exact enough answer. When you calculate 1.05 to the power 4 are there lots of decimal places?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 699,
+    "question_id": 131691,
+    "subject_path": "Number > Proportion > Direct Proportion",
+    "question_text": "Per \\( 100 \\mathrm{ml} \\), which drink is the best value for money?\nYou can use your calculator to help you",
+    "options": {
+      "A": "\\( 1 \\) litre for \\( £ 1.60 \\)",
+      "B": "\\( 500 \\mathrm{ml} \\) for \\( 75 p \\)",
+      "C": "\\( 330 \\mathrm{ml} \\) for \\( 55 \\) p",
+      "D": "\\( 200 \\mathrm{ml} \\) for \\( 35 \\) p"
+    },
+    "misconception_name": "Direct Proportion 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "How can I solve this"
+      },
+      {
+        "turn_id": 4,
+        "quote": "I'm not sure"
+      },
+      {
+        "turn_id": 8,
+        "quote": "0.16"
+      },
+      {
+        "turn_id": 10,
+        "quote": "do we divide by 5"
+      },
+      {
+        "turn_id": 16,
+        "quote": "0.16"
+      },
+      {
+        "turn_id": 20,
+        "quote": "So B is cheaper because it costs 15p"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! How can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "You need to find the cost of 100ml for each option So how could we go from the cost of 1 litre to the cost of 100ml?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "Great, can you do £1.60 ÷ 10?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Perfect, so that's the cost of 100ml on option A What about option B... If 500ml = 75p, how do we get the cost of 100ml?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 568,
+    "question_id": 134917,
+    "subject_path": "Number > Ratio > Sharing in a Ratio",
+    "question_text": "Write the following ratio in its simplest form so both sides of the ratio are integers:\n\\(\n\\frac{1}{4}: \\frac{1}{2}\n\\)",
+    "options": {
+      "A": "\\( 4: 2 \\)",
+      "B": "\\( 2: 4 \\)",
+      "C": "\\( 2: 1 \\)",
+      "D": "\\( 1: 2 \\)"
+    },
+    "misconception_name": "Sharing in a Ratio 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "im not sure what it mean by write the ratio in its simplest form means*"
+      },
+      {
+        "turn_id": 4,
+        "quote": "yes wait how do i answer the question now"
+      },
+      {
+        "turn_id": 8,
+        "quote": "i don’t understand how they could go into the other"
+      },
+      {
+        "turn_id": 12,
+        "quote": "uhh 1 ? 1/4 divided by 1/4?"
+      },
+      {
+        "turn_id": 16,
+        "quote": "1:2?"
+      },
+      {
+        "turn_id": 18,
+        "quote": "no thank you i can’t answer the question 😭😭"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "it just means to simplify it. So if you had 5:10 you can write it in its simplest form by dividing both sides by 5 to get 1:2 Does that make sense?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "would you like any more help? what goes into 1/4 and 1/2?",
+        "talk_moves": [
+          "<Keep Together>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "not quite, 2 does not go into 1/4 or 1/2 Have a think, does 1/2 go into 1/4?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 109,
+    "question_id": 101404,
+    "subject_path": "Number > Ratio > Simplifying and Equivalent Ratios",
+    "question_text": "Lee and Drew are arguing about equivalent ratios.\nLee says \\( 4: 14 \\) is equivalent to \\( 1: 3.5 \\)\nDrew says \\( 4: 14 \\) is equivalent to \\( 6: 21 \\)\nWho is correct?",
+    "options": {
+      "A": "Only\nLee",
+      "B": "Only\nDrew",
+      "C": "Both Lee and Drew",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "Simplifying and Equivalent Ratios 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "HI this is Alex one of the tutors at Eedi How can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "every qestion makes no sense *question"
+      },
+      {
+        "turn_id": 4,
+        "quote": "yes :p"
+      },
+      {
+        "turn_id": 6,
+        "quote": "2:7 ?"
+      },
+      {
+        "turn_id": 10,
+        "quote": "divide by 2?"
+      },
+      {
+        "turn_id": 18,
+        "quote": "no ?"
+      },
+      {
+        "turn_id": 24,
+        "quote": "ok ( :p"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "HI this is Alex one of the tutors at Eedi How can I help?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 3,
+        "quote": "Did you watch the teach videos?",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Good How do I simplify the ratio 4:14?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "👍 Is 2:7 equivalent to 1:3.5?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 686,
+    "question_id": 104627,
+    "subject_path": "Number > Ratio > Simplifying and Equivalent Ratios",
+    "question_text": "\\(\n\\frac{3}{5}: \\frac{1}{3}\n\\)\nWrite this ratio in the form \\( 1: n \\)",
+    "options": {
+      "A": "\\( 1: \\frac{5}{3} \\)",
+      "B": "\\( 1: \\frac{3}{2} \\)",
+      "C": "\\( 1: \\frac{1}{2} \\)",
+      "D": "\\( 1: \\frac{5}{9} \\)"
+    },
+    "misconception_name": "Simplifying and Equivalent Ratios 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hey! How can I help? 😃",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 1,
+        "quote": "help pls"
+      },
+      {
+        "turn_id": 3,
+        "quote": "whats the answer"
+      },
+      {
+        "turn_id": 5,
+        "quote": "can you help then"
+      },
+      {
+        "turn_id": 7,
+        "quote": "so what do i do"
+      },
+      {
+        "turn_id": 9,
+        "quote": "ok then what"
+      },
+      {
+        "turn_id": 15,
+        "quote": "divide by 9?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 2,
+        "quote": "Hey! How can I help? 😃",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 10,
+        "quote": "have you worked out what to multiply by?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 12,
+        "quote": "perfect what does that give us?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 18,
+        "quote": "the answer options are left as fractions 1 : 5/9 Are you happy with how we got the answer?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 684,
+    "question_id": 101417,
+    "subject_path": "Number > Ratio > Writing Ratios",
+    "question_text": "What is the ratio of \\( x \\) to \\( y \\) ?",
+    "options": {
+      "A": "\\( 1: 3 \\)",
+      "B": "\\( 1: 4 \\)",
+      "C": "\\( 1: 5 \\)",
+      "D": "\\( 1: 12 \\)"
+    },
+    "misconception_name": "Writing Ratios 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi again [STUDENT_NAME] 😁👋 How can I help?!",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I dont understand what to do here?☹️"
+      },
+      {
+        "turn_id": 4,
+        "quote": "divide by 4 Nina? NINa?!"
+      },
+      {
+        "turn_id": 6,
+        "quote": "Oh, sry"
+      },
+      {
+        "turn_id": 8,
+        "quote": "umm....... 1:4? take ur time"
+      },
+      {
+        "turn_id": 12,
+        "quote": "multiply by four"
+      },
+      {
+        "turn_id": 16,
+        "quote": "what's x again?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi again [STUDENT_NAME] 😁👋 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "So how have we gone from the base of the small triangle to the base of the large triangle? 😀😀😀",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "So we know x times 4 is going to give us the whole side of the big triangle 😁👍 Happy with that?!",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 17,
+        "quote": "X is the side of the small triangle 😁👍 Can you see in the fdiagram!?",
+        "talk_moves": []
+      }
+    ]
+  },
+  {
+    "session_id": 730,
+    "question_id": 104637,
+    "subject_path": "Number > Ratio > Writing Ratios",
+    "question_text": "Lila and Elijah share some sweets in the ratio \\( 3: 2 \\)\nWhat is this ratio in the form \\( 1: n \\) ?",
+    "options": {
+      "A": "\\( 1: 1.5 \\)",
+      "B": "\\( 1: \\frac{2}{3} \\)",
+      "C": "\\( 1: 0 \\)",
+      "D": "\\( 1: 6 \\)"
+    },
+    "misconception_name": "Writing Ratios 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "i don’t think i have seen a ratio like 1:n and i dont know what to do"
+      },
+      {
+        "turn_id": 6,
+        "quote": "1? but it has a remainder"
+      },
+      {
+        "turn_id": 8,
+        "quote": "i dont understand"
+      },
+      {
+        "turn_id": 12,
+        "quote": "ohh okay"
+      },
+      {
+        "turn_id": 14,
+        "quote": "no thank you"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi [STUDENT_NAME], how can I help?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "okay it just means that the first part of the ratio has to be 1 so in this one, it will be 1: something. but to get from 3 to 1, what do you divide by?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "good, so you need to do the same with the other side 2 divided by 3 is what?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "1/2 means 1 divided by 2 3/4 means 3 divided by 4 how would you write 2 divided by 3?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 154,
+    "question_id": 130053,
+    "subject_path": "Number > Rounding and Estimating > Estimation",
+    "question_text": "Which is the best estimate for \\( (4.2)^{2} \\) ?",
+    "options": {
+      "A": "\\( 25 \\)",
+      "B": "\\( 16 \\)",
+      "C": "\\( 8 \\)",
+      "D": "\\( 10 \\)"
+    },
+    "misconception_name": "Estimation 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Hi! Ooh, so what did you round 4.2 to, first?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Need help with the question 😡 10"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Maybe 🤔"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi! Ooh, so what did you round 4.2 to, first?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "Ah ok, we can round to an easy number that's closer to 4.2 than 10... We don't want to round too far away Can you round to the nearest whole number?",
+        "talk_moves": [
+          "<Revoicing>",
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Think about counting in 1s, 1 2 3 4 5 6 7 8... Which one is closest to 4.2?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 15,
+        "quote": "Ready to carry on? Bye!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 10,
+    "question_id": 104614,
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "question_text": "Alex and Sophie are arguing about rounding \nAlex says \\( \\mathbf{5 . 4 5 9 8} \\) rounded to \\( 1 \\) decimal place is \\( \\mathbf{5 . 5} \\) \nSophie says \\( \\mathbf{5 . 4 5 9 8} \\) rounded to \\( 2 \\) decimal places is \\( \\mathbf{5 . 4 6} \\) \nWho is correct?",
+    "options": {
+      "A": "Only Alex",
+      "B": "Only\nSophie",
+      "C": "Both Alex and Sophie",
+      "D": "Neither is correct"
+    },
+    "misconception_name": "四舍五入数位保留与小数点移位混淆",
+    "error_choice": "D",
+    "key_aha_question": "Can you round 5.45 to one decimal place?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "Hi I would you preferred to be called [STUDENT_NAME] I need help On this question I am a bit stuck at this can you help me please Thx u"
+      },
+      {
+        "turn_id": 4,
+        "quote": "Ok thank you take your time"
+      },
+      {
+        "turn_id": 6,
+        "quote": "I think both are wrong Is that right ???"
+      },
+      {
+        "turn_id": 8,
+        "quote": "Both are wrong Or Sophie is correct"
+      },
+      {
+        "turn_id": 10,
+        "quote": "5.45 Maybe or not sure"
+      },
+      {
+        "turn_id": 12,
+        "quote": "5.4510 Can you give me a clue Please"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hello [STUDENT_NAME], just wanted to check, you OK? You don't have to have help if you don't want it but I am here if you need anything.",
+        "talk_moves": []
+      },
+      {
+        "turn_id": 5,
+        "quote": "Do you have any thoughts about what either Alex or Sophie said? Do you think either of them is right or wrong?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "OK. So if Alex is wrong, what do you think would be the right answer for his question?",
+        "talk_moves": [
+          "<Getting Student to Relate>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "what do you think 5.4598 rounds to to 1dp?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 33,
+    "question_id": 104615,
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "question_text": "What is \\( \\mathbf{3 . 1 5 3} \\) rounded to the nearest \\( \\mathbf{0 . 0 2} \\) ?",
+    "options": {
+      "A": "\\( 3.2 \\)",
+      "B": "\\( 3.12 \\)",
+      "C": "\\( 3.16 \\)",
+      "D": "\\( 3.15 \\)"
+    },
+    "misconception_name": "四舍五入中‘四舍五入到最近0.02’与传统‘四舍五入到最近0.1/0.01’概念混淆",
+    "error_choice": "B",
+    "key_aha_question": "So what would the value above 3.153 be in the 0.02 times table?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "I don't know how to work out this question."
+      },
+      {
+        "turn_id": 4,
+        "quote": "What is the 0.02 times table value?"
+      },
+      {
+        "turn_id": 6,
+        "quote": "I think so"
+      },
+      {
+        "turn_id": 8,
+        "quote": "3.16"
+      },
+      {
+        "turn_id": 10,
+        "quote": "3.16 ia closer"
+      },
+      {
+        "turn_id": 12,
+        "quote": "Thank you! This really helped. 😁"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 1,
+        "quote": "Hi again Zainab 😁👋 How can I help?!",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 3,
+        "quote": "So for this one we need to think about the 0.02 times table values near 3.153 😃 Can you think about what value would be in the 0.02 times table near 3.153.. Any ideas? 💡",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "I'll give you the value below, see if you can find the value above.. So the value in the 0.02 times table below 3.153 would be 3.14 Does that make sense? 😊👍",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      },
+      {
+        "turn_id": 7,
+        "quote": "So what would the value above 3.153 be in the 0.02 times table? 🧠 3.1 to 3.12 to 3.14 to ...",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 206,
+    "question_id": 130248,
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "question_text": "Round \\( 7.503 \\) to the nearest whole number",
+    "options": {
+      "A": "\\( 6 \\)",
+      "B": "\\( 7 \\)",
+      "C": "\\( 7.5 \\)",
+      "D": "\\( 8 \\)"
+    },
+    "misconception_name": "Rounding to Decimal Places 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "Ok, so 7.503 is inbetween two whole numbers, what two whole numbers is it between? :)",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 6,
+        "quote": "i still dont understand."
+      },
+      {
+        "turn_id": 8,
+        "quote": "7 and 8"
+      },
+      {
+        "turn_id": 10,
+        "quote": "7.5 i think"
+      },
+      {
+        "turn_id": 12,
+        "quote": "ohhhhhhh"
+      },
+      {
+        "turn_id": 14,
+        "quote": "its smaller by 0.003"
+      },
+      {
+        "turn_id": 16,
+        "quote": "arent they the same number?"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 7,
+        "quote": "Ok, so 7.503 is inbetween two whole numbers, what two whole numbers is it between? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 9,
+        "quote": "Excellent! So we need to work out whether it's closest to 7 or 8, if we're rounding to the nearest whole number What would be the middle of 7 and 8?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 19,
+        "quote": "Ah no worries! So we've decided that 7.503 is more than 7.5, so is it rounding up to 8 or down to 7? :)",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 29,
+        "quote": "No worries! Hehe so we said you'd round up What numbers did we say we were choosing between?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      }
+    ]
+  },
+  {
+    "session_id": 214,
+    "question_id": 129995,
+    "subject_path": "Number > Rounding and Estimating > Rounding to the Nearest Whole (10, 100, etc)",
+    "question_text": "What is \\( 356,958 \\) rounded to the nearest \\( 100 \\) ?",
+    "options": {
+      "A": "\\( 356,900 \\)",
+      "B": "\\( 356,960 \\)",
+      "C": "\\( 400,000 \\)",
+      "D": "\\( 357,000 \\)"
+    },
+    "misconception_name": "Rounding to the Nearest Whole (10, 100, etc) 概念与解题规则认知模糊",
+    "error_choice": "",
+    "key_aha_question": "OK, let's have a look together. 356, 958 to the nearest 100. This is quite a long number, because we're rounding to the nearest 100, let's just look at 6958 for now. Which is the hundreds number?",
+    "student_verbatim_quotes": [
+      {
+        "turn_id": 2,
+        "quote": "yea and im a bit confused on this mate"
+      },
+      {
+        "turn_id": 4,
+        "quote": "9 but what i leanred if it was five of greater u round up"
+      },
+      {
+        "turn_id": 8,
+        "quote": "but the 9 rounded up would be ten and the would be added to the 6 but no 7 in any of them"
+      },
+      {
+        "turn_id": 10,
+        "quote": "far sighted so i guess i didnt know"
+      },
+      {
+        "turn_id": 14,
+        "quote": "si i mean yes 😓"
+      }
+    ],
+    "tutor_verbatim_prompts": [
+      {
+        "turn_id": 3,
+        "quote": "OK, let's have a look together. 356, 958 to the nearest 100. This is quite a long number, because we're rounding to the nearest 100, let's just look at 6958 for now. Which is the hundreds number?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 5,
+        "quote": "Yes, that's right, great! So, there is a 5 after the hundreds number, so are you rounding up or down?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 11,
+        "quote": "Have another look at the four answers, which one has a 7 in it?",
+        "talk_moves": [
+          "<Press for Accuracy>"
+        ]
+      },
+      {
+        "turn_id": 13,
+        "quote": "👍😀 Great work, are you happy that you've got your answer?",
+        "talk_moves": [
+          "<Keep Together>"
+        ]
+      }
+    ]
+  }
+]

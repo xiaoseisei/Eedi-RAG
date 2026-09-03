@@ -170,6 +170,11 @@ def test_validate_verbatim_grounding(sample_session: CleanedSession):
     assert is_valid_fake is False
 
 
+def test_validate_verbatim_grounding_allows_transcription_edge_formatting(sample_session):
+    tutor = next(t for t in sample_session.turns if t.is_tutor)
+    assert validate_verbatim_grounding(tutor.text.strip() + " 🧠", [tutor]) == (True, tutor.turn_id)
+
+
 def test_extract_knowledge_fails_fast_when_no_llm(sample_session: CleanedSession, monkeypatch):
     """测试当未配置 LLM API Key 且未传入 Mock Client 时，严格抛出 LLMUnavailableError (Fail-Fast)。"""
     # 确保环境变量清空

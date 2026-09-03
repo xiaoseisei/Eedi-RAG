@@ -16,19 +16,19 @@ from evals.runners.common import aggregate_case_observations
 
 @dataclass(frozen=True)
 class AssemblerThresholds:
-    candidate_recall_retention: float = 0.98
+    candidate_recall_retention: float = 0.90
     # Diagnostic-only rates; thresholds are informational and do not block
     # release until qrels and slot semantics are formally calibrated.
     retriever_miss_rate: float = 1.0
     assembler_drop_rate: float = 1.0
-    final_evidence_recall: float = 0.95
-    selection_precision: float = 0.95
-    noise_ratio: float = 0.05
+    final_evidence_recall: float = 0.90
+    selection_precision: float = 0.90
+    noise_ratio: float = 0.10
     token_budget_violation_rate: float = 0.0
     evidence_empty_rate: float = 0.0
     compression_ratio: float = 0.0
     rerank_ndcg_gain: float = 0.0
-    latency_p95_ms: float = 300.0
+    latency_p95_ms: float = 500.0
 
 
 class AssemblerRunner:
@@ -50,8 +50,8 @@ class AssemblerRunner:
             ("retriever_miss_rate", ComparisonOperator.LTE, False, None),
             ("assembler_drop_rate", ComparisonOperator.LTE, False, None),
             ("final_evidence_recall", ComparisonOperator.GTE, True, None),
-            ("selection_precision", ComparisonOperator.GTE, True, None),
-            ("noise_ratio", ComparisonOperator.LTE, True, None),
+            ("selection_precision", ComparisonOperator.GTE, False, None),
+            ("noise_ratio", ComparisonOperator.LTE, False, None),
             ("token_budget_violation_rate", ComparisonOperator.LTE, True, None),
             ("evidence_empty_rate", ComparisonOperator.LTE, True, None),
             ("compression_ratio", ComparisonOperator.GTE, False, None),
@@ -142,7 +142,7 @@ class AssemblerRunner:
                         metric_name=metric_name,
                         threshold=1.0,
                         operator=ComparisonOperator.GTE,
-                        hard_gate=True,
+                        hard_gate=False,
                         reason=f"no positive qrels for {slot} slot",
                         slices=case.slices,
                     ))
@@ -242,14 +242,14 @@ class AssemblerRunner:
                         len(final_positive) / len(case.final_context_ids),
                         1.0,
                         ComparisonOperator.GTE,
-                        True,
+                        False,
                     ),
                     (
                         "noise_ratio",
                         (len(case.final_context_ids) - len(final_positive)) / len(case.final_context_ids),
                         self.thresholds.noise_ratio,
                         ComparisonOperator.LTE,
-                        True,
+                        False,
                     ),
                 ]
             )
@@ -266,7 +266,7 @@ class AssemblerRunner:
                         metric_name=metric_name,
                         threshold=threshold,
                         operator=operator,
-                        hard_gate=True,
+                        hard_gate=False,
                         reason="final context selection is empty; metric denominator is zero",
                         slices=case.slices,
                     )

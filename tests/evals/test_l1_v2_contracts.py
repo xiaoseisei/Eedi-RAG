@@ -133,12 +133,20 @@ def test_fusion_compares_raw_with_full_rrf() -> None:
         },
         rewrite_only_ranked_ids=["target", "noise"],
         raw_inclusive_ranked_ids=["target", "noise"],
+        selected_ranked_ids=["noise", "target"],
+        selected_strategy="raw_first",
         qrels={"target": 3},
         latency_ms=1,
     )
     obs = RewriteRunner().run(_context(), [case])
     names = {item.metric_name for item in obs}
     assert "raw_inclusive_rrf_mrr_lift" in names
+    selected_lift = next(
+        item for item in obs
+        if item.metric_name == "selected_fusion_mrr_lift" and item.scope == "aggregate"
+    )
+    assert selected_lift.value == 0.0
+    assert selected_lift.hard_gate is True
 
 
 def test_assembler_precision_is_slot_scoped() -> None:
@@ -256,6 +264,17 @@ def test_document_qrels_deduplicate_quote_evidence_and_mark_derived() -> None:
     assert rows[0]["evidence_turns"] == [{"session_id": 1, "turn_id": 2}, {"session_id": 1, "turn_id": 3}]
 
 
+def test_assembler_qrels_do_not_invent_unlabeled_complementary_slot() -> None:
+    from scripts.build_l1_component_datasets import build_assembler_qrels
+
+    rows = build_assembler_qrels({
+        "category": "STUDENT_INSIGHT",
+        "verbatim_grounding_quotes": [{"session_id": 10, "turn_id": 1}],
+    }, query_id="q")
+
+    assert [row["slot"] for row in rows] == ["misconception"]
+
+
 def test_assembler_runner_separates_retriever_miss_and_assembler_drop() -> None:
     miss = AssemblerEvalCase(
         case_id="miss",
@@ -301,3 +320,23 @@ def test_manifest_provenance_contains_distinct_counts_and_hashes(tmp_path) -> No
     assert len(result["artifact_hashes"]["duckdb_sha256"]) == 64
     assert len(result["artifact_hashes"]["chroma_sha256"]) == 64
     assert len(result["system_config_hash"]) == 64
+
+
+def test_split_manifest_keeps_connected_source_sessions_in_one_split() -> None:
+    from scripts.build_l1_component_datasets import build_split_manifest
+
+    cases = [
+        {"question": "q1", "verbatim_grounding_quotes": [{"session_id": 10}]},
+        {"question": "q2", "verbatim_grounding_quotes": [{"session_id": 10}, {"session_id": 20}]},
+        {"question": "q3", "verbatim_grounding_quotes": [{"session_id": 30}]},
+        {"question": "q4", "verbatim_grounding_quotes": [{"session_id": 40}]},
+        {"question": "q5", "verbatim_grounding_quotes": [{"session_id": 50}]},
+    ]
+
+    manifest = build_split_manifest(cases, holdout_fraction=0.4, salt="unit-test")
+    assignments = manifest["query_assignments"]
+
+    assert assignments["eedi-l1-0001"] == assignments["eedi-l1-0002"]
+    assert manifest["session_leakage_count"] == 0
+    assert set(assignments.values()) == {"dev", "holdout"}
+    assert manifest["split_counts"]["dev"] + manifest["split_counts"]["holdout"] == 5

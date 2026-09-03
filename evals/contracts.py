@@ -379,6 +379,8 @@ class FusionEvalCase(StrictContract):
     lane_ranked_ids: dict[str, list[str]]
     rewrite_only_ranked_ids: list[str]
     raw_inclusive_ranked_ids: list[str]
+    selected_ranked_ids: list[str] | None = None
+    selected_strategy: Literal["raw_first", "raw_inclusive_rrf"] = "raw_inclusive_rrf"
     qrels: dict[str, int]
     latency_ms: float = Field(ge=0.0)
     slices: dict[str, str] = Field(default_factory=dict)
@@ -392,8 +394,10 @@ class FusionEvalCase(StrictContract):
         for lane, ranking in self.lane_ranked_ids.items():
             if len(ranking) != len(set(ranking)):
                 raise ValueError(f"lane {lane} contains duplicate document IDs")
-        for field_name in ("rewrite_only_ranked_ids", "raw_inclusive_ranked_ids"):
+        for field_name in ("rewrite_only_ranked_ids", "raw_inclusive_ranked_ids", "selected_ranked_ids"):
             ranking = getattr(self, field_name)
+            if ranking is None:
+                continue
             if len(ranking) != len(set(ranking)):
                 raise ValueError(f"{field_name} contains duplicate document IDs")
         _validate_qrels(self.qrels)
@@ -521,6 +525,7 @@ class DeepEvalSettings(StrictContract):
     evaluation_model: str = Field(min_length=1)
     evaluation_model_version: str | None = None
     api_key_env: str = Field(pattern=r"^[A-Z][A-Z0-9_]*$")
+    base_url: str | None = None
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     seed: int | None = None
 

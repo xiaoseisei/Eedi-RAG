@@ -29,9 +29,11 @@ if str(project_root) not in sys.path:
 from src.models import CleanedSession, ExtractedPIU, Chunk
 from src.storage_manager import (
     DualEngineStorageManager,
+    FastDeterministicEmbeddingFunction,
     build_misconception_embedding_doc,
     build_tutor_strategy_embedding_doc
 )
+from src.embedding_provider import EmbeddingIndexContract, EmbeddingProviderError
 
 
 @pytest.fixture
@@ -240,3 +242,21 @@ def test_storage_exposes_embedding_backend():
     manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
     assert manager.embedding_backend == "fast_deterministic"
     manager.close()
+
+
+def test_persistent_storage_rejects_index_with_mismatched_embedding_contract(tmp_path):
+    class ContractEmbedding(FastDeterministicEmbeddingFunction):
+        def contract(self, *, index_version=None):
+            return EmbeddingIndexContract(self.name(), "test-model", self.dim, index_version or "test-v1")
+
+    db_path = tmp_path / "test.duckdb"
+    chroma_path = tmp_path / "chroma"
+    first = DualEngineStorageManager(db_path=db_path, chroma_dir=chroma_path, embedding_function=ContractEmbedding())
+    first.close()
+    with pytest.raises(EmbeddingProviderError, match="contract mismatch"):
+        DualEngineStorageManager(
+            db_path=db_path,
+            chroma_dir=chroma_path,
+            embedding_function=ContractEmbedding(),
+            embedding_index_version="test-v1",
+        )

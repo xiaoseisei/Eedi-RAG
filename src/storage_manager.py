@@ -23,6 +23,8 @@
 import os
 import sys
 import json
+import re
+import unicodedata
 import math
 import re
 import hashlib
@@ -114,6 +116,16 @@ def build_misconception_embedding_doc(
     return doc
 
 
+def _canonicalize_evidence_text(text: str) -> str:
+    value = unicodedata.normalize("NFKC", str(text)).replace("\u200b", "")
+    value = re.sub(r"\s+", " ", value).strip()
+    while value and unicodedata.category(value[0]) in {"So", "Sk"}:
+        value = value[1:].lstrip()
+    while value and unicodedata.category(value[-1]) in {"So", "Sk"}:
+        value = value[:-1].rstrip()
+    return value
+
+
 def build_tutor_strategy_embedding_doc(
     card: TutorStrategyProfile,
     question_text: str = "",
@@ -155,6 +167,7 @@ class DualEngineStorageManager:
         chroma_dir: Optional[Union[str, Path]] = "data/chroma",
         embedding_function: Any = None,
         embedding_backend: Optional[str] = None,
+        embedding_index_version: Optional[str] = None,
         in_memory: bool = False
     ):
         """
@@ -167,6 +180,7 @@ class DualEngineStorageManager:
           in_memory: 是否运行纯内存模式 (用于单元测试和极速沙盒验证)
         """
         self.in_memory = in_memory
+        self.embedding_index_version = embedding_index_version
         if embedding_function is not None and embedding_backend is not None:
             raise ValueError("embedding_function 与 embedding_backend 只能指定一个")
         if embedding_function is not None:
@@ -179,9 +193,18 @@ class DualEngineStorageManager:
             logger.warning(
                 "[Storage] 使用显式/测试 deterministic 特征哈希 embedding 后端"
             )
+        elif embedding_backend == "siliconflow":
+            from src.embedding_provider import SiliconFlowQwen3EmbeddingFunction
+
+            self.embedding_function = SiliconFlowQwen3EmbeddingFunction.from_env()
+            self.embedding_backend = self.embedding_function.name()
+            if embedding_index_version is None:
+                embedding_index_version = self.embedding_function.index_version
+                self.embedding_index_version = embedding_index_version
+            logger.info("[Storage] 使用 SiliconFlow OpenAI-compatible embedding provider")
         else:
             raise ValueError(
-                "持久化存储必须显式提供 embedding_function，或设置 embedding_backend='deterministic'"
+                "持久化存储必须显式提供 embedding_function，或设置 embedding_backend='deterministic'/'siliconflow'"
             )
         
         # 1. 初始化 DuckDB 关系底表
@@ -205,6 +228,8 @@ class DualEngineStorageManager:
             self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_dir))
             
         self._init_chromadb_collections()
+        if self.embedding_index_version and not self.in_memory:
+            self._validate_embedding_index_contract()
 
     def _init_duckdb_schema(self):
         """初始化 DuckDB 确定性关系底表 DDL Schema。"""
@@ -305,6 +330,16 @@ class DualEngineStorageManager:
             metadata={"description": "纯规则滑动窗口原文直接检索向量索引库"},
             embedding_function=self.embedding_function
         )
+
+    def _validate_embedding_index_contract(self) -> None:
+        """Ensure persistent index metadata matches the query embedding provider."""
+        contract_factory = getattr(self.embedding_function, "contract", None)
+        if not callable(contract_factory):
+            raise ValueError("embedding_index_version requires an embedding provider with a contract() method")
+        contract = contract_factory(index_version=self.embedding_index_version)
+        from src.embedding_provider import validate_index_contract
+        for collection in (self.coll_misconceptions, self.coll_strategies, self.coll_windows):
+            validate_index_contract(collection.metadata, contract)
 
     # =========================================================================
     # 数据批量摄取与持久化 (Ingestion Pipeline)
@@ -660,15 +695,15 @@ class DualEngineStorageManager:
                 turn = turn_map.get(turn_id)
                 if turn is None or not turn.is_tutor:
                     raise ValueError(f"Session {item.session_id} 导师证据 Turn {turn_id} 不存在或角色错误")
-            student_texts = {turn_map[turn_id].text for turn_id in item.misconception.source_turn_ids}
+            student_texts = {_canonicalize_evidence_text(turn_map[turn_id].text) for turn_id in item.misconception.source_turn_ids}
             missing_quotes = [
                 quote for quote in item.misconception.verbatim_student_quotes
-                if quote not in student_texts
+                if not any(_canonicalize_evidence_text(quote) in text for text in student_texts)
             ]
             if missing_quotes:
                 raise ValueError(f"Session {item.session_id} 学生引用不是声明轮次的逐字原文")
-            tutor_texts = {turn_map[turn_id].text for turn_id in item.tutor_strategy.source_turn_ids}
-            if item.tutor_strategy.key_aha_question not in tutor_texts:
+            tutor_texts = {_canonicalize_evidence_text(turn_map[turn_id].text) for turn_id in item.tutor_strategy.source_turn_ids}
+            if not any(_canonicalize_evidence_text(item.tutor_strategy.key_aha_question) in text for text in tutor_texts):
                 raise ValueError(f"Session {item.session_id} 破局问题不是声明导师轮次的逐字原文")
 
 

@@ -8,9 +8,9 @@
 - **根 Git 仓库**：`E:\PIAgent`（注意：根仓库包含多个项目，不能对整个仓库执行清理或重置）
 - **当前分支**：`master`
 - **当前任务**：在真实教育辅导需求场景下，使用 Hugging Face 的 Eedi Tutoring Dialogues 作为公开代理数据，完成一个从数据治理、知识抽取、RAG 构建、检索与证据优化到业务落地的 0→1→100 完整路线。
-- **本次交付**：新增 L1 v2 具体实施说明书，并更新本文件以固定六组件结论；没有据此修改业务代码、没有安装依赖、没有重置已有改动。
+- **本次交付**：完成 L1 v2 测量真实性修复、Storage 受控切换记录、Embedding API 小基准，并更新本文件固定最终交接状态；后续仍需合并并行子分支的 PR。
 - **当前判断**：架构方向有竞争力，但当前质量基线仍属于诊断基线，不能宣称已经达到生产可用或已证明 NBCOT 业务价值。
-- **当前首要方向**：先修正 Grounding、Chunking、Rewrite/Fusion、Assembler 的 L1 v2 测量真实性，再建立正式 graded qrels，随后在隔离索引上优化 BM25+Dense；不要先继续堆 Prompt或调整 MMR 参数。
+- **当前首要方向**：按 `docs/L1_Optimization_Closeout_L2_DeepEval_Entry_Plan.md` 完成 Qwen 0.6B 的 L1 最后一次优化收尾；只有获得明确 `GO_TO_L2_TECHNICAL` 后才进入使用 DeepEval 的 L2。不要先继续堆 Prompt 或调整 MMR 参数。
 
 ## 1. 必读文件和阅读顺序
 
@@ -24,7 +24,8 @@
 6. `docs/L1_Component_Evaluation_V2_Implementation_Plan.md`：L1 v2 指标口径修正、Hybrid Retrieval 和验收施工说明书。
 7. `docs/Embedding_方案选型与Benchmark计划.md`：Embedding 候选、统一对照实验、成本/延迟/质量评分和落地规则。
 8. `docs/Embedding_选型实测报告_20260902.md`：deterministic、e5-small、e5-base 的真实 CPU 结果和选择依据。
-9. 本文件的“当前真实状态”和“下一步计划”。
+9. `docs/L1_Optimization_Closeout_L2_DeepEval_Entry_Plan.md`：L1 最后一次优化收尾、验收标签和 L2 DeepEval 入场标准。
+10. 本文件的“当前真实状态”和“下一步计划”。
 
 源码阅读顺序：
 
@@ -722,6 +723,10 @@ Eedi 只验证数学辅导场景的管线和方法。客户数据到来后必须
 
 > 请先读取项目根目录 `HANDOFF.md`、`AGENTS.md`、`docs/需求.md` 和 `docs/L1_Component_Evaluation_Construction_Guide.md`。当前任务按 HANDOFF 的 P0 顺序继续：先修复四元组引用审计和生成契约，再施工正式 graded qrels；保留当前工作树改动，不执行 reset/checkout/clean，不伪造成功状态。完成任何修改前先说明影响范围，完成后给出真实测试证据。
 
+如继续当前最新主线，应优先读取第 14 节和
+`docs/L1_Component_Evaluation_V2_Implementation_Plan.md`；Embedding 施工以
+`Qwen/Qwen3-Embedding-0.6B` 为初期候选，先在隔离索引验证，再考虑生产切换。
+
 ## 12. 交接文档验证记录
 
 初版 HANDOFF 写入前曾完成：
@@ -737,6 +742,175 @@ Eedi 只验证数学辅导场景的管线和方法。客户数据到来后必须
 最后更新：2026-09-02。
 
 本次更新重新核对了真实 run JSON、评测数据构建代码、生产 Chunk、Retriever 和 Assembler，并固定了 L1 六组件复核结论；新增 `docs/L1_Component_Evaluation_V2_Implementation_Plan.md`，未据此修改生产检索算法。
+
+## 14. 最终会话交接：L1 v2 与 Embedding 选型（2026-09-02）
+
+本节优先级高于前文旧的施工状态；旧报告和旧统计保留为审计历史，不得与本节口径混算。
+
+### 14.1 我们正在做什么
+
+项目目标是构建一个覆盖 L1 组件、L2 端到端链路、L3 业务效果的真实数据驱动评测体系，并用它指导教育辅导 RAG 的优化。当前使用 Eedi 数学辅导公开数据作为 NBCOT 真实数据到来前的技术代理，主链路为：
+
+```text
+清洗/脱敏 → LLM 知识卡抽取 → Chunk → DuckDB + Chroma
+→ Query Expansion → Dense/RRF 检索 → Reranker/Assembler
+→ Generator → 四元组引用审计
+```
+
+当前阶段聚焦 L1，并行推进 Embedding 选型；最终目标是将各子分支合并为一个可审查 PR，而不是把多个实验结果直接覆盖到生产目录。
+
+### 14.2 已完成的工作
+
+- L0/L1 评测控制面已实现，DeepEval 作为未来语义评测适配边界；确定性指标不调用 Judge。
+- Storage L1 已通过：生产 DuckDB/Chroma 的 ID parity 100%、metadata contract 100%、orphan 0。
+- 生产 Chroma 已完成受控 metadata 迁移；原始目录备份在 `data/chroma-backups/`，没有删除。
+- L1 v2 已拆分 `grounding`、`chunking`、`chunk_structure`、`rewrite`、`fusion`、`assembler`。
+- Chunk 结构已由生产实现核验：pointer/verbatim/boundary/Turn coverage 均 100%；结构 inflation 约 3.80，低于 4.0。
+- Grounding 已使用真实 deterministic pipeline citation 和 retrieved evidence，不再把黄金证据复制成系统输出。
+- Rewrite/Fusion 已记录 raw、misconception、strategy、curriculum、rewrite-only RRF、raw-inclusive RRF；完整 raw-inclusive RRF 相对 raw-only 有小幅正增益。
+- Assembler 已记录真实 final evidence/prompt trace，并增加 `retriever_miss_rate` 与 `assembler_drop_rate` 分离指标。
+- manifest 已加入 source/indexed/golden 三种计数、输入/输出 artifact hash、system config、embedding 和 qrels provenance。
+- 当前 L1 v2 专项测试最近一次为 `39 passed`；全量测试历史结果为 `123 passed, 1 failed`，唯一失败是既有 `test_llm_expansion_extractor_uses_strict_shared_gate` 契约冲突，不能为本任务掩盖。
+
+### 14.3 当前已固定的 Embedding 决策
+
+初期采用 SiliconFlow OpenAI-compatible Embedding API：
+
+```dotenv
+EMBEDDING_PROVIDER=siliconflow
+EMBEDDING_BASE_URL=https://api.siliconflow.cn/v1
+EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
+```
+
+精确模型 ID 必须是 `Qwen/Qwen3-Embedding-0.6B`，不得带尾随空格，也不要误用视觉模型 `Qwen/Qwen3-VL-Embedding-8B`。
+
+已完成 API 正常性与小规模质量验证：
+
+| 模型 | 全部 30 Query/200 卡片 Recall@5 | MRR | nDCG@5 | 向量维度 | API 总时间 | 估算费用 |
+|---|---:|---:|---:|---:|---:|---:|
+| Qwen3-Embedding-0.6B | 1.000 | 1.000 | 1.000 | 1024 | 13.29 s | 约 $0.0043 |
+| Qwen3-Embedding-4B | 1.000 | 1.000 | 1.000 | 2560 | 20.41 s | 约 $0.0085 |
+| Qwen3-Embedding-8B | 1.000 | 1.000 | 1.000 | 4096 | 161.61 s | 约 $0.0170 |
+
+正式报告：`reports/eval/embedding-api-benchmark/20260902-223930/report.json`。
+该报告使用 30 个 Query、100 张 misconception 卡和 100 张 strategy 卡；三个模型都触顶，说明当前单目标 derived qrels 区分度不足。该结果支持“0.6B 是性价比最优初期候选”，不证明 0.6B 与 4B 在复杂真实业务中等价。
+
+本次 benchmark 只读 DuckDB，没有打开或写入 Chroma；当前生产 artifact 组合 hash 仍为：
+
+```text
+711f1ed14e8f7014a2a57421665c08037fd8189c80bf922217209b7789718fa4
+```
+
+### 14.4 当前卡点
+
+1. **Embedding API 已接入 Provider，但尚未切换生产 Retriever/Storage**：已实现 `src/embedding_provider.py` 的 OpenAI-compatible Provider，并完成独立 Qwen Dense index；生产默认仍保持原有 deterministic Chroma，不能把 benchmark 报告等同于已经切换生产。
+2. **L1 v2 报告仍 BLOCKED**：真实 deterministic 基线的 Grounding、fallback-window retrieval 和 Assembler 最终证据保留率不足，这是当前算法事实，不应通过降低门槛解决。
+3. **qrels 仍不是多相关人工 graded qrels**：当前 30 个 Query 各有一个主要文档正例，文档标签是 `derived_from_human_quote`；Recall/MRR/nDCG 适合相对比较，不适合宣布最终业务准确率。
+4. **manifest 曾记录 `artifact_mutated_during_build=true`**：这是此前构建副本被 Chroma 客户端改写的审计事实；当前生产 artifact 只读复核通过，但后续所有构建必须在隔离副本执行且前后 hash 相等。
+5. **当前没有 BM25/Sparse 和 Cross-Encoder**：所谓 `DualMetric` 只是同一 Dense 向量的 Cosine + L2，不能替代 BM25+Dense Hybrid。
+6. **并行分支尚未合并**：当前仓库存在 `embedding-benchmark` 等分支及工作树用户改动；合并前必须逐 commit review，不能 reset/checkout 覆盖。
+
+### 14.4.1 Qwen 0.6B 隔离索引与 L1 评测证据
+
+已使用 SiliconFlow API 重建隔离 Chroma：
+
+```text
+reports/eval/embedding-qwen3-0.6b-20260902-233144/chroma
+```
+
+构建报告：
+`reports/eval/embedding-qwen3-0.6b-20260902-233144/chroma.build.json`。
+集合数量为 misconception 100、strategy 100、fallback window 719；向量维度 1024；
+API 请求 31、输入/总 tokens 209374；DuckDB hash 未变化。
+
+在该索引的隔离副本上完成 Retrieval、Fusion、Assembler L1：
+
+```text
+报告：reports/eval/l1-qwen3-0.6b-rfa-20260902-233144-rerun
+运行：l1-qwen3-0.6b-rfa-20260902-233144-rerun
+请求：420 次，重试 0，向量维度 1024
+release_status：BLOCKED（执行成功，但质量/延迟门禁未通过）
+```
+
+关键聚合结果：
+
+| 模块 | 指标 | 结果 | 说明 |
+|---|---|---:|---|
+| Retrieval | Candidate Recall@20 | 1.000 | 目标卡全部进入候选 |
+| Retrieval | Recall@5 / MRR / nDCG@5 | 1.000 / 1.000 / 1.000 | 30 个单目标 qrels 上触顶，不能视为工业质量 |
+| Retrieval | noise ratio@5 | 0.80 | 单目标 qrels 把其余候选视为噪声，需多相关 qrels 才能正式解释 |
+| Retrieval | P95 latency | 685 ms | 超过当前 150 ms 门槛，API 逐 Query 调用是主要原因 |
+| Fusion | raw-inclusive RRF MRR lift | -0.0389 | 当前 Raw Dense 已很强，RRF 在此小集合上反而扰动排序 |
+| Assembler | retriever_miss_rate | 0.00 | Qwen 候选阶段未发生目标缺失 |
+| Assembler | assembler_drop_rate | 0.60 | 目标进候选后仍有 60% 未被最终保留 |
+| Assembler | final_evidence_recall | 0.40 | 最终证据覆盖不足 |
+| Assembler | rerank_ndcg_gain | -0.1124 | 当前 MMR/选择逻辑在该候选分布下退化 |
+| Assembler | token budget / evidence empty | 0 / 0 | 预算和非空证据正常 |
+
+该评测只证明 Qwen 0.6B 在当前单目标 qrels 上能显著改善候选召回，不证明完整业务质量；生产 Chroma 未被修改，当前生产组合 hash 仍为
+`711f1ed14e8f7014a2a57421665c08037fd8189c80bf922217209b7789718fa4`。
+
+最近一次 Provider、索引脚本和 L1 评测回归测试：`44 passed`；生产 deterministic
+回归（`tests/test_retriever.py` + `tests/test_storage_manager.py`）单独运行：`15 passed`。
+Qwen L1 运行的 `BLOCKED` 主要来自 API 延迟、单目标 qrels 的 noise 口径、Fusion 轻微负增益和 Assembler 丢弃；不能通过降低门禁或回退 deterministic 来处理。
+
+### 14.5 下一步计划
+
+#### P0：接入并验证 0.6B API Dense
+
+1. [x] 实现厂商无关的 `EmbeddingProvider`，支持 SiliconFlow OpenAI-compatible `/v1/embeddings`。
+2. [x] API 失败、超时、维度错误、数量不一致显式失败；禁止静默切回 deterministic。
+3. [x] 固定模型 ID、维度、batch 和调用 provenance；记录 usage tokens、request/retry 和耗时。
+4. [x] 从 DuckDB 重建新的 Qwen 0.6B Chroma 隔离索引；未混用 128d deterministic 向量。
+5. [x] 运行 Retrieval、Fusion、Assembler L1；结果仍为 BLOCKED，问题转入延迟、Fusion 和 Assembler 优化。
+6. [ ] 通过正式 qrels 与完整 L1 门禁后，再做受控蓝绿切换；保留旧 Chroma 备份和回滚 hash。
+
+#### P1：建立真正 Hybrid Retrieval
+
+1. 在同一份 qrels 上实现 BM25-only、Dense-only、BM25 + Dense RRF、Multi-query Dense RRF、BM25 + Multi-query Dense RRF。
+2. BM25 tokenizer 必须保留专业词、数字、小数、公式、选项和中文 bigram。
+3. 记录每个 lane 的候选、rank、score、fusion rank，先看 Candidate Recall@20/@50，再看 Recall@5、MRR、nDCG 和延迟。
+4. 只有候选池稳定后再加入 Cross-Encoder；固定候选池做 before/after paired evaluation。
+
+#### P1：修正数据评价能力
+
+1. qrels 增加多个相关文档、0/1/2/3 relevance、人工复核和 dev/holdout Session 隔离。
+2. Grounding 分离 dataset quote integrity、真实 citation grounding、role accuracy 和 candidate authorization。
+3. Assembler 继续分离 `retriever_miss` 与 `assembler_drop`，并按 misconception/strategy 槽位统计。
+4. manifest 增加索引版本、模型 revision、provider、实际 indexed session、运行命令和 hash；任何 hash 变化都阻断正式报告。
+
+#### P2：L2/L3
+
+1. 统一生产 Trace：raw/expanded query、各路候选、RRF、Reranker、最终 Context、evidence、stage latency、错误/降级。
+2. DeepEval 只在真实 Generator final Context 和独立 evaluation LLM 配置就绪后启用。
+3. Eedi 结果只能作为技术代理；接入 NBCOT 前重新做 taxonomy、PII、qrels、人工业务验收和 ROI 评估。
+
+### 14.6 绝对不要踩的坑
+
+- 不要把 30 Query 全部 Recall@5=1.0 解释成模型已经达到工业质量；当前 qrels 过于简单且单目标。
+- 不要把 API smoke test 当成生产索引已切换；必须重建独立 Chroma 并跑完整 L1。
+- 不要把 `Qwen3-Embedding-0.6B` 与 `Qwen3-VL-Embedding-8B` 混用，也不要在模型 ID 末尾留空格。
+- 不要把 Qwen 向量写入旧 deterministic 128d Chroma；不同模型/维度必须独立 index version。
+- 不要把 `EMBEDDING_API_KEY_ENV` 字段中的真实密钥写入报告、日志或提交；长期配置应改为变量名引用，密钥只存在进程环境。
+- 不要在 API 超时或依赖不可用时用 deterministic、随机向量、零向量或模板数据冒充成功。
+- 不要把 DuckDB 的 `LIKE` 查询称作 BM25；当前系统之前没有 Sparse retrieval。
+- 不要把单独 Rewrite Query 的负增益当成完整 Raw-inclusive RRF 的结论；必须保留 Raw、各 lane 和完整 Fusion 的 paired comparison。
+- 不要把 Chunk retrieval 的 inflation 与 Chunk generation inflation 混为一谈；检索候选数不是切块膨胀率。
+- 不要把 Retriever miss 算成 Assembler drop；目标不在候选池时，Assembler 无法凭空召回。
+- 不要把 Session 存在或后端查到 Turn 标记为 Citation 正确；必须核验完整 `(session_id, turn_id, speaker, quote_text)` 四元组和候选授权。
+- 不要用 `chromadb.PersistentClient` 对源 artifact 做“只读评测”；历史上它可能改写 housekeeping 文件。使用 immutable SQLite 或隔离副本。
+- 不要在构建数据集或评测时覆盖源 artifact；构建前后 hash 必须相等，目标目录必须不存在或使用明确的新版本目录。
+- 不要把当前生产工作树用户改动和子分支成果混在一个 commit；先逐文件 review，再按 PR 合并。
+- 不要使用 `git reset --hard`、`git checkout --`、全仓库 `git clean`，尤其根仓库 `E:\PIAgent` 包含多个项目。
+
+L1 最后一次优化和 L2 入场必须按
+`docs/L1_Optimization_Closeout_L2_DeepEval_Entry_Plan.md` 执行；该文档把每个失败指标
+分为必须修复、诊断/不适用或明确限制，并规定最终只能输出
+`GO_TO_L2_TECHNICAL`、`BUSINESS_QUALITY_PASSED` 或带责任和复现命令的 `BLOCKED`。
+
+### 14.7 继续工作的推荐开场白
+
+> 请先读取 `HANDOFF.md` 第 14 节、`AGENTS.md`、`docs/L1_Component_Evaluation_V2_Implementation_Plan.md`，并检查当前分支与工作树。当前任务是实现并验证 `Qwen/Qwen3-Embedding-0.6B` 的 SiliconFlow OpenAI-compatible EmbeddingProvider：先写失败契约测试，再在隔离 artifact 重建 Dense index，运行同一套 L1 指标，记录模型/usage/latency/cost/hash；不得覆盖生产 Chroma、不得静默 fallback、不得把单目标 qrels 的触顶结果写成工业质量。完成后提供测试证据、报告路径、commit SHA 和 PR 合并说明。
 
 ## 13. L1 v2 P0 实施状态（2026-09-02）
 
@@ -762,3 +936,122 @@ UNMEASURED: 213
 该 BLOCKED 是正确结果：当前 deterministic 基线与黄金证据/qrels 仍有真实差距，且单目标 golden qrels 尚未升级为人工多相关 graded qrels。不能据此调整生产排序，更不能将结果写成通过。
 
 验证：`pytest -q` 为 `123 passed, 1 failed`；唯一失败仍是第 6.4 节列出的 `test_llm_expansion_extractor_uses_strict_shared_gate`，没有修改相关实现。`compileall src evals scripts tests` 通过。评测使用 `reports/runtime/l1-v2-artifacts-20260902-154700/` 隔离副本；源 DB 与 Chroma 复核 hash 未变。
+
+## 14. L1 Optimization Closeout 执行结果（2026-09-03）
+
+本轮按 `docs/L1_Optimization_Closeout_L2_DeepEval_Entry_Plan.md` 执行 O1→O6，并将所有新实验写入不可覆盖的版本化目录：
+
+- O1 冻结输入：`evals/datasets/l1-closeout-20260903-015400/`，30 Query、30 derived qrels；按 source session 隔离为 dev=24、holdout=6，`session_leakage_count=0`。
+- Qwen 候选索引：`reports/eval/embedding-qwen3-0.6b-closeout-20260903-014700/chroma`，100/100/719，Chroma SHA256=`38c7b7076c4d8b787d5ac3474def6876c22316cbebae3667079fea289fef86f3`，DB+Chroma combined=`6bb387b4b9698009fffca6193a35d02b98b0424d017fc4add166f89428e9d67a`。
+- O2：LLM 生成契约改为完整 `(session_id, turn_id, speaker, quote_text)`；审计不再信任 `verifiable_in_duckdb` 或按 Session 自动取前六轮。
+- O3：misconception/strategy 独立选槽；raw-query rank boost 修复 RRF 归一化饱和导致的候选误选；Assembler latency 只测装配阶段。
+- O4：embedding provider 支持按 provider/model/index_version/query_text 的成功结果缓存；同一 Query 多 lane 合并批量请求；记录 request/cache/retry/token/P50/P95。
+- O5：fallback 增加对白区数字/公式 exact channel；Fusion 采用可审计 `raw_first`，保留 rewrite-only/raw-inclusive 对照 trace。
+- O6 最新 run：`reports/eval/l1-closeout-qwen-20260903-025500/`，状态计数 `SUCCESS=2110 / FAILED=344 / UNMEASURED=262 / ERROR=0`；closeout 决策为 `BLOCKED`，详见 `closeout.md`、`closeout.json`。
+
+当前硬阻塞及责任模块：
+
+1. Grounding `citation_recall=0.5889 < 0.95`：最终生成仍未覆盖全部 required quote，责任模块为 Generator/引用选择；下一步需基于真实最终 evidence 做可解释的引用选择和人工复核，不能从黄金 qrels 反向复制。
+2. Chunk retrieval `turn_recall_at_3=0.7944 < 0.90`、`turn_mrr=0.8461 < 0.85`：dev 分片分别为 0.7569/0.8076，责任模块为 fallback window Query/候选排序；holdout 为 0.9444/1.0，需扩大独立 qrels 后再调参。
+3. Retrieval `latency_p95=443.8ms > 300ms`：责任模块为 API/Chroma 查询链路；provider 记录了 60 requests、390 cache hits、0 retries，但上游延迟存在长尾，不能把 token/cache 命中伪称达标。
+
+Storage、Chunk Structure、单槽 Retrieval 质量、Assembler retention/evidence/budget/latency 和 selected Fusion non-regression 均已通过；derived qrels 的 Top-5 noise、无标签 Rewrite intent、未适用 fallback slot 均已降为诊断或 `UNMEASURED`，没有参与硬门禁。
+
+本轮曾因误用 `PersistentClient` 读取旧 Qwen 目录导致 housekeeping hash 从计划值变化；该目录未再作为基线，已新建上述隔离索引并保留旧目录作为事故证据。所有最终 run 评测后源 hash 保持不变。
+
+由于 L1 决策为 `BLOCKED` 且 DeepEval 专用 Judge 未配置，L2 未启动；禁止输出 Gold/Real 语义分数或 `GO_TO_L2_TECHNICAL`。
+
+## 15. Qwen Embedding 生产接入边界（2026-09-03）
+
+已补充 `src/embedding_provider.py` 的 `EmbeddingIndexContract`：持久化索引必须记录并匹配 provider、model、dimension、index_version；缺失或不一致时显式抛错，禁止把 Qwen Query 向量发送到旧 deterministic 索引。Qwen provider 默认契约为 `Qwen/Qwen3-Embedding-0.6B`、1024 维、`qwen3-embedding-0.6b-v1`。
+
+`DualEngineStorageManager` 支持 `embedding_index_version` 校验；`scripts/rebuild_qwen_embedding_index.py` 将完整契约写入三个 Chroma collection metadata 和 build provenance；两个 Qwen L1 评测脚本会校验索引契约。`src/cli.py` 新增 `--db-path`、`--chroma-dir`、`--embedding-backend {deterministic,siliconflow}`，默认仍为 deterministic，Qwen 只能显式选择并指向匹配的新索引，例如：
+
+```powershell
+python -m src.cli --embedding-backend siliconflow --chroma-dir reports\eval\embedding-qwen3-0.6b-...\chroma
+```
+
+本次未调用真实 API、未修改 `data/chroma`、未提交 commit。验证：相关测试 `26 passed`，`compileall src scripts` 通过，`git diff --check` 通过。后续若重建 Qwen 索引，必须使用新目录并保留 build report；生产切换前先停止 CLI，执行 Storage L1 和完整 Retrieval/Fusion/Assembler L1，固定 hash 后再做蓝绿切换并保留回滚副本。
+
+## 16. L2/L3 闭环与三层总报告（2026-09-03）
+
+### 16.1 L2 DeepEval 闭环
+
+已在项目 `.venv` 安装并锁定 `deepeval==4.2.0`（`pyproject.toml` 的 `evaluation` optional dependency）。新增 `scripts/run_l2_deepeval.py` 与 `evals/deepeval_adapter.py`：
+
+```text
+raw query → deterministic expansion → Qwen retrieval → raw_first fusion
+→ Assembler → Real final Context / Gold Context
+→ production LLM generator (mimo-v2.5)
+→ quadruple citation audit
+→ DeepEval Judge (mimo-v2.5-pro, OpenAI-compatible)
+```
+
+L2 数据集：`evals/datasets/l2-golden30-20260903-060000/`，30 cases、dev=24、holdout=6、Session leakage=0，包含 `queries.jsonl`、`expected_answers.jsonl`、`expected_evidence.jsonl`、`split_manifest.json` 和 manifest。
+
+最新真实 smoke 报告：`reports/eval/l2-deepeval-smoke-20260903-060000/`。
+
+- Gold/Real 各 2 cases，4 条真实 trace、24 个指标（含 deterministic citation audit）；`ERROR=0`。
+- Judge readiness=`SUCCESS`，DeepEval=`4.2.0`，model=`mimo-v2.5-pro`；API key 只通过 `LLM_API_KEY` 环境变量读取，未写入报告。
+- Gold：Answer Relevancy `1.000`、Contextual Precision `1.000`、Contextual Recall `0.833`、Faithfulness `0.875`、Pedagogical GEval `0.600`、Citation audit `0.833`。
+- Real：Answer Relevancy `1.000`、Contextual Precision `1.000`、Contextual Recall `1.000`、Faithfulness `0.750`、Pedagogical GEval `0.600`、Citation audit `0.250`。
+- artifact hash 前后未变；release decision=`BLOCKED_L1_PRECONDITION`。这表示 L2 链路和 Judge 可运行，但 L1 尚未达到 `GO_TO_L2_TECHNICAL`，且 smoke 样本不足以签署语义发布门禁。
+
+Gold/Real 解释遵循固定口径：Gold 高、Real 低表示上游检索/装配损失；两者都低则需要检查 Generator 或数据。当前结果支持继续修复引用覆盖和教学适配性，不支持把 smoke 分数写成生产质量。
+
+### 16.2 L3 业务/教研闭环
+
+已新增 `scripts/run_l3_business_eval.py` 与 `tests/test_l3_business_eval.py`。L3 数据集：`evals/datasets/l3-business-proxy-20260903-051500/`，30 个 Eedi 技术代理 cases（dev=24、holdout=6、student_insight=18、tutor_intervention=12），包含业务任务、接受标准、required evidence quads、qrels 和 split manifest。
+
+最新报告：`reports/eval/l3-business-proxy-20260903-051500/`。
+
+| L3 指标 | 全量 | Dev | Holdout | 状态 |
+|---|---:|---:|---:|---|
+| Candidate Recall@20 | 1.0000 | 1.0000 | 1.0000 | `DIAGNOSTIC_PROXY` |
+| Recall@5 | 1.0000 | 1.0000 | 1.0000 | `DIAGNOSTIC_PROXY` |
+| MRR | 1.0000 | 1.0000 | 1.0000 | `DIAGNOSTIC_PROXY` |
+| Final document recall | 1.0000 | 1.0000 | 1.0000 | `DIAGNOSTIC_PROXY` |
+| Final evidence recall | 0.6111 | 0.6319 | 0.5278 | `DIAGNOSTIC_PROXY` |
+| Actionability | 1.0000 | 1.0000 | 1.0000 | `DIAGNOSTIC_PROXY` |
+
+真实业务指标均明确为 `UNMEASURED`：`researcher_adoption`、`task_completion`、`learning_gain`、`online_feedback`。Eedi 数学数据只验证技术链路，不代表 NBCOT 或客户业务效果；当前 qrels 仍由人工引用派生，不是独立多文档 graded judgments。
+
+### 16.3 最终三层交付报告
+
+总报告：`reports/eval/l123-analysis-20260903-063000/`，包含 `report.md`、`report.json`，并在 JSON 中嵌入 L1/L2/L3 manifest、raw data 文件路径和 SHA-256。
+
+最终交付状态固定为：
+
+```text
+L1_BLOCKED_L2_VALIDATED_L3_BUSINESS_UNMEASURED
+```
+
+含义：
+
+1. L1 已完成可审计 closeout，但 Grounding citation recall、fallback Chunk Turn Recall、Retrieval P95 仍未过门禁；不能发布或切换生产索引。
+2. L2 Gold/Real + DeepEval 真实闭环已验证，Judge 可用且无 ERROR，但当前为 2-case smoke，发布受 L1 前置阻塞。
+3. L3 已完成 Eedi proxy 的召回/证据/行动性测评；真实教研员采纳、任务完成、学习增益和线上反馈没有数据，不能宣称业务质量通过。
+
+三层总报告的原始证据入口：
+
+- [L1 closeout](/E:/PIAgent/10-projects/AgentLearn/Eedi-RAG/reports/eval/l1-closeout-qwen-20260903-025500/closeout.md)
+- [L2 DeepEval smoke](/E:/PIAgent/10-projects/AgentLearn/Eedi-RAG/reports/eval/l2-deepeval-smoke-20260903-060000/report.md)
+- [L3 proxy report](/E:/PIAgent/10-projects/AgentLearn/Eedi-RAG/reports/eval/l3-business-proxy-20260903-051500/report.md)
+- [L1/L2/L3 analysis](/E:/PIAgent/10-projects/AgentLearn/Eedi-RAG/reports/eval/l123-analysis-20260903-063000/report.md)
+
+## 17. L2/L3 最新复核（2026-09-03）
+
+为修正 L2 trace 的 split 映射和 citation audit 记录，已用新 run ID 重跑 2-case smoke：
+
+- L2 最新数据集：`evals/datasets/l2-golden30-20260903-060000/`。
+- L2 最新报告：`reports/eval/l2-deepeval-smoke-20260903-060000/`。
+- 4 条真实 Gold/Real trace、24 个指标、`ERROR=0`、Judge readiness=`SUCCESS`，源 Qwen combined hash 前后仍为 `6bb387b4b9698009fffca6193a35d02b98b0424d017fc4add166f89428e9d67a`。
+- Gold 指标：Answer Relevancy 1.000、Citation audit 0.833、Contextual Precision 1.000、Contextual Recall 0.833、Faithfulness 0.875、Pedagogical GEval 0.600。
+- Real 指标：Answer Relevancy 1.000、Citation audit 0.250、Contextual Precision 1.000、Contextual Recall 1.000、Faithfulness 0.750、Pedagogical GEval 0.600。
+- release decision=`BLOCKED_L1_PRECONDITION`；该 smoke 只证明 L2 闭环可运行，不构成完整 30-case 语义发布基线。
+
+L3 最新全量 proxy 仍为 `reports/eval/l3-business-proxy-20260903-051500/`：30 cases，Candidate Recall@20/Recall@5/MRR/final document recall/actionability 均 1.0，final evidence recall 0.6111；researcher adoption、task completion、learning gain、online feedback 全部 `UNMEASURED`。
+
+最终三层报告已更新为：`reports/eval/l123-analysis-20260903-071500/`，决策=`L1_BLOCKED_L2_VALIDATED_L3_BUSINESS_UNMEASURED`。该报告包含三层 manifest、raw observations/traces/cases 路径与 SHA-256、aggregate/case/slice 指标和组件优化结论；其中 L2 证据文字已与最新 24 条指标 raw report 对齐。
+
+最终验证：全量 `pytest`=`151 passed, 1 failed`；唯一失败仍是既有 `test_llm_expansion_extractor_uses_strict_shared_gate` 扩容异常契约冲突；`compileall` 和 `git diff --check` 通过。`.venv` `pip check` 仍报告可选 `huggingface-hub` 要求 `click>=8.4.2` 与 DeepEval `click<8.4.0` 的依赖冲突；不影响已验证的 L2 import/runner，但后续应通过独立环境或兼容依赖约束解决。

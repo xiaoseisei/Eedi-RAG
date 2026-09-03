@@ -1,0 +1,40 @@
+{
+  "artifact_hash": "6bb387b4b9698009fffca6193a35d02b98b0424d017fc4add166f89428e9d67a",
+  "case_count": 30,
+  "dataset_version": "eedi-l3-business-proxy-v1",
+  "files": {
+    "business_cases.jsonl": "a09bbb709d57e517f745d47fb670c8636d2048dedc4b639a04d7a6ca8de50387",
+    "qrels.jsonl": "cab5278e2f0318eb2d15130b2b5a281842a09607d61ff76f6122b762713d668c",
+    "split_manifest.json": "2fa446fd44fb7b7f8f7a347f1953cc76cdfe2b8a3f64010aaf2b830842baf537"
+  },
+  "generated_at": "2026-09-02T18:54:23.385237Z",
+  "l1_manifest_sha256": "2d59880583f03e6ce8caeb23f9c73ce9500b816773f6a32bffafebf5e75fef3d",
+  "limitations": [
+    "Eedi is a technical proxy and not NBCOT business data",
+    "no independent researcher adoption labels",
+    "no online user feedback or learning-gain measurements",
+    "qrels are derived from human quote evidence and are not multi-document graded judgments"
+  ],
+  "qrel_count": 30,
+  "qrels_version": "golden-verbatim-v2-derived-document-v1",
+  "schema_version": "l3-business-proxy-dataset/v1",
+  "session_leakage_count": 0,
+  "split_counts": {
+    "dev": 24,
+    "holdout": 6
+  },
+  "system_config": {
+    "assembler_top_k_each": 5,
+    "data_mode": "Eedi_proxy_only",
+    "layer": "L3",
+    "real_business_outcomes": [
+      "researcher_adoption",
+      "task_completion",
+      "learning_gain",
+      "online_feedback"
+    ],
+    "retrieval_top_k": 20,
+    "unmeasured_outcome_policy": "explicit_unmeasured_no_proxy_substitution"
+  },
+  "system_config_hash": "88911486d15f71335252d4c78b1ed4e48a3c3452049fc978246c73d2b26c7b2b"
+}

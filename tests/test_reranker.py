@@ -132,3 +132,58 @@ def test_evidence_deduplication_keeps_same_turn_from_different_sessions():
     })
 
     assert [(t["session_id"], t["turn_id"]) for t in result.evidence_turns] == [(10, 1), (33, 1)]
+
+
+def test_strategy_selection_is_independent_from_misconception_redundancy():
+    """Complementary slots must select their own best candidate independently."""
+    assembler = PedagogicalGoldAssembler(lambda_diversity=0.7)
+    shared_evidence = [{"turn_id": 1, "speaker": "tutor", "text": "Use the same place value."}]
+    result = assembler.assemble("rounding place value", {
+        "misconceptions": [{
+            "rrf_score": 0.03,
+            "document": "rounding place value shared terms",
+            "metadata": {"session_id": 10, "subject_path": "Number"},
+            "evidence_turns": [{"turn_id": 2, "speaker": "student", "text": "I used the wrong place."}],
+        }],
+        "strategies": [
+            {
+                "rrf_score": 0.03,
+                "document": "rounding place value shared terms",
+                "metadata": {"session_id": 10, "subject_path": "Number", "key_aha_question": "Which place?"},
+                "evidence_turns": shared_evidence,
+            },
+            {
+                "rrf_score": 0.02,
+                "document": "unrelated distinct intervention",
+                "metadata": {"session_id": 33, "subject_path": "Number", "key_aha_question": "Try another way?"},
+                "evidence_turns": shared_evidence,
+            },
+        ],
+        "rewritten_queries": {"extracted_keywords": ["rounding", "place", "value"]},
+    })
+
+    assert result.selected_strategy["metadata"]["session_id"] == 10
+
+
+def test_raw_query_rank_breaks_rrf_score_saturation_for_slot_selection():
+    assembler = PedagogicalGoldAssembler()
+    candidates = [
+        {
+            "rrf_score": 0.02,
+            "document": "direct answer",
+            "metadata": {},
+            "perspective_hits": ["raw_query_perspective(#Rank1)"],
+            "evidence_turns": [{"turn_id": 1, "speaker": "student", "text": "direct"}],
+        },
+        {
+            "rrf_score": 0.03,
+            "document": "glossary rounding place value",
+            "metadata": {},
+            "perspective_hits": ["raw_query_perspective(#Rank10)"],
+            "evidence_turns": [{"turn_id": 2, "speaker": "student", "text": "incidental"}],
+        },
+    ]
+
+    selected = assembler._select_mmr_best(candidates, "direct answer", ["rounding", "place", "value"], [])
+
+    assert selected is candidates[0]

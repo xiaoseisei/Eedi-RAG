@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 # 确保项目根目录在 sys.path 中
 project_root = Path(__file__).resolve().parent.parent
@@ -41,69 +41,62 @@ class CitationAuditError(RAGGenerationError):
     """回答中的任一引用无法逐字段映射到真实会话证据。"""
 
 
-class LLMCitationPayload(BaseModel):
-    """LLM 引用的严格传输契约；session_id 是跨会话消歧所必需。"""
+class LLMDialogueCitation(BaseModel):
+    """Citation fields the model must copy from the final assembled evidence."""
 
     model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=True)
 
-    session_id: int = Field(gt=0)
-    turn_id: int = Field(gt=0)
+    session_id: int = Field(ge=1)
+    turn_id: int = Field(ge=1)
     speaker: Literal["student", "tutor"]
     quote_text: str = Field(min_length=1)
 
 
 class LLMGuidancePayload(BaseModel):
-    """LLM 原始 JSON 的严格契约，禁止缺字段、空内容和额外字段。"""
+    """
+    LLM 轻量输出契约：短回答 + 完整引用四元组。
+    引用必须逐字复制自本次最终 Assembler evidence。
+    """
 
     model_config = ConfigDict(extra="forbid", strict=True, str_strip_whitespace=True)
 
-    subject_path: str = Field(min_length=1)
-    answer_content: str = Field(min_length=1)
-    misconception_diagnosis: str = Field(min_length=1)
-    key_aha_question: str = Field(min_length=1)
-    recommended_talk_moves: List[str] = Field(min_length=1)
-    scaffolding_steps: List[str] = Field(min_length=1)
-    dialogue_citations: List[LLMCitationPayload] = Field(min_length=1)
-    transfer_question: str = Field(min_length=1)
-
-    @field_validator("recommended_talk_moves", "scaffolding_steps")
-    @classmethod
-    def reject_blank_list_items(cls, values: List[str]) -> List[str]:
-        if any(not isinstance(value, str) or not value.strip() for value in values):
-            raise ValueError("列表项不能为空")
-        return [value.strip() for value in values]
+    subject_path: str = Field(min_length=1, description="学科考纲路径")
+    answer: str = Field(min_length=1, max_length=200, description="核心回答（80字左右）")
+    dialogue_citations: List[LLMDialogueCitation] = Field(
+        min_length=1,
+        description="来自最终上下文的完整 (session_id, turn_id, speaker, quote_text) 引用",
+    )
+    transfer_question: Optional[str] = Field(default=None, description="变式巩固题（如有）")
 
 
-SYSTEM_PEDAGOGICAL_PROMPT = """你是一名拥有 20 年一线教学与教研经验的资深中学数学教研专家兼苏格拉底式启发辅导导师。
-你的职责是：根据下方经由真实课堂检索提纯的【权威教研参考知识基座】，严格针对用户提问进行深度解答。
+SYSTEM_PEDAGOGICAL_PROMPT = """你是资深中学数学教研专家。根据【知识基座】回答用户提问。
 
-【核心铁律】：
-1. 【根据提问语义自然聚焦】：
-   - 若提问侧重学生错因/误区 → 深入分析学情认知卡点与错因机理；
-   - 若提问侧重教法/引导策略 → 聚焦名师破局一问、脚手架与教学动作；
-   - 若提问同时涉及两者 → 综合呈现学情诊断 + 教法建议，按语义权重自然侧重。
-2. 【真实学生发问与对白引用】：
-   - 引用历史学生发问必须真实源于知识基座中的原声对白（带 [Turn N]），绝不凭空捏造。
-3. 【严格 JSON 输出】：
-   - 必须且仅能输出符合以下 JSON Schema 的纯 JSON 对象：
+【回答风格】：
+- 直接、精炼，像给同事的口头答复
+- 学情类问题 → 一句话说出核心误区与成因（80字以内）
+- 教法类问题 → 一句话说出核心引导策略（80字以内）
+- 不要展开长篇分析，不要分章节，不要建议步骤
+
+【输出格式】严格输出以下 JSON：
 
 {
-  "subject_path": "学科考纲路径或涵盖领域",
-  "answer_content": "针对用户具体问题展开的自然、深刻、结构化的完整回答正文 (支持 Markdown 丰富排版)",
-  "misconception_diagnosis": "学情认知误区提炼总结",
-  "key_aha_question": "推荐的核心破局一问 (如有)",
-  "recommended_talk_moves": ["<Press for Accuracy>", "<Revoicing>"],
-  "scaffolding_steps": ["步骤 1: ...", "步骤 2: ..."],
+  "subject_path": "学科考纲路径",
+  "answer": "核心回答（80字以内）",
   "dialogue_citations": [
     {
       "session_id": 10,
       "turn_id": 9,
       "speaker": "tutor",
-      "quote_text": "对白原文"
+      "quote_text": "逐字复制【真实师生对白实录证据】中的完整原文"
     }
   ],
-  "transfer_question": "同构变式巩固题 (如有)"
+  "transfer_question": null
 }
+
+【引用硬约束】：
+- 每条引用必须完整填写 session_id、turn_id、speaker、quote_text；
+- 只能逐字复制本次【真实师生对白实录证据】中可见的条目；
+- 禁止改写 quote_text、猜测 Turn、引用未进入最终上下文的 Session。
 """
 
 
@@ -239,6 +232,8 @@ class EndToEndPedagogicalRAGPipeline:
         retrieval_res: Dict[str, Any],
     ) -> PedagogicalGuidanceResponse:
         """调用 LLM；两次尝试均失败时显式抛错，不在内部静默降级。"""
+        import time as _time
+
         if not self.api_key:
             raise RAGGenerationError("缺少 LLM_API_KEY，无法执行 LLM 生成")
         if not self.model_name:
@@ -250,16 +245,22 @@ class EndToEndPedagogicalRAGPipeline:
         except Exception as exc:
             raise RAGGenerationError(f"LLM 客户端初始化失败: {exc}") from exc
 
+        # 探针: prompt 构建
+        t_prompt = _time.time()
         user_prompt = (
             f"【用户教研提问】: {query}\n\n"
             f"{gold_ctx.prompt_context_markdown}\n\n"
-            "仅输出符合 system JSON Schema 的对象。每条 dialogue_citations 必须同时给出 "
-            "session_id、turn_id、speaker、quote_text，并逐字引用上下文。"
+            "仅输出 JSON，不要输出其他内容。"
         )
+        prompt_tokens_est = len(user_prompt) // 2  # 粗估: ~2 字符/token
+        logger.info(f"  📏 [探针] Prompt 构建: {round(_time.time()-t_prompt, 3)}s | 预估输入 tokens: ~{prompt_tokens_est}")
+
         last_error: Optional[Exception] = None
         payload: Optional[LLMGuidancePayload] = None
         for attempt in range(2):
             try:
+                # 探针: LLM API 调用 (核心瓶颈)
+                t_llm = _time.time()
                 llm_response = client.chat.completions.create(
                     model=self.model_name,
                     messages=[
@@ -269,10 +270,28 @@ class EndToEndPedagogicalRAGPipeline:
                     temperature=0.2,
                     response_format={"type": "json_object"},
                 )
+                llm_elapsed = round(_time.time() - t_llm, 3)
+
                 raw_content = llm_response.choices[0].message.content
                 if not raw_content:
                     raise ValueError("LLM 返回空内容")
+
+                # 探针: 响应元信息
+                usage = getattr(llm_response, "usage", None)
+                if usage:
+                    logger.info(
+                        f"  🤖 [探针] LLM API 调用: {llm_elapsed}s | "
+                        f"输入 tokens: {usage.prompt_tokens} | "
+                        f"输出 tokens: {usage.completion_tokens} | "
+                        f"总 tokens: {usage.total_tokens} | "
+                        f"生成速度: {round(usage.completion_tokens / llm_elapsed, 1)} tokens/s"
+                    )
+
+                # 探针: JSON 解析 + Pydantic 校验
+                t_parse = _time.time()
                 payload = LLMGuidancePayload.model_validate(json.loads(raw_content))
+                logger.info(f"  🔧 [探针] JSON 解析+校验: {round(_time.time()-t_parse, 3)}s")
+
                 break
             except (json.JSONDecodeError, ValidationError, ValueError, AttributeError, IndexError) as exc:
                 last_error = exc
@@ -288,23 +307,40 @@ class EndToEndPedagogicalRAGPipeline:
         if payload is None:
             raise RAGGenerationError(f"LLM 生成在 2 次尝试后失败: {last_error}") from last_error
 
-        citations = [DialogueCitation(
-            session_id=c.session_id,
-            turn_id=c.turn_id,
-            speaker=c.speaker,
-            quote_text=c.quote_text,
-            verifiable_in_duckdb=False,
-        ) for c in payload.dialogue_citations]
+        # ── 后处理: 只接受模型从最终 Assembler evidence 复制的四元组 ──
+        t_lookup = _time.time()
+        citations = [
+            DialogueCitation(**citation.model_dump(), verifiable_in_duckdb=False)
+            for citation in payload.dialogue_citations
+        ]
+        referenced_ids = list(dict.fromkeys(citation.session_id for citation in citations))
+
+        # 从检索结果中查找破局一问和教学动作（来自被引用的 session）
+        key_aha = ""
+        talk_moves: List[str] = []
+        for src in retrieval_res.get("strategies", []):
+            meta = src.get("metadata", {})
+            if meta.get("session_id") in referenced_ids:
+                if not key_aha and meta.get("key_aha_question"):
+                    key_aha = meta["key_aha_question"]
+                if meta.get("talk_moves"):
+                    talk_moves = list(meta["talk_moves"])[:4]
+
+        if not key_aha:
+            key_aha = payload.answer
+
+        # 从检索结果中提取调试信息
         debug_sources = self._extract_debug_sources(retrieval_res)
+
         response = PedagogicalGuidanceResponse(
             query=query,
             subject_path=payload.subject_path,
-            session_id=payload.dialogue_citations[0].session_id,
-            answer_content=payload.answer_content,
-            misconception_diagnosis=payload.misconception_diagnosis,
-            key_aha_question=payload.key_aha_question,
-            recommended_talk_moves=payload.recommended_talk_moves,
-            scaffolding_steps=payload.scaffolding_steps,
+            session_id=referenced_ids[0] if referenced_ids else None,
+            answer_content=payload.answer,
+            misconception_diagnosis=payload.answer,
+            key_aha_question=key_aha,
+            recommended_talk_moves=talk_moves,
+            scaffolding_steps=[],
             dialogue_citations=citations,
             transfer_question=payload.transfer_question,
             retrieved_sources_debug=debug_sources,
@@ -371,6 +407,9 @@ class EndToEndPedagogicalRAGPipeline:
 
         invalid = []
         for citation, record in zip(response.dialogue_citations, records):
+            # Verification is derived here only.  A caller/model supplied flag
+            # must never bypass the final-evidence authorization check.
+            citation.verifiable_in_duckdb = False
             fact = (
                 record.get("session_id"),
                 record.get("turn_id"),
@@ -448,10 +487,12 @@ class EndToEndPedagogicalRAGPipeline:
         self,
         query: str,
         mode: str = "auto",
-        top_k_each: int = 5,
+        top_k_each: int = 3,
         fetch_evidence: bool = True
     ) -> PedagogicalGuidanceResponse:
         """端到端问答核心入口；deterministic 必须由调用方显式选择。"""
+        import time as _time
+
         if self.retriever is None:
             raise RuntimeError("DualMetricRetriever 未初始化，无法执行检索！")
         if mode not in {"auto", "llm", "deterministic"}:
@@ -461,34 +502,53 @@ class EndToEndPedagogicalRAGPipeline:
                 "auto 模式缺少 LLM_API_KEY；如需真实确定性生成，请显式传 mode='deterministic'"
             )
 
+        timings = {}
         logger.info(f"🚀 [Step5_RAG] 接收提问: '{query}' (mode={mode})")
 
         # 1. 多视角检索
+        t0 = _time.time()
         retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
             raw_query=query,
             top_k_each=top_k_each,
             fetch_evidence=fetch_evidence
         )
+        timings["retrieval"] = round(_time.time() - t0, 3)
 
         # 2. MMR 黄金装配
+        t0 = _time.time()
         gold_ctx = self.assembler.assemble(
             raw_query=query,
             retrieval_results=retrieval_res
         )
+        timings["assembly"] = round(_time.time() - t0, 3)
 
         # 3. 生成
+        t0 = _time.time()
         if mode in {"llm", "auto"}:
             response = self._generate_with_llm(query, gold_ctx, retrieval_res)
         else:
             response = self._synthesize_deterministic_grounding(query, gold_ctx, retrieval_res)
+        timings["generation"] = round(_time.time() - t0, 3)
 
         # 4. 引用防伪审计
+        t0 = _time.time()
         self._audit_citations(response, gold_ctx)
         response.rendered_markdown = self._render_pretty_markdown(
             response,
             gold_ctx,
             response.retrieved_sources_debug,
         )
+        timings["audit_render"] = round(_time.time() - t0, 3)
 
-        logger.info(f"✅ [Step5_RAG] 完成生成 | 溯源卡片数={len(response.retrieved_sources_debug)}")
+        timings["total"] = round(sum(timings.values()), 3)
+        response._profiling = timings
+
+        logger.info(
+            f"✅ [Step5_RAG] 完成 | "
+            f"检索={timings['retrieval']}s | "
+            f"装配={timings['assembly']}s | "
+            f"生成={timings['generation']}s | "
+            f"审计渲染={timings['audit_render']}s | "
+            f"总计={timings['total']}s"
+        )
         return response

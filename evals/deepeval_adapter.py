@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.metadata
 import importlib.util
 import os
+import asyncio
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -11,6 +12,78 @@ from evals.contracts import DeepEvalCasePayload, DeepEvalReadiness, DeepEvalSett
 
 class DeepEvalUnavailableError(RuntimeError):
     pass
+
+
+class OpenAICompatibleDeepEvalModel:
+    """Minimal DeepEvalBaseLLM adapter for an explicit OpenAI-compatible judge."""
+
+    def __init__(self, *, model_name: str, api_key: str, base_url: str | None, temperature: float = 0.0) -> None:
+        if not model_name.strip() or not api_key.strip():
+            raise ValueError("DeepEval judge model and API key are required")
+        try:
+            from deepeval.models.base_model import DeepEvalBaseLLM
+        except ImportError as exc:
+            raise DeepEvalUnavailableError("DeepEval is not installed") from exc
+
+        class _Adapter(DeepEvalBaseLLM):
+            def __init__(self, outer: "OpenAICompatibleDeepEvalModel") -> None:
+                self._outer = outer
+                super().__init__(outer.model_name)
+
+            def load_model(self):
+                return self
+
+            def generate(self, prompt: str, schema: Any | None = None, **kwargs: Any) -> str:
+                return self._outer._generate(prompt, schema=schema, **kwargs)
+
+            async def a_generate(self, prompt: str, schema: Any | None = None, **kwargs: Any) -> str:
+                return await asyncio.to_thread(self._outer._generate, prompt, schema=schema, **kwargs)
+
+            def get_model_name(self, *args: Any, **kwargs: Any) -> str:
+                return self._outer.model_name
+
+        self.model_name = model_name
+        self.temperature = temperature
+        self._adapter = _Adapter(self)
+        try:
+            from openai import OpenAI
+        except ImportError as exc:
+            raise DeepEvalUnavailableError("openai package is required for the DeepEval judge") from exc
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
+
+    @property
+    def model(self) -> Any:
+        return self._adapter
+
+    def _generate(self, prompt: str, *, schema: Any | None = None, **kwargs: Any) -> str:
+        request: dict[str, Any] = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": self.temperature,
+        }
+        if schema is not None:
+            request["response_format"] = {"type": "json_object"}
+        response = self._client.chat.completions.create(**request)
+        content = getattr(getattr(response, "choices", [None])[0], "message", None)
+        text = getattr(content, "content", None)
+        if not text:
+            raise RuntimeError("DeepEval judge returned empty content")
+        return str(text)
+
+
+def make_deepeval_model(settings: DeepEvalSettings, *, environment: Mapping[str, str] | None = None) -> Any:
+    """Construct an explicit judge model only when readiness is satisfied."""
+    readiness = probe_deepeval(settings, environ=environment)
+    if readiness.status is not MetricStatus.SUCCESS:
+        raise DeepEvalUnavailableError(readiness.error_message or "DeepEval judge is not ready")
+    env = os.environ if environment is None else environment
+    api_key = env.get(settings.api_key_env, "")
+    return OpenAICompatibleDeepEvalModel(
+        model_name=settings.evaluation_model,
+        api_key=api_key,
+        base_url=settings.base_url,
+        temperature=settings.temperature,
+    ).model
 
 
 def probe_deepeval(
@@ -58,4 +131,3 @@ def build_deepeval_test_case(payload: DeepEvalCasePayload) -> Any:
     from deepeval.test_case import LLMTestCase
 
     return LLMTestCase(**payload.to_test_case_kwargs())
-

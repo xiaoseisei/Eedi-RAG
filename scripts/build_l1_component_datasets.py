@@ -72,6 +72,98 @@ def load_sessions() -> dict[int, CleanedSession]:
     return sessions
 
 
+def build_split_manifest(
+    golden: list[dict],
+    *,
+    holdout_fraction: float = 0.2,
+    salt: str = "eedi-l1-session-split-v1",
+) -> dict:
+    """Create a deterministic split with zero source-session leakage.
+
+    Cases sharing any source session form one connected component and are
+    assigned together.  Component hashes select the holdout set, so input
+    ordering cannot move a session across splits.
+    """
+    if not 0.0 < holdout_fraction < 1.0:
+        raise ValueError("holdout_fraction must be between 0 and 1")
+    if not salt.strip():
+        raise ValueError("split salt must be non-blank")
+
+    sessions_by_query: dict[str, set[int]] = {}
+    parent: dict[int, int] = {}
+
+    def find(value: int) -> int:
+        parent.setdefault(value, value)
+        while parent[value] != value:
+            parent[value] = parent[parent[value]]
+            value = parent[value]
+        return value
+
+    def union(left: int, right: int) -> None:
+        root_left, root_right = find(left), find(right)
+        if root_left != root_right:
+            parent[max(root_left, root_right)] = min(root_left, root_right)
+
+    for index, case in enumerate(golden, 1):
+        query_id = f"eedi-l1-{index:04d}"
+        session_ids = {
+            int(quote["session_id"])
+            for quote in case.get("verbatim_grounding_quotes", [])
+        }
+        if not session_ids:
+            raise ValueError(f"{query_id} has no source sessions and cannot be split safely")
+        sessions_by_query[query_id] = session_ids
+        ordered = sorted(session_ids)
+        find(ordered[0])
+        for session_id in ordered[1:]:
+            union(ordered[0], session_id)
+
+    components: dict[int, set[int]] = {}
+    for session_id in parent:
+        components.setdefault(find(session_id), set()).add(session_id)
+    if len(components) < 2:
+        raise ValueError("at least two independent session components are required for dev/holdout")
+
+    ranked_components = sorted(
+        components.values(),
+        key=lambda values: hashlib.sha256(
+            f"{salt}:{','.join(str(value) for value in sorted(values))}".encode("utf-8")
+        ).hexdigest(),
+    )
+    holdout_count = max(1, min(len(ranked_components) - 1, round(len(ranked_components) * holdout_fraction)))
+    holdout_sessions = set().union(*ranked_components[:holdout_count])
+    session_assignments = {
+        session_id: ("holdout" if session_id in holdout_sessions else "dev")
+        for session_id in sorted(parent)
+    }
+    query_assignments: dict[str, str] = {}
+    for query_id, session_ids in sessions_by_query.items():
+        assigned = {session_assignments[session_id] for session_id in session_ids}
+        if len(assigned) != 1:
+            raise RuntimeError(f"session leakage detected while assigning {query_id}: {assigned}")
+        query_assignments[query_id] = assigned.pop()
+
+    split_counts = {
+        split: sum(value == split for value in query_assignments.values())
+        for split in ("dev", "holdout")
+    }
+    session_split_counts = {
+        split: sum(value == split for value in session_assignments.values())
+        for split in ("dev", "holdout")
+    }
+    return {
+        "schema_version": "l1-session-split/v1",
+        "strategy": "connected-source-session-hash-partition",
+        "salt": salt,
+        "requested_holdout_fraction": holdout_fraction,
+        "query_assignments": query_assignments,
+        "session_assignments": {str(key): value for key, value in session_assignments.items()},
+        "split_counts": split_counts,
+        "session_split_counts": session_split_counts,
+        "session_leakage_count": 0,
+    }
+
+
 def turn_to_ref(turn) -> EvidenceRef:
     return EvidenceRef(
         session_id=turn.session_ref if hasattr(turn, "session_ref") else 0,
@@ -272,27 +364,11 @@ def build_document_qrels(case: dict, *, query_id: str) -> list[dict]:
 
 
 def build_assembler_qrels(case: dict, *, query_id: str) -> list[dict]:
-    """Build both fixed assembler slot targets for every cited session."""
-    base = build_document_qrels(case, query_id=query_id)
-    sessions = sorted({q["session_id"] for q in case.get("verbatim_grounding_quotes", [])})
-    evidence = [
-        {"session_id": int(q["session_id"]), "turn_id": int(q["turn_id"])}
-        for q in case.get("verbatim_grounding_quotes", [])
-    ]
-    rows = {row["document_id"]: row for row in base}
-    for sid in sessions:
-        for suffix, slot in (("misconception", "misconception"), ("tutor_strategy", "strategy")):
-            doc_id = f"session_{sid}_{suffix}"
-            rows.setdefault(doc_id, {
-                "query_id": query_id,
-                "document_id": doc_id,
-                "slot": slot,
-                "relevance": 3,
-                "label_source": "derived_from_human_quote",
-                "relevance_source": "human_verbatim_grounding_quote_session",
-                "evidence_turns": evidence,
-            })
-    return [rows[key] for key in sorted(rows)]
+    """Build qrels only for slots supported by the case's labeled evidence."""
+    # A student-insight quote does not prove any tutor strategy is relevant,
+    # and a tutor quote does not prove a misconception card.  Unlabeled fixed
+    # slots are therefore explicitly not-applicable in the Assembler runner.
+    return build_document_qrels(case, query_id=query_id)
 
 
 def _ranked_session_ids(retriever, query: str, collection: str, top_k: int = 20) -> list[str]:
@@ -410,6 +486,8 @@ def build_fusion_cases(golden: list[dict], retriever) -> list[dict]:
             },
             rewrite_only_ranked_ids=trace["fused_rankings"][f"{prefix}_rewrite_only"],
             raw_inclusive_ranked_ids=trace["fused_rankings"][f"{prefix}_raw_inclusive"],
+            selected_ranked_ids=trace["fused_rankings"][f"{prefix}_selected"],
+            selected_strategy=trace["fusion"],
             qrels={row["document_id"]: row["relevance"] for row in build_document_qrels(case, query_id=f"eedi-l1-{index:04d}")},
             latency_ms=round(latency_ms, 3),
             slices={"category": intent, "collection": collection},
@@ -422,6 +500,8 @@ def build_assembler_cases(
     sessions: dict[int, CleanedSession],
     retriever,
     assembler,
+    *,
+    top_k_each: int = 5,
 ) -> list[dict]:
     """
     assembler 语义: MMR 装配后黄金目标卡是否保留、选择精度、压缩率、预算。
@@ -441,10 +521,12 @@ def build_assembler_cases(
         target_suffix = "misconception" if collection == "student_misconceptions" else "tutor_strategy"
         target_id = f"session_{target_session}_{target_suffix}"
 
-        started = time.perf_counter()
+        retrieval_started = time.perf_counter()
         retrieval_res = retriever.retrieve_multi_perspective_rrf(
-            query, top_k_each=5, fetch_evidence=True
+            query, top_k_each=top_k_each, fetch_evidence=True
         )
+        # Measure assembler latency independently from upstream retrieval.
+        started = time.perf_counter()
         candidates = retrieval_res.get("misconceptions", []) + retrieval_res.get("strategies", [])
         input_ranked = [str(c["chunk_id"]) for c in candidates]
 
@@ -624,6 +706,8 @@ def main(argv: list[str] | None = None) -> None:
     rewriter = MultiPerspectiveQueryRewriter(mode="deterministic")
 
     out_dir = args.output_dir
+    if out_dir.exists() and any(out_dir.iterdir()):
+        raise FileExistsError(f"refusing to overwrite existing dataset directory: {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     indexed_session_ids = {
@@ -637,7 +721,7 @@ def main(argv: list[str] | None = None) -> None:
         "chunking.json": build_chunk_retrieval_cases(golden, retriever),
         "rewrite.json": build_rewrite_cases(golden, sessions, retriever, rewriter),
         "fusion.json": build_fusion_cases(golden, retriever),
-        "assembler.json": build_assembler_cases(golden, sessions, retriever, assembler),
+        "assembler.json": build_assembler_cases(golden, sessions, retriever, assembler, top_k_each=20),
     }
 
     for name, cases in datasets.items():
@@ -679,8 +763,22 @@ def main(argv: list[str] | None = None) -> None:
         "source": "golden_test_set.json",
         "component_case_counts": {name.removesuffix(".json"): len(rows) for name, rows in datasets.items()},
         "embedding_backend": "deterministic",
+        "embedding_model": "FastDeterministicEmbeddingFunction",
+        "embedding_dimension": 128,
+        "embedding_index_version": "deterministic-128d-v1",
+        "embedding_batch_size": None,
+        "embedding_timeout_seconds": None,
+        "embedding_cache_policy": "not_applicable_local_deterministic",
         "query_rewrite_mode": "deterministic_rules",
+        "retrieval_top_k": 20,
+        "chunk_retrieval_top_k": 50,
+        "rrf_k": 60,
+        "fusion_strategy": "raw-inclusive-rrf",
         "mmr_lambda": 0.7,
+        "assembler_top_k_each": 20,
+        "assembler_max_prompt_tokens": 1500,
+        "chunk_window_size": 6,
+        "chunk_window_step": 3,
     }
     suite_payload = {
         "schema_version": args.schema_version,
@@ -699,14 +797,21 @@ def main(argv: list[str] | None = None) -> None:
         "assembler_cases": datasets["assembler.json"],
     }
     (out_dir / "suite.json").write_text(json.dumps(suite_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    split_manifest = build_split_manifest(golden)
+    split_manifest_path = out_dir / "split_manifest.json"
+    split_manifest_path.write_text(
+        json.dumps(split_manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     with (out_dir / "queries.jsonl").open("w", encoding="utf-8") as handle:
         for idx, item in enumerate(golden, 1):
             if item.get("question"):
+                query_id = f"eedi-l1-{idx:04d}"
                 handle.write(json.dumps({
-                    "query_id": f"eedi-l1-{idx:04d}",
+                    "query_id": query_id,
                     "query": item["question"],
                     "intent": item.get("category", "UNKNOWN"),
-                    "split": "dev",
+                    "split": split_manifest["query_assignments"][query_id],
                     "source_session_ids": sorted({q["session_id"] for q in item.get("verbatim_grounding_quotes", [])}),
                     "slices": {"category": item.get("category", "unknown")},
                 }, ensure_ascii=False) + "\n")
@@ -750,6 +855,14 @@ def main(argv: list[str] | None = None) -> None:
         "quote_evidence_rows": sum(len(item.get("verbatim_grounding_quotes", [])) for item in golden),
         "unique_query_document_pairs": len({(row["query_id"], row["document_id"]) for row in qrel_rows}),
         "limitation": "document relevance is derived from human quote/session evidence; independent multi-document human judgments are not present",
+    }
+    manifest["split"] = {
+        "manifest_file": split_manifest_path.name,
+        "manifest_sha256": _file_sha256(split_manifest_path),
+        "strategy": split_manifest["strategy"],
+        "split_counts": split_manifest["split_counts"],
+        "session_split_counts": split_manifest["session_split_counts"],
+        "session_leakage_count": split_manifest["session_leakage_count"],
     }
     (out_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 

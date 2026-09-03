@@ -17,6 +17,9 @@ dependencies = [
 embedding-benchmark = [
     "sentence-transformers==6.0.1",
 ]
+evaluation = [
+    "deepeval==4.2.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

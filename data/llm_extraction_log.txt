@@ -1,0 +1,608 @@
+2026-09-01 23:59:46,102 [    INFO] 🚀 [Step6_Expansion] 开始执行知识库扩容流程...
+2026-09-01 23:59:47,454 [    INFO] ✅ LLM 严格抽取模式已启用 (model=mimo-v2.5)
+2026-09-01 23:59:47,659 [    INFO] 📊 全量可用清洗会话分布: {'Number': 854, 'Geometry and Measure': 268, 'Algebra': 304, 'Data and Statistics': 144, 'General': 6}
+2026-09-01 23:59:47,659 [    INFO] ✅ 成功分层抽样 100 场典型会话！
+2026-09-01 23:59:57,234 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:01:20,007 [    INFO]   [1/100] Session #10 → LLM 抽取通过 ✅
+2026-09-02 00:01:28,109 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:02:37,843 [    INFO]   [2/100] Session #14 → LLM 抽取通过 ✅
+2026-09-02 00:02:45,916 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:03:33,324 [    INFO]   [3/100] Session #23 → LLM 抽取通过 ✅
+2026-09-02 00:03:41,411 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:05:02,727 [    INFO]   [4/100] Session #33 → LLM 抽取通过 ✅
+2026-09-02 00:05:10,805 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:06:17,217 [    INFO]   [5/100] Session #42 → LLM 抽取通过 ✅
+2026-09-02 00:06:25,313 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:07:08,098 [    INFO]   [6/100] Session #59 → LLM 抽取通过 ✅
+2026-09-02 00:07:16,162 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:07:41,102 [    INFO]   [7/100] Session #99 → LLM 抽取通过 ✅
+2026-09-02 00:07:49,162 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:09:13,086 [    INFO]   [8/100] Session #109 → LLM 抽取通过 ✅
+2026-09-02 00:09:21,161 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:10:11,718 [    INFO]   [9/100] Session #118 → LLM 抽取通过 ✅
+2026-09-02 00:10:19,822 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:11:43,272 [    INFO]   [10/100] Session #143 → LLM 抽取通过 ✅
+2026-09-02 00:11:51,369 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:13:17,234 [    INFO]   [11/100] Session #154 → LLM 抽取通过 ✅
+2026-09-02 00:13:25,316 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:13:44,271 [ WARNING] Session 188 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): 'wait yes yes'；正在请求模型自纠
+2026-09-02 00:13:52,370 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:14:23,698 [    INFO]   [12/100] Session #188 → LLM 抽取通过 ✅
+2026-09-02 00:14:31,786 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:15:02,919 [    INFO]   [13/100] Session #201 → LLM 抽取通过 ✅
+2026-09-02 00:15:11,021 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:16:19,549 [ WARNING] Session 206 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): 'are they the same number?'；正在请求模型自纠
+2026-09-02 00:16:27,644 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:16:57,146 [ WARNING] Session #206 LLM 抽取失败，跳过: LLM 在 2 次自纠尝试后仍然失败 (Session 206): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): 'are they the same number?'
+2026-09-02 00:16:57,146 [ WARNING]   [14/100] Session #206 → LLM 抽取失败，跳过 ❌
+2026-09-02 00:17:05,253 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:17:35,013 [ WARNING] Session 214 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): 'so i mean yes 😓'；正在请求模型自纠
+2026-09-02 00:17:43,149 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:17:55,005 [    INFO]   [15/100] Session #214 → LLM 抽取通过 ✅
+2026-09-02 00:18:03,106 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:18:54,672 [    INFO]   [16/100] Session #247 → LLM 抽取通过 ✅
+2026-09-02 00:19:02,751 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:20:04,751 [    INFO]   [17/100] Session #275 → LLM 抽取通过 ✅
+2026-09-02 00:20:12,872 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:21:13,279 [ WARNING] Session 278 抽取校验失败 (尝试 1/2): 导师 source_turn_ids 包含不存在或非导师轮次: 9；正在请求模型自纠
+2026-09-02 00:21:21,368 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:22:18,964 [    INFO]   [18/100] Session #278 → LLM 抽取通过 ✅
+2026-09-02 00:22:27,155 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:23:21,544 [ WARNING] Session 288 抽取校验失败 (尝试 1/2): 1 validation error for _StrictExtractionPayload
+misconception.error_choice
+  String should have at least 1 character [type=string_too_short, input_value='', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_too_short；正在请求模型自纠
+2026-09-02 00:23:29,705 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:24:10,111 [    INFO]   [19/100] Session #288 → LLM 抽取通过 ✅
+2026-09-02 00:24:18,200 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:25:01,176 [    INFO]   [20/100] Session #423 → LLM 抽取通过 ✅
+2026-09-02 00:25:09,284 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:25:31,984 [ WARNING] Session 436 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): '“So, the distance between -10 and 2 is 12. And this is represented by 6 gaps, so what does each gap represent? Dividing 12 between the 6 gaps...”'；正在请求模型自纠
+2026-09-02 00:25:40,064 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:26:06,946 [    INFO]   [21/100] Session #436 → LLM 抽取通过 ✅
+2026-09-02 00:26:15,136 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:28:06,827 [    INFO]   [22/100] Session #463 → LLM 抽取通过 ✅
+2026-09-02 00:28:14,924 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:28:34,030 [ WARNING] Session 464 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'Well the best way to check is to again change these fractions to the same denominator. What number could you use for 2 and 5 (Turn 17)'；正在请求模型自纠
+2026-09-02 00:28:42,120 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:29:03,148 [    INFO]   [23/100] Session #464 → LLM 抽取通过 ✅
+2026-09-02 00:29:11,253 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:29:32,890 [    INFO]   [24/100] Session #509 → LLM 抽取通过 ✅
+2026-09-02 00:29:40,963 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:31:27,138 [    INFO]   [25/100] Session #568 → LLM 抽取通过 ✅
+2026-09-02 00:31:35,298 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:32:04,544 [    INFO]   [26/100] Session #573 → LLM 抽取通过 ✅
+2026-09-02 00:32:12,625 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:32:45,702 [    INFO]   [27/100] Session #603 → LLM 抽取通过 ✅
+2026-09-02 00:32:53,782 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:33:21,823 [    INFO]   [28/100] Session #658 → LLM 抽取通过 ✅
+2026-09-02 00:33:29,905 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:34:58,136 [    INFO]   [29/100] Session #663 → LLM 抽取通过 ✅
+2026-09-02 00:35:06,227 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:35:51,612 [ WARNING] Session 664 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): "I'm not sure. I don't really know."；正在请求模型自纠
+2026-09-02 00:35:59,762 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:36:20,043 [    INFO]   [30/100] Session #664 → LLM 抽取通过 ✅
+2026-09-02 00:36:28,120 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:37:43,186 [    INFO]   [31/100] Session #668 → LLM 抽取通过 ✅
+2026-09-02 00:37:51,268 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:38:07,529 [    INFO]   [32/100] Session #684 → LLM 抽取通过 ✅
+2026-09-02 00:38:15,610 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:38:41,640 [    INFO]   [33/100] Session #686 → LLM 抽取通过 ✅
+2026-09-02 00:38:49,720 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:40:11,368 [    INFO]   [34/100] Session #699 → LLM 抽取通过 ✅
+2026-09-02 00:40:19,461 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:41:35,840 [    INFO]   [35/100] Session #707 → LLM 抽取通过 ✅
+2026-09-02 00:41:43,918 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:42:11,258 [ WARNING] Session 730 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): '2 divided by 3 is what? (并用类比引导思考其分数表示)'；正在请求模型自纠
+2026-09-02 00:42:19,363 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:43:15,525 [    INFO]   [36/100] Session #730 → LLM 抽取通过 ✅
+2026-09-02 00:43:23,618 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:44:56,091 [    INFO]   [37/100] Session #735 → LLM 抽取通过 ✅
+2026-09-02 00:45:04,191 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:46:06,241 [    INFO]   [38/100] Session #737 → LLM 抽取通过 ✅
+2026-09-02 00:46:14,319 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:47:18,829 [ WARNING] Session 741 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'Is 324 a square number?'；正在请求模型自纠
+2026-09-02 00:47:26,914 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:47:38,610 [ WARNING] Session #741 LLM 抽取失败，跳过: LLM 在 2 次自纠尝试后仍然失败 (Session 741): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'Is 324 a square number?'
+2026-09-02 00:47:38,610 [ WARNING]   [39/100] Session #741 → LLM 抽取失败，跳过 ❌
+2026-09-02 00:47:46,692 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:48:26,737 [    INFO]   [40/100] Session #754 → LLM 抽取通过 ✅
+2026-09-02 00:48:34,807 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:48:53,840 [    INFO]   [41/100] Session #69 → LLM 抽取通过 ✅
+2026-09-02 00:49:01,911 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:50:05,380 [ WARNING] Session 97 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'We could add the m and the 2m? What would that get? Remember what number is technically in front of the m by itself'；正在请求模型自纠
+2026-09-02 00:50:13,464 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:51:10,628 [    INFO]   [42/100] Session #97 → LLM 抽取通过 ✅
+2026-09-02 00:51:18,718 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:51:37,722 [ WARNING] Session 100 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): "i don't understand the question or the graph"；正在请求模型自纠
+2026-09-02 00:51:45,804 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:52:46,599 [    INFO]   [43/100] Session #100 → LLM 抽取通过 ✅
+2026-09-02 00:52:54,782 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:54:01,370 [    INFO]   [44/100] Session #115 → LLM 抽取通过 ✅
+2026-09-02 00:54:09,444 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:54:38,077 [ WARNING] Session 159 抽取校验失败 (尝试 1/2): 导师 source_turn_ids 包含不存在或非导师轮次: 18；正在请求模型自纠
+2026-09-02 00:54:46,165 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:55:04,774 [    INFO]   [45/100] Session #159 → LLM 抽取通过 ✅
+2026-09-02 00:55:13,148 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:56:08,588 [    INFO]   [46/100] Session #258 → LLM 抽取通过 ✅
+2026-09-02 00:56:16,700 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:57:01,907 [    INFO]   [47/100] Session #286 → LLM 抽取通过 ✅
+2026-09-02 00:57:10,009 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:57:38,263 [    INFO]   [48/100] Session #287 → LLM 抽取通过 ✅
+2026-09-02 00:57:46,360 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:58:05,065 [    INFO]   [49/100] Session #308 → LLM 抽取通过 ✅
+2026-09-02 00:58:13,172 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 00:59:34,810 [    INFO]   [50/100] Session #477 → LLM 抽取通过 ✅
+2026-09-02 00:59:42,938 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:00:12,249 [    INFO]   [51/100] Session #492 → LLM 抽取通过 ✅
+2026-09-02 01:00:20,331 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:01:24,645 [    INFO]   [52/100] Session #607 → LLM 抽取通过 ✅
+2026-09-02 01:01:33,165 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:02:37,739 [    INFO]   [53/100] Session #617 → LLM 抽取通过 ✅
+2026-09-02 01:02:46,133 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:03:35,719 [    INFO]   [54/100] Session #637 → LLM 抽取通过 ✅
+2026-09-02 01:03:43,801 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:05:04,122 [    INFO]   [55/100] Session #657 → LLM 抽取通过 ✅
+2026-09-02 01:05:12,220 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:05:34,804 [    INFO]   [56/100] Session #672 → LLM 抽取通过 ✅
+2026-09-02 01:05:42,886 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:06:08,012 [ WARNING] Session 681 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): "So we don't want the letters there now as that's general, we want to replace them with the values because we know for our coordinate y = -1 and x = 2 👍👍👍 So you substitute the numbers in instead of the letters... What does that give us? 😊 (对应Turn 21)"；正在请求模型自纠
+2026-09-02 01:06:16,094 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:07:06,805 [    INFO]   [57/100] Session #681 → LLM 抽取通过 ✅
+2026-09-02 01:07:14,886 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:08:37,086 [    INFO]   [58/100] Session #689 → LLM 抽取通过 ✅
+2026-09-02 01:08:45,180 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:08:58,582 [    INFO]   [59/100] Session #691 → LLM 抽取通过 ✅
+2026-09-02 01:09:06,681 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:10:06,763 [    INFO]   [60/100] Session #706 → LLM 抽取通过 ✅
+2026-09-02 01:10:14,871 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:10:41,483 [ WARNING] Session 720 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'Great! Now we have to choose whether adding or subtracting our equations will get rid of q Any idea which one we want?'；正在请求模型自纠
+2026-09-02 01:10:49,557 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:11:55,477 [    INFO]   [61/100] Session #720 → LLM 抽取通过 ✅
+2026-09-02 01:12:03,560 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:13:12,265 [    INFO]   [62/100] Session #721 → LLM 抽取通过 ✅
+2026-09-02 01:13:20,360 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:14:12,528 [    INFO]   [63/100] Session #798 → LLM 抽取通过 ✅
+2026-09-02 01:14:20,676 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:15:01,004 [ WARNING] Session 866 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'So is 8/p going to be 8 divided by p or p divided by 8?'；正在请求模型自纠
+2026-09-02 01:15:09,091 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:15:46,318 [    INFO]   [64/100] Session #866 → LLM 抽取通过 ✅
+2026-09-02 01:15:54,393 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:16:48,036 [    INFO]   [65/100] Session #870 → LLM 抽取通过 ✅
+2026-09-02 01:16:56,226 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:17:24,202 [    INFO]   [66/100] Session #29 → LLM 抽取通过 ✅
+2026-09-02 01:17:32,332 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:18:45,367 [    INFO]   [67/100] Session #77 → LLM 抽取通过 ✅
+2026-09-02 01:18:53,457 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:19:56,129 [    INFO]   [68/100] Session #80 → LLM 抽取通过 ✅
+2026-09-02 01:20:04,196 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:21:07,633 [    INFO]   [69/100] Session #85 → LLM 抽取通过 ✅
+2026-09-02 01:21:15,730 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:22:21,236 [    INFO]   [70/100] Session #122 → LLM 抽取通过 ✅
+2026-09-02 01:22:29,474 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:24:00,583 [ WARNING] Session 162 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): 'I meant both Jack and Lily are correct'；正在请求模型自纠
+2026-09-02 01:24:08,669 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:24:38,279 [    INFO]   [71/100] Session #162 → LLM 抽取通过 ✅
+2026-09-02 01:24:46,403 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:25:46,136 [    INFO]   [72/100] Session #179 → LLM 抽取通过 ✅
+2026-09-02 01:25:54,246 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:27:09,152 [    INFO]   [73/100] Session #255 → LLM 抽取通过 ✅
+2026-09-02 01:27:17,248 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:28:15,493 [    INFO]   [74/100] Session #421 → LLM 抽取通过 ✅
+2026-09-02 01:28:23,565 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:29:24,973 [ WARNING] Session 431 抽取校验失败 (尝试 1/2): 导师 source_turn_ids 包含不存在或非导师轮次: 14；正在请求模型自纠
+2026-09-02 01:29:33,058 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:29:38,741 [    INFO]   [75/100] Session #431 → LLM 抽取通过 ✅
+2026-09-02 01:29:46,935 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:31:48,027 [    INFO]   [76/100] Session #478 → LLM 抽取通过 ✅
+2026-09-02 01:31:56,185 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:32:16,827 [    INFO]   [77/100] Session #497 → LLM 抽取通过 ✅
+2026-09-02 01:32:24,938 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:32:46,742 [    INFO]   [78/100] Session #539 → LLM 抽取通过 ✅
+2026-09-02 01:32:54,819 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:33:39,216 [    INFO]   [79/100] Session #671 → LLM 抽取通过 ✅
+2026-09-02 01:33:47,323 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:34:46,579 [    INFO]   [80/100] Session #739 → LLM 抽取通过 ✅
+2026-09-02 01:34:54,753 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:35:39,345 [    INFO]   [81/100] Session #776 → LLM 抽取通过 ✅
+2026-09-02 01:35:47,460 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:36:06,516 [    INFO]   [82/100] Session #819 → LLM 抽取通过 ✅
+2026-09-02 01:36:14,741 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:37:04,987 [    INFO]   [83/100] Session #859 → LLM 抽取通过 ✅
+2026-09-02 01:37:13,127 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:38:41,745 [    INFO]   [84/100] Session #872 → LLM 抽取通过 ✅
+2026-09-02 01:38:49,811 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:40:02,612 [    INFO]   [85/100] Session #903 → LLM 抽取通过 ✅
+2026-09-02 01:40:10,705 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:40:54,931 [    INFO]   [86/100] Session #147 → LLM 抽取通过 ✅
+2026-09-02 01:41:03,031 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:41:28,948 [    INFO]   [87/100] Session #276 → LLM 抽取通过 ✅
+2026-09-02 01:43:59,101 [    INFO] Retrying request to /chat/completions in 0.420942 seconds
+2026-09-02 01:44:07,714 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:44:57,893 [ WARNING] Session 282 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): 'How can you find a tenth of something?'；正在请求模型自纠
+2026-09-02 01:45:05,983 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:45:24,763 [    INFO]   [88/100] Session #282 → LLM 抽取通过 ✅
+2026-09-02 01:45:32,873 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:45:55,866 [ WARNING] Session 443 抽取校验失败 (尝试 1/2): 学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): "i've already calculated that 120% of the yellow sheep have been diagnosed with disease and that 270% of the blue sheep have got the disease"；正在请求模型自纠
+2026-09-02 01:46:03,978 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:46:15,795 [    INFO]   [89/100] Session #443 → LLM 抽取通过 ✅
+2026-09-02 01:46:23,859 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:46:50,955 [    INFO]   [90/100] Session #469 → LLM 抽取通过 ✅
+2026-09-02 01:46:59,034 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:47:13,663 [    INFO]   [91/100] Session #495 → LLM 抽取通过 ✅
+2026-09-02 01:47:21,760 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:47:36,701 [    INFO]   [92/100] Session #555 → LLM 抽取通过 ✅
+2026-09-02 01:47:44,789 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:48:11,689 [ WARNING] Session 576 抽取校验失败 (尝试 1/2): 导师 key_aha_question 未匹配其 source_turn_ids 对应的导师原文 (Grounding Gate Failed): '“winning snap and loosing ace and winning ace and loosing snap” -> “how do we work out the probability of winning snap and then losing ace?”'；正在请求模型自纠
+2026-09-02 01:48:19,770 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:48:25,381 [ WARNING] Session #576 LLM 抽取失败，跳过: LLM 在 2 次自纠尝试后仍然失败 (Session 576): 4 validation errors for _StrictExtractionPayload
+misconception.confusion_triggers
+  Field required [type=missing, input_value={'misconception_name': '...mechanism': '学生对'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+misconception.verbatim_student_quotes
+  Field required [type=missing, input_value={'misconception_name': '...mechanism': '学生对'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+misconception.source_turn_ids
+  Field required [type=missing, input_value={'misconception_name': '...mechanism': '学生对'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+tutor_strategy
+  Field required [type=missing, input_value={'misconception': {'misco...echanism': '学生对'}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+2026-09-02 01:48:25,381 [ WARNING]   [93/100] Session #576 → LLM 抽取失败，跳过 ❌
+2026-09-02 01:48:33,456 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:48:52,217 [    INFO]   [94/100] Session #716 → LLM 抽取通过 ✅
+2026-09-02 01:49:00,315 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:49:16,042 [    INFO]   [95/100] Session #973 → LLM 抽取通过 ✅
+2026-09-02 01:49:24,145 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:50:02,440 [    INFO]   [96/100] Session #976 → LLM 抽取通过 ✅
+2026-09-02 01:50:10,515 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:51:29,677 [    INFO]   [97/100] Session #1009 → LLM 抽取通过 ✅
+2026-09-02 01:51:37,908 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:52:07,268 [    INFO]   [98/100] Session #1011 → LLM 抽取通过 ✅
+2026-09-02 01:52:15,347 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:52:36,146 [    INFO]   [99/100] Session #1021 → LLM 抽取通过 ✅
+2026-09-02 01:52:44,229 [    INFO] HTTP Request: POST https://api.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-09-02 01:53:01,426 [    INFO]   [100/100] Session #1023 → LLM 抽取通过 ✅
+2026-09-02 01:53:01,426 [    INFO]
+============================================================
+2026-09-02 01:53:01,426 [    INFO] 📊 数据真实性审计报告:
+2026-09-02 01:53:01,426 [    INFO]   总处理 session: 100
+2026-09-02 01:53:01,426 [    INFO]   LLM 抽取成功: 97 (97.0%)
+2026-09-02 01:53:01,426 [    INFO]   LLM 抽取失败: 3 (3.0%)
+2026-09-02 01:53:01,426 [    INFO]   模板降级: 0 (已禁用)
+2026-09-02 01:53:01,426 [    INFO] ============================================================
+2026-09-02 01:53:01,426 [ WARNING] [Storage] 使用显式/测试 deterministic 特征哈希 embedding 后端
+2026-09-02 01:53:01,655 [    INFO] 🚀 [step=Step3_Storage|action=ingest_all] 开始双引擎全资产摄取: 100 场会话, 97 份抽取卡片...
+2026-09-02 01:53:01,659 [    INFO] [step=Step3_Storage|action=ingest_sessions] 📦 正在摄取 100 场清洗会话至 DuckDB 关系底表...
+2026-09-02 01:53:01,659 [    INFO]   ├─ [会话摄取] Session #10 | 题目 QID=104614 | 轮数=26 (学生=13, 导师=13) | 考点: 'Number > Rounding and Estimating > Rounding to Decimal Places' | 题干: 'Alex and Sophie are arguing about r...'
+2026-09-02 01:53:01,659 [    INFO]   ├─ [会话摄取] Session #14 | 题目 QID=129129 | 轮数=25 (学生=12, 导师=13) | 考点: 'Number > Basic Arithmetic > Mental Multiplication and Division' | 题干: 'What is the value of: \( \frac{54+5...'
+2026-09-02 01:53:01,659 [    INFO]   ├─ [会话摄取] Session #23 | 题目 QID=147113 | 轮数=27 (学生=14, 导师=13) | 考点: 'Number > Basic Arithmetic > Mental Multiplication and Division' | 题干: 'Elijah makes a conjecture: To find ...'
+2026-09-02 01:53:01,659 [    INFO]   ├─ [会话摄取] Session #33 | 题目 QID=104615 | 轮数=15 (学生=7, 导师=8) | 考点: 'Number > Rounding and Estimating > Rounding to Decimal Places' | 题干: 'What is \( \mathbf{3 . 1 5 3} \) ro...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #42 | 题目 QID=89558 | 轮数=16 (学生=8, 导师=8) | 考点: 'Number > Negative Numbers > Multiplying and Dividing Negative Numbers' | 题干: 'Statement 1: \( \quad p \times(-q)=...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #59 | 题目 QID=103042 | 轮数=17 (学生=8, 导师=9) | 考点: 'Number > Factors, Multiples and Primes > Prime Numbers and Prime Factors' | 题干: 'Which is the next prime number grea...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #99 | 题目 QID=89436 | 轮数=20 (学生=10, 导师=10) | 考点: 'Number > Negative Numbers > Adding and Subtracting Negative Numbers' | 题干: 'What is the value of \( a \) ?...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #109 | 题目 QID=101404 | 轮数=31 (学生=15, 导师=16) | 考点: 'Number > Ratio > Simplifying and Equivalent Ratios' | 题干: 'Lee and Drew are arguing about equi...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #118 | 题目 QID=143355 | 轮数=17 (学生=8, 导师=9) | 考点: 'Number > Percentages > Percentage Increase and Decrease' | 题干: 'Lina buys a painting for \( £ 80 \)...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #143 | 题目 QID=77590 | 轮数=37 (学生=18, 导师=19) | 考点: 'Number > Basic Arithmetic > Mental Multiplication and Division' | 题干: 'At the start of the day, there was ...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #154 | 题目 QID=130053 | 轮数=15 (学生=7, 导师=8) | 考点: 'Number > Rounding and Estimating > Estimation' | 题干: 'Which is the best estimate for \( (...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #188 | 题目 QID=134802 | 轮数=26 (学生=13, 导师=13) | 考点: 'Number > Basic Arithmetic > BIDMAS' | 题干: 'Jake and Lisa are discussing the or...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #201 | 题目 QID=103831 | 轮数=29 (学生=14, 导师=15) | 考点: 'Number > Fractions > Converting Mixed Number and Improper Fractions' | 题干: 'What mixed number fraction is repre...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #206 | 题目 QID=130248 | 轮数=33 (学生=16, 导师=17) | 考点: 'Number > Rounding and Estimating > Rounding to Decimal Places' | 题干: 'Round \( 7.503 \) to the nearest wh...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #214 | 题目 QID=129995 | 轮数=15 (学生=7, 导师=8) | 考点: 'Number > Rounding and Estimating > Rounding to the Nearest Whole (10, 100, etc)' | 题干: 'What is \( 356,958 \) rounded to th...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #247 | 题目 QID=130049 | 轮数=13 (学生=6, 导师=7) | 考点: 'Number > Basic Arithmetic > Place Value' | 题干: 'Which number line shows a good esti...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #275 | 题目 QID=101869 | 轮数=12 (学生=6, 导师=6) | 考点: 'Number > Basic Arithmetic > Mental Addition and Subtraction' | 题干: '\( 204-36= \)...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #278 | 题目 QID=156974 | 轮数=22 (学生=11, 导师=11) | 考点: 'Number > Fractions > Adding and Subtracting Fractions' | 题干: '\( 3 \frac{3}{7}+1 \frac{5}{7}= \)...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #288 | 题目 QID=101075 | 轮数=21 (学生=10, 导师=11) | 考点: 'Number > Fractions > Adding and Subtracting Fractions' | 题干: 'Work out: \( \frac{5}{7}-\frac{1}{4...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #423 | 题目 QID=131357 | 轮数=17 (学生=8, 导师=9) | 考点: 'Number > Fractions > Equivalent Fractions' | 题干: 'What percentage of this shape is sh...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #436 | 题目 QID=75909 | 轮数=27 (学生=13, 导师=14) | 考点: 'Number > Negative Numbers > Ordering Negative Numbers' | 题干: 'What is the value of B?...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #463 | 题目 QID=101851 | 轮数=25 (学生=12, 导师=13) | 考点: 'Number > Basic Arithmetic > Place Value' | 题干: 'What number is the arrow pointing t...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #464 | 题目 QID=100594 | 轮数=43 (学生=21, 导师=22) | 考点: 'Number > Fractions > Ordering Fractions' | 题干: 'Which of these fractions could \(\ ...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #509 | 题目 QID=89405 | 轮数=23 (学生=12, 导师=11) | 考点: 'Number > Negative Numbers > Ordering Negative Numbers' | 题干: 'Which statement about the temperatu...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #568 | 题目 QID=134917 | 轮数=19 (学生=9, 导师=10) | 考点: 'Number > Ratio > Sharing in a Ratio' | 题干: 'Write the following ratio in its si...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #573 | 题目 QID=103770 | 轮数=20 (学生=10, 导师=10) | 考点: 'Number > Basic Arithmetic > Place Value' | 题干: 'If  \( 32 \times 65=2080  \)  then ...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #603 | 题目 QID=103735 | 轮数=20 (学生=10, 导师=10) | 考点: 'Number > Negative Numbers > Adding and Subtracting Negative Numbers' | 题干: '\( 0.2 \div 0.4= \)...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #658 | 题目 QID=95781 | 轮数=17 (学生=8, 导师=9) | 考点: 'Number > Basic Arithmetic > BIDMAS' | 题干: '\( \frac{0.3-0.1}{0.5}= \)...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #663 | 题目 QID=101074 | 轮数=31 (学生=16, 导师=15) | 考点: 'Number > Fractions > Adding and Subtracting Fractions' | 题干: 'The perimeter of this isosceles tri...'
+2026-09-02 01:53:01,660 [    INFO]   ├─ [会话摄取] Session #664 | 题目 QID=76747 | 轮数=47 (学生=23, 导师=24) | 考点: 'Number > Fractions > Adding and Subtracting Fractions' | 题干: 'Which fraction is closest to \( 1 \...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #668 | 题目 QID=101067 | 轮数=15 (学生=7, 导师=8) | 考点: 'Number > Fractions > Dividing Fractions' | 题干: 'Cliff has two fraction cards. \( \f...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #684 | 题目 QID=101417 | 轮数=35 (学生=17, 导师=18) | 考点: 'Number > Ratio > Writing Ratios' | 题干: 'What is the ratio of \( x \) to \( ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #686 | 题目 QID=104627 | 轮数=22 (学生=11, 导师=11) | 考点: 'Number > Ratio > Simplifying and Equivalent Ratios' | 题干: '\( \frac{3}{5}: \frac{1}{3} \) Writ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #699 | 题目 QID=131691 | 轮数=35 (学生=17, 导师=18) | 考点: 'Number > Proportion > Direct Proportion' | 题干: 'Per \( 100 \mathrm{ml} \), which dr...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #707 | 题目 QID=89334 | 轮数=21 (学生=10, 导师=11) | 考点: 'Number > Basic Arithmetic > BIDMAS' | 题干: 'Think of a number, then add \(4\), ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #730 | 题目 QID=104637 | 轮数=15 (学生=7, 导师=8) | 考点: 'Number > Ratio > Writing Ratios' | 题干: 'Lila and Elijah share some sweets i...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #735 | 题目 QID=76812 | 轮数=31 (学生=15, 导师=16) | 考点: 'Number > Percentages > Repeated Percentages and Compound Interest' | 题干: '\( £ 13000 \) is invested at \( 5 \...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #737 | 题目 QID=99570 | 轮数=25 (学生=12, 导师=13) | 考点: 'Number > Basic Arithmetic > Written Multiplication' | 题干: 'If you list the multiples of \( 14 ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #741 | 题目 QID=89784 | 轮数=49 (学生=24, 导师=25) | 考点: 'Number > Factors, Multiples and Primes > Factors and Highest Common Factor' | 题干: '"If you multiply a square number by...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #754 | 题目 QID=95813 | 轮数=21 (学生=10, 导师=11) | 考点: 'Number > Basic Arithmetic > BIDMAS' | 题干: '\( \frac{3}{4}-\frac{1}{4} \times \...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #69 | 题目 QID=106909 | 轮数=25 (学生=12, 导师=13) | 考点: 'Algebra > Inequalities > Solving Linear Inequalities' | 题干: 'Leo and Sophie are arguing about so...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #97 | 题目 QID=147373 | 轮数=17 (学生=8, 导师=9) | 考点: 'Algebra > Formula > Substitution into Formula' | 题干: 'Liam and Emma are discussing this f...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #100 | 题目 QID=147255 | 轮数=16 (学生=8, 导师=8) | 考点: 'Algebra > Sequences > Linear Sequences (nth term)' | 题干: 'Which sequence matches this graph?...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #115 | 题目 QID=77771 | 轮数=23 (学生=12, 导师=11) | 考点: 'Algebra > Expanding Brackets > Expanding Single Brackets' | 题干: 'Expand \( 4(3 c+2) \)...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #159 | 题目 QID=131778 | 轮数=27 (学生=13, 导师=14) | 考点: 'Algebra > Solving Equations > Linear Equations' | 题干: 'Max and Lily are discussing identit...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #258 | 题目 QID=131721 | 轮数=17 (学生=8, 导师=9) | 考点: 'Algebra > Other Graphs > Real Life Graphs' | 题干: 'Water is poured into a glass at a c...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #286 | 题目 QID=106720 | 轮数=39 (学生=19, 导师=20) | 考点: 'Algebra > Solving Equations > Quadratic Equations' | 题干: 'Mariana is trying to solve the equa...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #287 | 题目 QID=105520 | 轮数=43 (学生=21, 导师=22) | 考点: 'Algebra > Expanding Brackets > Expanding Single Brackets' | 题干: 'Liam and Emma are arguing about exp...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #308 | 题目 QID=147295 | 轮数=25 (学生=12, 导师=13) | 考点: 'Algebra > Sequences > Linear Sequences (nth term)' | 题干: 'This is a linear sequence  What sho...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #477 | 题目 QID=77775 | 轮数=41 (学生=20, 导师=21) | 考点: 'Algebra > Expanding Brackets > Expanding Single Brackets' | 题干: 'Expand and simplify: \[ 4(2 x+1)-(5...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #492 | 题目 QID=131353 | 轮数=16 (学生=8, 导师=8) | 考点: 'Algebra > Writing and Simplifying Expressions > Writing Expressions' | 题干: 'Leo and Lila are discussing how to ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #607 | 题目 QID=89557 | 轮数=32 (学生=16, 导师=16) | 考点: 'Algebra > Solving Equations > Linear Equations' | 题干: 'Which calculation is equal to \( -2...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #617 | 题目 QID=129181 | 轮数=25 (学生=12, 导师=13) | 考点: 'Algebra > Formula > Substitution into Formula' | 题干: 'A formula is given by:  \[ F=3 p \]...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #637 | 题目 QID=77776 | 轮数=13 (学生=6, 导师=7) | 考点: 'Algebra > Expanding Brackets > Expanding Single Brackets' | 题干: 'Expand and simplify \[ 2 a-4(3-a) \...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #657 | 题目 QID=146324 | 轮数=28 (学生=14, 导师=14) | 考点: 'Algebra > Writing and Simplifying Expressions > Writing Expressions' | 题干: 'Leo and Sophie are discussing this ...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #672 | 题目 QID=144059 | 轮数=29 (学生=14, 导师=15) | 考点: 'Algebra > Straight Line Graphs > Gradient as change in y over change in x' | 题干: 'What do you need to add on to the c...'
+2026-09-02 01:53:01,661 [    INFO]   ├─ [会话摄取] Session #681 | 题目 QID=106936 | 轮数=49 (学生=24, 导师=25) | 考点: 'Algebra > Inequalities > Graphing Linear Inequalities (Shading Regions)' | 题干: 'The diagram on the right shows the ...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #689 | 题目 QID=106659 | 轮数=23 (学生=11, 导师=12) | 考点: 'Algebra > Solving Equations > Linear Equations' | 题干: 'Jack and Emma are arguing about a f...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #691 | 题目 QID=147438 | 轮数=17 (学生=8, 导师=9) | 考点: 'Algebra > Solving Equations > Function Machines' | 题干: 'Jack and Emma are discussing the ou...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #706 | 题目 QID=77778 | 轮数=25 (学生=12, 导师=13) | 考点: 'Algebra > Expanding Brackets > Expanding Single Brackets' | 题干: 'Which of the following statements i...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #720 | 题目 QID=131837 | 轮数=26 (学生=13, 导师=13) | 考点: 'Algebra > Solving Equations > Simultaneous Equations' | 题干: 'What is the value of \( p \) in the...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #721 | 题目 QID=107177 | 轮数=15 (学生=7, 导师=8) | 考点: 'Algebra > Straight Line Graphs > Plotting Lines from Tables of Values' | 题干: 'What is the gradient of this line?...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #798 | 题目 QID=91695 | 轮数=21 (学生=10, 导师=11) | 考点: 'Algebra > Sequences > Sequences-Others' | 题干: 'Dots have been arranged in these pa...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #866 | 题目 QID=147360 | 轮数=15 (学生=7, 导师=8) | 考点: 'Algebra > Writing and Simplifying Expressions > Writing Expressions' | 题干: 'Which of the following is the corre...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #870 | 题目 QID=104952 | 轮数=27 (学生=13, 导师=14) | 考点: 'Algebra > Writing and Simplifying Expressions > Writing Expressions' | 题干: 'If we want to write  "\( m \) multi...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #29 | 题目 QID=108130 | 轮数=13 (学生=6, 导师=7) | 考点: 'Geometry and Measure > Volume and Surface Area > Volume of Prisms' | 题干: 'The table shows the numbers of TVs ...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #77 | 题目 QID=131463 | 轮数=16 (学生=8, 导师=8) | 考点: 'Geometry and Measure > Volume and Surface Area > Volume of Prisms' | 题干: 'What is the volume of this cuboid?...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #80 | 题目 QID=75997 | 轮数=13 (学生=6, 导师=7) | 考点: 'Geometry and Measure > Volume and Surface Area > Volume of Prisms' | 题干: 'Which clock shows ten to twelve at ...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #85 | 题目 QID=131361 | 轮数=30 (学生=15, 导师=15) | 考点: 'Geometry and Measure > Similarity and Congruency > Length Scale Factors in Similar Shapes' | 题干: 'Liam and Sophie are discussing simi...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #122 | 题目 QID=76840 | 轮数=29 (学生=14, 导师=15) | 考点: 'Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)' | 题干: 'Angle \( \square=50^{\circ} \) beca...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #162 | 题目 QID=91621 | 轮数=21 (学生=10, 导师=11) | 考点: 'Geometry and Measure > Angles > Angle Facts with Parallel Lines' | 题干: 'Jack and Lily are arguing about the...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #179 | 题目 QID=98488 | 轮数=22 (学生=11, 导师=11) | 考点: 'Geometry and Measure > Perimeter and Area > Area of Simple Shapes' | 题干: 'Which of the following triangles do...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #255 | 题目 QID=129099 | 轮数=28 (学生=14, 导师=14) | 考点: 'Geometry and Measure > 2D Names and Properties of Shapes > 2D Names and Properties of Shapes-Others' | 题干: 'Ben and Maria are discussing regula...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #421 | 题目 QID=130192 | 轮数=17 (学生=8, 导师=9) | 考点: 'Geometry and Measure > Circles > Parts of a Circle' | 题干: 'Which of the following diagrams sho...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #431 | 题目 QID=95518 | 轮数=19 (学生=9, 导师=10) | 考点: 'Geometry and Measure > Circles > Parts of a Circle' | 题干: 'What is the length of the side mark...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #478 | 题目 QID=107595 | 轮数=17 (学生=8, 导师=9) | 考点: 'Geometry and Measure > Units of Measurement > Weight Units' | 题干: 'Martha has answered a question on m...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #497 | 题目 QID=129168 | 轮数=19 (学生=9, 导师=10) | 考点: 'Geometry and Measure > Angles > Angles in Triangles' | 题干: 'What is the size of angle \( p \) i...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #539 | 题目 QID=93387 | 轮数=17 (学生=8, 导师=9) | 考点: 'Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)' | 题干: 'What is the size of angle \( n \) ?...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #671 | 题目 QID=75988 | 轮数=13 (学生=6, 导师=7) | 考点: 'Geometry and Measure > Compound Measures > Speed, Distance, Time' | 题干: 'A tuk tuk's highest speed is \( 30 ...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #739 | 题目 QID=107919 | 轮数=28 (学生=14, 导师=14) | 考点: 'Geometry and Measure > Compound Measures > Density' | 题干: 'Which of the following is not a mea...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #776 | 题目 QID=145978 | 轮数=21 (学生=10, 导师=11) | 考点: 'Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)' | 题干: 'What is the size of angle \( x \) ?...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #819 | 题目 QID=106636 | 轮数=21 (学生=10, 导师=11) | 考点: 'Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals' | 题干: 'Elijah is trying to solve the equat...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #859 | 题目 QID=154582 | 轮数=19 (学生=9, 导师=10) | 考点: 'Geometry and Measure > Volume and Surface Area > Volume of Prisms' | 题干: 'The area of these shapes are equal....'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #872 | 题目 QID=79038 | 轮数=28 (学生=14, 导师=14) | 考点: 'Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals' | 题干: 'How many edges are there in the fol...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #903 | 题目 QID=107597 | 轮数=43 (学生=21, 导师=22) | 考点: 'Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)' | 题干: 'How should you write \( 5 \) kilogr...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #147 | 题目 QID=79107 | 轮数=19 (学生=9, 导师=10) | 考点: 'Data and Statistics > Data Representation > Time Series and Line Graphs' | 题干: 'How many months have an average tem...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #276 | 题目 QID=107852 | 轮数=22 (学生=11, 导师=11) | 考点: 'Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data' | 题干: 'The mean of the following numbers i...'
+2026-09-02 01:53:01,662 [    INFO]   ├─ [会话摄取] Session #282 | 题目 QID=76888 | 轮数=23 (学生=11, 导师=12) | 考点: 'Data and Statistics > Data Representation > Pie Chart' | 题干: 'This pie chart shows how the employ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #443 | 题目 QID=76894 | 轮数=25 (学生=12, 导师=13) | 考点: 'Data and Statistics > Data Representation > Pie Chart' | 题干: '\(120 \) blue sheep and \( 90 \) ye...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #469 | 题目 QID=107895 | 轮数=31 (学生=15, 导师=16) | 考点: 'Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data' | 题干: 'What is the mode of the following n...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #495 | 题目 QID=77639 | 轮数=16 (学生=8, 导师=8) | 考点: 'Data and Statistics > Data Representation > Time Series and Line Graphs' | 题干: 'How many metres did the rocket trav...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #555 | 题目 QID=77633 | 轮数=16 (学生=8, 导师=8) | 考点: 'Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data' | 题干: 'The median of these four numbers is...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #576 | 题目 QID=78699 | 轮数=15 (学生=7, 导师=8) | 考点: 'Data and Statistics > Probability > Tree Diagrams with Independent Events' | 题干: 'What is the probability of winning ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #716 | 题目 QID=107904 | 轮数=17 (学生=8, 导师=9) | 考点: 'Data and Statistics > Data Processing > Range and Interquartile Range from a List of Data' | 题干: 'What is the range of the following ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #973 | 题目 QID=77643 | 轮数=22 (学生=11, 导师=11) | 考点: 'Data and Statistics > Data Representation > Time Series and Line Graphs' | 题干: 'How many months have an average tem...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #976 | 题目 QID=146708 | 轮数=17 (学生=8, 导师=9) | 考点: 'Data and Statistics > Data Representation > Venn Diagrams' | 题干: '\( \begin{array}{c}\xi=\begin{array...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #1009 | 题目 QID=131546 | 轮数=17 (学生=8, 导师=9) | 考点: 'Data and Statistics > Data Representation > Pictogram' | 题干: 'This pictogram shows the different ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #1011 | 题目 QID=78706 | 轮数=19 (学生=9, 导师=10) | 考点: 'Data and Statistics > Probability > Experimental Probability and Relative Frequency' | 题干: 'A card is picked from a pack of \( ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #1021 | 题目 QID=77920 | 轮数=19 (学生=9, 导师=10) | 考点: 'Data and Statistics > Data Processing > Averages and Range from Grouped Data' | 题干: '\begin{tabular}{|c|c|} \hline Test ...'
+2026-09-02 01:53:01,663 [    INFO]   ├─ [会话摄取] Session #1023 | 题目 QID=131550 | 轮数=14 (学生=7, 导师=7) | 考点: 'Data and Statistics > Data Representation > Pictogram' | 题干: 'This pictogram shows the different ...'
+2026-09-02 01:53:15,076 [    INFO] [step=Step3_Storage|status=SUCCESS] ✅ DuckDB 会话事实与对话明细入库完成: tutoring_sessions (+100 条), session_dialogue_turns (+2335 轮对话)
+2026-09-02 01:53:15,080 [    INFO] [step=Step3_Storage|action=ingest_cards] 🧠 正在持久化 97 份双卡片知识资产 (DuckDB + ChromaDB)...
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #10 (QID=104614) | 误区:「小数位数保留规则与进位混淆」 (错误选项=D) | 机理: '学生未能正确理解小数位保留的核心概念，将'保留一位小数'误解为简单截断数字或错误...' | 证据轮次=[10, 12, 18, 22]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #10 (QID=104614) | 策略分类: [Socratic_Questioning] | 破局一问:「what do you think 5.4598 rounds to to 1dp?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #14 (QID=129129) | 误区:「加法心算错误与分数运算顺序理解模糊」 (错误选项=B) | 机理: '学生可能混淆分数表达式rac{54+58}{2}的运算顺序，或在心算加法54+...' | 证据轮次=[8, 12]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #14 (QID=129129) | 策略分类: [Socratic_Questioning] | 破局一问:「Let's simplify... 54 = 50+4 and 58 = 50+8 🎉🎉 Great!! Now, what is the final part of the question?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[11, 13]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #23 (QID=147113) | 误区:「乘积作为最低公倍数的过度概括错觉」 (错误选项=C) | 机理: '学生错误地将最低公倍数（LCM）与两数乘积等同，忽略了当两数存在公因数时，LCM...' | 证据轮次=[1, 7, 19]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #23 (QID=147113) | 策略分类: [Counter_Example] | 破局一问:「Is there an example where it doesn't work?」 | 教学动作=['<Press for Accuracy>', '<Keep Together>', '<Press for Reasoning>', '<Revoicing>'] | 证据轮次=[16, 18]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #33 (QID=104615) | 误区:「非标准增量四舍五入的规则应用障碍」 (错误选项=D) | 机理: '学生未能理解四舍五入到非标准增量0.02的规则，误以为可以直接四舍五入到最近的小...' | 证据轮次=[2, 4]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #33 (QID=104615) | 策略分类: [Socratic_Questioning] | 破局一问:「So what would the value above 3.153 be in the 0.02 times table? 🧠 3.1 to 3.12 to 3.14 to ...」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[7, 9]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #42 (QID=89558) | 误区:「负数运算规则混淆：乘法与平方的符号处理不一致」 (错误选项=C) | 机理: '学生可能没有掌握负数平方的运算规则，误以为负号的处理与乘法一致，导致对 Stat...' | 证据轮次=[4, 12]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #42 (QID=89558) | 策略分类: [Socratic_Questioning] | 破局一问:「Does -p x q give us the same answer?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[7, 13]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #59 (QID=103042) | 误区:「质数判定计算错误与因数分解误解」 (错误选项=B) | 机理: '学生缺乏系统测试大质数的方法，依赖直觉或错误计算，误以为小整数（如6）能整除质数...' | 证据轮次=[6, 8]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #59 (QID=103042) | 策略分类: [Socratic_Questioning] | 破局一问:「perfect! So looking at the answer options, is there any that you know can be divided by something other than 1 or itself? Is there one that you could rule out?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Press for Reasoning>'] | 证据轮次=[5, 11]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #99 (QID=89436) | 误区:「数轴上的连续减法路径计数错误（忽略跨越零点的额外步骤）」 (错误选项=C) | 机理: '学生在数轴上计算从一个正数到一个负数的连续减法步数时，未能正确建模跨越零点的完整...' | 证据轮次=[9, 17]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [策略卡入库] Session #99 (QID=89436) | 策略分类: [Socratic_Questioning] | 破局一问:「Not quite, if we are at 1 and minus 4 we would get to -3, we want to get to -5 From 1 we could minus 1 and that would get us to 0 How many would we have to take away to get from 0 to -5?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[10, 12, 14]
+2026-09-02 01:53:15,080 [    INFO]   ├─ [错因卡入库] Session #109 (QID=101404) | 误区:「比例等价性缩放因子混淆」 (错误选项=B) | 机理: '学生未能掌握比例等价性需要通过乘以或除以相同因子到两个项来转换，特别是在涉及小数...' | 证据轮次=[12, 8]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #109 (QID=101404) | 策略分类: [Socratic_Questioning] | 破局一问:「Think about what we would have to multiply 2 and 7 by to get 6 and 21 Is it the same number?」 | 教学动作=['<Press for Accuracy>', '<Keep Together>'] | 证据轮次=[17, 25]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #118 (QID=143355) | 误区:「利润计算中差异概念混淆，误将卖出价直接作为利润差」 (错误选项=B) | 机理: '学生未能正确理解利润百分比的计算依赖于利润（卖出价减买入价）而非直接使用卖出价；...' | 证据轮次=[4, 6]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #118 (QID=143355) | 策略分类: [Socratic_Questioning] | 破局一问:「not quite, she buys the painting for £80 & sells it for £140 what is the difference?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[7, 9, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #143 (QID=77590) | 误区:「语义误解引发运算类型与顺序混淆」 (错误选项=None) | 机理: '学生将问题中'taken'一词字面理解为'减去'，忽略了商业上下文中'taken...' | 证据轮次=[4, 6]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #143 (QID=77590) | 策略分类: [Socratic_Questioning] | 破局一问:「let's look at what the questions says to start there is £1,578 in the till £6,537 is taken what does that mean?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>'] | 证据轮次=[5, 7, 9]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #154 (QID=130053) | 误区:「指数运算语义混淆：误将平方视为乘以2」 (错误选项=C) | 机理: '学生对指数运算的基本语义理解不牢固，误将4²中的指数2解读为乘以2，而不是乘以自...' | 证据轮次=[2, 10]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #154 (QID=130053) | 策略分类: [Socratic_Questioning] | 破局一问:「Think about counting in 1s, 1 2 3 4 5 6 7 8... Which one is closest to 4.2?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #188 (QID=134802) | 误区:「运算顺序规则应用不稳定与形式依赖」 (错误选项=A) | 机理: '学生在面对复合运算表达式时，虽然知晓BIDMAS规则，但无法稳定、系统地将其应用...' | 证据轮次=[7, 9, 11, 15, 17]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #188 (QID=134802) | 策略分类: [Socratic_Questioning] | 破局一问:「What does BIDMAS stand for? 😁」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Press for Reasoning>'] | 证据轮次=[12, 18]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #201 (QID=103831) | 误区:「分数单位“1”的识别混淆与带分数/假分数概念转换脱节」 (错误选项=C) | 机理: '学生将问题的理解焦点从“识别整体（长方形）的个数”错误地转移到了“计算最小分割单...' | 证据轮次=[8, 18]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #201 (QID=103831) | 策略分类: [Socratic_Questioning] | 破局一问:「So yes there are 23 little rectangles I meant if you look at the big rectangles, how many are completely coloured in?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 21, 23]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #214 (QID=129995) | 误区:「四舍五入中进位连锁反应的认知盲区与数字重组表征困难」 (错误选项=A) | 机理: '学生能够正确识别需要四舍五入的位值（百位9）并应用“五入”规则，但在计算‘9+1...' | 证据轮次=[8, 14]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #214 (QID=129995) | 策略分类: [Socratic_Questioning] | 破局一问:「Have another look at the four answers, which one has a 7 in it?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #247 (QID=130049) | 误区:「数轴上数字估计的位值混淆与比例误解」 (错误选项=A and C) | 机理: '学生可能对数字的位值理解不足，导致在估计数字在数轴上的位置时，错误判断数字的大小...' | 证据轮次=[2, 4, 6, 8, 10]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #247 (QID=130049) | 策略分类: [Socratic_Questioning] | 破局一问:「Good explanations! So does C work, now we have discounted everything else?」 | 教学动作=['<Keep Together>', '<Press for Reasoning>', '<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #275 (QID=101869) | 误区:「减法运算顺序的僵化应用与列竖式步骤混淆」 (错误选项=B) | 机理: '学生将学校教授的列竖式减法中'从个位开始减'的步骤绝对化，缺乏在心算或简化计算中...' | 证据轮次=[4, 8]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #275 (QID=101869) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok, so it's best to start with the tens... So what is 204-30?」 | 教学动作=['<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[5, 9]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #278 (QID=156974) | 误区:「带分数加法中假分数转换与整数合并步骤遗漏」 (错误选项=D) | 机理: '学生在进行带分数加法时，能够正确计算整数部分和分数部分，但当分数部分相加得到假分...' | 证据轮次=[11, 13]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #278 (QID=156974) | 策略分类: [Socratic_Questioning] | 破局一问:「it is, well done! so if 7 make 1 whole how can we write 8/7 instead?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[10, 12, 16, 20]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #288 (QID=101075) | 误区:「等价分数转换中乘数应用混淆」 (错误选项=N/A) | 机理: '学生理解需要将分母统一为28，但在转换第二个分数1/4时，错误地应用了乘数概念，...' | 证据轮次=[4, 10, 12]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #288 (QID=101075) | 策略分类: [Socratic_Questioning] | 破局一问:「Nearly....yes 20/28 is correct.well done! So, then for 1/4, what has the 4 been multiplied by to get 28?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #423 (QID=131357) | 误区:「分数简化与图形阴影部分匹配错误」 (错误选项=A) | 机理: '学生在将百分比（如30%）转换为简化分数（3/10）后，直接假设该分数与图形中阴...' | 证据轮次=[10, 12]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #423 (QID=131357) | 策略分类: [Socratic_Questioning] | 破局一问:「Good, and what fraction of the diagram is shaded? Is it equivalent to 3/10?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [错因卡入库] Session #436 (QID=75909) | 误区:「负数在数轴上的大小比较与刻度推导障碍」 (错误选项=D) | 机理: '学生混淆了负数在数轴上的大小关系。在负数区域，数值向右（趋向零）移动时增大，向左...' | 证据轮次=[8, 12, 18]
+2026-09-02 01:53:15,081 [    INFO]   ├─ [策略卡入库] Session #436 (QID=75909) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok, great, So, the distance between -10 and 2 is 12. And this is represented by 6 gaps, so what does each gap represent? Dividing 12 between the 6 gaps...」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[15]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #463 (QID=101851) | 误区:「数轴间隔计数与数值差计算混淆」 (错误选项=B, C, or D) | 机理: '学生错误地将数轴上的刻度线数量当作间隔数量，导致间隔数计数为4（实际应为5）；同...' | 证据轮次=[4, 10, 14]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #463 (QID=101851) | 策略分类: [Socratic_Questioning] | 破局一问:「good! what is the difference between 125 and 150?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 17]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #464 (QID=100594) | 误区:「分数在数轴上位置的否定判断与数值空间直觉混淆」 (错误选项=A) | 机理: '学生未能准确理解题干中的双重否定逻辑（'could not be placed ...' | 证据轮次=[16, 34, 36]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #464 (QID=100594) | 策略分类: [Socratic_Questioning] | 破局一问:「No worries :) Hi again Sam So we want to compare 1/5, 3/5 and 1/4 What could we change these fractions to fractions out of?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[17, 25, 27, 29]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #509 (QID=89405) | 误区:「“比较句式”中主体与参照物方向混淆与温差计算脱节」 (错误选项=B) | 机理: '学生虽然能正确识别“-7°C比5°C冷”这一基本事实，但在处理“X is [数值...' | 证据轮次=[17, 19]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #509 (QID=89405) | 策略分类: [Socratic_Questioning] | 破局一问:「So we know that 5 is hotter than -7 How much hotter is it?」 | 教学动作=['<Press for Accuracy>', '<Keep Together>', '<Revoicing>'] | 证据轮次=[14, 18]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #568 (QID=134917) | 误区:「分数比例简化中的除法操作混淆」 (错误选项=未完成选择) | 机理: '学生未能理解分数之间的整除关系，将整数除法规则错误应用于分数，导致无法确定公因数...' | 证据轮次=[2, 6, 8, 18]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #568 (QID=134917) | 策略分类: [Analogy] | 破局一问:「imagine a half if you had half a pizza, could you fit a quarter into that half?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #573 (QID=103770) | 误区:「小数乘法位值缩放规律理解不完整」 (错误选项=无法独立推导，可能误选A（208）或C（20.8）作为中间步骤或最终答案) | 机理: '学生知道从32到3.2和从65到6.5发生了变化（除以10），但未能自主构建起“...' | 证据轮次=[9, 15]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #573 (QID=103770) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok, so we know that 32 x 65 = 2080 What has happened to both the 32 and the 65 to get 3.2 and 6.5?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[10, 12]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #603 (QID=103735) | 误区:「小数除法意义混淆与运算方向倒置」 (错误选项=B) | 机理: '学生暴露了两个核心的认知障碍。第一，对除法运算的意义存在根本性误解，特别是“包含...' | 证据轮次=[4, 10]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #603 (QID=103735) | 策略分类: [Socratic_Questioning] | 破局一问:「if I times the fraction 0.2/0.4 top and bottom by 10 what do we get? what is 0.2 x 10=?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 13, 15]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #658 (QID=95781) | 误区:「整数思维定势导致的位值理解偏差」 (错误选项=B) | 机理: '学生可能将整数除法（大数除小数）的直觉错误迁移到了小数除法中，错误地认为 2 ÷...' | 证据轮次=[10]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #658 (QID=95781) | 策略分类: [Scaffolding] | 破局一问:「Great....now we need to get this the correct size... So, 20 ÷ 5 = 4..... s0 2 ÷ 5 = ?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #663 (QID=101074) | 误区:「周长定义误解与运算混淆」 (错误选项=N/A) | 机理: '学生混淆了周长的加法性质，误以为需要减去部分边长来求解未知边长，缺乏对等腰三角形...' | 证据轮次=[13, 25]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #663 (QID=101074) | 策略分类: [Socratic_Questioning] | 破局一问:「That will get you 0. Anything take away itself is 0. how do we work out the perimeter of a shape?」 | 教学动作=['<Keep Together>', '<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[16, 24]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #664 (QID=76747) | 误区:「分数与1的距离计算与分数大小比较混淆」 (错误选项=C) | 机理: '学生未建立‘一个分数与1的差值就是用1（同分母分数）减去该分数，差值越小则距离越...' | 证据轮次=[12, 14, 10, 34, 36]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #664 (QID=76747) | 策略分类: [Socratic_Questioning] | 破局一问:「of course.. out of the fractions shown, how do you think we could decide if they are close to 1?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[7, 11, 15, 21, 25, 33, 37]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #668 (QID=101067) | 误区:「分数乘除法逆运算关系概念模糊」 (错误选项=无) | 机理: '学生对数学术语'product'（乘积）的定义记忆模糊，导致解题时混淆乘法与除法...' | 证据轮次=[4, 8]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #668 (QID=101067) | 策略分类: [Socratic_Questioning] | 破局一问:「What is the opposite of multiplying? 👀 EXACTLY ✅✅✅✅ So we need to do 2/5 divide by 3/7 to get the answer! Any idea how to do that? 😁」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #684 (QID=101417) | 误区:「比例方向颠倒与整体-部分关系混淆」 (错误选项=A) | 机理: '学生在理解几何图形间的比例关系时，未能清晰构建‘从小到大’或‘从部分到整体’的逻...' | 证据轮次=[4, 8, 20, 26]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #684 (QID=101417) | 策略分类: [Socratic_Questioning] | 破局一问:「So how have we gone from the base of the small triangle to the base of the large triangle? 😀😀😀」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[3, 7, 11, 19, 23, 25, 27, 29]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #686 (QID=104627) | 误区:「数值转换的形式规范与无限表示混淆」 (错误选项=学生可能最初会倾向于用小数表示比例后项（如0.5555...），而非题目要求的分数形式。) | 机理: '学生能够执行正确的算术步骤（乘以公分母，再除以目标系数），但在最终结果呈现上，可...' | 证据轮次=[17]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #686 (QID=104627) | 策略分类: [Scaffolding] | 破局一问:「have you worked out what to multiply by?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[10, 14, 18]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #699 (QID=131691) | 误区:「单位转换与性价比标准化策略缺失」 (错误选项=无) | 机理: '学生缺乏将不同包装商品成本标准化为相同单位（每100ml）的策略，导致初始无法解...' | 证据轮次=[4, 10]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #699 (QID=131691) | 策略分类: [Socratic_Questioning] | 破局一问:「You need to find the cost of 100ml for each option So how could we go from the cost of 1 litre to the cost of 100ml?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[3, 9]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #707 (QID=89334) | 误区:「运算顺序与除法表达式优先级混淆」 (错误选项=B) | 机理: '学生将文字描述的步骤'先加4，再除以5'误解为先除法后加法，因为表达式 n + ...' | 证据轮次=[2, 4, 8]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #707 (QID=89334) | 策略分类: [Socratic_Questioning] | 破局一问:「BIDMAS will certainly help you 😁👌 thinking about BIDMAS then, what would we have to do first in Amy's sum?!」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[3, 7, 9, 11, 15, 19]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [错因卡入库] Session #730 (QID=104637) | 误区:「比例转换中整数除法思维与分数表示法的混淆」 (错误选项=无直接选择，但暴露整数余数错误) | 机理: '学生将比例缩放（或同除运算）误解为常规的整数带余除法。当需要将3:2转换为1:n...' | 证据轮次=[6, 8]
+2026-09-02 01:53:15,082 [    INFO]   ├─ [策略卡入库] Session #730 (QID=104637) | 策略分类: [Socratic_Questioning] | 破局一问:「1/2 means 1 divided by 2 3/4 means 3 divided by 4 how would you write 2 divided by 3?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #735 (QID=76812) | 误区:「复利计算中中间结果过早四舍五入导致的累积误差」 (错误选项=无) | 机理: '学生最初混淆了百分比增长乘数的概念，误将5%直接用作乘数（0.05），而非增长因...' | 证据轮次=[4, 10, 22]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #735 (QID=76812) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok, so what's the multiplier for increasing by 5%?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[3, 23]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #737 (QID=99570) | 误区:「多位数乘法进位处理错误与乘法表不熟悉」 (错误选项=无) | 机理: '学生对14的乘法表不熟悉，且在列乘法计算时进位机制处理不当，导致14×3错误地计...' | 证据轮次=[6, 14]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #737 (QID=99570) | 策略分类: [Socratic_Questioning] | 破局一问:「Yes sorry, I mean 14 x what?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #754 (QID=95813) | 误区:「分数运算顺序与结果简化脱节」 (错误选项=B) | 机理: '学生可能在计算过程中，虽然逐步操作正确（通分、相减），但在得出初步结果（14/2...' | 证据轮次=[6]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #754 (QID=95813) | 策略分类: [Socratic_Questioning] | 破局一问:「great! Then we need to do 3/4 - 1/20 so this is the bit where we need common denominators what would we do?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[7, 9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #69 (QID=106909) | 误区:「负数除法与不等式性质混淆」 (错误选项=C) | 机理: '学生对于解线性不等式（尤其是涉及负数系数）的代数操作流程和符号规则存在模糊理解。...' | 证据轮次=[6, 10, 20]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #69 (QID=106909) | 策略分类: [Socratic_Questioning] | 破局一问:「Super :) What does that give us ? :0」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 15]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #97 (QID=147373) | 误区:「代数表达式运算中的变量系数忽略与分配律应用错误」 (错误选项=C) | 机理: '学生未能正确识别变量m的隐含系数1，在加法运算中错误合并变量项与常数；同时，在乘...' | 证据轮次=[4, 12]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #97 (QID=147373) | 策略分类: [Socratic_Questioning] | 破局一问:「Ooh not quite We could add the m and the 2m? What would that get? Remember what number is technically in front of the m by itself」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #100 (QID=147255) | 误区:「图表信息映射缺失：无法将图表的“位置-值”对与选项中的图形表示进行关联」 (错误选项=未记录) | 机理: '学生可能未能将图表解读为明确的“位置-值”对（如横坐标为位置，纵坐标为序列值），...' | 证据轮次=[3, 9]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #100 (QID=147255) | 策略分类: [Socratic_Questioning] | 破局一问:「OK so the graph gives the position and value of the term 😁👌 So in position 1 what is the value of the term? 👀」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[4, 6, 10]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #115 (QID=77771) | 误区:「分配律应用不完整与运算符混淆」 (错误选项=Unknown) | 机理: '学生理解展开括号需要乘法分配，但在合并两项时可能误用运算符（如将加号误为等号），...' | 证据轮次=[1, 13]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #115 (QID=77771) | 策略分类: [Socratic_Questioning] | 破局一问:「good thank you let's have a look at this question? What does expand mean?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[6, 12]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #159 (QID=131778) | 误区:「恒等式概念误解：将恒等式与方程混淆」 (错误选项=A) | 机理: '学生未能区分'恒等式'（identity）和'方程'（equ程）的核心概念。学生...' | 证据轮次=[6, 16]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #159 (QID=131778) | 策略分类: [Socratic_Questioning] | 破局一问:「We use an identity symbol (the three lines) when something is always true So Max is saying that 2x + 1 is always equal to 3 Is this true?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[5, 7, 15]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #258 (QID=131721) | 误区:「深度-时间图形斜率与玻璃横截面积动态关系的误解」 (错误选项=D) | 机理: '学生未能将图形斜率变化（深度增加先快后慢）与玻璃横截面积的动态变化（先窄后宽）建...' | 证据轮次=[4, 6, 10]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #258 (QID=131721) | 策略分类: [Socratic_Questioning] | 破局一问:「ok so let's look at the graph, the depth of water increases quite quickly at the start and then slows down Imagine pouring water into a glass... If it fills quickly would you expect the bottom of the glass to be narrow or wide?」 | 教学动作=['<Keep Together>', '<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[5, 7, 9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #286 (QID=106720) | 误区:「因式分解验证错误与二次方程实数解逻辑混淆」 (错误选项=D) | 机理: '学生误将二次项与常数项直接组合为完全平方式，忽略了因式分解的代数正确性验证；同时...' | 证据轮次=[4, 8, 24]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #286 (QID=106720) | 策略分类: [Socratic_Questioning] | 破局一问:「do you think step 1 is correct?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[5, 11, 25]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #287 (QID=105520) | 误区:「代数表达式重排中的符号守恒与项类型混淆」 (错误选项=C) | 机理: '学生存在两层认知障碍：1. **运算概念混淆**：将“乘法”与“加法”概念在负数...' | 证据轮次=[8, 12, 24, 34, 36]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #287 (QID=105520) | 策略分类: [Socratic_Questioning] | 破局一问:「Be careful.. We are multiplying... Not adding,,, What is -3 x 1 = ?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Getting Student to Relate>', '<Keep Together>'] | 证据轮次=[9, 11, 23, 39]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #308 (QID=147295) | 误区:「线性数列公差计算依赖试错而非整体结构分析」 (错误选项=未记录) | 机理: '学生虽能理解序列在递减（“subtracting each time”），但未能...' | 证据轮次=[8, 10, 14]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #308 (QID=147295) | 策略分类: [Scaffolding] | 破局一问:「lovely 👍 so, as the quetsion is multiple choice we can use the options they give us to help us decide which one is correct let's start for example with the 73 is the sequence went 108, ___, 73, 3, ... can you work out what the rule would be? that means, what is being taken away each time (use the 73, 3 to help you work that out)」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Getting Student to Relate>'] | 证据轮次=[7, 9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #477 (QID=77775) | 误区:「代数展开中括号分配与符号处理的认知混淆」 (错误选项=A) | 机理: '学生可能误解括号前的乘法分配律，未将括号外的系数正确分配到括号内每一项；在处理括...' | 证据轮次=[4, 14, 18]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #477 (QID=77775) | 策略分类: [Socratic_Questioning] | 破局一问:「We need to multiply everything in the bracket by the 4 outside the bracket 😊 4 x 2x = ? 4 x 1 = ?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 15, 19]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #492 (QID=131353) | 误区:「代数表达式中变量并列的运算含义混淆」 (错误选项=C) | 机理: '学生未能掌握代数表达式中变量并列表示乘法的约定（如'pq'表示 p × q），而...' | 证据轮次=[10, 12]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [策略卡入库] Session #492 (QID=131353) | 策略分类: [Socratic_Questioning] | 破局一问:「Not quite. Look at what Leo says at the end What does he think 'pq' means?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,083 [    INFO]   ├─ [错因卡入库] Session #607 (QID=89557) | 误区:「运算顺序优先级与负数减法规则混淆」 (错误选项=B) | 机理: '学生未能正确应用BIDMAS运算顺序规则（乘法优先于减法），并误解了负数相减时的...' | 证据轮次=[14, 22]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #607 (QID=89557) | 策略分类: [Socratic_Questioning] | 破局一问:「How do we go about doing this question?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[13, 21]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #617 (QID=129181) | 误区:「符号混淆：等号与减号的认知混淆」 (错误选项=C) | 机理: '学生未能正确区分等号 '=' 作为赋值或相等关系与减号 '-' 作为运算符的区别...' | 证据轮次=[14, 18]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #617 (QID=129181) | 策略分类: [Socratic_Questioning] | 破局一问:「Why do you not think 12 makes sense?🤔」 | 教学动作=['<Press for Reasoning>'] | 证据轮次=[13]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #637 (QID=77776) | 误区:「负号分配律应用错误」 (错误选项=D) | 机理: '学生未能正确应用分配律将-4乘以括号内的每一项，特别是忽略了-4与-a相乘时的符...' | 证据轮次=[6]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #637 (QID=77776) | 策略分类: [Socratic_Questioning] | 破局一问:「yes, tyhe total number of a's is 6 😀 when you multiply out the bracket you get 2a-12+4a does that make sense?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[7, 9]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #657 (QID=146324) | 误区:「等式平衡变换规则误解」 (错误选项=A) | 机理: '学生未能理解等式两边必须进行相同运算以保持等价性的核心原理，在加减和乘除操作中错...' | 证据轮次=[5, 13]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #657 (QID=146324) | 策略分类: [Socratic_Questioning] | 破局一问:「If we x (x+y)/2 by 2 what do we get?」 | 教学动作=['<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[16, 18]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #672 (QID=144059) | 误区:「曲面面积与总表面积组成部分混淆」 (错误选项=D) | 机理: '学生未能将圆柱体完整分解为曲面（一个展开的长方形）和两个独立的圆形底面（顶面和底...' | 证据轮次=[10, 12, 22, 24]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #672 (QID=144059) | 策略分类: [Scaffolding] | 破局一问:「Let's stay focused and sensible 😊 What other faces do we need to include? 🧠」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[9, 11, 13, 23, 25]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #681 (QID=106936) | 误区:「坐标有序数对概念混淆（x与y值辨识错误）」 (错误选项=无法独立判断任何选项，过程中出现多次错误计算与逻辑中断) | 机理: '学生未稳固掌握笛卡尔坐标系中有序数对 (x,y) 的基本定义，特别是将坐标值正确...' | 证据轮次=[6, 12, 20, 22, 30, 36]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #681 (QID=106936) | 策略分类: [Socratic_Questioning] | 破局一问:「So we don't want the letters there now as that's general, we want to replace them with the values because we know for our coordinate y = -1 and x = 2 👍👍👍 So you substitute the numbers in instead of the letters... What does that give us? 😊」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[21]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #689 (QID=106659) | 误区:「变量系数合并时的符号处理错误与加法逆元误解」 (错误选项=None) | 机理: '学生误解了负数加法规则，在合并变量项系数时错误地将-4v + 9v计算为-13v...' | 证据轮次=[8, 12]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #689 (QID=106659) | 策略分类: [Socratic_Questioning] | 破局一问:「-4v + 9v would not equal -13v Go through 0v... How much do you add to -4v to get 0v?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Getting Student to Relate>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #691 (QID=147438) | 误区:「代数表达式等价性判断缺失与分配律应用不完整」 (错误选项=B (Only Emma)) | 机理: '学生首先未能将 '2(p-3)' 与 '2p-6' 在心理上建立联系，视其为两个...' | 证据轮次=[2, 4, 10, 12]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #691 (QID=147438) | 策略分类: [Socratic_Questioning] | 破局一问:「You are correct that Jack is correct, well done! but... if you multiplied out the brackets... what would you get?」 | 教学动作=['<Revoicing>', '<Press for Accuracy>', '<Getting Student to Relate>'] | 证据轮次=[3, 9, 11]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #706 (QID=77778) | 误区:「矩形面积计算中乘法分配律应用错误」 (错误选项=C) | 机理: '学生未能正确应用面积公式 length × breadth，在展开 x(5x+1...' | 证据轮次=[20, 22]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #706 (QID=77778) | 策略分类: [Socratic_Questioning] | 破局一问:「so A is true B is true as eedi has already told us that! Area of a rectangle is equal to the length times breadth So if we were to do x(5x+1), what would we get?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[19]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #720 (QID=131837) | 误区:「联立方程消元时的运算一致性错误」 (错误选项=无) | 机理: '学生在应用加法消元法时，未能将方程组视为一个整体进行运算。虽然正确识别了变量q的...' | 证据轮次=[14, 16]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #720 (QID=131837) | 策略分类: [Socratic_Questioning] | 破局一问:「Great! Now we have to choose whether adding or subtracting our equations will get rid of q Any idea which one we want?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[7]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #721 (QID=107177) | 误区:「坐标差值计算中的符号忽略或方向性误解」 (错误选项=未误选) | 机理: '学生在计算坐标差值时，可能只关注绝对值差异，忽略了差值的符号方向，导致对梯度（变...' | 证据轮次=[2, 6]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #721 (QID=107177) | 策略分类: [Socratic_Questioning] | 破局一问:「what would the difference there be ?」 | 教学动作=['<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #798 (QID=91695) | 误区:「线性序列公差识别错误与计数偏差」 (错误选项=学生未在选项中做出明确选择) | 机理: '学生未能一致识别序列的恒定公差，初始计数图案点数时出现偏差（如图案3误数为12）...' | 证据轮次=[12, 14]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #798 (QID=91695) | 策略分类: [Socratic_Questioning] | 破局一问:「Fab So we have 6, 10, 14,... What do you notice?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 11, 13]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #866 (QID=147360) | 误区:「分数表达式中除法顺序与变量值混淆」 (错误选项=B) | 机理: '学生未能理解分数表达式中分子和分母的位置关系与除法顺序的对应关系，错误地将具体数...' | 证据轮次=[12, 14]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #866 (QID=147360) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok you're right, D isn't correct either. 8 multiplied by p can be written as 8 x p or as 8p :) So we're just left with A and C - which both say divided. And that's correct We can remind ourselves of fractions to help - 1/2 of a cake means 1 whole cake divided in to 2 😊 So is 8/p going to be 8 divided by p or p divided by 8? :) Are you still with me Leo-Marcus? 😊 Hello [STUDENT_NAME]-Marcus, how can I help?」 | 教学动作=['<Getting Student to Relate>', '<Revoicing>', '<Press for Accuracy>', '<Press for Reasoning>'] | 证据轮次=[5, 9, 11, 13]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [错因卡入库] Session #870 (QID=104952) | 误区:「代数表达式书写规范混淆：未遵循省略乘号与数字在前的标准约定」 (错误选项=C) | 机理: '学生将具体乘法运算（m x 7）直接转化为符号，但未内化代数中的抽象书写规则，误...' | 证据轮次=[12, 16]
+2026-09-02 01:53:15,084 [    INFO]   ├─ [策略卡入库] Session #870 (QID=104952) | 策略分类: [Socratic_Questioning] | 破局一问:「what is the symbol for multiplying」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #29 (QID=108130) | 误区:「频率表数据值与频率混淆及数据存在条件忽视」 (错误选项=B) | 机理: '学生未能清晰区分频率表中的‘数据值’（即TV数量本身）和‘频率’（即拥有该数量T...' | 证据轮次=[4, 6]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #29 (QID=108130) | 策略分类: [Socratic_Questioning] | 破局一问:「Great... so the largest number of TVs is 4 And the lowest number of TVs that anyone has is 1. So, the range = 4-1 = ?」 | 教学动作=['<Revoicing>', '<Keep Together>', '<Press for Accuracy>'] | 证据轮次=[9, 7]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #77 (QID=131463) | 误区:「将长方体体积计算错误地应用为表面积计算」 (错误选项=D) | 机理: '学生未能区分体积（三维空间大小）和表面积（表面总面积）的概念，在计算时错误地将所...' | 证据轮次=[3, 5]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #77 (QID=131463) | 策略分类: [Socratic_Questioning] | 破局一问:「Hi! Can you see the feedback tells you which calculation to use?」 | 教学动作=['<Keep Together>', '<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[2, 8, 12]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #80 (QID=75997) | 误区:「时间表达法混淆与24小时制理解不足」 (错误选项=A) | 机理: '学生将'ten to twelve'字面理解为10:12，忽略了'to'在时间表...' | 证据轮次=[6, 8, 10]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #80 (QID=75997) | 策略分类: [Socratic_Questioning] | 破局一问:「Excellent! so 10 to 1 again So it isn't A, B or C! How about D? :)」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #85 (QID=131361) | 误区:「相似图形概念与比例缩放原理混淆」 (错误选项=A) | 机理: '学生将相似图形误解为具有相同周长和面积，而忽略了比例缩放和角度一致的本质。这源于...' | 证据轮次=[7]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #85 (QID=131361) | 策略分类: [Socratic_Questioning] | 破局一问:「Do you know what 'similar shapes' are?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[6, 8, 12, 22, 24]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #122 (QID=76840) | 误区:「角度事实适用场景混淆与几何符号识别障碍」 (错误选项=A) | 机理: '学生无法区分不同角度配置（如点周围角度求和与直线角度求和）的适用条件，且对几何符...' | 证据轮次=[4, 10, 16]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #122 (QID=76840) | 策略分类: [Socratic_Questioning] | 破局一问:「Because all the angles there are around exactly one point. Do we know every angle except one of them? :)」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[9, 23]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #162 (QID=91621) | 误区:「代数表达式等价性误解与括号运算优先级混淆」 (错误选项=A) | 机理: '学生未掌握乘法分配律，无法理解表达式3(n-4)展开后等于3n-12，因此认为两...' | 证据轮次=[10, 12]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #162 (QID=91621) | 策略分类: [Socratic_Questioning] | 破局一问:「OK! So if we want to subtract 4 then multiply ALL of our answer by 3 (like the arrows say), Lily's answer would be correct because we use the brackets to make sure ALL of n - 4 gets multiplied by 3. So Lily is correct. The question is, is Jack right too or not?」 | 教学动作=['<Getting Student to Relate>', '<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #179 (QID=98488) | 误区:「问题理解偏差与多选选项混淆」 (错误选项=D) | 机理: '学生在处理多选问题时，由于对题干要求的理解不准确或注意力分散，错误地将选项的字母...' | 证据轮次=[17]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #179 (QID=98488) | 策略分类: [Socratic_Questioning] | 破局一问:「we need the base and height, so the that's the line that's straight along and the one that's straight up 3 x 6, right? And then what's the second step for area of a triangle?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[8, 18]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #255 (QID=129099) | 误区:「正多边形判定条件应用不全与图形符号解读局限」 (错误选项=A) | 机理: '学生可能仅凭导师的提示或简单视觉印象判断形状，未深入应用正多边形必须同时满足‘所...' | 证据轮次=[3, 19, 21]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #255 (QID=129099) | 策略分类: [Socratic_Questioning] | 破局一问:「Using this is Ben's shape regular?」 | 教学动作=['<Press for Reasoning>'] | 证据轮次=[6, 8, 10, 12, 14, 18, 20]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #421 (QID=130192) | 误区:「圆基本几何术语混淆：半径、直径与切线的误识别」 (错误选项=C) | 机理: '学生缺乏对圆的基本组成部分（半径、直径、切线）定义的清晰理解，导致在视觉识别时混...' | 证据轮次=[2, 4, 6, 8]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #421 (QID=130192) | 策略分类: [Socratic_Questioning] | 破局一问:「you chose C but the red lline in that diagram is called a tangent let me explain what a radius is a radius is a line that is drawn from the centre of a circle to its edge which diagram shows a line from the centre to the edge of the circle?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 9, 13, 15]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #431 (QID=95518) | 误区:「圆的半径概念多重性与图形表示混淆」 (错误选项=D) | 机理: '学生对圆的半径概念理解停留在单一表示层面，不确定从圆心到圆周的k线段是否也代表半...' | 证据轮次=[14]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #431 (QID=95518) | 策略分类: [Socratic_Questioning] | 破局一问:「What do we call the distance from the centre of the circle to the outside? It's okay if you aren't sure!」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 7, 9, 15]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #478 (QID=107595) | 误区:「物理量单位类型混淆：质量单位与长度单位区分不清」 (错误选项=C) | 机理: '学生未能清晰区分质量单位（如克、千克、吨）和长度单位（如米）的物理意义及缩写含义...' | 证据轮次=[4, 8, 12]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #478 (QID=107595) | 策略分类: [Socratic_Questioning] | 破局一问:「Do you know what any of them stand for?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>'] | 证据轮次=[7, 9, 11, 13]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #497 (QID=129168) | 误区:「多边形内角和公式与图形对称性知识缺口」 (错误选项=A) | 机理: '学生未能提取或运用先验知识（任意四边形内角和为360度）和特定图形（风筝形）的对...' | 证据轮次=[4, 6]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #497 (QID=129168) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok so, do you know what the sum of the angles in any quadrilateral is?」 | 教学动作=['<Press for Accuracy>', '<Keep Together>'] | 证据轮次=[5, 11]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #539 (QID=93387) | 误区:「平角构成要素的空间分离困难（非相邻角错误纳入）」 (错误选项=B) | 机理: '学生能够回忆起“平角是180度”这一事实，但在具体图形情境中，未能准确识别出哪些...' | 证据轮次=[8, 10, 14]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #539 (QID=93387) | 策略分类: [Socratic_Questioning] | 破局一问:「Super! And do you know how many degrees make up a straight line?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[3, 5, 7, 15]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #671 (QID=75988) | 误区:「时间单位转换错误与分数运算混淆」 (错误选项=D) | 机理: '学生未能理解时间单位转换的基本概念，错误地将分钟直接与速度关联，或未正确应用距离...' | 证据轮次=[2, 4]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #671 (QID=75988) | 策略分类: [Socratic_Questioning] | 破局一问:「It is not, no 😊 40 minutes is how much of an hour? 🧠」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[3, 5]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #739 (QID=107919) | 误区:「体积与面积单位识别混淆」 (错误选项=D) | 机理: '学生未能掌握密度作为复合度量（质量/体积）的本质，对单位系统的层次性理解不足，混...' | 证据轮次=[9, 17, 25]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #739 (QID=107919) | 策略分类: [Socratic_Questioning] | 破局一问:「Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>', '<Getting Student to Relate>'] | 证据轮次=[2, 6, 12, 22, 26]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [错因卡入库] Session #776 (QID=145978) | 误区:「忽略图形标记的直角与角度求和遗漏」 (错误选项=误以为62度（对应Turn 10的猜测）) | 机理: '学生未能识别图形中正方形标记代表90度直角，且在计算角度总和时仅考虑显式数值角度...' | 证据轮次=[4, 10, 12]
+2026-09-02 01:53:15,085 [    INFO]   ├─ [策略卡入库] Session #776 (QID=145978) | 策略分类: [Socratic_Questioning] | 破局一问:「What is the value of the angle with the square marker on it? 👀😁」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[7, 15, 17]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #819 (QID=106636) | 误区:「代数表达式中字母与系数关系的理解障碍」 (错误选项=B) | 机理: '学生无法自主建立‘4k’这一代数表达式的明确含义，即‘4乘以k’。其认知障碍在于...' | 证据轮次=[2, 10, 6]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #819 (QID=106636) | 策略分类: [Socratic_Questioning] | 破局一问:「what does 4k mean?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #859 (QID=154582) | 误区:「面积计算与代数方程建立混淆」 (错误选项=B) | 机理: '学生未能正确应用平行四边形面积公式（base × perpendicular h...' | 证据轮次=[2, 6, 10, 12]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #859 (QID=154582) | 策略分类: [Socratic_Questioning] | 破局一问:「what is the height of the bottom parallelogram?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 7, 9, 11, 15]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #872 (QID=79038) | 误区:「3D形状术语edges与vertices概念混淆」 (错误选项=N/A) | 机理: '学生未能清晰区分3D形状中的'edges'（边）和'vertices'（顶点），...' | 证据轮次=[7, 17]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #872 (QID=79038) | 策略分类: [Socratic_Questioning] | 破局一问:「ok, this question asks about edges what do you think the edges of a shape are?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[6, 10]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #903 (QID=107597) | 误区:「单位转换中乘除法方向混淆与小数点定位错误」 (错误选项=A) | 机理: '学生未能建立清晰的单位层级概念（克→千克→吨），混淆了从较小单位转换到较大单位需...' | 证据轮次=[6, 14, 26]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #903 (QID=107597) | 策略分类: [Socratic_Questioning] | 破局一问:「Of course! Let's start with the grams. Do you know how many grams there are in a kg?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[3, 5, 9, 13, 25, 27]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #147 (QID=79107) | 误区:「数值比较中'above'边界条件的混淆（将'above'误解为'at or above'）」 (错误选项=D) | 机理: '学生未能正确理解'above'一词在数学语境中表示严格大于（>），而不是大于或等...' | 证据轮次=[8, 10]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #147 (QID=79107) | 策略分类: [Socratic_Questioning] | 破局一问:「Ahhh you have accidentally counted the months below 23 degrees... What has the question asked you to find? 😁」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #276 (QID=107852) | 误区:「均值-总数关系理解缺失」 (错误选项=未记录) | 机理: '学生未能建立‘平均数’与‘数据总和’之间的逆运算关系。面对求和问题，学生的第一反...' | 证据轮次=[11, 15]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #276 (QID=107852) | 策略分类: [Socratic_Questioning] | 破局一问:「Remember an earlier question where we had 7 numbers and the average was 4 so we did 7 x 4 = 28 for the total? 😀」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[8, 10]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #282 (QID=76888) | 误区:「饼图信息范围误解：平均数不可从比例数据推导」 (错误选项=D) | 机理: '学生可能将饼图理解为可以提取所有统计量（包括平均数），但平均数需要原始数值数据（...' | 证据轮次=[10, 16]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #282 (QID=76888) | 策略分类: [Socratic_Questioning] | 破局一问:「Amazing, is there a way we can find the angle is we know that train is 1/10?」 | 教学动作=['<Press for Accuracy>'] | 证据轮次=[11, 15]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #443 (QID=76894) | 误区:「饼图角度与百分比基数混淆」 (错误选项=未记录) | 机理: '学生将饼图中的角度（基于360度）与百分比（基于100）这两个不同的数据表示体系...' | 证据轮次=[2, 8]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #443 (QID=76894) | 策略分类: [Socratic_Questioning] | 破局一问:「What fraction of the pie chart for blue is diseased sheep? 🐏」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #469 (QID=107895) | 误区:「形式表征异构性障碍：未能识别不同数学形式所代表的数值等价性」 (错误选项=D) | 机理: '学生可能只关注了数字的表层形式（如小数0.4与分数1/4看起来不同），而未能进行...' | 证据轮次=[2, 6, 12, 14, 16, 22]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #469 (QID=107895) | 策略分类: [Socratic_Questioning] | 破局一问:「This is an interesting one! What are you looking for in the list when you're finding the mode?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[3, 5, 9]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #495 (QID=77639) | 误区:「累计距离与区间距离混淆」 (错误选项=B) | 机理: '学生将“到40秒时的总累计距离”（50米）错误地等同于“在10秒到40秒这个时间...' | 证据轮次=[9, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #495 (QID=77639) | 策略分类: [Socratic_Questioning] | 破局一问:「Ok, so it had already travelled 10 metres in the first 10 seconds. Then by 40 seconds it had travelled 50 metres in total So how far did it travel between 10 and 40 seconds?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[10, 12]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #555 (QID=77633) | 误区:「中位数概念混淆：未掌握偶数个数据时中位数的计算规则」 (错误选项=学生未展示具体计算，因此无法判断其误选选项。) | 机理: '学生暴露其根本性知识缺失：对“中位数”的定义及其在数据个数为偶数时的计算方法（取...' | 证据轮次=[2]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #555 (QID=77633) | 策略分类: [Scaffolding] | 破局一问:「Do you think you can work out the answer now?」 | 教学动作=['<Revoicing>', '<Keep Together>'] | 证据轮次=[3, 9, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #716 (QID=107904) | 误区:「极差定义与运算混淆（将减法误记为除法）」 (错误选项=D (基于其错误运算 17 ÷ 2 = 8.5，最接近选项B；但其最初错误指令为除法，可能指向任何计算结果不明确的选项)) | 机理: '学生将描述数据离散程度的统计量‘极差（Range）’的计算公式（最大值 - 最小...' | 证据轮次=[6]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #716 (QID=107904) | 策略分类: [Counter_Example] | 破局一问:「So what do you think you need to do here?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[5, 7, 11, 13]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #973 (QID=77643) | 误区:「数据筛选方向与条件性判断混淆」 (错误选项=A) | 机理: '学生未能正确理解题目条件“below 25⁰C”所限定的筛选方向（是‘小于’而非...' | 证据轮次=[5, 9]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #973 (QID=77643) | 策略分类: [Socratic_Questioning] | 破局一问:「What temp is feb?」 | 教学动作=['<Keep Together>', '<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[10, 12]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #976 (QID=146708) | 误区:「Venn图区域与数字属性对应关系误解」 (错误选项=C) | 机理: '学生未能准确判定数字4是否满足集合A（奇数）和集合B（30的因数）的条件，导致错...' | 证据轮次=[2, 4, 6]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #976 (QID=146708) | 策略分类: [Socratic_Questioning] | 破局一问:「Let me check Is 4 a factor of 30?」 | 教学动作=['<Keep Together>', '<Revoicing>', '<Press for Accuracy>'] | 证据轮次=[3, 5, 7, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #1009 (QID=131546) | 误区:「Pictogram Fractional Parts Misinterpretation and Symbol-Count Confusion」 (错误选项=A) | 机理: '学生可能仅关注pictogram中的whole units（整圆），忽略了fra...' | 证据轮次=[6, 10]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #1009 (QID=131546) | 策略分类: [Socratic_Questioning] | 破局一问:「Brill! Do we have any extra parts as well? (a quarter of a circle or a half of a circle)」 | 教学动作=['<Keep Together>', '<Press for Accuracy>'] | 证据轮次=[9, 11]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [错因卡入库] Session #1011 (QID=78706) | 误区:「条件概率中样本空间未按条件缩减」 (错误选项=A) | 机理: '学生未能理解题目中“given that the card is a Club”...' | 证据轮次=[6, 12]
+2026-09-02 01:53:15,086 [    INFO]   ├─ [策略卡入库] Session #1011 (QID=78706) | 策略分类: [Socratic_Questioning] | 破局一问:「good how many queens, kings and jacks in total?」 | 教学动作=['<Press for Accuracy>', '<Restating>', '<Revoicing>', '<Keep Together>'] | 证据轮次=[9, 11, 13]
+2026-09-02 01:53:15,087 [    INFO]   ├─ [错因卡入库] Session #1021 (QID=77920) | 误区:「分组数据中位数的位置与值混淆」 (错误选项=B) | 机理: '学生未能将中位数的计算从通用位置概念（第25和26位）与分组数据的报告要求（必须...' | 证据轮次=[8, 10]
+2026-09-02 01:53:15,087 [    INFO]   ├─ [策略卡入库] Session #1021 (QID=77920) | 策略分类: [Socratic_Questioning] | 破局一问:「👍 Ok, so for the median, we want to make sure that we're choosing a value that is relevant to the data collected. So, imagine you were collecting the data for this table - what would you be asking people?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>', '<Press for Reasoning>', '<Keep Together>'] | 证据轮次=[13, 15]
+2026-09-02 01:53:15,087 [    INFO]   ├─ [错因卡入库] Session #1023 (QID=131550) | 误区:「象形图符号与数值总量的对应关系混淆」 (错误选项=3) | 机理: '学生对‘用完整符号表示’这一核心指令理解不精确，可能混淆了‘符号的数量’与‘符号...' | 证据轮次=[8, 10]
+2026-09-02 01:53:15,087 [    INFO]   ├─ [策略卡入库] Session #1023 (QID=131550) | 策略分类: [Socratic_Questioning] | 破局一问:「Hello! So, ONE symbol represents how many CDs?」 | 教学动作=['<Press for Accuracy>', '<Revoicing>'] | 证据轮次=[3, 7]
+2026-09-02 01:53:17,242 [    INFO] [step=Step3_Storage|status=SUCCESS] ✅ 知识卡片双轨同步完成: DuckDB (+97 错因, +97 策略) | ChromaDB (student_misconceptions: +97, tutor_strategies: +97)
+2026-09-02 01:53:17,243 [    INFO] [step=Step3_Storage|action=ingest_windows] 🪟 正在持久化 883 个滑动窗口切块...
+2026-09-02 01:53:21,869 [    INFO] [step=Step3_Storage|status=SUCCESS] ✅ 滑动窗口冷备写入完成: DuckDB sliding_window_chunks (+689 行), ChromaDB fallback_windows (+689 向量)
+2026-09-02 01:53:21,962 [    INFO]
+📊 ====================【双引擎存储白盒审计快照】====================
+  * 关系底表引擎 (DuckDB [持久化文件]):
+    - tutoring_sessions:         100 行 (宏观会话事实与原题)
+    - session_dialogue_turns:   2335 轮 (时序原声对话实录明细)
+    - misconception_chunks:      100 条 (学生错因机理结构化)
+    - tutor_strategy_chunks:     100 条 (名师启发策略结构化)
+    - sliding_window_chunks:     719 块 (冷备滑动窗口)
+  * 语义向量引擎 (ChromaDB 多物理隔离集合):
+    - student_misconceptions:    100 向量 (学情障碍与错因诊断)
+    - tutor_strategies:          100 向量 (名师破局提问与脚手架)
+    - fallback_windows:          719 向量 (零信任纯原文直取)
+========================================================================
+2026-09-02 01:53:21,962 [    INFO] 🎉 [step=Step3_Storage|status=SUCCESS] 双引擎存储摄取与持久化 100% 同步完成！
+2026-09-02 01:53:21,964 [    INFO]
+📊 ====================【双引擎存储白盒审计快照】====================
+  * 关系底表引擎 (DuckDB [持久化文件]):
+    - tutoring_sessions:         100 行 (宏观会话事实与原题)
+    - session_dialogue_turns:   2335 轮 (时序原声对话实录明细)
+    - misconception_chunks:      100 条 (学生错因机理结构化)
+    - tutor_strategy_chunks:     100 条 (名师启发策略结构化)
+    - sliding_window_chunks:     719 块 (冷备滑动窗口)
+  * 语义向量引擎 (ChromaDB 多物理隔离集合):
+    - student_misconceptions:    100 向量 (学情障碍与错因诊断)
+    - tutor_strategies:          100 向量 (名师破局提问与脚手架)
+    - fallback_windows:          719 向量 (零信任纯原文直取)
+========================================================================
+2026-09-02 01:53:21,998 [    INFO] 🎉 [Step6_Expansion] 知识库扩容完成！
+
+=== 最终数据库审计 ===
+  duckdb_tables: {'tutoring_sessions': 100, 'session_dialogue_turns': 2335, 'misconception_chunks': 100, 'tutor_strategy_chunks': 100, 'sliding_window_chunks': 719}
+  chromadb_collections: {'student_misconceptions': 100, 'tutor_strategies': 100, 'fallback_windows': 719}
+  is_in_memory: False

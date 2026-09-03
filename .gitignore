@@ -9,6 +9,9 @@ __pycache__/
 .audit-tmp*/
 .uv-cache-audit/
 reports/runtime/
+reports/eval/.scratch/
+reports/eval/**/chroma/
+reports/eval/chroma-migrated-*/
 
 # IDE
 .idea/

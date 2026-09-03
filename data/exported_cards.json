@@ -1,0 +1,3559 @@
+{
+  "misconceptions": [
+    {
+      "session_id": 10,
+      "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+      "misconception_name": "小数四舍五入位值概念混淆与操作规则误解",
+      "error_choice": "Neither is correct",
+      "deep_mechanism": "学生的核心障碍在于对'四舍五入到特定小数位'的操作规则理解不清晰。具体表现为：1) 无法准确识别目标小数位（如将1dp误认为2dp）；2) 将小数四舍五入的操作错误地等同于小数点的机械移动（如认为5.45→54.5），混淆了数值大小改变与数位表达；3) 认为保留两位小数的数值（5.45）四舍五入到一位小数时'应该不变'，缺乏进位规则的主动应用意识。这反映出学生在小数的位值概念、'保留位数'的定义以及四舍五入的执行步骤上存在系统性认知缺陷。",
+      "verbatim_student_quotes": [
+        "I think both are wrong Is that right ???",
+        "Both are wrong Or Sophie is correct",
+        "5.45 Maybe or not sure",
+        "5.4510 Can you give me a clue Please",
+        "54.5",
+        "How does this work Because like 5.45 to one decimal should be the same no changes"
+      ],
+      "source_turn_ids": [
+        6,
+        8,
+        10,
+        12,
+        18,
+        22
+      ]
+    },
+    {
+      "session_id": 14,
+      "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+      "misconception_name": "两位数加法的数位计算与分数符号的双重误解",
+      "error_choice": "B",
+      "deep_mechanism": "学生最初对算式`(54+58)/2`的整体结构存在困惑，可能将表达式错误解读为先计算除法再进行加法（如54 + (58/2)），从而可能得到224这类干扰项。在进行第一步加法计算时，其心算过程出现数位对齐或进位错误（54+58计算为114），暴露了其基础加法计算不扎实或注意力分配问题。同时，学生对于分数的分数线`/`这一数学符号的双重含义（既是分数线，也代表除法运算）需要明确，这影响了对运算顺序的正确理解。",
+      "verbatim_student_quotes": [
+        "the value of 54+58/2",
+        "i think 114?"
+      ],
+      "source_turn_ids": [
+        4,
+        8
+      ]
+    },
+    {
+      "session_id": 23,
+      "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+      "misconception_name": "对最低公倍数与乘积关系普适性的错误二元认知",
+      "error_choice": "C",
+      "deep_mechanism": "学生可能将猜想验证简化为非黑即白的判断（总是正确或总是错误），缺乏对最低公倍数（LCM）概念与数字互质性关系的深刻理解，导致在实证检验中出现计算混淆和普适性误判。",
+      "verbatim_student_quotes": [
+        "is it c",
+        "its d 24 12",
+        "i dont know d"
+      ],
+      "source_turn_ids": [
+        1,
+        19,
+        17
+      ]
+    },
+    {
+      "session_id": 29,
+      "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+      "misconception_name": "范围计算中频率与数据值的混淆",
+      "error_choice": "B",
+      "deep_mechanism": "学生错误地将频数（频率）中的最大数值（12）或数据值列表中未考虑频数时的错误配对（4和2）当作范围计算的依据。其核心障碍在于未能理解频数分布表中，范围是基于数据值（TVs）而非频数（Frequency），且必须考虑频数不为零的数据值。学生可能受选项B（12，即最大频数）的误导，或误以为范围是数据值的简单差值而忽略了实际出现的最小数据值。",
+      "verbatim_student_quotes": [
+        "Would that be 4 and 2? Wait 0",
+        "So 4 and 2?"
+      ],
+      "source_turn_ids": [
+        4,
+        6
+      ]
+    },
+    {
+      "session_id": 33,
+      "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+      "misconception_name": "非十进制增量（如0.02）四舍五入的判定规则与执行程序混淆",
+      "error_choice": "未在对话中明确误选，但初始困惑指向对题目核心操作的误解",
+      "deep_mechanism": "学生将“四舍五入到最近的0.02”这一操作等同于标准的“四舍五入到某位小数”。其认知模式局限于基于10的倍数进行舍入，未能理解并建构“在非十进制增量的数轴上寻找最近点”的数学过程。这导致她无法独立识别解题所需的“构建倍数序列-定位区间-比较距离”的三步思维框架。",
+      "verbatim_student_quotes": [
+        "I don't know how to work out this question.",
+        "What is the 0.02 times table value?",
+        "I think so"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "session_id": 42,
+      "subject_path": "Number > Negative Numbers > Multiplying and Dividing Negative Numbers",
+      "misconception_name": "负号在代数表达式中的位置与作用混淆",
+      "error_choice": "无",
+      "deep_mechanism": "学生对负数的代数抽象化运算存在障碍，未能准确理解符号与代数表达式（如-p, -q）结合后的整体含义。在陈述1中，学生仅能定性判断“结果会是负”，但无法写出或确认具体的代数表达式（-pq），表明其对“两个不同变量分别带负号相乘”的理解停留在算术符号层面，未能进行有效的代数抽象和等价转换。在陈述2中，学生最初直觉判断“我觉得不行”，但无法清晰阐述负号作用于整个括号平方与仅作用于变量平方的区别，反映了对“符号作用范围”规则（如 -(q)^2 vs (-q)^2）的模糊认知。",
+      "verbatim_student_quotes": [
+        "Um well I know it would be a negative but I don’t really know the answer",
+        "I don’t think it works"
+      ],
+      "source_turn_ids": [
+        4,
+        12
+      ]
+    },
+    {
+      "session_id": 59,
+      "subject_path": "Number > Factors, Multiples and Primes > Prime Numbers and Prime Factors",
+      "misconception_name": "质数概念与倍数特征应用模糊",
+      "error_choice": "C",
+      "deep_mechanism": "学生虽然能复述质数的定义（只能被1和它本身整除），但在实际判断较大数（如105）是否为质数时，未能将抽象定义与具体的、可操作的倍数特征（如：个位是0或5的数能被5整除）联系起来，导致无法有效利用选项特征进行排除。对质数的验证停留在“尝试除以小数”的直觉层面，缺乏系统性判别策略。",
+      "verbatim_student_quotes": [
+        "I don't know my prime numbers past 40",
+        "103",
+        "Because 5 is in the 5 times tables"
+      ],
+      "source_turn_ids": [
+        2,
+        6,
+        12
+      ]
+    },
+    {
+      "session_id": 69,
+      "subject_path": "Algebra > Inequalities > Solving Linear Inequalities",
+      "misconception_name": "不等式两边除以负数时未反转符号，且解题目标混淆",
+      "error_choice": "B",
+      "deep_mechanism": "学生对解不等式的过程不清晰，尤其是在处理负数系数时，没有意识到需要反转不等号方向。同时，学生在没有完全理解两个不等式（Leo的和Sophie的）分别对应的运算和结果的情况下，试图直接猜测答案选项，表现出对题目整体结构（比较两个独立解）的认知模糊。",
+      "verbatim_student_quotes": [
+        "thank you what would i do next would it be -1",
+        "sorry im still confused on how i know whether it is sophies or leoms or sophies and leos",
+        "oh wait i think i know is the answer B"
+      ],
+      "source_turn_ids": [
+        10,
+        20,
+        22
+      ]
+    },
+    {
+      "session_id": 77,
+      "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+      "misconception_name": "体积与表面积概念混淆",
+      "error_choice": "D",
+      "deep_mechanism": "学生未能区分“体积”与“表面积”两个几何度量概念。当被要求计算一个三维形状的“大小”时，学生错误地调用了“表面积”（计算所有面的面积总和）的程序，而非“体积”（计算形状内部占据的空间量）。这表明学生对空间度量的物理意义和计算目标的理解存在根本性混淆。",
+      "verbatim_student_quotes": [
+        "i dont get it what feedback ???# ??? i did the area add all the side areas",
+        "I know its not D oh ok what is volume is it sound"
+      ],
+      "source_turn_ids": [
+        3,
+        5
+      ]
+    },
+    {
+      "session_id": 80,
+      "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+      "misconception_name": "时间表述中的分钟-小时倒装与12/24小时制混淆",
+      "error_choice": "A",
+      "deep_mechanism": "学生将'10 to 12'理解为10点过12分（即10:12），表现出对英语时间表达中‘分钟 to 小时’倒装结构的误解，未能将‘to’识别为‘差...到...点’。同时，对12小时制与24小时制在表达夜间时间时的等价关系缺乏清晰认知。",
+      "verbatim_student_quotes": [
+        "i need help on this question"
+      ],
+      "source_turn_ids": [
+        4
+      ]
+    },
+    {
+      "session_id": 85,
+      "subject_path": "Geometry and Measure > Similarity and Congruency > Length Scale Factors in Similar Shapes",
+      "misconception_name": "Length Scale Factors in Similar Shapes 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Length Scale Factors in Similar Shapes」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "yeah i guess it like shapes that have the same perimeter and area i guess",
+        "both has the same angle and the have 5,5 and 6,6 i gues i guess",
+        "oh the shape also",
+        "right"
+      ],
+      "source_turn_ids": [
+        7,
+        15,
+        17,
+        19
+      ]
+    },
+    {
+      "session_id": 97,
+      "subject_path": "Algebra > Formula > Substitution into Formula",
+      "misconception_name": "Substitution into Formula 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Substitution into Formula」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "I’m not sure on how to solve this as I find questions like this hard"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 99,
+      "subject_path": "Number > Negative Numbers > Adding and Subtracting Negative Numbers",
+      "misconception_name": "Adding and Subtracting Negative Numbers 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Negative Numbers」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "and we minus 4 from it ?",
+        "5 steps backwards",
+        "so it is c",
+        "4 thank you😄"
+      ],
+      "source_turn_ids": [
+        9,
+        11,
+        13,
+        15
+      ]
+    },
+    {
+      "session_id": 100,
+      "subject_path": "Algebra > Sequences > Linear Sequences (nth term)",
+      "misconception_name": "Linear Sequences (nth term) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Linear Sequences (nth term)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i don’t understand the question or the graph",
+        "Ohhh C ??",
+        "Yeah 😊😊",
+        "Yeah x"
+      ],
+      "source_turn_ids": [
+        3,
+        11,
+        13,
+        15
+      ]
+    },
+    {
+      "session_id": 109,
+      "subject_path": "Number > Ratio > Simplifying and Equivalent Ratios",
+      "misconception_name": "Simplifying and Equivalent Ratios 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Simplifying and Equivalent Ratios」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "2:7 ?",
+        "divide by 2?",
+        "is drew correct?"
+      ],
+      "source_turn_ids": [
+        6,
+        10,
+        26
+      ]
+    },
+    {
+      "session_id": 115,
+      "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+      "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Expanding Single Brackets」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "fine how is yours",
+        "muptiple",
+        "12c + 8"
+      ],
+      "source_turn_ids": [
+        5,
+        7,
+        17
+      ]
+    },
+    {
+      "session_id": 118,
+      "subject_path": "Number > Percentages > Percentage Increase and Decrease",
+      "misconception_name": "Percentage Increase and Decrease 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Percentage Increase and Decrease」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont understand the question to work it out",
+        "i did that and the percentage isnt on there",
+        "thank you for your help😀"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        12
+      ]
+    },
+    {
+      "session_id": 122,
+      "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+      "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Oh so the answer is A",
+        "170 and 50",
+        "310?"
+      ],
+      "source_turn_ids": [
+        8,
+        12,
+        22
+      ]
+    },
+    {
+      "session_id": 143,
+      "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+      "misconception_name": "Mental Multiplication and Division 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Mental Multiplication and Division」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Good How are you",
+        "6537 has been taken from 1578",
+        "Oh so it's been added",
+        "And then subtracted"
+      ],
+      "source_turn_ids": [
+        2,
+        6,
+        8,
+        10
+      ]
+    },
+    {
+      "session_id": 147,
+      "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+      "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Time Series and Line Graphs」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "it is less than 23?",
+        "how many moths have an have an average temperature above 23 degries c"
+      ],
+      "source_turn_ids": [
+        6,
+        10
+      ]
+    },
+    {
+      "session_id": 154,
+      "subject_path": "Number > Rounding and Estimating > Estimation",
+      "misconception_name": "Estimation 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Estimation」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Need help with the question 😡 10",
+        "Maybe 🤔"
+      ],
+      "source_turn_ids": [
+        2,
+        4
+      ]
+    },
+    {
+      "session_id": 159,
+      "subject_path": "Algebra > Solving Equations > Linear Equations",
+      "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Linear Equations」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "5x lily? is she correct?",
+        "how do you move on from question 1"
+      ],
+      "source_turn_ids": [
+        16,
+        24
+      ]
+    },
+    {
+      "session_id": 162,
+      "subject_path": "Geometry and Measure > Angles > Angle Facts with Parallel Lines",
+      "misconception_name": "Angle Facts with Parallel Lines 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Angle Facts with Parallel Lines」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "I meant both Jack and Lily are correct",
+        "It couldn’t of been nitrous correct because Lily is correct so it has to be both I meant neither is correct"
+      ],
+      "source_turn_ids": [
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 179,
+      "subject_path": "Geometry and Measure > Perimeter and Area > Area of Simple Shapes",
+      "misconception_name": "Area of Simple Shapes 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Area of Simple Shapes」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont understand",
+        "D because it letter",
+        "send meeeeee back"
+      ],
+      "source_turn_ids": [
+        3,
+        17,
+        21
+      ]
+    },
+    {
+      "session_id": 188,
+      "subject_path": "Number > Basic Arithmetic > BIDMAS",
+      "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「BIDMAS」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont get the question 😀",
+        "is it A",
+        "so you do the multiplacation first so B",
+        "the brackets"
+      ],
+      "source_turn_ids": [
+        3,
+        7,
+        17,
+        19
+      ]
+    },
+    {
+      "session_id": 201,
+      "subject_path": "Number > Fractions > Converting Mixed Number and Improper Fractions",
+      "misconception_name": "Converting Mixed Number and Improper Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Converting Mixed Number and Improper Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Yeah",
+        "mhm-hm! OHH 3 then?x",
+        "yeah",
+        "yeah"
+      ],
+      "source_turn_ids": [
+        4,
+        10,
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 206,
+      "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+      "misconception_name": "Rounding to Decimal Places 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Rounding to Decimal Places」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i still dont understand.",
+        "7 and 8",
+        "ohhhhhhh",
+        "its smaller by 0.003"
+      ],
+      "source_turn_ids": [
+        6,
+        8,
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 214,
+      "subject_path": "Number > Rounding and Estimating > Rounding to the Nearest Whole (10, 100, etc)",
+      "misconception_name": "Rounding to the Nearest Whole (10, 100, etc) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Rounding to the Nearest Whole (10, 100, etc)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "9 but what i leanred if it was five of greater u round up"
+      ],
+      "source_turn_ids": [
+        4
+      ]
+    },
+    {
+      "session_id": 247,
+      "subject_path": "Number > Basic Arithmetic > Place Value",
+      "misconception_name": "Place Value 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Place Value」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "yes The questionsthat are not rihht are A, and C"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 255,
+      "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > 2D Names and Properties of Shapes-Others",
+      "misconception_name": "2D Names and Properties of Shapes-Others 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「2D Names and Properties of Shapes-Others」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont get the questtio question",
+        "yep7",
+        "but would maria be correct",
+        "so only ben would be correct"
+      ],
+      "source_turn_ids": [
+        3,
+        11,
+        17,
+        21
+      ]
+    },
+    {
+      "session_id": 258,
+      "subject_path": "Algebra > Other Graphs > Real Life Graphs",
+      "misconception_name": "Real Life Graphs 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Real Life Graphs」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "all right",
+        "yeah please I really don't get the question",
+        "wide?",
+        "so the answer is d"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        12
+      ]
+    },
+    {
+      "session_id": 275,
+      "subject_path": "Number > Basic Arithmetic > Mental Addition and Subtraction",
+      "misconception_name": "Mental Addition and Subtraction 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Mental Addition and Subtraction」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Hello I’m finding this a bit difficult to work out very quickly And not sure how I can store all the information"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 276,
+      "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+      "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Averages (mean, median, mode) from a List of Data」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Im stuck you see what sums do you need to do?",
+        "5 including the missing one. 😀",
+        "That's where I am stuck! 🟩🟦⬛ hee",
+        "yep i remember [STUDENT_NAME] yep"
+      ],
+      "source_turn_ids": [
+        3,
+        5,
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 278,
+      "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+      "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Wsg Idk how to work dis out",
+        "Yeah I did, I still don’t get it.",
+        "4 wholes",
+        "8 over 7 That’s an improper fraction ?"
+      ],
+      "source_turn_ids": [
+        1,
+        5,
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 282,
+      "subject_path": "Data and Statistics > Data Representation > Pie Chart",
+      "misconception_name": "Pie Chart 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Pie Chart」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Im great thank you how are you?",
+        "in summer im just trying to get some practice in for year 9",
+        "10/100",
+        "with a protractor?"
+      ],
+      "source_turn_ids": [
+        2,
+        8,
+        12,
+        16
+      ]
+    },
+    {
+      "session_id": 286,
+      "subject_path": "Algebra > Solving Equations > Quadratic Equations",
+      "misconception_name": "Quadratic Equations 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Quadratic Equations」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "p×p=P squared, p×8=p8. Then we do 8×p=8p,8×8=64 And thats the bit i dont get because i cant isolate the P.",
+        "On most qustions.",
+        "x squared + 64.",
+        "Would it be x squared plus 8x plus 8x plus 64"
+      ],
+      "source_turn_ids": [
+        8,
+        12,
+        14,
+        16
+      ]
+    },
+    {
+      "session_id": 287,
+      "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+      "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Expanding Single Brackets」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "uhh the first one is -4 and the bottom one is 6p?",
+        "oh -3 sorry",
+        "uhm is it 3p",
+        "6p - 3?"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 288,
+      "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+      "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "4 7x4 = 28",
+        "20/28 - 4/28",
+        "ohhhh, i thought i was doing 4x4 7",
+        "both of them or just the one we are on about"
+      ],
+      "source_turn_ids": [
+        6,
+        8,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 308,
+      "subject_path": "Algebra > Sequences > Linear Sequences (nth term)",
+      "misconception_name": "Linear Sequences (nth term) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Linear Sequences (nth term)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "it would be subtracting 70 each time",
+        "108, 38, -32",
+        "you would take 99 each time",
+        "108, 9"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        14,
+        16
+      ]
+    },
+    {
+      "session_id": 421,
+      "subject_path": "Geometry and Measure > Circles > Parts of a Circle",
+      "misconception_name": "Parts of a Circle 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Parts of a Circle」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont get it",
+        "the straight line from the centre of circle to its circumference"
+      ],
+      "source_turn_ids": [
+        2,
+        14
+      ]
+    },
+    {
+      "session_id": 423,
+      "subject_path": "Number > Fractions > Equivalent Fractions",
+      "misconception_name": "Equivalent Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Equivalent Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "3/10"
+      ],
+      "source_turn_ids": [
+        8
+      ]
+    },
+    {
+      "session_id": 431,
+      "subject_path": "Geometry and Measure > Circles > Parts of a Circle",
+      "misconception_name": "Parts of a Circle 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Parts of a Circle」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Radius",
+        "Sorry, quick question",
+        "Thank you very much! Bye! :)"
+      ],
+      "source_turn_ids": [
+        6,
+        12,
+        18
+      ]
+    },
+    {
+      "session_id": 436,
+      "subject_path": "Number > Negative Numbers > Ordering Negative Numbers",
+      "misconception_name": "Ordering Negative Numbers 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Ordering Negative Numbers」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "How many numbers are in each bar?",
+        "The - Mjnus5",
+        "And then it would be --2 and then -4"
+      ],
+      "source_turn_ids": [
+        6,
+        8,
+        22
+      ]
+    },
+    {
+      "session_id": 443,
+      "subject_path": "Data and Statistics > Data Representation > Pie Chart",
+      "misconception_name": "Pie Chart 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Pie Chart」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i am stuck on what i should do next",
+        "270/360",
+        "360/360",
+        "oh 120"
+      ],
+      "source_turn_ids": [
+        4,
+        6,
+        8,
+        12
+      ]
+    },
+    {
+      "session_id": 463,
+      "subject_path": "Number > Basic Arithmetic > Place Value",
+      "misconception_name": "Place Value 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Place Value」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i am confused on the question i have been given 😭",
+        "I am so confused 😭😭😭😭😭",
+        "125 is half of 150 And th",
+        "oppsies"
+      ],
+      "source_turn_ids": [
+        2,
+        6,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 464,
+      "subject_path": "Number > Fractions > Ordering Fractions",
+      "misconception_name": "Ordering Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Ordering Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "3/4?",
+        "26? 25**",
+        "1/5 is less than a half so would 1/2 be on the line 10?",
+        "yep!"
+      ],
+      "source_turn_ids": [
+        6,
+        10,
+        18,
+        20
+      ]
+    },
+    {
+      "session_id": 469,
+      "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+      "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Averages (mean, median, mode) from a List of Data」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "he most common number",
+        "0.25",
+        "1/10"
+      ],
+      "source_turn_ids": [
+        4,
+        10,
+        16
+      ]
+    },
+    {
+      "session_id": 477,
+      "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+      "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Expanding Single Brackets」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i don't understand the steps of how to calculate the answer",
+        "wouldn't the answer be 9 4 2=8 =4x2 +1 =9",
+        "4 x 1=4",
+        "-13x ???"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        8,
+        14
+      ]
+    },
+    {
+      "session_id": 478,
+      "subject_path": "Geometry and Measure > Units of Measurement > Weight Units",
+      "misconception_name": "Weight Units 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Weight Units」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "grams, metres and kilograms",
+        "b and a?"
+      ],
+      "source_turn_ids": [
+        8,
+        12
+      ]
+    },
+    {
+      "session_id": 492,
+      "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+      "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Expressions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "So is it Lila"
+      ],
+      "source_turn_ids": [
+        14
+      ]
+    },
+    {
+      "session_id": 495,
+      "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+      "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Time Series and Line Graphs」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i need help pleasd",
+        "please",
+        "10 meteres",
+        "50 meteres"
+      ],
+      "source_turn_ids": [
+        3,
+        5,
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 497,
+      "subject_path": "Geometry and Measure > Angles > Angles in Triangles",
+      "misconception_name": "Angles in Triangles 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Angles in Triangles」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "hi sophia"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 509,
+      "subject_path": "Number > Negative Numbers > Ordering Negative Numbers",
+      "misconception_name": "Ordering Negative Numbers 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Ordering Negative Numbers」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "false",
+        "can i come back in 30 min going out sorry"
+      ],
+      "source_turn_ids": [
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 539,
+      "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+      "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont get the quistion",
+        "its on a straight ine",
+        "take away"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "session_id": 555,
+      "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+      "misconception_name": "Averages (mean, median, mode) from a List of Data 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Averages (mean, median, mode) from a List of Data」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "ohh also 1 more question",
+        "You can leave me to it!!",
+        "👍 👍 👍"
+      ],
+      "source_turn_ids": [
+        4,
+        14,
+        16
+      ]
+    },
+    {
+      "session_id": 568,
+      "subject_path": "Number > Ratio > Sharing in a Ratio",
+      "misconception_name": "Sharing in a Ratio 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Sharing in a Ratio」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i don’t understand how they could go into the other",
+        "uhh 1 ? 1/4 divided by 1/4?",
+        "1:2?"
+      ],
+      "source_turn_ids": [
+        8,
+        12,
+        16
+      ]
+    },
+    {
+      "session_id": 573,
+      "subject_path": "Number > Basic Arithmetic > Place Value",
+      "misconception_name": "Place Value 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Place Value」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "im gay heloo",
+        "can i have some4 help-",
+        "3.2x6.5",
+        "divide 10"
+      ],
+      "source_turn_ids": [
+        3,
+        7,
+        9,
+        11
+      ]
+    },
+    {
+      "session_id": 576,
+      "subject_path": "Data and Statistics > Probability > Tree Diagrams with Independent Events",
+      "misconception_name": "Tree Diagrams with Independent Events 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Tree Diagrams with Independent Events」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "winning snap and loosing ace \nand winning ace and loosing snap",
+        "times them together?",
+        "9/20",
+        "2/5x1/4= 2/20?"
+      ],
+      "source_turn_ids": [
+        4,
+        6,
+        8,
+        10
+      ]
+    },
+    {
+      "session_id": 603,
+      "subject_path": "Number > Negative Numbers > Adding and Subtracting Negative Numbers",
+      "misconception_name": "Adding and Subtracting Negative Numbers 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Negative Numbers」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "im still confused❓",
+        "0.02",
+        "1/2 or 0.5",
+        "are you a real human"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 607,
+      "subject_path": "Algebra > Solving Equations > Linear Equations",
+      "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Linear Equations」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "I was stuck on the question I was just doing, please could you help?",
+        "Hmmmm give me one sec Would the answer be 20?",
+        "Yea! 😊",
+        "Oh yea"
+      ],
+      "source_turn_ids": [
+        2,
+        14,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 617,
+      "subject_path": "Algebra > Formula > Substitution into Formula",
+      "misconception_name": "Substitution into Formula 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Substitution into Formula」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "3 x p?",
+        "3 x 4 = 12?",
+        "but if F is 12 it doesnt make sense 12 - 34 ?",
+        "because it says F - 3p. p = 4 so it means 12 - 34"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 637,
+      "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+      "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Expanding Single Brackets」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "2a-12-a so is the answer a-12",
+        "6a-12",
+        "thank you for your help"
+      ],
+      "source_turn_ids": [
+        6,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 657,
+      "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+      "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Expressions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "so x + y + 12??",
+        "Sorry i struggle with math so -2",
+        "8 on 1 side",
+        "dont you need to minus on both sides?? so what abt th x y part"
+      ],
+      "source_turn_ids": [
+        5,
+        7,
+        9,
+        11
+      ]
+    },
+    {
+      "session_id": 658,
+      "subject_path": "Number > Basic Arithmetic > BIDMAS",
+      "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「BIDMAS」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "So it would be 0.4"
+      ],
+      "source_turn_ids": [
+        14
+      ]
+    },
+    {
+      "session_id": 663,
+      "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+      "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "perimeter",
+        "the lines through the sides",
+        "so would i plus 1/5 and 1/5",
+        "thatd be 2/5"
+      ],
+      "source_turn_ids": [
+        5,
+        9,
+        19,
+        21
+      ]
+    },
+    {
+      "session_id": 664,
+      "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+      "misconception_name": "Adding and Subtracting Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Adding and Subtracting Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Oh sorry I disconnected.",
+        "Maybe check how much the fraction is away from 1! :)",
+        "10/10-9/10 = 1/10",
+        "5/5-4/5 = 1/5"
+      ],
+      "source_turn_ids": [
+        4,
+        8,
+        16,
+        22
+      ]
+    },
+    {
+      "session_id": 668,
+      "subject_path": "Number > Fractions > Dividing Fractions",
+      "misconception_name": "Dividing Fractions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Dividing Fractions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "heyy",
+        "i forgot how to do tis",
+        "is it multiply",
+        "do you divide?"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "session_id": 671,
+      "subject_path": "Geometry and Measure > Compound Measures > Speed, Distance, Time",
+      "misconception_name": "Speed, Distance, Time 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Speed, Distance, Time」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "4/10👍 4/6 🤫🧏‍♂️",
+        "is it b ?"
+      ],
+      "source_turn_ids": [
+        4,
+        10
+      ]
+    },
+    {
+      "session_id": 672,
+      "subject_path": "Algebra > Straight Line Graphs > Gradient as change in y over change in x",
+      "misconception_name": "Gradient as change in y over change in x 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Gradient as change in y over change in x」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "im stuck",
+        "im st",
+        "are you real?",
+        "on skibidi"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "session_id": 681,
+      "subject_path": "Algebra > Inequalities > Graphing Linear Inequalities (Shading Regions)",
+      "misconception_name": "Graphing Linear Inequalities (Shading Regions) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Graphing Linear Inequalities (Shading Regions)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "working it out",
+        "2,-1",
+        "x = -1 y = 2",
+        "sorry"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        12,
+        20
+      ]
+    },
+    {
+      "session_id": 684,
+      "subject_path": "Number > Ratio > Writing Ratios",
+      "misconception_name": "Writing Ratios 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Ratios」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "I dont understand what to do here?☹️",
+        "divide by 4 Nina? NINa?!",
+        "Oh, sry",
+        "umm....... 1:4? take ur time"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "session_id": 686,
+      "subject_path": "Number > Ratio > Simplifying and Equivalent Ratios",
+      "misconception_name": "Simplifying and Equivalent Ratios 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Simplifying and Equivalent Ratios」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "help pls",
+        "whats the answer",
+        "can you help then",
+        "so what do i do"
+      ],
+      "source_turn_ids": [
+        1,
+        3,
+        5,
+        7
+      ]
+    },
+    {
+      "session_id": 689,
+      "subject_path": "Algebra > Solving Equations > Linear Equations",
+      "misconception_name": "Linear Equations 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Linear Equations」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "letter",
+        "add 4 both sides",
+        "add 9 to both sides so 1 - 13v = 3",
+        "4 the answer is 5"
+      ],
+      "source_turn_ids": [
+        4,
+        6,
+        8,
+        10
+      ]
+    },
+    {
+      "session_id": 691,
+      "subject_path": "Algebra > Solving Equations > Function Machines",
+      "misconception_name": "Function Machines 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Function Machines」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "HEYY umm according to my calculation i thought jack was right",
+        "2p-3",
+        "oh so can u give me time to workout",
+        "emma is"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        10
+      ]
+    },
+    {
+      "session_id": 699,
+      "subject_path": "Number > Proportion > Direct Proportion",
+      "misconception_name": "Direct Proportion 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Direct Proportion」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "0.16",
+        "do we divide by 5",
+        "0.16",
+        "So B is cheaper because it costs 15p"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        16,
+        20
+      ]
+    },
+    {
+      "session_id": 706,
+      "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+      "misconception_name": "Expanding Single Brackets 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Expanding Single Brackets」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i dont understand",
+        "a, 4x+9=5x+1 b, x=8 c, area =5x to the power of 2 +1 d, perimeter= 10x+18",
+        "i dont",
+        "6x squered"
+      ],
+      "source_turn_ids": [
+        4,
+        12,
+        16,
+        20
+      ]
+    },
+    {
+      "session_id": 707,
+      "subject_path": "Number > Basic Arithmetic > BIDMAS",
+      "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「BIDMAS」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "oops never mind what I said😂 4/5 then add n(6)",
+        "I originally thought that but I just did 4/5 +6 and got 6.8",
+        "for Henry would the answer be 2?",
+        "Henry's"
+      ],
+      "source_turn_ids": [
+        4,
+        8,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 716,
+      "subject_path": "Data and Statistics > Data Processing > Range and Interquartile Range from a List of Data",
+      "misconception_name": "Range and Interquartile Range from a List of Data 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Range and Interquartile Range from a List of Data」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "I am stuck",
+        "Divide biggest number by the smallest number",
+        "Subtracted",
+        "Subtraction"
+      ],
+      "source_turn_ids": [
+        2,
+        6,
+        8,
+        10
+      ]
+    },
+    {
+      "session_id": 720,
+      "subject_path": "Algebra > Solving Equations > Simultaneous Equations",
+      "misconception_name": "Simultaneous Equations 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Simultaneous Equations」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "adding the q",
+        "add the 19 and the 5",
+        "4p=14",
+        "24 divided by 4"
+      ],
+      "source_turn_ids": [
+        8,
+        12,
+        14,
+        20
+      ]
+    },
+    {
+      "session_id": 721,
+      "subject_path": "Algebra > Straight Line Graphs > Plotting Lines from Tables of Values",
+      "misconception_name": "Plotting Lines from Tables of Values 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Plotting Lines from Tables of Values」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "so the difference between 1 and 2 is 1"
+      ],
+      "source_turn_ids": [
+        6
+      ]
+    },
+    {
+      "session_id": 730,
+      "subject_path": "Number > Ratio > Writing Ratios",
+      "misconception_name": "Writing Ratios 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Ratios」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "1? but it has a remainder",
+        "i dont understand"
+      ],
+      "source_turn_ids": [
+        6,
+        8
+      ]
+    },
+    {
+      "session_id": 735,
+      "subject_path": "Number > Percentages > Repeated Percentages and Compound Interest",
+      "misconception_name": "Repeated Percentages and Compound Interest 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Repeated Percentages and Compound Interest」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "how do you do compund interest",
+        "0.05",
+        "1.05",
+        "1.22"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        6,
+        10
+      ]
+    },
+    {
+      "session_id": 737,
+      "subject_path": "Number > Basic Arithmetic > Written Multiplication",
+      "misconception_name": "Written Multiplication 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Written Multiplication」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "stage 1-check in",
+        "I got 52",
+        "would we get 42",
+        "is it oh tanks"
+      ],
+      "source_turn_ids": [
+        8,
+        14,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 739,
+      "subject_path": "Geometry and Measure > Compound Measures > Density",
+      "misconception_name": "Density 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Density」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "sorry, but what is density",
+        "v3 V cube",
+        "is tones mass",
+        "iam confused"
+      ],
+      "source_turn_ids": [
+        1,
+        3,
+        17,
+        19
+      ]
+    },
+    {
+      "session_id": 741,
+      "subject_path": "Number > Factors, Multiples and Primes > Factors and Highest Common Factor",
+      "misconception_name": "Factors and Highest Common Factor 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Factors and Highest Common Factor」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "helo i need ur help",
+        "i neeeed my streak",
+        "252 without calculator😎😎🆒",
+        "waaaaaaat 342???"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        8,
+        10
+      ]
+    },
+    {
+      "session_id": 754,
+      "subject_path": "Number > Basic Arithmetic > BIDMAS",
+      "misconception_name": "BIDMAS 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「BIDMAS」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "multiply",
+        "1/20",
+        "15/20",
+        "14/20"
+      ],
+      "source_turn_ids": [
+        8,
+        10,
+        14,
+        16
+      ]
+    },
+    {
+      "session_id": 776,
+      "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+      "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "228 from the angles that are there",
+        "110+118=228",
+        "42 42 degrees is the answer"
+      ],
+      "source_turn_ids": [
+        4,
+        6,
+        18
+      ]
+    },
+    {
+      "session_id": 798,
+      "subject_path": "Algebra > Sequences > Sequences-Others",
+      "misconception_name": "Sequences-Others 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Sequences-Others」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "it go up in 6 10 14",
+        "2 then 4",
+        "26 thank you",
+        "bye bye"
+      ],
+      "source_turn_ids": [
+        12,
+        14,
+        18,
+        20
+      ]
+    },
+    {
+      "session_id": 819,
+      "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals",
+      "misconception_name": "Properties of Quadrilaterals 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Properties of Quadrilaterals」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "imstuck",
+        "im stuck on that too",
+        "divide"
+      ],
+      "source_turn_ids": [
+        2,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 859,
+      "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+      "misconception_name": "Volume of Prisms 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Volume of Prisms」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "so is it b",
+        "so its d",
+        "10x + 10"
+      ],
+      "source_turn_ids": [
+        6,
+        10,
+        14
+      ]
+    },
+    {
+      "session_id": 866,
+      "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+      "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Expressions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "help please",
+        "and a",
+        "8 divided be p is 2"
+      ],
+      "source_turn_ids": [
+        6,
+        12,
+        14
+      ]
+    },
+    {
+      "session_id": 870,
+      "subject_path": "Algebra > Writing and Simplifying Expressions > Writing Expressions",
+      "misconception_name": "Writing Expressions 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Writing Expressions」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "i cant do it i need help",
+        "you said its mx7",
+        "oh m7",
+        "its fine wHAT IS THE RULE"
+      ],
+      "source_turn_ids": [
+        2,
+        14,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 872,
+      "subject_path": "Geometry and Measure > 2D Names and Properties of Shapes > Properties of Quadrilaterals",
+      "misconception_name": "Properties of Quadrilaterals 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Properties of Quadrilaterals」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Good",
+        "I need help with understanding what are vertices face and etc",
+        "The corner of the shape?",
+        "10? Is it 10"
+      ],
+      "source_turn_ids": [
+        3,
+        5,
+        7,
+        17
+      ]
+    },
+    {
+      "session_id": 903,
+      "subject_path": "Geometry and Measure > Angles > Basic Angle Facts (straight line, opposite, around a point, etc)",
+      "misconception_name": "Basic Angle Facts (straight line, opposite, around a point, etc) 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "1000g in 1kg!!",
+        "I divide ➗ by 2000!! 1000!!*",
+        "5007 Tonnes!! 😁😁",
+        "Yay!!!!!"
+      ],
+      "source_turn_ids": [
+        4,
+        24,
+        26,
+        34
+      ]
+    },
+    {
+      "session_id": 973,
+      "subject_path": "Data and Statistics > Data Representation > Time Series and Line Graphs",
+      "misconception_name": "Time Series and Line Graphs 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Time Series and Line Graphs」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "idk what to do ughh",
+        "oml ty",
+        "is it 3",
+        "22 4!"
+      ],
+      "source_turn_ids": [
+        1,
+        3,
+        5,
+        17
+      ]
+    },
+    {
+      "session_id": 976,
+      "subject_path": "Data and Statistics > Data Representation > Venn Diagrams",
+      "misconception_name": "Venn Diagrams 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Venn Diagrams」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Is it c"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 1009,
+      "subject_path": "Data and Statistics > Data Representation > Pictogram",
+      "misconception_name": "Pictogram 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Pictogram」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Yeah.",
+        "Wait! Is the answer 13?"
+      ],
+      "source_turn_ids": [
+        14,
+        16
+      ]
+    },
+    {
+      "session_id": 1011,
+      "subject_path": "Data and Statistics > Probability > Experimental Probability and Relative Frequency",
+      "misconception_name": "Experimental Probability and Relative Frequency 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Experimental Probability and Relative Frequency」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "10 or 12 i can't remember how many Jacks there are",
+        "oh so would it be 3/13 ?",
+        "thankyou for all your help 😊",
+        "have a nice evening :)"
+      ],
+      "source_turn_ids": [
+        10,
+        14,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 1021,
+      "subject_path": "Data and Statistics > Data Processing > Averages and Range from Grouped Data",
+      "misconception_name": "Averages and Range from Grouped Data 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Averages and Range from Grouped Data」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "Erm..."
+      ],
+      "source_turn_ids": [
+        14
+      ]
+    },
+    {
+      "session_id": 1023,
+      "subject_path": "Data and Statistics > Data Representation > Pictogram",
+      "misconception_name": "Pictogram 概念与解题规则认知模糊",
+      "error_choice": "",
+      "deep_mechanism": "学生在面对「Pictogram」考点时，对基础数学定义或规则迁移应用不熟练，在提取对应倍数、运算优先级或数位定义时产生卡点。",
+      "verbatim_student_quotes": [
+        "im stuck heloo]",
+        "4 are you their?",
+        "yay 👍"
+      ],
+      "source_turn_ids": [
+        2,
+        4,
+        12
+      ]
+    }
+  ],
+  "strategies": [
+    {
+      "session_id": 10,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "what do you think 5.4598 rounds to to 1dp?",
+      "scaffolding_steps": [
+        "Step 1: 通过开放性提问(Do you have any thoughts...)探查学生初始理解与错误判断。",
+        "Step 2: 针对具体知识点(5.4598 rounds to to 1dp)进行提问，暴露学生在小数位数上的混淆。",
+        "Step 3: 明确定义关键概念('An answer to 1 decimal place should have only one digit after the decimal point.')。",
+        "Step 4: 设计简化且针对性的诊断性任务(Can you round 5.45 to one decimal place?)以定位具体错误模式。",
+        "Step 5: 在学生错误回答后，直接给出正确答案(No, the answer would be 5.5)并尝试归因(I think maybe you multiplied by ten)。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        9,
+        11,
+        13,
+        17,
+        19
+      ]
+    },
+    {
+      "session_id": 14,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "so we have 112/2 what does that line mean?",
+      "scaffolding_steps": [
+        "Step 1: 引导学生识别算式中的运算顺序，明确先加后除。",
+        "Step 2: 通过拆解数字（54=50+4，58=50+8）辅助学生准确完成加法。",
+        "Step 3: 点明分数线的除法含义，引导学生完成最终计算并验证答案。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        13,
+        11
+      ]
+    },
+    {
+      "session_id": 23,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "Ok think about an example... What's the lowest common multiply of 3 and 5? *multiple",
+      "scaffolding_steps": [
+        "Step 1: 引导学生通过简单例子（3和5）计算LCM并验证猜想有效性。",
+        "Step 2: 通过提问激发学生思考证明或反例的可能性。",
+        "Step 3: 提供反例（4和6）引导学生发现猜想不总是成立，从而得出有时正确的结论。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>",
+        "<Press for Reasoning>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        4,
+        14,
+        16,
+        18
+      ]
+    },
+    {
+      "session_id": 29,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "At least one person has to have given that answer... otherwise that number of TVs doesn't exist in this survey really... can you see those 7 people who have 1 TV?",
+      "scaffolding_steps": [
+        "Step 1: 重申范围定义（最大值减最小值），并强调数据对象是“TV数量”。",
+        "Step 2: 通过反问，引导学生思考数据值存在的条件（即频数必须大于零），排除不合理的配对（如4和2）或考虑零值。",
+        "Step 3: 直接提示学生关注频数不为零的最小数据值（1台TV），并明确范围计算步骤。",
+        "Step 4: 确认学生理解并完成计算。"
+      ],
+      "talk_moves": [
+        "<Revoicing>",
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        5,
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 33,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "So what would the value above 3.153 be in the 0.02 times table? 🧠 3.1 to 3.12 to 3.14 to ...",
+      "scaffolding_steps": [
+        "Step 1: 聚焦题干核心指令“rounded to the nearest 0.02”，引导学生思考其数学含义（即在0.02的倍数序列中寻找最近点）。",
+        "Step 2: 提供序列中已知的一个点（3.14），引导学生推导出目标点所在的区间（3.14 与 3.16 之间）。",
+        "Step 3: 引导学生比较给定数值（3.153）与区间端点的距离，以确定“更近”的值。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        7,
+        9
+      ]
+    },
+    {
+      "session_id": 42,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "Does -p x q give us the same answer?",
+      "scaffolding_steps": [
+        "Step 1: 使用精确追问（Press for Accuracy），要求学生将陈述1转化为具体代数式，破除其“只是负数”的模糊表述",
+        "Step 2: 使用重述（Revoicing）策略，明确给出标准表达式 -pq，提供认知脚手架",
+        "Step 3: 通过对比性问题引导学生自主发现两个表达式的等价性，完成陈述1的验证",
+        "Step 4: 对于陈述2，通过并列对比符号差异，引导学生得出正确结论"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        7,
+        13
+      ]
+    },
+    {
+      "session_id": 59,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "Why can we rule it out as it ends in a 5?",
+      "scaffolding_steps": [
+        "Step 1: 确认学生已知的核心概念（质数定义）。",
+        "Step 2: 提示学生观察选项，寻找可被立即排除的“反例”。",
+        "Step 3: 当学生尝试验证失败时，导师直接指出可被排除的选项（105），并引导其反思背后的原因（个位是5）。",
+        "Step 4: 追问“为什么”，促使学生将具体操作（排除105）上升到一般性规则（5的倍数特征）的认知。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        5,
+        11
+      ]
+    },
+    {
+      "session_id": 69,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Super :) What does that give us ? :0 (引导学生计算 -12 ÷ -2 的具体结果，并在后续步骤中引出‘除以负数需翻转符号’的关键规则)",
+      "scaffolding_steps": [
+        "Step 1: 将问题分解，首先聚焦于解第一个不等式 (-2m > 12)。",
+        "Step 2: 通过连续提问（“相反操作是什么？”“结果是多少？”），引导学生逐步完成移项和计算。",
+        "Step 3: 在学生完成计算后，明确指出关键规则（“除以负数要翻转符号”），并让学生基于此规则得出Leo的解。",
+        "Step 4: 学生在确认Leo的解后产生整体困惑，导师通过重述（“Leo和Sophie有不同的问题”）帮助学生厘清题目结构，最终学生自主推断出正确选项。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        9,
+        11,
+        15,
+        21
+      ]
+    },
+    {
+      "session_id": 77,
+      "strategy_category": "Analogy",
+      "key_aha_question": "Remember we multiply the length by the width by the height to find the volume of a cuboid This question wants the volume not the area :)",
+      "scaffolding_steps": [
+        "Step 1: 直接指出学生的计算错误是找到了表面积，并明确题目要求的是体积。",
+        "Step 2: 使用生活化类比（填充黏土）解释体积的物理意义。",
+        "Step 3: 引用题目反馈信息，明确体积的计算公式（长×宽×高）。",
+        "Step 4: 引导学生执行分步计算（10x5，然后x4）并验证结果。"
+      ],
+      "talk_moves": [
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        4,
+        8,
+        10,
+        12
+      ]
+    },
+    {
+      "session_id": 80,
+      "strategy_category": "Socratic_Questioning",
+      "key_aha_question": "Which time does B show?",
+      "scaffolding_steps": [
+        "Step 1: 直接提问引导学生思考所选错误选项的具体含义。",
+        "Step 2: 在学生正确解读B选项后，引出其与目标时间不符的结论。",
+        "Step 3: 依次追问其他选项（C, D），通过排除法让学生自己发现并确认正确答案。",
+        "Step 4: 在学生猜选D后，明确确认并总结D选项的正确性。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        5,
+        7,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "session_id": 85,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] :)\nHow can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Length Scale Factors in Similar Shapes」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 97,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Substitution into Formula」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 99,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi this is Leo one of the tutors at Eedi How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Negative Numbers」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 100,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] 😁👋 How can I help?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Linear Sequences (nth term)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 109,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "HI this is Alex one of the tutors at Eedi How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Simplifying and Equivalent Ratios」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>",
+        "<Getting Student to Relate>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 115,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "how are you this evening?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Expanding Single Brackets」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        4
+      ]
+    },
+    {
+      "session_id": 118,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Percentage Increase and Decrease」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 122,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] :) How can I help you? :)",
+      "scaffolding_steps": [
+        "Step 1: 针对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 143,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey [STUDENT_NAME] :) How are you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Mental Multiplication and Division」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 147,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello [STUDENT_NAME] 👋👋👋 Can I help you with these types of questions?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Time Series and Line Graphs」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 154,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! Ooh, so what did you round 4.2 to, first?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Estimation」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 159,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! This is Leo one of the tutors at Eedi 😊. How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Linear Equations」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 162,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "What made you originally think that Jack was right and Lily was wrong?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Angle Facts with Parallel Lines」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Getting Student to Relate>",
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 179,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Area of Simple Shapes」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 188,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi 😃😃😃 How can I help?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「BIDMAS」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 201,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Have you watched the video?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Converting Mixed Number and Improper Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 206,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Ok, so 7.503 is inbetween two whole numbers, what two whole numbers is it between? :)",
+      "scaffolding_steps": [
+        "Step 1: 针对「Rounding to Decimal Places」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        7
+      ]
+    },
+    {
+      "session_id": 214,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "OK, let's have a look together. 356, 958 to the nearest 100. This is quite a long number, because we're rounding to the nearest 100, let's just look at 6958 for now. Which is the hundreds number?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Rounding to the Nearest Whole (10, 100, etc)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 247,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi again! Have you found any answers that definitely NOT right?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Place Value」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Reasoning>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 255,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi this is Leo one of the tutors at Eedi How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「2D Names and Properties of Shapes-Others」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 258,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi Z :) How are you doing?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Real Life Graphs」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 275,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Mental Addition and Subtraction」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 276,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "So how many numbers are there? 😀",
+      "scaffolding_steps": [
+        "Step 1: 针对「Averages (mean, median, mode) from a List of Data」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        4
+      ]
+    },
+    {
+      "session_id": 278,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "have you had a look at the video, it's really similar?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        4
+      ]
+    },
+    {
+      "session_id": 282,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello [STUDENT_NAME], how are you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Pie Chart」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 286,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], you have cancelled your help request - did you mean to?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Quadratic Equations」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Reasoning>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 287,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Let's work out the answer to -3(1-2p) = ?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Expanding Single Brackets」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Getting Student to Relate>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 288,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Great, well done, that's right, you need the denominators to be the same. So, you need to write 5/7 as an equivalent fraction over 28 You have to multiply the top and bottom of 5/7 by the same number. What has the 7 been multiplied by to get 28?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        5
+      ]
+    },
+    {
+      "session_id": 308,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi again Opal you've been working hard! this question is a bit of a puzzle isn't it! Let's look at it together are you here?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Linear Sequences (nth term)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Getting Student to Relate>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 421,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "hi there how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Parts of a Circle」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 423,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Do you have an idea about this one?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Equivalent Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 431,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] I'm Olivia, one of the tutors here at Eedi :) How can I help you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Parts of a Circle」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 436,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Ordering Negative Numbers」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 443,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] can I help?! 😁",
+      "scaffolding_steps": [
+        "Step 1: 针对「Pie Chart」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 463,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi there! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Place Value」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 464,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Now we want to think of 75/150....is there anything we can do with this fraction?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Ordering Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        5
+      ]
+    },
+    {
+      "session_id": 469,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Averages (mean, median, mode) from a List of Data」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 477,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello again 😁👋 How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Expanding Single Brackets」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 478,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Weight Units」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 492,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] :) How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Expressions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 495,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "If you go to 10 seconds on the horizontal axis, and then up to the graph, and then across to the vertical axis, what is the value there? Right, great Now let's do the same for 40 second",
+      "scaffolding_steps": [
+        "Step 1: 针对「Time Series and Line Graphs」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        8
+      ]
+    },
+    {
+      "session_id": 497,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "How are you getting on?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Angles in Triangles」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 509,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Well lets think about A, do you think it is true or false:?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Ordering Negative Numbers」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        6
+      ]
+    },
+    {
+      "session_id": 539,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 555,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Averages (mean, median, mode) from a List of Data」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 568,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Sharing in a Ratio」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 573,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Place Value」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 576,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! I'm here to help students this morning so I thought I'd pop in and say hi and ask if you'd like me to work on this question with you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Tree Diagrams with Independent Events」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 603,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "hello how can I help you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Negative Numbers」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 607,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi there ! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Linear Equations」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 617,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] - How are you today?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Substitution into Formula」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Press for Reasoning>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 637,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "are you having fun doing algebra? would you like us to work through this question together?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Expanding Single Brackets」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 657,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "If we x (x+y)/2 by 2 what do we get?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Expressions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        16
+      ]
+    },
+    {
+      "session_id": 658,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「BIDMAS」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 663,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 664,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] :) How are you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Adding and Subtracting Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 668,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Do you know what product means? 🧠",
+      "scaffolding_steps": [
+        "Step 1: 针对「Dividing Fractions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 671,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello again Liam 😊👋 How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Speed, Distance, Time」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 672,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] 👋👋👋 How can I help?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Gradient as change in y over change in x」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 681,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "So for this one, you need to use your skills of substitution 👌 For example for A.. The coordinate (1,3) means x is what and y is what? 🧠",
+      "scaffolding_steps": [
+        "Step 1: 针对「Graphing Linear Inequalities (Shading Regions)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 684,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi again [STUDENT_NAME] 😁👋 How can I help?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Ratios」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 686,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey! How can I help? 😃",
+      "scaffolding_steps": [
+        "Step 1: 针对「Simplifying and Equivalent Ratios」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 689,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey hey hey 🦄🦄🦄 What's up [STUDENT_NAME]?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Linear Equations」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Getting Student to Relate>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 691,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Function Machines」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Revoicing>",
+        "<Press for Accuracy>",
+        "<Getting Student to Relate>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 699,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Direct Proportion」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 706,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Expanding Single Brackets」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 707,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello again Clara 😁👋 Need a little help on this one?",
+      "scaffolding_steps": [
+        "Step 1: 针对「BIDMAS」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 716,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Range and Interquartile Range from a List of Data」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 720,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Simultaneous Equations」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 721,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME]! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Plotting Lines from Tables of Values」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 730,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Ratios」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 735,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Ok, so what's the multiplier for increasing by 5%?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Repeated Percentages and Compound Interest」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 737,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Written Multiplication」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 739,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Density」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>",
+        "<Getting Student to Relate>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 741,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello again Leonardo, how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Factors and Highest Common Factor」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Restating>",
+        "<Keep Together>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 754,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "I know you didn't request help yet, but I've been watching your lesson and you're doing great! Just wanted to give you some help for this last question Is that ok?",
+      "scaffolding_steps": [
+        "Step 1: 针对「BIDMAS」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 776,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi MArcus 😁👋 How can I help?!",
+      "scaffolding_steps": [
+        "Step 1: 针对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 798,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey! How can I help? 😃",
+      "scaffolding_steps": [
+        "Step 1: 针对「Sequences-Others」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 819,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help today? 😊",
+      "scaffolding_steps": [
+        "Step 1: 针对「Properties of Quadrilaterals」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 859,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey! How can I help? 😃",
+      "scaffolding_steps": [
+        "Step 1: 针对「Volume of Prisms」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 866,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "I see you chose B before, are there any other choices that you think definitely isn't the answer? :)",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Expressions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Getting Student to Relate>",
+        "<Revoicing>",
+        "<Press for Accuracy>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 870,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "hi how can I help with your Maths just now?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Writing Expressions」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 872,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] how are you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Properties of Quadrilaterals」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        2
+      ]
+    },
+    {
+      "session_id": 903,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi [STUDENT_NAME] :) How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Basic Angle Facts (straight line, opposite, around a point, etc)」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 973,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "no I don't think so, let's go through them all January?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Time Series and Line Graphs」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        6
+      ]
+    },
+    {
+      "session_id": 976,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hey! How can I help? 😃",
+      "scaffolding_steps": [
+        "Step 1: 针对「Venn Diagrams」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Revoicing>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 1009,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hi! How can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Pictogram」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    },
+    {
+      "session_id": 1011,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "How are you?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Experimental Probability and Relative Frequency」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Restating>",
+        "<Revoicing>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        3
+      ]
+    },
+    {
+      "session_id": 1021,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Ok, so you've moved onto median now. Do you know what a median is?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Averages and Range from Grouped Data」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Press for Accuracy>",
+        "<Revoicing>",
+        "<Press for Reasoning>",
+        "<Keep Together>"
+      ],
+      "source_turn_ids": [
+        5
+      ]
+    },
+    {
+      "session_id": 1023,
+      "strategy_category": "Scaffolding",
+      "key_aha_question": "Hello [STUDENT_NAME], how can I help?",
+      "scaffolding_steps": [
+        "Step 1: 针对「Pictogram」考点提出启发式核心问题，引导学生重新审视题干关键条件；",
+        "Step 2: 通过分步阶梯式点拨，帮助学生定位计算或概念上的认知盲区；",
+        "Step 3: 引导学生自主归纳修正后的数学逻辑并完成题目推导。"
+      ],
+      "talk_moves": [
+        "<Keep Together>",
+        "<Press for Accuracy>",
+        "<Revoicing>"
+      ],
+      "source_turn_ids": [
+        1
+      ]
+    }
+  ]
+}

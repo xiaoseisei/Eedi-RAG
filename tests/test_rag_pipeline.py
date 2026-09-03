@@ -114,14 +114,46 @@ def test_citation_auditor():
     assert fake_response.audit_status == "GROUNDING_DEGRADED"
 
 
+def test_citation_auditor_never_trusts_preverified_flag():
+    """A caller-provided verification flag must not bypass quadruple auditing."""
+    pipeline = EndToEndPedagogicalRAGPipeline()
+    gold_ctx = GoldAssembledContext(
+        raw_query="test",
+        prompt_context_markdown="test",
+        evidence_turns=[{
+            "session_id": 7,
+            "turn_id": 9,
+            "speaker": "tutor",
+            "text": "What does it round to?",
+        }],
+    )
+    response = PedagogicalGuidanceResponse(
+        query="test",
+        subject_path="Number > Rounding",
+        misconception_diagnosis="diagnosis",
+        key_aha_question="question",
+        session_id=7,
+        dialogue_citations=[DialogueCitation(
+            session_id=7,
+            turn_id=99,
+            speaker="student",
+            quote_text="fabricated",
+            verifiable_in_duckdb=True,
+        )],
+        audit_status="PENDING",
+    )
+
+    with pytest.raises(CitationAuditError):
+        pipeline._audit_citations(response, gold_ctx)
+
+    assert response.audit_status == "GROUNDING_DEGRADED"
+    assert response.dialogue_citations[0].verifiable_in_duckdb is False
+
+
 def _valid_llm_payload(**overrides):
     payload = {
         "subject_path": "Number > Rounding",
-        "answer_content": "The student retained two decimal places rather than rounding to one.",
-        "misconception_diagnosis": "The place-value target was misidentified.",
-        "key_aha_question": "Which digit decides the tenths digit?",
-        "recommended_talk_moves": ["<Press for Accuracy>"],
-        "scaffolding_steps": ["Ask the student to mark the tenths digit."],
+        "answer": "The student retained two decimal places rather than rounding to one.",
         "dialogue_citations": [{
             "session_id": 7,
             "turn_id": 9,
@@ -137,7 +169,7 @@ def _valid_llm_payload(**overrides):
 @pytest.mark.parametrize(
     "override",
     [
-        {"answer_content": ""},
+        {"answer": ""},
         {"dialogue_citations": []},
         {"dialogue_citations": [{"session_id": 7, "turn_id": 0, "speaker": "tutor", "quote_text": "x"}]},
         {"dialogue_citations": [{"session_id": "7", "turn_id": 9, "speaker": "tutor", "quote_text": "x"}]},
@@ -147,6 +179,17 @@ def _valid_llm_payload(**overrides):
 def test_llm_payload_is_strict_and_non_empty(override):
     with pytest.raises(ValidationError):
         LLMGuidancePayload.model_validate(_valid_llm_payload(**override))
+
+
+def test_llm_payload_accepts_only_complete_citation_quadruples():
+    payload = LLMGuidancePayload.model_validate(_valid_llm_payload())
+
+    assert payload.dialogue_citations[0].model_dump() == {
+        "session_id": 7,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "What does it round to?",
+    }
 
 
 @pytest.mark.parametrize(
@@ -247,6 +290,50 @@ def test_llm_schema_retries_are_exhausted_then_error_is_raised(monkeypatch):
         pipeline._generate_with_llm("q", ctx, {})
 
     assert len(calls) == 2
+
+
+def test_llm_generation_uses_only_final_assembler_evidence(monkeypatch):
+    evidence = {
+        "session_id": 7,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "text": "What does it round to?",
+    }
+    content = json.dumps(_valid_llm_payload(), ensure_ascii=False)
+    fake_client = SimpleNamespace(
+        chat=SimpleNamespace(
+            completions=SimpleNamespace(
+                create=lambda **kwargs: SimpleNamespace(
+                    choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
+                    usage=None,
+                )
+            )
+        )
+    )
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    # No storage handle is deliberately exposed: generation must not fetch
+    # arbitrary turns by session id after the assembler has fixed the evidence.
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="ctx",
+        evidence_turns=[evidence],
+    )
+
+    response = pipeline._generate_with_llm("q", ctx, {})
+    pipeline._audit_citations(response, ctx)
+
+    assert response.dialogue_citations[0].model_dump(exclude={"verifiable_in_duckdb"}) == {
+        "session_id": 7,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "What does it round to?",
+    }
+    assert response.audit_status == "AUDITED_100_VERIFIED"
 
 
 def test_exact_citation_fact_is_verified_and_promotes_audit_status():

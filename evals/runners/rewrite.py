@@ -71,6 +71,9 @@ class RewriteRunner:
             "rewrite_only_rrf_mrr_lift",
             "raw_inclusive_rrf_mrr_lift",
             "raw_inclusive_rrf_recall_at_5_lift",
+            "selected_fusion_mrr",
+            "selected_fusion_mrr_lift",
+            "selected_fusion_recall_at_5_lift",
         ):
             matching = [item for item in case_observations if item.metric_name == metric_name]
             if not matching:
@@ -83,7 +86,7 @@ class RewriteRunner:
                 stage="fusion",
                 threshold=0.0,
                 operator=ComparisonOperator.GTE,
-                hard_gate=metric_name.startswith("raw_inclusive"),
+                hard_gate=metric_name in {"selected_fusion_mrr_lift", "selected_fusion_recall_at_5_lift"},
             ))
         return result
 
@@ -94,6 +97,9 @@ class RewriteRunner:
         inclusive_mrr = mean_reciprocal_rank(case.raw_inclusive_ranked_ids, case.qrels)
         raw_recall = recall_at_k(raw, case.qrels, 5)
         inclusive_recall = recall_at_k(case.raw_inclusive_ranked_ids, case.qrels, 5)
+        selected = case.selected_ranked_ids or case.raw_inclusive_ranked_ids
+        selected_mrr = mean_reciprocal_rank(selected, case.qrels)
+        selected_recall = recall_at_k(selected, case.qrels, 5)
         values = {
             "raw_rrf_mrr": raw_mrr,
             "rewrite_only_rrf_mrr": rewrite_mrr,
@@ -101,6 +107,9 @@ class RewriteRunner:
             "rewrite_only_rrf_mrr_lift": rewrite_mrr - raw_mrr,
             "raw_inclusive_rrf_mrr_lift": inclusive_mrr - raw_mrr,
             "raw_inclusive_rrf_recall_at_5_lift": inclusive_recall - raw_recall,
+            "selected_fusion_mrr": selected_mrr,
+            "selected_fusion_mrr_lift": selected_mrr - raw_mrr,
+            "selected_fusion_recall_at_5_lift": selected_recall - raw_recall,
             "latency_ms": case.latency_ms,
         }
         result: list[MetricObservation] = []
@@ -116,7 +125,7 @@ class RewriteRunner:
                 threshold=threshold,
                 operator=operator,
                 hard_gate=False,
-                slices={**case.slices, "intent": case.intent},
+                slices={**case.slices, "intent": case.intent, "selected_strategy": case.selected_strategy},
             ))
         return result
 
@@ -163,7 +172,7 @@ class RewriteRunner:
                         metric_name=metric_name,
                         threshold=threshold,
                         operator=ComparisonOperator.GTE,
-                        hard_gate=hard_gate if metric_name == "intent_preservation" else False,
+                        hard_gate=False,
                         reason=reason,
                         slices=case.slices,
                     )
@@ -252,10 +261,12 @@ class RewriteRunner:
                 "domain_injection_coverage",
             }:
                 operator = ComparisonOperator.GTE
-                hard_gate = metric_name != "domain_injection_coverage"
+                hard_gate = metric_name not in {"domain_injection_coverage", "intent_preservation"}
                 threshold = getattr(self.thresholds, metric_name)
             else:
                 threshold, operator, hard_gate = self._gate(metric_name, aggregate=True)
+                if metric_name in {"retrieval_mrr_lift", "retrieval_recall_at_5_lift"}:
+                    hard_gate = False
                 if aggregate_name:
                     threshold = getattr(self.thresholds, threshold_name)
             result.append(

@@ -1,0 +1,31 @@
+{
+  "schema_version": "embedding-index-build/v1",
+  "generated_at": "2026-09-02T17:53:23.459614Z",
+  "provider": {
+    "name": "openai_compatible:Qwen/Qwen3-Embedding-0.6B",
+    "base_url": "https://api.siliconflow.cn/v1",
+    "model": "Qwen/Qwen3-Embedding-0.6B",
+    "dimension": 1024,
+    "index_version": "qwen3-embedding-0.6b-v1"
+  },
+  "collection_counts": {
+    "student_misconceptions": 100,
+    "tutor_strategies": 100,
+    "fallback_windows": 719
+  },
+  "target": "E:\\PIAgent\\10-projects\\AgentLearn\\Eedi-RAG\\reports\\eval\\embedding-qwen3-0.6b-closeout-20260903-014700\\chroma",
+  "target_chroma_sha256": "38c7b7076c4d8b787d5ac3474def6876c22316cbebae3667079fea289fef86f3",
+  "source_duckdb_sha256": "09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad",
+  "elapsed_seconds": 21.468,
+  "usage": {
+    "request_count": 31,
+    "retry_count": 0,
+    "input_tokens": 209374,
+    "total_tokens": 209374
+  },
+  "notes": [
+    "DuckDB opened read_only; no production Chroma path was opened",
+    "target directory was required to be absent and was created as a new index",
+    "API key is intentionally excluded from this report"
+  ]
+}

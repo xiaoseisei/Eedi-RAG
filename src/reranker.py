@@ -122,6 +122,16 @@ class PedagogicalGoldAssembler:
             matched_kws = [kw for kw in keywords if kw.lower() in doc_text.lower()]
             bonus += 0.15 * (len(matched_kws) / len(keywords))
 
+        # Preserve a strong raw-query signal when RRF scores saturate after
+        # normalization.  This is derived solely from the retriever trace and
+        # prevents a lower-ranked card with incidental glossary overlap from
+        # displacing the direct query match.
+        for hit in candidate.get("perspective_hits", []):
+            match = re.search(r"raw_query_perspective\(#Rank(\d+)\)", str(hit))
+            if match:
+                bonus += 0.50 / int(match.group(1))
+                break
+
         return round(norm_base + bonus, 5)
 
     def _select_mmr_best(
@@ -180,13 +190,13 @@ class PedagogicalGoldAssembler:
             already_selected_texts=[]
         )
 
-        # 2. MMR 挑选 Top-1 名师策略卡 (排斥与错因卡的同质化文本)
-        selected_texts = [selected_misc.get("document", "")] if selected_misc else []
+        # 2. 策略槽位独立选择。错因卡与策略卡是互补信息，不允许跨槽位
+        # Jaccard 惩罚把同一教学事件的正确策略压低。
         selected_strat = self._select_mmr_best(
             candidates=strat_candidates,
             raw_query=raw_query,
             keywords=keywords,
-            already_selected_texts=selected_texts
+            already_selected_texts=[]
         )
 
         # 3. 聚合并去重真实对白证据 (来自 DuckDB)

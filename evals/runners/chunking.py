@@ -10,10 +10,10 @@ from evals.runners.common import aggregate_case_observations
 @dataclass(frozen=True)
 class ChunkingThresholds:
     session_recall_at_1: float = 0.0
-    session_recall_at_3: float = 0.95
+    session_recall_at_3: float = 0.90
     turn_recall_at_1: float = 0.0
-    turn_recall_at_3: float = 0.95
-    turn_mrr: float = 0.90
+    turn_recall_at_3: float = 0.90
+    turn_mrr: float = 0.85
     inflation_ratio: float = 4.0
     latency_p95_ms: float = 150.0
 

@@ -26,6 +26,8 @@ import sys
 import json
 import math
 import logging
+import re
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -39,6 +41,32 @@ from src.query_rewriter import MultiPerspectiveQueryRewriter
 from src.storage_manager import DualEngineStorageManager, FastDeterministicEmbeddingFunction
 
 logger = logging.getLogger(__name__)
+
+
+def _normalized_math_text(text: str) -> str:
+    value = text.casefold().replace("−", "-").replace("×", "*").replace("÷", "/")
+    value = re.sub(r"(?<=\d)\s*\.\s*(?=\d)", ".", value)
+    value = re.sub(r"(?<=\d)\s+(?=\d)", "", value)
+    return value
+
+
+def _numeric_formula_tokens(text: str) -> set[str]:
+    normalized = _normalized_math_text(text)
+    return set(re.findall(r"[+-]?\d+(?:\.\d+)?(?:/\d+(?:\.\d+)?)?", normalized))
+
+
+def numeric_formula_exact_score(query: str, document: str) -> float:
+    """Score exact numeric/formula matches, prioritizing dialogue over repeated anchors."""
+    query_tokens = _numeric_formula_tokens(query)
+    if not query_tokens:
+        return 0.0
+    marker = "[对话片段"
+    anchor, separator, dialogue = document.partition(marker)
+    anchor_tokens = _numeric_formula_tokens(anchor)
+    dialogue_tokens = _numeric_formula_tokens(dialogue if separator else document)
+    dialogue_overlap = len(query_tokens.intersection(dialogue_tokens)) / len(query_tokens)
+    anchor_overlap = len(query_tokens.intersection(anchor_tokens)) / len(query_tokens)
+    return round(min(1.0, dialogue_overlap + 0.1 * anchor_overlap), 6)
 
 
 def rrf_ranked_ids(rankings: list[list[Dict[str, Any]]], k_constant: int) -> list[str]:
@@ -125,7 +153,8 @@ class DualMetricRetriever:
         storage_manager: Optional[DualEngineStorageManager] = None,
         rewriter: Optional[MultiPerspectiveQueryRewriter] = None,
         query_rewrite_mode: Optional[str] = None,
-        alpha: float = 0.5
+        alpha: float = 0.5,
+        fusion_strategy: str = "raw_inclusive_rrf",
     ):
         """
         初始化检索器。
@@ -136,6 +165,9 @@ class DualMetricRetriever:
           alpha: 余弦相似度权重 (1-alpha 为欧氏相似度权重，默认 0.5)
         """
         self.alpha = max(0.0, min(1.0, alpha))
+        if fusion_strategy not in {"raw_first", "raw_inclusive_rrf"}:
+            raise ValueError("fusion_strategy must be raw_first or raw_inclusive_rrf")
+        self.fusion_strategy = fusion_strategy
         if storage_manager is None:
             raise ValueError("必须显式传入已配置 embedding 后端的 storage_manager")
         self.storage = storage_manager
@@ -151,6 +183,34 @@ class DualMetricRetriever:
             raise ValueError(
                 "必须显式传入 rewriter，或设置 query_rewrite_mode='deterministic'"
             )
+
+    def _embed_query_batch(self, query_texts: List[str]) -> tuple[Dict[str, List[float]], Dict[str, Any]]:
+        """Embed all unique lane queries in one provider call and expose safe telemetry."""
+        unique_texts = list(dict.fromkeys(query_texts))
+        before_usage = getattr(self.embedding_fn, "usage", None)
+        before = dict(getattr(before_usage, "__dict__", {}) or {})
+        started = time.perf_counter()
+        raw_vectors = self.embedding_fn(unique_texts)
+        latency_ms = round((time.perf_counter() - started) * 1000.0, 3)
+        if len(raw_vectors) != len(unique_texts):
+            raise RuntimeError(
+                f"embedding backend returned {len(raw_vectors)} vectors for {len(unique_texts)} lane queries"
+            )
+        vectors = {
+            text: [float(value) for value in vector]
+            for text, vector in zip(unique_texts, raw_vectors)
+        }
+        after_usage = getattr(self.embedding_fn, "usage", None)
+        after = dict(getattr(after_usage, "__dict__", {}) or {})
+        delta = {}
+        for key in ("request_count", "retry_count", "input_count", "cache_hit_count", "input_tokens", "total_tokens"):
+            if key in after:
+                delta[key] = int(after.get(key, 0)) - int(before.get(key, 0))
+        return vectors, {
+            "unique_query_count": len(unique_texts),
+            "batch_latency_ms": latency_ms,
+            "usage_delta": delta,
+        }
 
     def _rank_collection_candidates(
         self,
@@ -218,7 +278,21 @@ class DualMetricRetriever:
         """
         检索学生认知误区卡片 (student_misconceptions)。
         """
-        query_vector = self.embedding_fn([query_text])[0]
+        query_vector = self._embed_query_batch([query_text])[0][query_text]
+        return self._retrieve_misconceptions_by_vector(
+            query_vector,
+            top_k=top_k,
+            fetch_evidence=fetch_evidence,
+            where_filter=where_filter,
+        )
+
+    def _retrieve_misconceptions_by_vector(
+        self,
+        query_vector: List[float],
+        top_k: int = 3,
+        fetch_evidence: bool = True,
+        where_filter: Optional[Dict] = None,
+    ) -> List[Dict[str, Any]]:
         hits = self._rank_collection_candidates("student_misconceptions", query_vector, top_k=top_k, where_filter=where_filter)
         
         if fetch_evidence:
@@ -241,7 +315,21 @@ class DualMetricRetriever:
         """
         检索名师启发式策略卡片 (tutor_strategies)。
         """
-        query_vector = self.embedding_fn([query_text])[0]
+        query_vector = self._embed_query_batch([query_text])[0][query_text]
+        return self._retrieve_strategies_by_vector(
+            query_vector,
+            top_k=top_k,
+            fetch_evidence=fetch_evidence,
+            where_filter=where_filter,
+        )
+
+    def _retrieve_strategies_by_vector(
+        self,
+        query_vector: List[float],
+        top_k: int = 3,
+        fetch_evidence: bool = True,
+        where_filter: Optional[Dict] = None,
+    ) -> List[Dict[str, Any]]:
         hits = self._rank_collection_candidates("tutor_strategies", query_vector, top_k=top_k, where_filter=where_filter)
         
         if fetch_evidence:
@@ -263,8 +351,32 @@ class DualMetricRetriever:
         """
         零信任模式：纯原文滑动窗口直接检索 (fallback_windows)。
         """
-        query_vector = self.embedding_fn([query_text])[0]
-        return self._rank_collection_candidates("fallback_windows", query_vector, top_k=top_k, where_filter=where_filter)
+        query_vector = self._embed_query_batch([query_text])[0][query_text]
+        # A wider dense pool lets the deterministic exact channel recover
+        # formula-bearing dialogue windows without scanning or rewriting the
+        # immutable index.  The exact score uses only SUT input/document text.
+        candidates = self._rank_collection_candidates(
+            "fallback_windows",
+            query_vector,
+            top_k=max(top_k, 50),
+            where_filter=where_filter,
+        )
+        for candidate in candidates:
+            exact_score = numeric_formula_exact_score(query_text, candidate.get("document", ""))
+            candidate["numeric_formula_exact_score"] = exact_score
+            candidate["retrieval_channels"] = ["dense"] + (["numeric_formula_exact"] if exact_score > 0 else [])
+            candidate["fallback_combined_score"] = round(
+                float(candidate.get("hybrid_score", 0.0)) + 0.35 * exact_score,
+                6,
+            )
+        candidates.sort(
+            key=lambda item: (
+                -item["fallback_combined_score"],
+                -item["numeric_formula_exact_score"],
+                str(item["chunk_id"]),
+            )
+        )
+        return candidates[:top_k]
 
     def retrieve_hybrid(
         self,
@@ -312,10 +424,17 @@ class DualMetricRetriever:
         # 1. 多视角派生与专业注入
         rewritten: MultiPerspectiveQueries = self.rewriter.rewrite(raw_query)
 
+        query_vectors, embedding_trace = self._embed_query_batch([
+            rewritten.misconception_query,
+            rewritten.curriculum_query,
+            raw_query,
+            rewritten.strategy_query,
+        ])
+
         # 2. 错因库多视角检索与 RRF 融合 (3-Way: misconception + curriculum + raw_query)
-        misc_ranks_p1 = self.retrieve_misconceptions(rewritten.misconception_query, top_k=15, fetch_evidence=False)
-        misc_ranks_p2 = self.retrieve_misconceptions(rewritten.curriculum_query, top_k=15, fetch_evidence=False)
-        misc_ranks_p3 = self.retrieve_misconceptions(raw_query, top_k=15, fetch_evidence=False)
+        misc_ranks_p1 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.misconception_query], top_k=15, fetch_evidence=False)
+        misc_ranks_p2 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False)
+        misc_ranks_p3 = self._retrieve_misconceptions_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False)
         
         misc_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(misc_ranks_p1, start=1):
@@ -340,6 +459,11 @@ class DualMetricRetriever:
             misc_rrf_map[cid]["perspective_hits"].append(f"raw_query_perspective(#Rank{rank_idx})")
 
         fused_misc = sorted(misc_rrf_map.values(), key=lambda x: x["rrf_score"], reverse=True)
+        if self.fusion_strategy == "raw_first":
+            raw_ids = [str(candidate["chunk_id"]) for candidate in misc_ranks_p3]
+            by_id = {str(item["candidate"]["chunk_id"]): item for item in fused_misc}
+            fused_misc = [by_id[chunk_id] for chunk_id in raw_ids]
+            fused_misc.extend(item for item in by_id.values() if str(item["candidate"]["chunk_id"]) not in set(raw_ids))
         top_misc_results = []
         for item in fused_misc[:top_k_each]:
             c = item["candidate"]
@@ -354,9 +478,9 @@ class DualMetricRetriever:
             top_misc_results.append(c)
 
         # 3. 策略库多视角检索与 RRF 融合 (3-Way: strategy + curriculum + raw_query)
-        strat_ranks_p1 = self.retrieve_strategies(rewritten.strategy_query, top_k=15, fetch_evidence=False)
-        strat_ranks_p2 = self.retrieve_strategies(rewritten.curriculum_query, top_k=15, fetch_evidence=False)
-        strat_ranks_p3 = self.retrieve_strategies(raw_query, top_k=15, fetch_evidence=False)
+        strat_ranks_p1 = self._retrieve_strategies_by_vector(query_vectors[rewritten.strategy_query], top_k=15, fetch_evidence=False)
+        strat_ranks_p2 = self._retrieve_strategies_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False)
+        strat_ranks_p3 = self._retrieve_strategies_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False)
 
         lane_trace = {
             "misconception": [
@@ -414,6 +538,12 @@ class DualMetricRetriever:
             strat_rrf_map[cid]["perspective_hits"].append(f"raw_query_perspective(#Rank{rank_idx})")
 
         fused_strat = sorted(strat_rrf_map.values(), key=lambda x: x["rrf_score"], reverse=True)
+        if self.fusion_strategy == "raw_first":
+            raw_ids = [str(candidate["chunk_id"]) for candidate in strat_ranks_p3]
+            raw_id_set = set(raw_ids)
+            by_id = {str(item["candidate"]["chunk_id"]): item for item in fused_strat}
+            fused_strat = [by_id[chunk_id] for chunk_id in raw_ids]
+            fused_strat.extend(item for item in by_id.values() if str(item["candidate"]["chunk_id"]) not in raw_id_set)
         top_strat_results = []
         for item in fused_strat[:top_k_each]:
             c = item["candidate"]
@@ -427,18 +557,23 @@ class DualMetricRetriever:
                     c["evidence_turns"] = self.storage.get_dialogue_turns(sess_id, turn_ids)
             top_strat_results.append(c)
 
+        fused_trace["misconception_selected"] = [str(item["chunk_id"]) for item in top_misc_results]
+        fused_trace["strategy_selected"] = [str(item["chunk_id"]) for item in top_strat_results]
+
         return {
             "raw_query": raw_query,
             "execution_metadata": {
                 "query_rewrite_backend": self.rewriter.backend_name,
                 "embedding_backend": self.storage.embedding_backend,
+                "fusion_strategy": self.fusion_strategy,
             },
             "rewritten_queries": rewritten.model_dump(),
             "trace": {
                 "expanded_queries": rewritten.model_dump(),
+                "embedding": embedding_trace,
                 "lanes": lane_trace,
                 "fused_rankings": fused_trace,
-                "fusion": "raw-inclusive-rrf",
+                "fusion": self.fusion_strategy,
                 "rrf_k": k_constant,
                 "candidate_count": len(top_misc_results) + len(top_strat_results),
             },

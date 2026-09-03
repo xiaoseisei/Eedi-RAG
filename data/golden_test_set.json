@@ -1,0 +1,752 @@
+[
+  {
+    "question": "四舍五入 5.4598 到 1 位小数时，学生为什么会误选 5.45？",
+    "ground_truth": "学生核心误区在于未能正确理解小数位数保留规则，混淆了一位小数（1dp）与两位小数（2dp），误以为保留一位小数是直接截断至小数点后第二位保留 5.45。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 10,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "5.45 Maybe or not sure"
+      },
+      {
+        "session_id": 10,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "5.4510 Can you give me a clue Please"
+      }
+    ],
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "当学生误以为任意两个数的最小公倍数就是它们的乘积时，名师该如何用反例提问破局？",
+    "ground_truth": "名师应先用互质数对（如 3 和 5）确认学生的「乘积即 LCM」直觉成立，再抛出反例引导一问「Can you prove it?」，让学生尝试用非互质数对（如 4 和 6，LCM=12 而非 24）自行发现公因数导致乘积大于 LCM，从而得出答案是 Sometimes true。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 23,
+        "turn_id": 1,
+        "speaker": "student",
+        "quote_text": "is it c"
+      },
+      {
+        "session_id": 23,
+        "turn_id": 4,
+        "speaker": "tutor",
+        "quote_text": "Ok think about an example... What's the lowest common multiply of 3 and 5? *multiple"
+      },
+      {
+        "session_id": 23,
+        "turn_id": 14,
+        "speaker": "tutor",
+        "quote_text": "Can you prove it?"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "学生将「四舍五入到最近 0.02」等同于「四舍五入到小数点后第二位」时，导师如何用 0.02 乘法表的概念重新框定问题？",
+    "ground_truth": "导师将「四舍五入到最近 0.02」重新框定为在 0.02 乘法表中寻找 3.153 的上下邻居值（3.14 和 3.16），引导学生判断 3.153 更靠近哪一个，从而得出正确答案 3.16。此策略将陌生的非标准四舍五入转化为学生熟悉的乘法表查找任务。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 33,
+        "turn_id": 3,
+        "speaker": "tutor",
+        "quote_text": "So for this one we need to think about the 0.02 times table values near 3.153 😃 Can you think about what value would be in the 0.02 times table near 3.153.. Any ideas? 💡"
+      },
+      {
+        "session_id": 33,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "So what would the value above 3.153 be in the 0.02 times table? 🧠 3.1 to 3.12 to 3.14 to ..."
+      },
+      {
+        "session_id": 33,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "3.16"
+      }
+    ],
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "学生看到分数线 (54+58)/2 时，为什么会先做 58÷2 而非先加分子？该误区的核心认知缺陷是什么？",
+    "ground_truth": "学生将水平分数线视为纯粹的除号而非分组符号，未识别出分数线自带的「分子整体先运算」含义，导致按 BIDMAS 中 D 优先于 A 的规则直接计算 54+58÷2=54+29=83≈85，选了错误答案 C。核心缺陷是对分数线的分组语义认知不清。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 14,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "the value of 54+58/2"
+      },
+      {
+        "session_id": 14,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "i think add 54 and 58?"
+      },
+      {
+        "session_id": 14,
+        "turn_id": 14,
+        "speaker": "student",
+        "quote_text": "halve?"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "展开含负数系数的括号 -3(1-2p) 时，学生最容易在哪一步犯错？导师如何分步拆解？",
+    "ground_truth": "学生最容易在「负数乘负数」这一步犯错：将 -3×1 误算为 -4（加法混入乘法）或将 -3×(-2p) 误算为 3p 而非 6p。导师的策略是将展开拆解为两个独立的乘法子任务「-3 × 1 = ?」和「-3 × -2p = ?」，逐一确认后再合并。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 287,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "okayy i dont really get it because it has a minus in it"
+      },
+      {
+        "session_id": 287,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "uhh the first one is -4 and the bottom one is 6p?"
+      },
+      {
+        "session_id": 287,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Be careful.. We are multiplying... Not adding,,, What is -3 x 1 = ?"
+      }
+    ],
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "学生在展开 4(2x+1)-(5x-9) 时，对第二个括号前的减号处理暴露了什么认知盲区？",
+    "ground_truth": "学生能正确展开第一个括号得到 8x+4，但面对第二个括号前的减号时出现严重错误，直接输出「-13x ???」——说明学生将减号与括号内项逐一相乘时，未正确处理负号分配（应得到 -5x+9），而是将所有项简单相减或串联，暴露出「减号分配律」这一认知盲区。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 477,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "8x + 4\n8x + 4\nyes"
+      },
+      {
+        "session_id": 477,
+        "turn_id": 14,
+        "speaker": "student",
+        "quote_text": "-13x ???"
+      },
+      {
+        "session_id": 477,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "We need to multiply everything in the bracket by the 4 outside the bracket 😊 4 x 2x = ? 4 x 1 = ?"
+      }
+    ],
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "当学生把 2a-4(3-a) 展开为 2a-12-a 而非 2a-12+4a 时，导师如何用 Revoicing 策略纠正？",
+    "ground_truth": "导师使用 Revoicing 策略，先肯定学生「总共有 6 个 a」的直觉是正确的，然后明确展示正确的展开过程「when you multiply out the bracket you get 2a-12+4a does that make sense?」，让学生看到 -4×(-a) 应得到 +4a 而非 -a。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 637,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "2a-12-a so is the answer a-12"
+      },
+      {
+        "session_id": 637,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "yes, tyhe total number of a's is 6 😀 when you multiply out the bracket you get 2a-12+4a does that make sense?"
+      },
+      {
+        "session_id": 637,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "6a-12"
+      }
+    ],
+    "subject_path": "Algebra > Expanding Brackets > Expanding Single Brackets",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "不等式 -2m>12 中，学生为什么会得到 m>-6 而非 m<-6？",
+    "ground_truth": "学生正确执行了除以 -2 的运算得到 -6，但遗漏了「除以负数时不等号必须翻转方向」这条关键规则，因此保留了原来的大于号，写出 m>-6（Leo 的错误答案），而正确答案应为 m<-6。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 69,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "divide by -2"
+      },
+      {
+        "session_id": 69,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Super :) What does that give us ? :0"
+      },
+      {
+        "session_id": 69,
+        "turn_id": 20,
+        "speaker": "student",
+        "quote_text": "sorry im still confused on how i know whether it is sophies or leoms or sophies and leos"
+      }
+    ],
+    "subject_path": "Algebra > Inequalities > Solving Linear Inequalities",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "面对「深度随时间变化的图像对应哪种玻璃杯形状」这类实际问题，导师如何从图形特征反推物理场景？",
+    "ground_truth": "导师的策略是将图形特征翻译为物理体验：「深度一开始增加很快然后减慢」→「如果水涨得快，说明底部是窄的还是宽的？」通过将抽象的图形斜率变化与「杯底窄→水位涨得快」的直觉对应起来，帮助学生建立图形与物理形状的因果映射。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 258,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "ok so let's look at the graph, the depth of water increases quite quickly at the start and then slows down Imagine pouring water into a glass... If it fills quickly would you expect the bottom of the glass to be narrow or wide?"
+      },
+      {
+        "session_id": 258,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "so the answer is d but I still don't understand how you figured it out when I find it difficult umm Sophia,are you there?"
+      }
+    ],
+    "subject_path": "Algebra > Other Graphs > Real Life Graphs",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "「已知均值为 4，求缺失数」这类均值反推题中，学生卡在哪一步？导师如何用类比旧题来搭建脚手架？",
+    "ground_truth": "学生卡在「已知均值如何反推总和」这一步（均值×个数=总和）。导师使用「回忆旧题」策略：「Remember an earlier question where we had 7 numbers and the average was 4 so we did 7×4 = 28 for the total?」将新问题与学生刚做过的旧题对齐，搭建从已知到未知的脚手架。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 276,
+        "turn_id": 7,
+        "speaker": "student",
+        "quote_text": "That's where I am stuck! 🟩🟦⬛ hee"
+      },
+      {
+        "session_id": 276,
+        "turn_id": 8,
+        "speaker": "tutor",
+        "quote_text": "Remember an earlier question where we had 7 numbers and the average was 4 so we did 7 x 4 = 28 for the total? 😀"
+      },
+      {
+        "session_id": 276,
+        "turn_id": 11,
+        "speaker": "student",
+        "quote_text": "by subtracting them so 1=A si or no?"
+      }
+    ],
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "当数据列表中同时包含小数和分数时（如 0.4, 1/4, 2.5, 2/5），学生在求众数时为什么无法识别重复值？",
+    "ground_truth": "学生知道众数是「最常出现的数」，但面对混合表示法时无法识别 0.4 和 2/5 是同一个值（因为 2/5=0.4），因此认为没有重复值。导师用「Have you tried converting the fractions into decimals?」引导学生将所有值统一为同一表示法后再比较。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 469,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "he most common number"
+      },
+      {
+        "session_id": 469,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "Have you tried converting the fractions into decimals?"
+      },
+      {
+        "session_id": 469,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "0.25"
+      }
+    ],
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "在分组数据频率表中找中位数所在区间时，学生为什么会把「频率值」误当成「中位数位置」？",
+    "ground_truth": "学生看到频率 17 最大，直接选了选项 D（17），将频率值本身等同于中位数，未理解需要先计算总频率（4+6+13+17+10=50），再找第 25、26 个数据所在的区间。导师通过提问「imagine these test papers in order, from lowest to highest score」将抽象的频率表还原为具体的排序场景。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 1021,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "I am not sure is it B or A🤔 50 50 tests"
+      },
+      {
+        "session_id": 1021,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "👍 So, as the feedback says: imagine these test papers in order, from lowest to highest score. The median result will be in the middle position. We need to work out what the middle position will be. How many tests were taken?"
+      }
+    ],
+    "subject_path": "Data and Statistics > Data Processing > Averages and Range from Grouped Data",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "求极差（Range）时，学生初始想到「用最大数除以最小数」而非相减，导师如何纠正？",
+    "ground_truth": "学生最初将极差定义为「最大数÷最小数」，后又将减法顺序写反为「2-17」。导师通过极简的提示「? - ?」引导学生自行重建正确的计算框架：最大值 - 最小值 = 17-2=15。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 716,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "Divide biggest number by the smallest number"
+      },
+      {
+        "session_id": 716,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "2-17"
+      },
+      {
+        "session_id": 716,
+        "turn_id": 11,
+        "speaker": "tutor",
+        "quote_text": "? - ?"
+      }
+    ],
+    "subject_path": "Data and Statistics > Data Processing > Range and Interquartile Range from a List of Data",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "当学生说「体积就是把所有面的面积加起来」时，说明他混淆了哪两个概念？导师如何用一句话点拨？",
+    "ground_truth": "学生把「体积（Volume）」与「表面积（Surface Area）」混淆了——「i did the area add all the side areas」说明他在计算表面积而非体积。导师用一句话点拨关键区分：「Remember we multiply the length by the width by the height to find the volume of a cuboid. This question wants the volume not the area.」",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 77,
+        "turn_id": 3,
+        "speaker": "student",
+        "quote_text": "i dont get it what feedback ???# ??? i did the area add all the side areas"
+      },
+      {
+        "session_id": 77,
+        "turn_id": 5,
+        "speaker": "student",
+        "quote_text": "I know its not D oh ok what is volume is it sound"
+      },
+      {
+        "session_id": 77,
+        "turn_id": 12,
+        "speaker": "tutor",
+        "quote_text": "Good, and x4?"
+      }
+    ],
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "学生选 10:12 表示「ten to twelve at night」暴露了对英语时间表达的什么误解？导师如何逐个排除法引导？",
+    "ground_truth": "学生将「ten to twelve」理解为「10:12」（十点十二分），暴露出对英语时间表达中「to」表示「差...分」的语义不理解——正确含义是「差十分到十二点」即 11:50，24小时制夜间为 23:50。导师采用逐项排除法，逐一确认每个选项对应的时间后引导学生发现 D 是正确答案。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 80,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "You went for A, which is 12 minutes past 10 What time does B show?"
+      },
+      {
+        "session_id": 80,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "12 minute past 50 50 minutes past 12"
+      },
+      {
+        "session_id": 80,
+        "turn_id": 11,
+        "speaker": "tutor",
+        "quote_text": "D shows 10 to 12 at night-time, so yes, 10 to 12 at night :) Super work! Well done ⭐⭐⭐⭐⭐ Are you ok to return to the lesson now?"
+      }
+    ],
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "当学生在频率表中用「频率列的极差」替代「数据值列的极差」时，导师如何引导学生区分数据值与频率？",
+    "ground_truth": "学生错误地将极差计算为频率列的最大值减最小值（如 12-0=12），而非数据值列的极差。导师关键点拨是引导学生关注「至少有一个人给出该答案」才意味着该数据值真实存在：「At least one person has to have given that answer... can you see those 7 people who have 1 TV?」让学生理解频率为 0 的数据值不存在于实际数据集中。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 29,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "4 is correct... but some people have 1 Tv... can you see those 7 people who have 1 TV?"
+      },
+      {
+        "session_id": 29,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Great... so the largest number of TVs is 4 And the lowest number of TVs that anyone has is 1. So, the range = 4-1 = ?"
+      },
+      {
+        "session_id": 29,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "Ohh 3"
+      }
+    ],
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "面对分数运算顺序题 1/2+1/3×1/4，学生为什么会在 BIDMAS 和分数运算之间来回犹豫？",
+    "ground_truth": "学生知道 BIDMAS 这个概念但无法将其应用到分数情境中——多次在选项间犹豫（「is it A」「wait no」「is it B」），说明学生缺乏将「乘法优先于加法」这一规则迁移到分数领域的信心。导师用简洁确认「So we need to do the multiplication before the addition, does that make sense?」帮助学生建立跨表示法的规则一致性。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 188,
+        "turn_id": 7,
+        "speaker": "student",
+        "quote_text": "is it A"
+      },
+      {
+        "session_id": 188,
+        "turn_id": 13,
+        "speaker": "student",
+        "quote_text": "is it A no its not is it B"
+      },
+      {
+        "session_id": 188,
+        "turn_id": 8,
+        "speaker": "tutor",
+        "quote_text": "So we need to do the multiplication before the addition, does that make sense? 🙂👍"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "BIDMAS 题中 n+4÷5 与 (n+4)/5 的区别，名师如何引导学生发现 Amy 的写法为什么是错的？",
+    "ground_truth": "导师利用 BIDMAS 规则反推：Amy 的 n+4÷5 中除法优先于加法，实际先算 4÷5 再加 n，并未实现「先加 4 再除以 5」的意图。而 Paul 的分数线写法 (n+4)/5 自带分组功能，确保先算分子再除。导师用 BIDMAS 规则拆解每个写法的实际运算顺序来区分。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 707,
+        "turn_id": 3,
+        "speaker": "tutor",
+        "quote_text": "BIDMAS will certainly help you 😁👌 thinking about BIDMAS then, what would we have to do first in Amy's sum?!"
+      },
+      {
+        "session_id": 707,
+        "turn_id": 2,
+        "speaker": "student",
+        "quote_text": "Hello [STUDENT_NAME], yes please do I need to do BIDMAS? wait now I don't think so"
+      },
+      {
+        "session_id": 707,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "Henry's"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > BIDMAS",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "当学生对心算减法 204-36 先减个位再减十位而得到 178 时，导师给出了什么更高效的心算策略？",
+    "ground_truth": "学生按列竖式思维「先减个位再减十位」得到 178（少减了 6），导师提供了「先减整十再减个位」的心算策略：先算 204-30=174，再算 174-6=168，避免了跨位借位带来的心算错误。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 275,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "I think maybe I should minus the ones then the tens? So then I'd get 78 I mean *178"
+      },
+      {
+        "session_id": 275,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "Ok, so it's best to start with the tens... So what is 204-30?"
+      },
+      {
+        "session_id": 275,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "So…168! Ah - I see I think because I school they teach us in column subtraction to subtract the ones then the tens. *at Thank you for helping me :)"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > Mental Addition and Subtraction",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "学生读到「£6,537 was taken」时误解为减法操作，暴露了对哪个日常用语的认知偏差？",
+    "ground_truth": "学生将「taken」理解为「被拿走」（减法），实际在收银语境中「£6,537 was taken」是指「收入了 £6,537」（加法）。学生说「You cannot subtract 6537 from 1578 without it going into negative」恰恰证明了他将 taken 理解为减法。导师通过追问「£6,537 is taken what does that mean?」让学生自行发现收银语境下 taken=收入=加法。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 143,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "You cannot subtract 6537 from 1578 without it going into negative"
+      },
+      {
+        "session_id": 143,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "Oh so it's been added"
+      },
+      {
+        "session_id": 143,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "let's look at what the questions says to start there is £1,578 in the till £6,537 is taken what does that mean?"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "学生做 32×65=2080 → 3.2×6.5=? 时，导师发现学生知道「除以 10」但不知道要除几次，导师如何引导？",
+    "ground_truth": "学生知道从 32→3.2 和 65→6.5 各除了一次 10，但不确定对乘积 2080 该除 10 还是除 100。导师需要引导学生理解：两个因数各缩小 10 倍，乘积就缩小 10×10=100 倍，所以 2080÷100=20.8。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 573,
+        "turn_id": 9,
+        "speaker": "student",
+        "quote_text": "3.2x6.5"
+      },
+      {
+        "session_id": 573,
+        "turn_id": 11,
+        "speaker": "student",
+        "quote_text": "divide 10"
+      }
+    ],
+    "subject_path": "Number > Basic Arithmetic > Place Value",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "在带分数加法 3⅜ + 1⅝ 中，学生能正确得出分子之和为 8/7（假分数），但卡在将其转化为带分数——导师如何一步追问打通？",
+    "ground_truth": "学生正确算出分数部分 3/7+5/7=8/7 并识别出这是假分数，但不知如何将其拆回带分数形式。导师用「if 7 make 1 whole how can we write 8/7 instead?」一步追问，引导学生发现 8/7=1+1/7，再加上整数部分 3+1=4，最终得出 5⅐。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 278,
+        "turn_id": 9,
+        "speaker": "student",
+        "quote_text": "8 over 7 That's an improper fraction ?"
+      },
+      {
+        "session_id": 278,
+        "turn_id": 10,
+        "speaker": "tutor",
+        "quote_text": "it is, well done! so if 7 make 1 whole how can we write 8/7 instead?"
+      },
+      {
+        "session_id": 278,
+        "turn_id": 11,
+        "speaker": "student",
+        "quote_text": "1 and 1 over 7 ? Idk man"
+      }
+    ],
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "在异分母减法 5/7 - 1/4 中，学生已知公分母是 28，但在通分时犯了什么错？导师如何用 Revoicing 纠正？",
+    "ground_truth": "学生已正确找到公分母 28，也算出 7×4=28，但在通分 5/7 时做了 4×4=16 而非 5×4=20——混淆了「乘法因子」和「分子」。导师用 Revoicing 确认正确部分「yes 20/28 is correct, well done!」再追问另一个分数的通分过程。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 288,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "i know i multiply the bottom and got to 28 but not sure on the rest"
+      },
+      {
+        "session_id": 288,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "ohhhh, i thought i was doing 4x4 7"
+      },
+      {
+        "session_id": 288,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Nearly....yes 20/28 is correct.well done! So, then for 1/4, what has the 4 been multiplied by to get 28?"
+      }
+    ],
+    "subject_path": "Number > Fractions > Adding and Subtracting Fractions",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "对于质数判定题「100 之后的下一个质数是哪个」，学生选了 105——导师如何用 5 的倍数特征快速排除？",
+    "ground_truth": "学生选 105 表明他不知道「尾数为 5 的数（除 5 本身外）一定是合数」。导师引导学生回忆质数的定义「只能被 1 和自身整除」，然后追问「Why can we rule it out as it ends in a 5?」让学生用 5 的倍数特征直接排除 105。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 59,
+        "turn_id": 2,
+        "speaker": "student",
+        "quote_text": "I don't know my prime numbers past 40"
+      },
+      {
+        "session_id": 59,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "They can only be divided by one and Itself"
+      },
+      {
+        "session_id": 59,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "Because 5 is in the 5 times tables"
+      }
+    ],
+    "subject_path": "Number > Factors, Multiples and Primes > Prime Numbers and Prime Factors",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "学生在负数乘法中认为 p×(-q) 和 (-q)² 的结果都保持负号，暴露了哪两条规则的混淆？",
+    "ground_truth": "学生混淆了两条规则：(1) p×(-q) = -(pq) 与 (-p)×q = -(pq) 确实相等（Statement 1 正确），但 (2) -(q)² ≠ q²，因为 -(q²) 始终为负而 q² 始终为正（Statement 2 错误）。学生选了 C（Both true）说明他误将「负号在平方外」等同于「负号在平方内」。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 42,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "Does -p x q give us the same answer?"
+      },
+      {
+        "session_id": 42,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "I don't think it works"
+      },
+      {
+        "session_id": 42,
+        "turn_id": 13,
+        "speaker": "tutor",
+        "quote_text": "I don't think it does either, as the left one stays negative, but the right one is positive So which answer do you think we need?"
+      }
+    ],
+    "subject_path": "Number > Negative Numbers > Multiplying and Dividing Negative Numbers",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "当速度问题要求将 40 分钟转换为小时的分数时，学生为什么会写成 4/10 而非 40/60？",
+    "ground_truth": "学生将分钟→小时的转换等同于「除以 10」（按十进制直觉），写出 4/10，暴露出对「1 小时=60 分钟」这一非十进制换算关系的忽视。导师直接追问「Not quite, there are not 100 minutes in an hour... How many are there?」打破学生的十进制假设。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 671,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "4/10👍 4/6 🤫🧏‍♂️"
+      },
+      {
+        "session_id": 671,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "Not quite, there are not 100 minutes in an hour... How many are there?"
+      }
+    ],
+    "subject_path": "Geometry and Measure > Compound Measures > Speed, Distance, Time",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "学生不知道「密度」的概念时，导师如何从「质量除以体积」的定义出发，引导学生识别出选项中不合规的单位？",
+    "ground_truth": "导师首先定义密度为「质量÷体积=每单位体积的质量」，然后教学生识别体积单位的标志——「cubed/立方」（如 cm³、km³、mm³），最后引导学生逐项检查选项，发现「Kilograms per metre squared」中 metre squared（平方米）是面积单位而非体积单位，因此不是密度的度量单位。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 739,
+        "turn_id": 1,
+        "speaker": "student",
+        "quote_text": "sorry, but what is density"
+      },
+      {
+        "session_id": 739,
+        "turn_id": 2,
+        "speaker": "tutor",
+        "quote_text": "Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?"
+      },
+      {
+        "session_id": 739,
+        "turn_id": 9,
+        "speaker": "student",
+        "quote_text": "centimetre is not volume nor mass"
+      }
+    ],
+    "subject_path": "Geometry and Measure > Compound Measures > Density",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "在除以小数的题 0.2÷0.4 中，导师如何通过「分子分母同乘10」的策略将小数除法转化为整数除法？",
+    "ground_truth": "导师将 0.2÷0.4 重新框定为分数 0.2/0.4，然后引导学生对分子分母同乘 10 得到 2/4，再化简为 1/2=0.5。关键的脚手架步骤是先用 20÷5=4 让学生熟悉操作，再缩回小数尺度 2÷5=0.4，最终得到 0.2/0.4=0.5。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 603,
+        "turn_id": 2,
+        "speaker": "student",
+        "quote_text": "i dont know what to do"
+      },
+      {
+        "session_id": 603,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "if I times the fraction 0.2/0.4 top and bottom by 10 what do we get? what is 0.2 x 10=?"
+      },
+      {
+        "session_id": 603,
+        "turn_id": 15,
+        "speaker": "tutor",
+        "quote_text": "👍great! so 0.2/0.4 has become 2/4 by timesing both top and bottom by 10 now look at 2/4, can you simplify that? or do you know what it is as a decimal?"
+      }
+    ],
+    "subject_path": "Number > Negative Numbers > Adding and Subtracting Negative Numbers",
+    "category": "TUTOR_INTERVENTION"
+  },
+  {
+    "question": "当学生误将 7.503 四舍五入到最近整数的结果写为 7.5 而非 8 时，导师用什么策略帮助学生理解「整数」与「小数」的区别？",
+    "ground_truth": "导师引导学生找出 7.503 位于哪两个整数之间（7 和 8），再找出中点 7.5，然后追问「7.503 比 7.5 大还是小？」——学生发现 7.503>7.5，因此应向上取整到 8。学生写 7.5 暴露了对「四舍五入到整数」的理解偏差，误以为 7.5 本身就是一个合法的「最近整数」答案。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 206,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "7.5 i think"
+      },
+      {
+        "session_id": 206,
+        "turn_id": 16,
+        "speaker": "student",
+        "quote_text": "arent they the same number?"
+      },
+      {
+        "session_id": 206,
+        "turn_id": 19,
+        "speaker": "tutor",
+        "quote_text": "Ah no worries! So we've decided that 7.503 is more than 7.5, so is it rounding up to 8 or down to 7? :)"
+      }
+    ],
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "category": "STUDENT_INSIGHT"
+  },
+  {
+    "question": "356,958 四舍五入到最近百位时，学生把百位上的 9 向上进位了但找不到选项中的 7，暴露了什么认知过程？",
+    "ground_truth": "学生正确识别了百位后的数字是 5（≥5 应进位），但在进位过程中把「百位的 9 进位为 10」的结果误认为需要在百位上直接写 10，未能理解进位会传递到千位（9→10→千位+1），导致困惑「the 9 rounded up would be ten and the would be added to the 6 but no 7 in any of them」——其实答案中有 357,000（千位从 6 变为 7）。",
+    "verbatim_grounding_quotes": [
+      {
+        "session_id": 214,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "but the 9 rounded up would be ten and the would be added to the 6 but no 7 in any of them"
+      },
+      {
+        "session_id": 214,
+        "turn_id": 11,
+        "speaker": "tutor",
+        "quote_text": "Have another look at the four answers, which one has a 7 in it?"
+      },
+      {
+        "session_id": 214,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "9 but what i leanred if it was five of greater u round up"
+      }
+    ],
+    "subject_path": "Number > Rounding and Estimating > Rounding to the Nearest Whole (10, 100, etc)",
+    "category": "STUDENT_INSIGHT"
+  }
+]

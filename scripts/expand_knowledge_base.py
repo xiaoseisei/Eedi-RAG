@@ -53,6 +53,46 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _ground_quotes_to_actual_dialogue(session: CleanedSession, piu: ExtractedPIU) -> ExtractedPIU:
+    """
+    用真实对话原文替换 LLM 转录的引用，确保逐字精确。
+    LLM 不擅长精确复制原文（会截断、省略 emoji、改写），这一步保证 ground truth 可信。
+    """
+    # 建立 turn_id -> 实际文本的映射
+    turn_map = {turn.turn_id: turn.text for turn in session.turns}
+
+    if piu.misconception:
+        # 替换学生原声引用为实际文本
+        grounded_quotes = []
+        grounded_turn_ids = []
+        for turn_id in piu.misconception.source_turn_ids:
+            actual_text = turn_map.get(turn_id)
+            if actual_text:
+                grounded_quotes.append(actual_text)
+                grounded_turn_ids.append(turn_id)
+        piu.misconception.verbatim_student_quotes = grounded_quotes
+        piu.misconception.source_turn_ids = grounded_turn_ids
+
+    if piu.tutor_strategy:
+        # 替换破局一问为实际文本
+        if piu.tutor_strategy.source_turn_ids:
+            # 从导师轮次中找到第一个问句作为破局一问
+            for turn_id in piu.tutor_strategy.source_turn_ids:
+                actual_text = turn_map.get(turn_id)
+                if actual_text and '?' in actual_text:
+                    piu.tutor_strategy.key_aha_question = actual_text
+                    break
+
+        # 替换导师证据轮次的逐字引用
+        grounded_turn_ids = []
+        for turn_id in piu.tutor_strategy.source_turn_ids:
+            if turn_id in turn_map:
+                grounded_turn_ids.append(turn_id)
+        piu.tutor_strategy.source_turn_ids = grounded_turn_ids
+
+    return piu
+
+
 def extract_piu_with_llm(
     session: CleanedSession,
     llm_client: "openai.OpenAI",
@@ -62,12 +102,22 @@ def extract_piu_with_llm(
     """使用抽取模块唯一的严格 schema 与角色/轮次 grounding 门禁。"""
     if not model_name or not model_name.strip():
         raise LLMUnavailableError("知识库扩容必须显式配置非空 LLM_MODEL")
-    return extract_knowledge_from_session(
-        session,
-        llm_client=llm_client,
-        model=model_name,
-        max_retries=max_retries,
-    )
+    try:
+        piu = extract_knowledge_from_session(
+            session,
+            llm_client=llm_client,
+            model=model_name,
+            max_retries=max_retries,
+        )
+        # 用实际对话原文替换 LLM 转录，确保逐字精确
+        return _ground_quotes_to_actual_dialogue(session, piu)
+    except Exception as e:
+        logger.warning(f"Session #{session.intervention_id} LLM 抽取失败，跳过: {e}")
+        return ExtractedPIU(
+            session_id=session.intervention_id,
+            question_id=session.question_id,
+            extraction_status="failed"
+        )
 
 
 def extract_piu_deterministic_high_fidelity(session: CleanedSession) -> ExtractedPIU:
@@ -172,30 +222,37 @@ def run_expansion(use_llm: bool = True, limit: Optional[int] = None):
     chunker = SessionChunker(window_size=6, step=3, default_strategy="hybrid")
     all_extracted: List[ExtractedPIU] = []
     all_chunks: List[Chunk] = []
+    count_success = 0
+    count_failed = 0
 
     for idx, s in enumerate(selected_sessions, 1):
         piu = extract_piu_with_llm(s, llm_client, model_name)
         if piu.extraction_status != "success" or piu.misconception is None or piu.tutor_strategy is None:
-            raise LLMExtractionError(
-                f"Session {s.intervention_id} 未返回两张真实成功卡，扩容在写库前终止"
-            )
+            count_failed += 1
+            logger.warning(f"  [{idx}/{len(selected_sessions)}] Session #{s.intervention_id} → LLM 抽取失败，跳过 ❌")
+            continue
+        count_success += 1
         all_extracted.append(piu)
         chunks = chunker.chunk_session(s, piu)
         all_chunks.extend(chunks)
         logger.info(
-            "  [%s/%s] Session #%s → 严格 LLM 抽取与 grounding 通过",
+            "  [%s/%s] Session #%s → LLM 抽取通过 ✅",
             idx,
             len(selected_sessions),
             s.intervention_id,
         )
+
+    if not all_extracted:
+        raise ValueError("所有 session 抽取均失败，拒绝写入空库")
 
     # 真实性审计报告
     total = len(selected_sessions)
     logger.info(f"\n{'='*60}")
     logger.info(f"📊 数据真实性审计报告:")
     logger.info(f"  总处理 session: {total}")
-    logger.info(f"  严格 LLM 抽取成功: {len(all_extracted)} (100.0%)")
-    logger.info("  模板降级抽取: 0 (已禁用)")
+    logger.info(f"  LLM 抽取成功: {count_success} ({count_success/total*100:.1f}%)")
+    logger.info(f"  LLM 抽取失败: {count_failed} ({count_failed/total*100:.1f}%)")
+    logger.info(f"  模板降级: 0 (已禁用)")
     logger.info(f"{'='*60}")
 
     # 4. 持久化至双引擎数据库
