@@ -41,6 +41,7 @@ from src.models import (
 from src.chunker import SessionChunker
 from src.storage_manager import DualEngineStorageManager
 from src.extract_knowledge import (
+    EXTRACTION_PROMPT_VERSION,
     LLMExtractionError,
     LLMUnavailableError,
     extract_knowledge_from_session,
@@ -99,7 +100,7 @@ def extract_piu_with_llm(
     model_name: str,
     max_retries: int = 2
 ) -> ExtractedPIU:
-    """使用抽取模块唯一的严格 schema 与角色/轮次 grounding 门禁。"""
+    """使用 evidence-completeness-v2 与严格 schema/角色 grounding 门禁。"""
     if not model_name or not model_name.strip():
         raise LLMUnavailableError("知识库扩容必须显式配置非空 LLM_MODEL")
     try:
@@ -108,16 +109,19 @@ def extract_piu_with_llm(
             llm_client=llm_client,
             model=model_name,
             max_retries=max_retries,
+            # 第二遍 evidence audit 尚未通过真实 provider 评测，保持显式关闭。
+            evidence_audit=False,
         )
         # 用实际对话原文替换 LLM 转录，确保逐字精确
         return _ground_quotes_to_actual_dialogue(session, piu)
-    except Exception as e:
-        logger.warning(f"Session #{session.intervention_id} LLM 抽取失败，跳过: {e}")
-        return ExtractedPIU(
-            session_id=session.intervention_id,
-            question_id=session.question_id,
-            extraction_status="failed"
-        )
+    except (LLMExtractionError, LLMUnavailableError):
+        logger.error("Session #%s LLM 抽取失败，扩容任务立即终止", session.intervention_id)
+        raise
+    except Exception as exc:
+        logger.error("Session #%s LLM 抽取发生未预期异常，扩容任务立即终止: %s", session.intervention_id, exc)
+        raise LLMExtractionError(
+            f"Session {session.intervention_id} 扩容抽取失败，拒绝继续部分写入"
+        ) from exc
 
 
 def extract_piu_deterministic_high_fidelity(session: CleanedSession) -> ExtractedPIU:
@@ -207,7 +211,11 @@ def run_expansion(use_llm: bool = True, limit: Optional[int] = None):
     if base_url:
         client_kwargs["base_url"] = base_url
     llm_client = openai.OpenAI(**client_kwargs)
-    logger.info("✅ LLM 严格抽取模式已启用 (model=%s)", model_name)
+    logger.info(
+        "✅ LLM 严格抽取模式已启用 (model=%s, prompt_version=%s, evidence_audit=false)",
+        model_name,
+        EXTRACTION_PROMPT_VERSION,
+    )
 
     # 2. 分层抽样
     selected_sessions = select_stratified_100_sessions()

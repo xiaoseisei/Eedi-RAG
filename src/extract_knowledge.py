@@ -48,6 +48,11 @@ from src.models import (
 
 logger = logging.getLogger(__name__)
 
+# Bump this when evidence-selection instructions change so extraction reports
+# can distinguish old representative-pointer runs from exhaustive evidence runs.
+EXTRACTION_PROMPT_VERSION = "evidence-completeness-v2"
+EVIDENCE_AUDIT_VERSION = "evidence-audit-v1"
+
 
 class LLMUnavailableError(RuntimeError):
     """当未配置有效的 LLM API Key 或外部模型服务不可用时抛出 (Fail-Fast)。"""
@@ -93,10 +98,21 @@ class _StrictTutorStrategyPayload(BaseModel):
 
 
 class _StrictExtractionPayload(BaseModel):
+    """LLM 原始 JSON 的顶层严格契约: 双卡片必须齐全，多余字段与空值一律拒绝。"""
+
     model_config = ConfigDict(extra="forbid", strict=True)
 
     misconception: _StrictMisconceptionPayload
     tutor_strategy: _StrictTutorStrategyPayload
+
+
+class _StrictEvidenceAuditPayload(BaseModel):
+    """Second-pass contract for a minimal, role-correct evidence set."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    misconception_source_turn_ids: List[int] = Field(min_length=1)
+    tutor_strategy_source_turn_ids: List[int] = Field(min_length=1)
 
 
 def build_extraction_prompt(session: CleanedSession) -> str:
@@ -149,6 +165,10 @@ def build_extraction_prompt(session: CleanedSession) -> str:
 2. "misconception.verbatim_student_quotes" 中的每一句话，必须是上方实录中学生实际发言的精确字面子串 (Exact Substring)，严禁任何美化或编造！
 3. "tutor_strategy.strategy_category" 必须从以下标准分类中选取一个: ['Socratic_Questioning', 'Scaffolding', 'Counter_Example', 'Analogy', 'Revoicing']。
 4. "tutor_strategy.key_aha_question" 必须是导师在实录中提出的最核心破局提问。
+5. `source_turn_ids` 是**证据覆盖集合**，不是代表性样本：必须穷举所有直接支撑该卡片结论的对话轮次，按时序列出且不得重复。学生卡片至少检查“首次暴露错误、解释/坚持错误、修正或确认”各类学生发言；导师卡片至少检查“诊断/追问、关键提问、脚手架/验证、结果确认”各类导师发言。若某类在实录中不存在，不要臆造轮次。
+6. 在输出 JSON 前先进行一次“证据完整性自检”：逐轮扫描完整实录，分别建立学生和导师的直接证据清单，再将清单中的全部 Turn ID 写入对应 `source_turn_ids`。禁止只返回一条最能代表主题的 Turn，也禁止为了减少字段而省略同一论证链上的其他直接证据。
+7. `misconception.verbatim_student_quotes` 应覆盖所选学生证据中的关键原声；每条引用必须能在对应学生 Turn 中逐字找到。`tutor_strategy.key_aha_question` 必须逐字来自所选导师 Turn；其他导师证据通过 `source_turn_ids` 保留，不要把它们改写成不存在的引用。
+8. `key_aha_question` 必须是**单个导师 Turn 内的短精确子串**（建议只保留核心问题句）；不得拼接多个 Turn，不得添加 `Turn N` 标签、引号或实录中不存在的表扬/emoji 文本。对应 `source_turn_ids` 至少包含该问题所在的 Tutor Turn。
 
 请严格按照以下 JSON Schema 键名结构输出:
 ```json
@@ -182,8 +202,57 @@ def build_extraction_prompt(session: CleanedSession) -> str:
     return prompt
 
 
+def build_evidence_audit_prompt(session: CleanedSession, extracted: ExtractedPIU) -> str:
+    """Build a second-pass prompt that audits pointer completeness and noise.
+
+    The auditor is not asked to rewrite the cards.  It only returns the
+    minimal, role-correct set of Turn IDs that directly supports each draft
+    card, allowing the caller to keep card semantics stable while expanding
+    missing evidence pointers.
+    """
+    turns_formatted = []
+    for turn in session.turns:
+        speaker_tag = "[TUTOR]" if turn.is_tutor else "[STUDENT]"
+        turns_formatted.append(f"[Turn {turn.turn_id}] {speaker_tag}: {turn.text}")
+    draft_json = json.dumps(extracted.model_dump(), ensure_ascii=False, indent=2)
+    return f"""你是严格的证据审计员，不要重写卡片语义，只审查 source_turn_ids。
+
+会话 ID: {session.intervention_id}
+
+【完整师生时序对话】
+{chr(10).join(turns_formatted)}
+
+【第一遍生成的卡片草稿】
+{draft_json}
+
+请分别为 misconception 和 tutor_strategy 返回**最小充分且完整**的直接证据 Turn ID 集合：
+1. 学生集合只允许 [STUDENT] Turn；导师集合只允许 [TUTOR] Turn；ID 必须存在于上方实录。
+2. “完整”表示覆盖卡片结论所依赖的全部直接证据链（错误暴露、关键解释/坚持、修正确认；或诊断追问、Aha 提问、脚手架、结果确认），不能只留一条代表性 Turn。
+3. “最小充分”表示排除问候、纯语气词、泛化过渡、与卡片结论无直接关系的计算或上下文；对每个候选做反事实检查：删掉它后若其他证据仍足以支持同一结论，就不要纳入。
+4. 不要根据题目常识臆造证据，也不要把相邻但无直接支撑作用的 Turn 当作证据。
+
+只输出严格 JSON，不要输出解释：
+{{
+  "misconception_source_turn_ids": [1, 2],
+  "tutor_strategy_source_turn_ids": [3, 4]
+}}
+"""
+
+
 def _canonicalize_evidence_text(text: str) -> str:
+    """\u5f15\u7528\u6bd4\u5bf9\u524d\u7684\u6587\u672c\u89c4\u8303\u5316: NFKC \u5f52\u4e00 + \u96f6\u5bbd\u5b57\u7b26\u5254\u9664 + \u7a7a\u767d\u538b\u7f29 + \u53bb\u9996\u5c3e emoji\u3002
+
+    \u7528\u4e8e\u5438\u6536 LLM \u8f6c\u5f55\u5f15\u7528\u4e0e\u539f\u6587\u4e4b\u95f4\u7684\u65e0\u5bb3\u5dee\u5f02 (\u6487\u53f7/\u7a7a\u683c/\u8868\u60c5\u7b26\u53f7)\uff0c
+    \u53ea\u4fdd\u7559\u6709\u610f\u4e49\u7684\u6587\u5b57\u5dee\u5f02\u4f5c\u4e3a Grounding Gate \u7684\u5931\u8d25\u4f9d\u636e\u3002
+    """
     value = unicodedata.normalize("NFKC", str(text)).replace("\u200b", "")
+    # Normalize typographic punctuation emitted by transcription/LLM output;
+    # this is formatting normalization, not fuzzy matching.
+    value = value.translate(str.maketrans({
+        "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",
+        "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"',
+        "\u2013": "-", "\u2014": "-", "\u2212": "-", "\u2026": "...",
+    }))
     value = re.sub(r"\s+", " ", value).strip()
     while value and unicodedata.category(value[0]) in {"So", "Sk"}:
         value = value[1:].lstrip()
@@ -212,6 +281,150 @@ def validate_verbatim_grounding(quote: str, turns: List[DialogueTurn]) -> Tuple[
             return True, t.turn_id
             
     return False, None
+
+
+def _call_structured_once(
+    client: Any,
+    *,
+    effective_model: Optional[str],
+    messages: List[Dict[str, str]],
+    prompt: str,
+    temperature: float,
+) -> Any:
+    """Call an injected structured client or OpenAI-compatible client once."""
+    if hasattr(client, "generate_structured"):
+        request = messages if getattr(client, "supports_messages", False) else prompt
+        return client.generate_structured(request)
+    if hasattr(client, "chat") and hasattr(client.chat, "completions"):
+        if not effective_model:
+            raise LLMUnavailableError("使用 OpenAI 兼容客户端时必须显式配置 LLM_MODEL。")
+        response = client.chat.completions.create(
+            model=effective_model,
+            messages=messages,
+            response_format={"type": "json_object"},
+            temperature=temperature,
+        )
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("LLM 返回空响应")
+        return content
+    raise LLMUnavailableError(
+        "llm_client 必须实现 generate_structured() 或 OpenAI 兼容 chat.completions 接口。"
+    )
+
+
+def _validate_audit_turn_ids(
+    *,
+    turn_ids: List[int],
+    session: CleanedSession,
+    expected_tutor: bool,
+    label: str,
+) -> None:
+    """审计轮次 ID 门禁: 不允许重复，且每个 ID 必须存在且说话人角色与预期一致。"""
+    if len(set(turn_ids)) != len(turn_ids):
+        raise ValueError(f"{label} source_turn_ids 不允许重复")
+    turns_by_id = {turn.turn_id: turn for turn in session.turns}
+    for turn_id in turn_ids:
+        turn = turns_by_id.get(turn_id)
+        if turn is None or turn.is_tutor != expected_tutor:
+            role = "导师" if expected_tutor else "学生"
+            raise ValueError(f"{label} source_turn_ids 包含不存在或非{role}轮次: {turn_id}")
+
+
+def _merge_evidence_audit(
+    extracted: ExtractedPIU,
+    audit: _StrictEvidenceAuditPayload,
+    session: CleanedSession,
+) -> ExtractedPIU:
+    """Union audited IDs with draft IDs and ground any newly added student quotes."""
+    _validate_audit_turn_ids(
+        turn_ids=audit.misconception_source_turn_ids,
+        session=session,
+        expected_tutor=False,
+        label="misconception audit",
+    )
+    _validate_audit_turn_ids(
+        turn_ids=audit.tutor_strategy_source_turn_ids,
+        session=session,
+        expected_tutor=True,
+        label="tutor_strategy audit",
+    )
+    if extracted.misconception is None or extracted.tutor_strategy is None:
+        raise ValueError("evidence audit 要求两张已成功生成的卡片")
+    turn_map = {turn.turn_id: turn for turn in session.turns}
+    student_ids = sorted(set(extracted.misconception.source_turn_ids) | set(audit.misconception_source_turn_ids))
+    tutor_ids = sorted(set(extracted.tutor_strategy.source_turn_ids) | set(audit.tutor_strategy_source_turn_ids))
+    existing_quotes = list(extracted.misconception.verbatim_student_quotes)
+    canonical_quotes = {_canonicalize_evidence_text(quote) for quote in existing_quotes}
+    for turn_id in student_ids:
+        text = turn_map[turn_id].text
+        canonical = _canonicalize_evidence_text(text)
+        if canonical not in canonical_quotes:
+            existing_quotes.append(text)
+            canonical_quotes.add(canonical)
+    misconception = extracted.misconception.model_copy(
+        update={"source_turn_ids": student_ids, "verbatim_student_quotes": existing_quotes}
+    )
+    tutor_strategy = extracted.tutor_strategy.model_copy(update={"source_turn_ids": tutor_ids})
+    return extracted.model_copy(update={"misconception": misconception, "tutor_strategy": tutor_strategy})
+
+
+def _run_evidence_audit(
+    *,
+    extracted: ExtractedPIU,
+    session: CleanedSession,
+    client: Any,
+    effective_model: Optional[str],
+    temperature: float,
+    max_retries: int,
+) -> ExtractedPIU:
+    """二次证据审计: 让 LLM 在严格契约下补选角色正确的证据轮次，再与草稿并集合并。
+
+    审计失败会带错误反馈自纠重试 (最多 max_retries 次)，耗尽后抛 LLMExtractionError，
+    绝不静默采用未审计的卡片。
+    """
+    prompt = build_evidence_audit_prompt(session, extracted)
+    messages: List[Dict[str, str]] = [
+        {"role": "system", "content": "You are a strict evidence auditor. Output JSON only."},
+        {"role": "user", "content": prompt},
+    ]
+    last_error: Optional[Exception] = None
+    last_raw: Any = {}
+    for attempt in range(1, max_retries + 1):
+        try:
+            last_raw = _call_structured_once(
+                client,
+                effective_model=effective_model,
+                messages=messages,
+                prompt=prompt,
+                temperature=temperature,
+            )
+            if isinstance(last_raw, str):
+                last_raw = json.loads(last_raw)
+            audit = _StrictEvidenceAuditPayload.model_validate(last_raw)
+            return _merge_evidence_audit(extracted, audit, session)
+        except (LLMUnavailableError, LLMExtractionError):
+            raise
+        except Exception as exc:
+            last_error = exc
+            if attempt < max_retries:
+                logger.warning(
+                    "Session %s evidence audit failed (attempt %s/%s): %s; retrying",
+                    session.intervention_id,
+                    attempt,
+                    max_retries,
+                    exc,
+                )
+                serialized = last_raw if isinstance(last_raw, str) else json.dumps(last_raw, ensure_ascii=False)
+                messages.extend(
+                    [
+                        {"role": "assistant", "content": serialized},
+                        {"role": "user", "content": f"证据审计输出校验失败: {exc}。只修正 Turn ID 集合后重新输出严格 JSON。"},
+                    ]
+                )
+    raise LLMExtractionError(
+        f"证据审计在 {max_retries} 次重试后仍然失败 (Session {session.intervention_id}): {last_error}"
+    ) from last_error
 
 
 def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU:
@@ -274,6 +487,7 @@ def extract_knowledge_from_session(
     model: Optional[str] = None,
     temperature: float = 0.1,
     max_retries: int = 3,
+    evidence_audit: bool = False,
     allow_none_on_failure: bool = False
 ) -> ExtractedPIU:
     """
@@ -292,6 +506,7 @@ def extract_knowledge_from_session(
       model (Optional[str]): 模型名称 (默认读取 LLM_MODEL；不存在隐式默认值)
       temperature (float): 采样温度 (默认 0.1)
       max_retries (int): 校验失败时的最大自纠重试次数 (默认 3 次)
+      evidence_audit (bool): 是否在首轮抽取后执行第二遍最小充分证据审计 (默认关闭，需显式开启)
       allow_none_on_failure (bool): 已废弃兼容参数；任何取值都始终 Fail-Fast
       
     返回:
@@ -335,27 +550,25 @@ def extract_knowledge_from_session(
     last_raw: Any = {}
     for attempt in range(1, max_retries + 1):
         try:
-            if hasattr(client, "generate_structured"):
-                request = messages if getattr(client, "supports_messages", False) else prompt
-                last_raw = client.generate_structured(request)
-            elif hasattr(client, "chat") and hasattr(client.chat, "completions"):
-                if not effective_model:
-                    raise LLMUnavailableError("使用 OpenAI 兼容客户端时必须显式配置 LLM_MODEL。")
-                response = client.chat.completions.create(
-                    model=effective_model,
-                    messages=messages,
-                    response_format={"type": "json_object"},
+            last_raw = _call_structured_once(
+                client,
+                effective_model=effective_model,
+                messages=messages,
+                prompt=prompt,
+                temperature=temperature,
+            )
+            parsed = _parse_and_ground_payload(last_raw, session)
+            if evidence_audit:
+                return _run_evidence_audit(
+                    extracted=parsed,
+                    session=session,
+                    client=client,
+                    effective_model=effective_model,
                     temperature=temperature,
+                    max_retries=max_retries,
                 )
-                last_raw = response.choices[0].message.content
-                if not last_raw:
-                    raise ValueError("LLM 返回空响应")
-            else:
-                raise LLMUnavailableError(
-                    "llm_client 必须实现 generate_structured() 或 OpenAI 兼容 chat.completions 接口。"
-                )
-            return _parse_and_ground_payload(last_raw, session)
-        except LLMUnavailableError:
+            return parsed
+        except (LLMUnavailableError, LLMExtractionError):
             raise
         except Exception as exc:
             last_error = exc

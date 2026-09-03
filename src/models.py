@@ -197,6 +197,7 @@ class StudentMisconceptionProfile(BaseModel):
 
     @model_validator(mode="after")
     def validate_grounding_fields(self) -> "StudentMisconceptionProfile":
+        """证据字段门禁: 轮次 ID 必须为正整数，原声引用不允许空串 (防伪造空证据入库)。"""
         if any(turn_id < 1 for turn_id in self.source_turn_ids):
             raise ValueError("source_turn_ids 必须全部为正整数")
         if any(not quote.strip() for quote in self.verbatim_student_quotes):
@@ -262,6 +263,7 @@ class TutorStrategyProfile(BaseModel):
 
     @model_validator(mode="after")
     def validate_strategy_grounding(self) -> "TutorStrategyProfile":
+        """证据字段门禁: 轮次 ID 必须为正整数，脚手架步骤不允许空串。"""
         if any(turn_id < 1 for turn_id in self.source_turn_ids):
             raise ValueError("source_turn_ids 必须全部为正整数")
         if any(not step.strip() for step in self.scaffolding_steps):
@@ -301,6 +303,7 @@ class ExtractedPIU(BaseModel):
 
     @model_validator(mode="after")
     def validate_status_payload_consistency(self) -> "ExtractedPIU":
+        """状态-载荷一致性门禁: success=双卡 / partial=单卡 / failed|skipped=零卡，杜绝状态与内容矛盾。"""
         present_count = int(self.misconception is not None) + int(self.tutor_strategy is not None)
         if self.extraction_status == "success" and present_count != 2:
             raise ValueError("success 状态必须同时包含 misconception 与 tutor_strategy")

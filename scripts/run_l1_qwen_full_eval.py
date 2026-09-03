@@ -205,6 +205,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--top-k", type=int, default=20)
     parser.add_argument("--dataset-manifest", type=Path, required=True)
+    parser.add_argument("--expected-artifact-hash", type=str, default=None)
+    parser.add_argument("--split-manifest", type=Path, default=None)
     args = parser.parse_args(argv)
     _load_dotenv_if_available()
     if args.top_k <= 0:
@@ -213,7 +215,7 @@ def main(argv: list[str] | None = None) -> int:
     chroma_path = args.chroma.resolve(strict=True)
     dataset_manifest_path = args.dataset_manifest.resolve(strict=True)
     dataset_manifest = json.loads(dataset_manifest_path.read_text(encoding="utf-8"))
-    split_file = dataset_manifest_path.parent / dataset_manifest["split"]["file"]
+    split_file = args.split_manifest.resolve(strict=True) if args.split_manifest else dataset_manifest_path.parent / dataset_manifest["split"]["file"]
     split_manifest = json.loads(split_file.read_text(encoding="utf-8"))
     split_assignments = split_manifest["query_assignments"]
     provider = SiliconFlowQwen3EmbeddingFunction.from_env()
@@ -221,7 +223,7 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError(f"expected Qwen/Qwen3-Embedding-0.6B, got {provider.model!r}")
 
     source_hash = hash_storage_artifacts(db_path, chroma_path)
-    expected_hash = dataset_manifest["artifact_hashes"]["qwen_combined_sha256"]
+    expected_hash = args.expected_artifact_hash or dataset_manifest["artifact_hashes"]["qwen_combined_sha256"]
     if source_hash != expected_hash:
         raise ValueError(f"Qwen source hash does not match frozen dataset: expected={expected_hash} actual={source_hash}")
     storage_snapshot = capture_storage_snapshot_from_paths(db_path, chroma_path, case_id="storage-qwen-closeout")

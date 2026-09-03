@@ -41,6 +41,7 @@ def build_report(
     l2_dataset_manifest_path: Path,
     l3_report_path: Path,
     l3_dataset_manifest_path: Path,
+    turn_root_cause_path: Path | None = None,
 ) -> dict[str, Any]:
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"refusing to overwrite L1/L2/L3 report directory: {output_dir}")
@@ -51,6 +52,7 @@ def build_report(
     l2_dataset = _load(l2_dataset_manifest_path)
     l3 = _load(l3_report_path)
     l3_dataset = _load(l3_dataset_manifest_path)
+    turn_root_cause = _load(turn_root_cause_path) if turn_root_cause_path is not None else None
     hashes = {
         "l1_qwen_combined": l1_manifest["artifact_hashes"]["qwen_combined_sha256"],
         "l2_artifact": l2["artifact_hash_before"],
@@ -69,6 +71,8 @@ def build_report(
         "l3_raw_cases": _raw_file(l3_report_path.parent / "raw_cases.jsonl"),
         "l3_dataset_manifest": _raw_file(l3_dataset_manifest_path),
     }
+    if turn_root_cause_path is not None:
+        raw_files["turn_root_cause_report"] = _raw_file(turn_root_cause_path)
     l1_aggregate = [item for item in l1.get("aggregate_metrics", [])]
     l2_aggregate = l2.get("metric_aggregates", [])
     l3_metrics = l3.get("metrics", {})
@@ -152,6 +156,14 @@ def build_report(
             "metrics": l3_metrics,
             "report_path": str(l3_report_path.resolve()),
         },
+        "turn_root_cause": {
+            "report_path": str(turn_root_cause_path.resolve()),
+            "schema_version": turn_root_cause.get("schema_version"),
+            "dataset": turn_root_cause.get("dataset"),
+            "root_cause_counts": turn_root_cause.get("root_cause_counts"),
+            "card_rank_pointer_overlap": turn_root_cause.get("card_rank_pointer_overlap"),
+            "evidence_chain": turn_root_cause.get("evidence_chain"),
+        } if turn_root_cause_path is not None and turn_root_cause is not None else None,
         "artifact_hashes": hashes,
         "artifact_hash_consistent": hash_consistent,
         "raw_data_files": raw_files,
@@ -202,10 +214,25 @@ def build_report(
             lines.append(f"| {name} | {value['mean']:.4f} | {value['dev_mean']:.4f} | {value['holdout_mean']:.4f} | {value['status']} |")
         else:
             lines.append(f"| {name} | — | — | — | {value.get('status', 'UNMEASURED')} |")
-    lines.extend(["", "## 6. 组件优化结论", "", "| Layer | Component | Evidence | Conclusion |", "| --- | --- | --- | --- |"])
+    if turn_root_cause is not None:
+        evidence = turn_root_cause.get("evidence_chain", {})
+        overlap = turn_root_cause.get("card_rank_pointer_overlap", {})
+        counts = turn_root_cause.get("root_cause_counts", {})
+        lines.extend([
+            "",
+            "## 6. Turn 级召回根因（provisional qrels）",
+            "",
+            f"- 生产窗口 union coverage=`{evidence.get('window_generation_coverage')}`；Turn coverage@3/@5=`{evidence.get('top3_turn_coverage')}`/`{evidence.get('top5_turn_coverage')}`。",
+            f"- 角色正确 card pointer recall=`{evidence.get('card_pointer_role_correct_mean')}`；根因分布：pointer-only `{counts.get('EXTRACTION_POINTER', 0)}`、pointer+rank `{counts.get('EXTRACTION_POINTER_AND_RETRIEVAL_RANK', 0)}`、window-rank-only `{counts.get('WINDOW_RETRIEVAL_RANK', 0)}`。",
+            f"- Card Recall@3 miss 与 pointer loss 重叠 `{overlap.get('card_rank_miss_with_pointer_loss_count', 0)}/{overlap.get('card_rank_miss_cases', 0)}`；isolated ranking miss=`{overlap.get('card_rank_miss_without_pointer_loss_count', 0)}`。",
+            "- qrels 是规则派生 provisional labels，必须人工复核后才能用于正式质量结论。",
+        ])
+    section_no = "7" if turn_root_cause is not None else "6"
+    lines.extend(["", f"## {section_no}. 组件优化结论", "", "| Layer | Component | Evidence | Conclusion |", "| --- | --- | --- | --- |"])
     for item in component_conclusions:
         lines.append(f"| {item['layer']} | {item['component']} | {item['evidence']} | {item['conclusion']} |")
-    lines.extend(["", "## 7. 限制与下一步", ""])
+    section_no = "8" if turn_root_cause is not None else "7"
+    lines.extend(["", f"## {section_no}. 限制与下一步", ""])
     lines.extend(f"- {item}" for item in report["limitations"])
     (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report
@@ -220,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--l2-dataset-manifest", type=Path, required=True)
     parser.add_argument("--l3-report", type=Path, required=True)
     parser.add_argument("--l3-dataset-manifest", type=Path, required=True)
+    parser.add_argument("--turn-root-cause", type=Path)
     args = parser.parse_args(argv)
     report = build_report(
         output_dir=args.output_dir,
@@ -229,6 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         l2_dataset_manifest_path=args.l2_dataset_manifest,
         l3_report_path=args.l3_report,
         l3_dataset_manifest_path=args.l3_dataset_manifest,
+        turn_root_cause_path=args.turn_root_cause.resolve(strict=True) if args.turn_root_cause else None,
     )
     print(json.dumps({"output_dir": str(args.output_dir), "delivery_decision": report["delivery_decision"], "artifact_hash_consistent": report["artifact_hash_consistent"]}, ensure_ascii=False))
     return 0

@@ -141,6 +141,7 @@ class DomainKnowledgeInjector:
     """
 
     def __init__(self, glossary: Optional[List[Dict[str, Any]]] = None):
+        """Args: glossary: 领域词条表 (默认 MATH_DOMAIN_GLOSSARY)，可注入自定义考点映射。"""
         self.glossary = glossary or MATH_DOMAIN_GLOSSARY
 
     def match_and_inject(self, raw_query: str) -> Tuple[str, List[str]]:
@@ -204,6 +205,16 @@ class MultiPerspectiveQueryRewriter:
         mode: Optional[str] = None,
         max_retries: int = 3,
     ):
+        """
+        构造函数强制显式配置: 不存在任何隐式默认后端。
+
+        Args:
+            openai_client: OpenAI 兼容客户端 (llm 模式必填)。
+            model_name: 改写用模型名 (llm 模式必填)。
+            injector: 领域知识注入器 (默认内置 MATH_DOMAIN_GLOSSARY)。
+            mode: 'llm' (大模型多视角改写) 或 'deterministic' (离线规则模板，调用方显式选择)。
+            max_retries: LLM 输出校验失败时的自纠重试上限。
+        """
         if mode not in {"llm", "deterministic"}:
             raise ValueError("mode 必须显式指定为 'llm' 或 'deterministic'")
         if mode == "llm" and openai_client is None:
@@ -220,6 +231,7 @@ class MultiPerspectiveQueryRewriter:
 
     @property
     def backend_name(self) -> str:
+        """当前后端标识 (llm / deterministic_rules)，写入评测 system_config 以保证可追溯。"""
         return "llm" if self.mode == "llm" else "deterministic_rules"
 
     def rewrite(self, raw_query: str) -> MultiPerspectiveQueries:

@@ -1055,3 +1055,119 @@ L3 最新全量 proxy 仍为 `reports/eval/l3-business-proxy-20260903-051500/`�
 最终三层报告已更新为：`reports/eval/l123-analysis-20260903-071500/`，决策=`L1_BLOCKED_L2_VALIDATED_L3_BUSINESS_UNMEASURED`。该报告包含三层 manifest、raw observations/traces/cases 路径与 SHA-256、aggregate/case/slice 指标和组件优化结论；其中 L2 证据文字已与最新 24 条指标 raw report 对齐。
 
 最终验证：全量 `pytest`=`151 passed, 1 failed`；唯一失败仍是既有 `test_llm_expansion_extractor_uses_strict_shared_gate` 扩容异常契约冲突；`compileall` 和 `git diff --check` 通过。`.venv` `pip check` 仍报告可选 `huggingface-hub` 要求 `click>=8.4.2` 与 DeepEval `click<8.4.0` 的依赖冲突；不影响已验证的 L2 import/runner，但后续应通过独立环境或兼容依赖约束解决。
+
+## 18. Turn 级召回根因排查（2026-09-03）
+
+本轮新增冻结的技术代理数据集、分级 qrels、人工复核队列和根因报告，用于区分卡片生成、卡片排序、窗口检索/排序、Assembler 与 Generator 的责任边界：
+
+- Turn/card graded 数据集：`evals/datasets/turn-card-graded-provisional-20260903-110000/`，30 cases、21,570 条窗口 qrel、100 张卡片 qrel；标签为 0/1/2/3 的**规则派生 provisional labels**，`needs_human_review=true`，不能当作最终业务真值。
+- 人工复核队列：`evals/datasets/graded-qrels-review-queue-20260903-112500/`，`review_queue.jsonl` 共 1,206 行（card=600、window=606；HIGH=323、MEDIUM=883），全部 `PENDING`。队列包含 Top-20 候选及 provisional relevance≥2 行。
+- 根因报告：`reports/eval/turn-recall-root-cause-20260903-120000/`（`report.md`/`report.json`），绑定上述数据集、L1 closeout 和 L2 report 的 SHA-256；源 Qwen combined artifact hash 未变化，`artifact_mutated=false`。
+- 三层总报告已重新生成：`reports/eval/l123-analysis-20260903-123000/`，在原 L1/L2/L3 证据之外嵌入 `turn_root_cause`、qrels 限制和卡片排序/指针重叠统计；交付决策仍为 `L1_BLOCKED_L2_VALIDATED_L3_BUSINESS_UNMEASURED`。
+
+### 18.1 证据链结论
+
+1. **窗口生成不是首因**：生产滑窗的全量 union 对 30/30 cases 覆盖全部 required Turn，`window_generation_coverage=1.0000`。因此“原文被 Chunking 丢失”目前没有证据。
+2. **卡片生成/source_turn_ids 是首要上游损失**：角色正确的卡片指针召回均值仅 `0.6833`（14/30 cases 有指针缺失）；Student Insight=`0.6111`，Tutor Intervention=`0.7917`。典型缺失见 Session 23、14、206、59，要求的角色 Turn 没进入对应卡片指针。
+3. **卡片 Embedding/排序不是已证实的主因**：卡片 graded Recall@3=`0.8333`，5 个卡片 Top-3 miss 全部与指针缺失重叠（`5/5`），无“指针完整但单独排序 miss”的案例。没有指针的证据，向量相似度无法补回。
+4. **窗口检索排序存在独立次因**：6/30 cases 指针完整但 Turn coverage@3<1（Window Retrieval Rank）；例如 Session 258、77、42 在 Top-3 未覆盖全部 required Turns，但 Top-5 可覆盖。当前 Turn coverage@3=`0.7944`、@5=`0.9000`，dev=`0.7569`、holdout=`0.9444`。
+5. **Assembler 当前不是文档级首因**：L1 的候选 retention/final evidence recall 等文档/槽位指标为 1.0；Turn 覆盖仍受上游指针和窗口排序输入约束。需要在最终 Context 上补充 Turn 级 trace，才能排除更细的装配丢失。
+6. **Generator 是下游引用/回答质量损失点**：已发出的 citation 精度/角色/quote 约 `0.9889`、authorization=`1.0`，但 L1 citation recall 仅 `0.5889`，L2 Real citation audit=`0.25`；说明“引用通常是真的”与“覆盖了所有必要证据”是两件事。L2 Gold/Real smoke 的 Answer Relevancy 均 `1.0`，不能掩盖 citation coverage 和教学表达不足（Pedagogical GEval=`0.6`）。
+
+### 18.2 当前优先级与限制
+
+- P0：对 provisional 0/1/2/3 qrels 做人工多相关复核，优先 level-2/3 和 Top-20 候选；复核完成前不得把 Recall/nDCG 写成业务准确率。
+- P1：对 14 个 pointer-loss case 重跑卡片抽取，要求按角色枚举**全部** claim-supporting Turns，并对 quote/source_turn_ids 做逐字和角色契约校验。
+- P1：对 6 个 pointer-complete/rank-loss case 增加 Turn-aware reranker 或 exact-query channel，在同一冻结 qrels 上做 dev/holdout 对照。
+- P1：Generator citation planner 必须覆盖 required evidence set；证据不足时显式报告 partial/degraded，不得从 gold qrels 反向复制 citation。
+- 上述结论是 Eedi 技术代理诊断，不是 NBCOT 或真实业务结论；qrels、Assembler Turn trace 和真实业务反馈仍未完成。
+
+## 19. 卡片 source_turn_ids 小规模修复评测（2026-09-03）
+
+### 19.1 方案决策
+
+暂不直接更换模型。当前首要缺陷是抽取契约只要求“引用真实”，没有要求“穷举同一论证链的全部直接证据”；因此先保留 `mimo-v2.5`，将抽取提示升级为 `evidence-completeness-v2`：按角色逐轮扫描，覆盖诊断/追问/脚手架/结果等直接证据，并在输出前做完整性自检。现有 JSON schema、角色校验、逐字 grounding gate 和 Fail-Fast 重试保持不变。
+
+### 19.2 A/B 结果
+
+评测脚本：`scripts/run_card_extraction_recall_eval.py`。样本为 6 个非 fallback pointer-loss sessions（23、14、206、33、287、469），baseline 直接读取与 Qwen 隔离索引同源的只读 `data/db/tutoring_knowledge.duckdb`，没有写入生产 DB/Chroma。
+
+报告：`reports/eval/card-extraction-recall-small-20260903-133000/`。
+
+| 指标 | 旧提示/卡片 | evidence-completeness-v2 | 变化 |
+|---|---:|---:|---:|
+| 角色正确指针召回（6 cases） | 0.1667 | 0.7222 | +0.5556 |
+| misconception 子集（4 cases） | 0.1250 | 0.5833 | +0.4583 |
+| strategy 子集（2 cases） | 0.2500 | 1.0000 | +0.7500 |
+| 成功/失败 | — | 6/0 | 全部通过严格 schema/grounding |
+| 改善/持平/下降 | — | 6/0/0 | 无下降案例 |
+
+结果说明：同模型、只改抽取契约即可显著提高 Turn 指针覆盖，当前没有“必须换模型”的证据。但部分输出仍会纳入较宽的同角色 Turn，且 Session 14/206 仍漏目标 Turn；因此下一步应增加二次 evidence-audit/最小充分证据判定，并补做 pointer precision/noise，而不是直接把本次 `0.7222` 宣布为最终达标。
+
+### 19.3 验证与下一步
+
+- 本轮测试：抽取、graded qrels、复核队列和三层报告相关测试共 `28 passed`；`compileall`、`git diff --check` 通过。
+- 全量 100 卡尚未重抽，生产 DB/Chroma 未修改；当前改动只影响后续真实抽取调用的提示词。
+- 若二次 evidence-audit 在更大 dev 集上仍低于目标，再对候选模型做同数据、同 schema、同 qrels 的 A/B；模型切换前必须记录成本、延迟、grounding 失败率和指针 precision。
+
+## 20. 二次 evidence-audit 状态（2026-09-03）
+
+已实现 `evidence_audit=True` 的第二遍严格审计：首轮卡片通过后，模型只返回两组最小充分 Turn ID；审计结果经 schema、存在性、角色和去重校验后，才与首轮指针合并；审计失败抛出 `LLMExtractionError`，不会静默沿用或伪造指针。
+
+本地契约测试已通过，但真实 provider 评测暂未完成：
+
+- `reports/eval/card-extraction-recall-audit-small-20260903-140000/`：3-case 运行在 provider 响应体读取阶段长时间无返回，已安全中止，状态 `UNMEASURED`。
+- `reports/eval/card-extraction-recall-audit-small-20260903-143000/`：同样在首轮/审计调用阶段挂起，已安全中止，状态 `UNMEASURED`。
+- `reports/eval/card-extraction-recall-audit-probe-20260903-150000/`：1-case、60 秒 probe 仍无法取得可解析响应，状态 `UNMEASURED`。
+
+因此当前决策是：**不把 evidence-audit 接入正式扩容，也不据此更换模型**。已验证的 `evidence-completeness-v2` 继续作为正式抽取提示；待 LLM provider 响应稳定后，再用相同 6-case/14-case、显式超时和冻结 qrels 复测。只有在第二遍取得真实、可审计且无明显 precision 退化的结果后，才将 `extract_piu_with_llm` 显式开启该 pass，并先写入 staging、重新建索引和回归 L1。
+
+### 20.1 直接替换结果
+
+已按当前授权将正式扩容代码路径替换为 `evidence-completeness-v2`（同一 `mimo-v2.5`），并在日志中固定记录 `prompt_version`；`evidence_audit` 保持显式 `false`。同时，扩容抽取失败不再被转换为 `failed` 后跳过，改为立即抛错，禁止部分成功卡片写入。
+
+注意：现有 `data/db/tutoring_knowledge.duckdb`、`data/chroma` 和 100 张历史卡仍是旧快照，尚未执行全量重抽取或覆盖。全量更新必须在 provider 稳定后写入 staging、完成全量成功与 Turn 指针审计，再进行蓝绿切换；本次没有伪装成“数据已经全部替换”。
+
+## 21. 100 场历史卡全量重抽取与生产切换（2026-09-03）
+
+### 21.1 全量重抽取
+
+新增 `scripts/reextract_cards_staging.py`，从生产 DB 只读读取 100 个 `intervention_id`，使用 `mimo-v2.5`、`evidence-completeness-v2`、`temperature=0.0`、严格角色/逐字 grounding；采用 2 workers 并发，自纠 `max_retries=4`。会话级失败会被记录并继续处理，遍历结束后只有失败清单为空才创建 staging DB/Chroma。
+
+最终 staging：`reports/eval/card-reextraction-staging-20260903-200000/`。
+
+- 100/100 sessions 成功，0 failures；200 张卡片、719 个滑动窗口、2,335 个 Turn。
+- staging snapshot：DuckDB `100/2335/100/100/719`；Chroma `100/100/719`。
+- staging prompt/model：`evidence-completeness-v2` / `mimo-v2.5`；`evidence_audit=false`。
+- staging DB SHA-256=`272ea013e792952aedee0a5aed38d9563fad7ced46281200b060306ce99dc184`。
+
+期间曾有两次失败 staging 尝试，均未写入 DB/Chroma：
+
+- `card-reextraction-staging-20260903-163000`：Session 33 在 2 retries 后角色指针失败。
+- `card-reextraction-staging-20260903-180000`：Session 100 在 4 retries 后因弯撇号 `don’t`/ASCII `don't` grounding 差异失败；随后补充了仅针对排版标点的 NFKC 归一化及测试。
+
+### 21.2 蓝绿切换与备份
+
+已将新 deterministic staging DB/Chroma 切换到生产路径：
+
+- 当前生产 DB：`data/db/tutoring_knowledge.duckdb`，SHA-256=`272ea013e792952aedee0a5aed38d9563fad7ced46281200b060306ce99dc184`。
+- 当前生产 Chroma：`data/chroma`；与 staging Chroma 逐集合计数一致，最近一次评测前后生产 combined hash=`de05478b086eead4b7a7f4b58b52f418f1450cb8766ce4274dd73c33e9e3e693`（Chroma SQLite 打开后可能产生内部 metadata hash 变化，评测前必须重新记录实际 hash；切换初始 hash=`9b8cacfd...` 仅作历史记录）。
+- 旧 DB 备份：`data/db/tutoring_knowledge.pre-card-reextract-20260903-220000.duckdb`，SHA-256=`09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad`。
+- 旧 Chroma 备份：`data/chroma-backups/card-reextract-20260903-220000/`。
+- Qwen 评测索引保留在：`reports/eval/card-reextraction-qwen-index-20260903-203000/chroma/`，未替换生产 deterministic Chroma。
+
+### 21.3 重抽后评测
+
+同一 30-case、21,570 window qrels、card graded qrels 的评测产物：
+
+- Qwen staging Turn/card 评测：`reports/eval/card-reextraction-turn-graded-20260903-210000/`。
+- 生产 deterministic 评测：`reports/eval/card-reextraction-turn-graded-production-20260903-221000/`。
+- 两者指标一致；相对旧生产 deterministic：card Recall@3=`0.3333→0.4667`、Recall@20=`0.6667→0.8000`、MRR=`0.3167→0.3833`、nDCG@5=`0.3000→0.3200`、角色正确 pointer recall=`0.6833→0.8722`。Card precision@5=`0.1200→0.1000`，说明指针覆盖提升伴随少量噪声，需后续最小充分证据审计。
+- Qwen 版本 card Recall@3/@5/@20、MRR 均为 `1.0000`，nDCG@5=`0.9395`。
+- Turn coverage@3=`0.7944`、@5=`0.9000` 未变化，因为本次只重抽卡片，滑动窗口未改变。
+- 根因报告：`reports/eval/card-reextraction-turn-root-cause-20260903-223500/`；pointer-loss cases 从 14 降至 7，`NO_UPSTREAM_TURN_LOSS_AT_K3` 从 10 增至 15，card rank miss=`0`。
+- 完整 L1 Qwen 组件评测：`reports/eval/l1-card-reextraction-qwen-full-20260903-223000/`；citation recall=`0.8056`（旧=`0.5889`），但仍低于 0.95；Turn recall@3=`0.7944`、Turn MRR=`0.8467` 仍未过门禁，整体 `BLOCKED`。
+
+### 21.4 当前边界
+
+生产卡库已经是全量新抽取版本，但 L1 尚未整体通过，不能宣称发布质量已达标。Generator citation coverage、窗口 Turn 排序、Assembler Turn 级 trace 和 provisional qrels 人工复核仍需继续；若需回滚，可使用上述带时间戳的 DB/Chroma 备份，禁止直接删除当前生产数据。

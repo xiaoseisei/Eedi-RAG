@@ -23,6 +23,8 @@ DEFAULT_QWEN3_EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
 
 @dataclass(frozen=True)
 class EmbeddingUsage:
+    """Embedding 调用累计遥测: 请求次数 / 重试 / 缓存命中 / token 消耗 / 延迟样本。"""
+
     request_count: int = 0
     retry_count: int = 0
     input_count: int = 0
@@ -38,7 +40,11 @@ class EmbeddingProviderError(RuntimeError):
 
 @dataclass(frozen=True)
 class EmbeddingIndexContract:
-    """Identity that must match on both document and query embedding paths."""
+    """Identity that must match on both document and query embedding paths.
+
+    建库与检索两侧必须使用同一 (provider, model, dimension, index_version) 组合，
+    否则检索将产生语义错配。该契约持久化在 Chroma metadata 中供启动时校验。
+    """
 
     provider: str
     model: str
@@ -53,7 +59,11 @@ class EmbeddingIndexContract:
 
 
 def validate_index_contract(metadata: dict[str, Any] | None, contract: EmbeddingIndexContract) -> None:
-    """Fail closed when a Chroma index was built by a different embedding contract."""
+    """Fail closed when a Chroma index was built by a different embedding contract.
+
+    打开既有索引前调用: 比对 Chroma metadata 中持久化的 embedding 契约与当前配置，
+    任何字段不匹配立即抛错，防止"用 A 模型向量查询 B 模型索引"的静默语义错配。
+    """
     metadata = metadata or {}
     expected = {
         "embedding_provider": contract.provider,
@@ -88,6 +98,18 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         index_version: str | None = None,
         cache: MutableMapping[str, list[float]] | None = None,
     ) -> None:
+        """初始化 OpenAI 兼容 embedding 客户端，参数在入口处全部严格校验。
+
+        Args:
+            api_key / base_url / model: OpenAI 兼容 /v1/embeddings 端点三元组。
+            timeout_seconds: 单次 HTTP 请求超时。
+            batch_size: 每次 API 调用打包的文本条数。
+            max_retries / retry_backoff_seconds: 失败重试次数与指数退避基数。
+            client: 测试注入用的预构建 OpenAI client (默认延迟构建)。
+            expected_dimension: 预期向量维度，响应校验时不符即抛错。
+            index_version: 索引契约版本号，参与缓存 key 与契约校验。
+            cache: 文本级向量缓存 (key 为 sha256 身份哈希)。
+        """
         if not api_key.strip():
             raise ValueError("embedding API key must not be blank")
         if not base_url.strip():
@@ -145,13 +167,16 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         )
 
     def name(self) -> str:
+        """Chroma EmbeddingFunction 标识名 (含模型名，供索引契约使用)。"""
         return f"openai_compatible:{self.model}"
 
     @property
     def dimension(self) -> int | None:
+        """向量维度: 首次真实响应后学习确定，或使用显式预期值。"""
         return self._dimension or self.expected_dimension
 
     def contract(self, *, index_version: str | None = None) -> EmbeddingIndexContract:
+        """构建当前配置的索引契约 (建库与检索两侧均须校验一致)。"""
         version = index_version or self.index_version
         if not version:
             raise EmbeddingProviderError("embedding index_version is required for an index contract")
@@ -162,10 +187,12 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
 
     @property
     def usage(self) -> EmbeddingUsage:
+        """累计调用遥测快照 (供评测与成本核算读取)。"""
         return self._usage
 
     @property
     def telemetry(self) -> dict[str, Any]:
+        """展开的遥测字典，附延迟 p50/p95 分位数。"""
         latencies = sorted(self._usage.request_latency_ms)
 
         def percentile(fraction: float) -> float | None:
@@ -181,6 +208,7 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         }
 
     def _cache_key(self, text: str) -> str:
+        """缓存键 = sha256(模型身份 + 索引版本 + 文本)。模型或版本变更自动失效旧缓存。"""
         identity = {
             "provider": self.name(),
             "model": self.model,
@@ -191,6 +219,11 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
     def __call__(self, input: Documents) -> Embeddings:
+        """Chroma EmbeddingFunction 入口: 去重 → 缓存命中 → 批量请求 → 按原序还原向量。
+
+        缺失向量按 batch_size 分批请求；仅完全校验成功的响应才会写入缓存。
+        最终结果按调用输入顺序精确还原，数量不符立即抛错。
+        """
         texts = [str(item) for item in input]
         if not texts:
             return []
@@ -243,6 +276,7 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         return vectors
 
     def _get_client(self) -> Any:
+        """延迟构建 OpenAI client (首次调用时)，避免初始化期即产生网络依赖。"""
         if self._client is None:
             try:
                 from openai import OpenAI
@@ -256,6 +290,7 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         return self._client
 
     def _embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """单批请求: 带指数退避重试，最终失败抛 EmbeddingProviderError (无零向量兜底)。"""
         last_error: Exception | None = None
         started = time.perf_counter()
         for attempt in range(self.max_retries + 1):
@@ -299,6 +334,10 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
         ) from last_error
 
     def _validate_response(self, response: Any, *, expected_count: int) -> list[list[float]]:
+        """响应校验门禁: 数量一致 / index 连续 / 向量非空 / 无 NaN-inf / 维度恒定。
+
+        任何一项不满足即抛错，确保只有"完全健康的向量批次"才能进入索引或缓存。
+        """
         data = list(getattr(response, "data", None) or [])
         if len(data) != expected_count:
             raise EmbeddingProviderError(
@@ -333,7 +372,11 @@ class OpenAICompatibleEmbeddingFunction(EmbeddingFunction):
 
 
 class SiliconFlowQwen3EmbeddingFunction(OpenAICompatibleEmbeddingFunction):
-    """Named provider for the initial SiliconFlow Qwen3 text embedding model."""
+    """Named provider for the initial SiliconFlow Qwen3 text embedding model.
+
+    预设 SiliconFlow 端点 + Qwen3-Embedding-0.6B 模型 + 1024 维契约，
+    是当前生产向量库 (data/chroma) 对应的 embedding 后端。
+    """
 
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("base_url", DEFAULT_SILICONFLOW_BASE_URL)

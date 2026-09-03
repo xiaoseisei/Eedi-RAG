@@ -27,12 +27,14 @@ if str(project_root) not in sys.path:
 
 from src.models import (
     CleanedSession,
+    DialogueTurn,
     StudentMisconceptionProfile,
     TutorStrategyProfile,
     ExtractedPIU
 )
 from src.extract_knowledge import (
     build_extraction_prompt,
+    build_evidence_audit_prompt,
     validate_verbatim_grounding,
     extract_knowledge_from_session,
     batch_extract_knowledge,
@@ -149,6 +151,58 @@ def test_build_extraction_prompt(sample_session: CleanedSession):
     assert "【师生时序对话实录】" in prompt
     assert "[Turn 1]" in prompt
     assert "[TUTOR]" in prompt or "[STUDENT]" in prompt
+    assert "证据覆盖集合" in prompt
+    assert "证据完整性自检" in prompt
+
+
+def test_evidence_audit_prompt_contains_draft_and_minimality_rules(sample_session: CleanedSession, mock_llm_response: dict):
+    draft = ExtractedPIU.model_validate({
+        "session_id": sample_session.intervention_id,
+        "question_id": sample_session.question_id,
+        "misconception": {
+            **mock_llm_response["misconception"],
+            "session_id": sample_session.intervention_id,
+            "question_id": sample_session.question_id,
+            "subject_path": sample_session.subjects.paths[0],
+        },
+        "tutor_strategy": {
+            **mock_llm_response["tutor_strategy"],
+            "session_id": sample_session.intervention_id,
+            "question_id": sample_session.question_id,
+        },
+        "extraction_status": "success",
+    })
+    prompt = build_evidence_audit_prompt(sample_session, draft)
+    assert "最小充分且完整" in prompt
+    assert "反事实检查" in prompt
+    assert "misconception_source_turn_ids" in prompt
+    assert "tutor_strategy_source_turn_ids" in prompt
+
+
+def test_evidence_audit_merges_role_correct_ids(sample_session: CleanedSession, mock_llm_response: dict):
+    class SequencedClient:
+        def __init__(self):
+            self.call_count = 0
+
+        def generate_structured(self, prompt: Any) -> dict:
+            self.call_count += 1
+            if self.call_count == 1:
+                return mock_llm_response
+            return {
+                "misconception_source_turn_ids": [10],
+                "tutor_strategy_source_turn_ids": [9],
+            }
+
+    client = SequencedClient()
+    extracted = extract_knowledge_from_session(
+        sample_session,
+        llm_client=client,
+        evidence_audit=True,
+        max_retries=1,
+    )
+    assert client.call_count == 2
+    assert extracted.misconception.source_turn_ids == [10]
+    assert extracted.tutor_strategy.source_turn_ids == [9]
 
 
 def test_validate_verbatim_grounding(sample_session: CleanedSession):
@@ -173,6 +227,17 @@ def test_validate_verbatim_grounding(sample_session: CleanedSession):
 def test_validate_verbatim_grounding_allows_transcription_edge_formatting(sample_session):
     tutor = next(t for t in sample_session.turns if t.is_tutor)
     assert validate_verbatim_grounding(tutor.text.strip() + " 🧠", [tutor]) == (True, tutor.turn_id)
+
+
+def test_validate_verbatim_grounding_normalizes_typographic_punctuation(sample_session):
+    student = DialogueTurn(
+        turn_id=999,
+        speaker="student",
+        is_tutor=False,
+        raw_messages=["I don’t know"],
+        text="I don’t know",
+    )
+    assert validate_verbatim_grounding("I don't know", [student]) == (True, student.turn_id)
 
 
 def test_extract_knowledge_fails_fast_when_no_llm(sample_session: CleanedSession, monkeypatch):

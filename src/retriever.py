@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 def _normalized_math_text(text: str) -> str:
+    """数学文本归一化: 统一 Unicode 运算符 (−×÷ → -* /) 并去除数字间空白，供精确通道比对。"""
     value = text.casefold().replace("−", "-").replace("×", "*").replace("÷", "/")
     value = re.sub(r"(?<=\d)\s*\.\s*(?=\d)", ".", value)
     value = re.sub(r"(?<=\d)\s+(?=\d)", "", value)
@@ -51,6 +52,7 @@ def _normalized_math_text(text: str) -> str:
 
 
 def _numeric_formula_tokens(text: str) -> set[str]:
+    """提取归一化后的数字/分数 token 集合 (如 '5.4598', '3/4', '-12')，作为精确匹配的比对单元。"""
     normalized = _normalized_math_text(text)
     return set(re.findall(r"[+-]?\d+(?:\.\d+)?(?:/\d+(?:\.\d+)?)?", normalized))
 
@@ -293,6 +295,7 @@ class DualMetricRetriever:
         fetch_evidence: bool = True,
         where_filter: Optional[Dict] = None,
     ) -> List[Dict[str, Any]]:
+        """按预计算向量直接检索错因库 (跳过重复 embedding)，供多视角 RRF 复用同一批向量。"""
         hits = self._rank_collection_candidates("student_misconceptions", query_vector, top_k=top_k, where_filter=where_filter)
         
         if fetch_evidence:
@@ -330,6 +333,7 @@ class DualMetricRetriever:
         fetch_evidence: bool = True,
         where_filter: Optional[Dict] = None,
     ) -> List[Dict[str, Any]]:
+        """按预计算向量直接检索策略库 (跳过重复 embedding)，供多视角 RRF 复用同一批向量。"""
         hits = self._rank_collection_candidates("tutor_strategies", query_vector, top_k=top_k, where_filter=where_filter)
         
         if fetch_evidence:

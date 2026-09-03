@@ -96,6 +96,7 @@ def mask_protected_spans(text: str) -> Tuple[str, Dict[str, str]]:
     counter = 0
 
     def replace_match(match: re.Match) -> str:
+        """闭包辅助: 为每个命中的公式分配递增占位符 token 并登记映射。"""
         nonlocal counter
         token = f"__PROTECTED_SPAN_{counter}__"
         protected_map[token] = match.group(0)

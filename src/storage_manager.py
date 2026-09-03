@@ -62,9 +62,11 @@ class FastDeterministicEmbeddingFunction(EmbeddingFunction):
     - 彻底免除外部庞大 ONNX 模型的联网下载与环境依赖，实现 0.05ms 极速确定性推理。
     """
     def __init__(self, dim: int = 128):
+        """Args: dim: 目标向量维度 (默认 128，特征经 MD5 哈希散列到各维并 L2 归一化)。"""
         self.dim = dim
 
     def name(self) -> str:
+        """后端标识名，写入 Chroma metadata 供索引契约校验。"""
         return "fast_deterministic"
 
     def __call__(self, input: Documents) -> Embeddings:
@@ -117,7 +119,17 @@ def build_misconception_embedding_doc(
 
 
 def _canonicalize_evidence_text(text: str) -> str:
+    """\u5f15\u7528\u9010\u5b57\u6821\u9a8c\u524d\u7684\u89c4\u8303\u5316: NFKC \u5f52\u4e00 + \u96f6\u5bbd\u5b57\u7b26\u5254\u9664 + \u7a7a\u767d\u538b\u7f29 + \u53bb\u9996\u5c3e emoji (So/Sk \u7c7b)\u3002
+
+    \u4e0e src/extract_knowledge.py \u7684\u540c\u540d\u51fd\u6570\u8bed\u4e49\u4e00\u81f4: \u5438\u6536\u65e0\u5bb3\u6392\u7248\u5dee\u5f02\uff0c
+    \u53ea\u4fdd\u7559\u5b9e\u8d28\u6587\u5b57\u5dee\u5f02\u4f5c\u4e3a\u5165\u5e93\u95e8\u7981\u5931\u8d25\u4f9d\u636e\u3002
+    """
     value = unicodedata.normalize("NFKC", str(text)).replace("\u200b", "")
+    value = value.translate(str.maketrans({
+        "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",
+        "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"',
+        "\u2013": "-", "\u2014": "-", "\u2212": "-", "\u2026": "...",
+    }))
     value = re.sub(r"\s+", " ", value).strip()
     while value and unicodedata.category(value[0]) in {"So", "Sk"}:
         value = value[1:].lstrip()

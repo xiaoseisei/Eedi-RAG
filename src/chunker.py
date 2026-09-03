@@ -50,10 +50,10 @@ def estimate_tokens(text: str) -> int:
 
 class BaseChunker(ABC):
     """切块器统一抽象基类。"""
-    
+
     @abstractmethod
     def chunk(self, session: CleanedSession, extracted: Optional[ExtractedPIU] = None) -> List[Chunk]:
-        """对单个会话执行切块，返回 Chunk 列表。"""
+        """对单个会话执行切块，返回 Chunk 列表。子类必须实现且不得伪造内容。"""
         pass
 
 
@@ -70,6 +70,12 @@ class KnowledgeDistilledChunker(BaseChunker):
     """
     
     def chunk(self, session: CleanedSession, extracted: Optional[ExtractedPIU] = None) -> List[Chunk]:
+        """
+        将抽取出的双卡片 (misconception + tutor_strategy) 渲染为自包含知识卡 Chunk。
+
+        每张卡的 content 是面向向量检索优化的结构化文本 (含考纲/原题/机理/原声引用)，
+        metadata 保留 source_turn_ids 以便事后从 DuckDB 回溯原始对白。
+        """
         if extracted is None:
             raise ValueError(
                 f"KnowledgeDistilledChunker 需要有效的 ExtractedPIU 输入 (Session ID: {session.intervention_id})。"
@@ -165,10 +171,22 @@ class SlidingWindowChunker(BaseChunker):
     """
     
     def __init__(self, window_size: int = 6, step: int = 3):
+        """
+        Args:
+            window_size: 每个窗口包含的对话轮数 (默认 6)。
+            step: 相邻窗口起始轮的步进 (默认 3)，步进 < 窗口意味着相邻窗口有重叠，
+                  保证跨窗口边界的因果链不被切断。
+        """
         self.window_size = window_size
         self.step = step
-        
+
     def chunk(self, session: CleanedSession, extracted: Optional[ExtractedPIU] = None) -> List[Chunk]:
+        """
+        以 (window_size, step) 滑动切分会话对话流，产出零依赖的原文窗口 Chunk。
+
+        每个窗口前置注入考纲路径与原题 Header，使单块自包含 (Self-contained)，
+        可独立用于检索兜底；source_turn_ids 记录窗口覆盖的轮次用于证据回溯。
+        """
         chunks = []
         turns = session.turns
         total_turns = len(turns)
@@ -236,6 +254,11 @@ class SessionChunker:
     """
     
     def __init__(self, window_size: int = 6, step: int = 3, default_strategy: str = "fallback"):
+        """
+        Args:
+            window_size / step: 透传给 SlidingWindowChunker 的窗口参数。
+            default_strategy: 未显式传 strategy 时使用的默认切分策略。
+        """
         self.primary_chunker = KnowledgeDistilledChunker()
         self.fallback_chunker = SlidingWindowChunker(window_size=window_size, step=step)
         self.default_strategy = default_strategy

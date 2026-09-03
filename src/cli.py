@@ -87,6 +87,12 @@ class PedagogicalCLI:
         default_mode: str = "auto",
         embedding_backend: str = "deterministic",
     ):
+        """
+        Args:
+            db_path / chroma_dir: 双引擎存储路径。
+            default_mode: 初始生成模式 (auto=有 Key 走 LLM / llm=强制 LLM / deterministic=确定性模板)。
+            embedding_backend: 向量后端 ('deterministic' 哈希基线 或 'siliconflow' 真实语义 API)。
+        """
         self.db_path = db_path
         self.chroma_dir = chroma_dir
         self.mode = default_mode
@@ -191,6 +197,7 @@ class PedagogicalCLI:
 
 
 def main():
+    """CLI 入口: 解析启动参数 (--db-path / --chroma-dir / --embedding-backend) 并进入 REPL。"""
     parser = argparse.ArgumentParser(description="Eedi-RAG interactive pedagogical CLI")
     parser.add_argument("--db-path", default="data/db/tutoring_knowledge.duckdb")
     parser.add_argument("--chroma-dir", default="data/chroma")

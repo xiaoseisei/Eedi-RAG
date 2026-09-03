@@ -32,6 +32,8 @@ logger = logging.getLogger(__name__)
 # ================================================================================
 
 class AtomicClaimCheck(BaseModel):
+    """Faithfulness 原子断言校验单元: 每条断言独立判定支持/矛盾/不可验证状态。"""
+
     model_config = ConfigDict(extra="forbid", strict=True)
 
     claim: str = Field(description="从模型回答中拆解出的最小原子事实陈述")
@@ -124,6 +126,15 @@ class RagasEvaluatorEngine:
         max_retries: int = 3,
         allow_heuristic_fallback: bool = False,
     ):
+        """
+        构造函数强制显式配置，缺 Key 或模型立即失败 (不静默降级)。
+
+        Args:
+            api_key / base_url / model_name: 评测 LLM 三元组 (默认读 LLM_API_KEY /
+                LLM_BASE_URL / JUDGE_LLM_MODEL 环境变量)。
+            max_retries: LLM 输出 Pydantic 校验失败时的重试上限。
+            allow_heuristic_fallback: 是否允许显式降级为关键词启发式 (结果标 DEGRADED)。
+        """
         self.api_key = api_key or os.getenv("LLM_API_KEY")
         self.base_url = base_url or os.getenv("LLM_BASE_URL")
         self.model_name = model_name or os.getenv("JUDGE_LLM_MODEL") or os.getenv("LLM_MODEL")

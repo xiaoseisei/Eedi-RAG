@@ -90,6 +90,84 @@ def build_window_graded_qrels(
     return rows
 
 
+def build_card_graded_qrels(
+    case: dict[str, Any],
+    cards: Iterable[dict[str, Any]],
+    *,
+    target_slot: str,
+    label_source: str = "provisional_rule_from_human_turns_v1",
+) -> list[dict[str, Any]]:
+    """Grade misconception/strategy cards against role-aware evidence.
+
+    The target slot is derived from the query intent by the evaluation control
+    plane, never by the system under test.  A card earns level 3 when its
+    role-correct source pointers cover every required quote for the slot, level
+    2 for a subset, level 1 for same-session/subject topical support, and level
+    0 otherwise.  All rows require human review before production claims.
+    """
+    if target_slot not in {"misconception", "strategy"}:
+        raise ValueError("target_slot must be misconception or strategy")
+    required = [
+        (int(item["session_id"]), int(item["turn_id"]), str(item["speaker"]))
+        for item in case.get("verbatim_grounding_quotes", [])
+        if (target_slot == "misconception" and item["speaker"] == "student")
+        or (target_slot == "strategy" and item["speaker"] == "tutor")
+    ]
+    if not required:
+        raise ValueError(f"case has no required {target_slot} evidence")
+    required_keys = {(sid, tid) for sid, tid, _ in required}
+    target_sessions = {sid for sid, _, _ in required}
+    target_subject = str(case.get("subject_path") or "").strip()
+    query_id = str(case.get("query_id") or case.get("case_id") or "").strip()
+    if not query_id:
+        raise ValueError("case must contain query_id or case_id")
+
+    rows: list[dict[str, Any]] = []
+    for card in cards:
+        document_id = str(card.get("chunk_id") or card.get("document_id") or "").strip()
+        if not document_id:
+            raise ValueError("card must contain chunk_id/document_id")
+        session_id = int(card["session_id"])
+        source_turn_ids = {
+            (session_id, int(turn_id))
+            for turn_id in (card.get("source_turn_ids") or [])
+        }
+        overlap = len(required_keys.intersection(source_turn_ids))
+        same_session = session_id in target_sessions
+        same_subject = target_subject and str(card.get("subject_path") or "").strip() == target_subject
+        if overlap == len(required_keys):
+            relevance = 3
+            rationale = "card role-correct pointers cover all required evidence turns"
+        elif overlap > 0:
+            relevance = 2
+            rationale = "card role-correct pointers cover a subset of required evidence turns"
+        elif same_session or same_subject:
+            relevance = 1
+            rationale = "topically/session related card without direct required role-correct turn"
+        else:
+            relevance = 0
+            rationale = "unrelated card"
+        rows.append({
+            "query_id": query_id,
+            "document_id": document_id,
+            "slot": target_slot,
+            "relevance": relevance,
+            "required_turn_overlap": overlap,
+            "required_turn_count": len(required_keys),
+            "label_source": label_source,
+            "relevance_source": "human_verbatim_grounding_quote_plus_role_aware_pointer_rule",
+            "needs_human_review": True,
+            "rationale": rationale,
+            "evidence_turns": [
+                {"session_id": sid, "turn_id": tid}
+                for sid, tid in sorted(required_keys.intersection(source_turn_ids))
+            ],
+        })
+    if not rows:
+        raise ValueError("cards must contain at least one document")
+    return rows
+
+
 def turn_coverage_at_k(
     ranked_windows: list[dict[str, Any]],
     required_turns: set[tuple[int, int]],
