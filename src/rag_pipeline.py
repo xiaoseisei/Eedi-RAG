@@ -507,9 +507,10 @@ class EndToEndPedagogicalRAGPipeline:
 
         # 1. 多视角检索
         t0 = _time.time()
+        configured_pool = getattr(self.assembler, "reranker_pool_size", top_k_each) if getattr(self.assembler, "model_reranker", None) is not None else top_k_each
         retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
             raw_query=query,
-            top_k_each=top_k_each,
+            top_k_each=max(top_k_each, configured_pool),
             fetch_evidence=fetch_evidence
         )
         timings["retrieval"] = round(_time.time() - t0, 3)

@@ -42,6 +42,7 @@ def run_sweep(
     embedding_backend: str,
     retrieval_mode: str,
     bm25_weight: float,
+    recall_tolerance: float = 0.02,
 ) -> dict[str, Any]:
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"refusing to overwrite sweep directory: {output_dir}")
@@ -51,6 +52,8 @@ def run_sweep(
         raise ValueError("cutoffs must be unique")
     if retrieval_mode not in {"dense", "bm25_dense"}:
         raise ValueError("retrieval_mode must be dense or bm25_dense")
+    if recall_tolerance < 0:
+        raise ValueError("recall_tolerance must be non-negative")
     output_dir.mkdir(parents=True, exist_ok=True)
     expected_hash = hash_storage_artifacts(db_path, chroma_path)
     results: list[dict[str, Any]] = []
@@ -99,7 +102,9 @@ def run_sweep(
             -float(item["cutoff"]),
         )
 
-    selected = max(results, key=key)
+    max_recall = max(float(item["recall_at_cutoff"]) for item in results)
+    eligible = [item for item in results if max_recall - float(item["recall_at_cutoff"]) <= recall_tolerance]
+    selected = min(eligible, key=lambda item: item["cutoff"])
     summary = {
         "schema_version": "bm25-dense-sweep/v1",
         "status": "PROVISIONAL_MEASURED",
@@ -108,9 +113,10 @@ def run_sweep(
         "retrieval_mode": retrieval_mode,
         "bm25_weight": bm25_weight,
         "dense_weight": 1.0 - bm25_weight,
+        "recall_tolerance": recall_tolerance,
         "cutoffs": cutoffs,
         "selected_rerank_pool_size": selected["cutoff"],
-        "selection_rule": "max recall_at_cutoff (the requested candidate count), then graded_ndcg_at_5, graded_mrr, graded_precision_at_5, preferring smaller cutoff",
+        "selection_rule": "choose the smallest cutoff within recall_tolerance of maximum recall_at_cutoff; tie-break by nDCG, MRR, Precision",
         "source_artifact_hash_before": expected_hash,
         "source_artifact_hash_after": actual_after,
         "artifact_mutated": expected_hash != actual_after,
@@ -128,7 +134,7 @@ def run_sweep(
         "Status: **PROVISIONAL_MEASURED — HUMAN REVIEW REQUIRED**",
         "",
         f"Embedding: `{embedding_backend}`; retrieval mode: `{retrieval_mode}`; BM25 weight: `{bm25_weight}`",
-        f"Selected rerank pool size: **Top-{selected['cutoff']}**",
+        f"Selected rerank pool size: **Top-{selected['cutoff']}** (max Recall gap allowed: `{recall_tolerance}`)",
         "",
         "| Cutoff | Recall@cutoff | Graded nDCG@5 | Graded MRR | Precision@5 | Card Recall@cutoff | Turn coverage@cutoff |",
         "| ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -163,6 +169,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--embedding-backend", choices=("qwen", "deterministic"), default="qwen")
     parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
     parser.add_argument("--bm25-weight", type=float, default=0.35)
+    parser.add_argument("--recall-tolerance", type=float, default=0.02)
     args = parser.parse_args(argv)
     cutoffs = [int(item.strip()) for item in args.cutoffs.split(",") if item.strip()]
     summary = run_sweep(
@@ -176,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
         embedding_backend=args.embedding_backend,
         retrieval_mode=args.retrieval_mode,
         bm25_weight=args.bm25_weight,
+        recall_tolerance=args.recall_tolerance,
     )
     print(json.dumps({"output_dir": str(args.output_dir), "selected_rerank_pool_size": summary["selected_rerank_pool_size"], "artifact_mutated": summary["artifact_mutated"]}, ensure_ascii=False))
     return 0

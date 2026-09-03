@@ -78,6 +78,7 @@ class PedagogicalGoldAssembler:
         lambda_diversity: float = 0.7,
         max_prompt_tokens: int = 1500,
         model_reranker: Any | None = None,
+        reranker_pool_size: int = 15,
     ):
         """
         初始化装配器。
@@ -89,6 +90,9 @@ class PedagogicalGoldAssembler:
         self.lambda_param = max(0.0, min(1.0, lambda_diversity))
         self.max_prompt_tokens = max_prompt_tokens
         self.model_reranker = model_reranker
+        if reranker_pool_size <= 0:
+            raise ValueError("reranker_pool_size must be positive")
+        self.reranker_pool_size = reranker_pool_size
 
     def _apply_model_reranker(
         self,

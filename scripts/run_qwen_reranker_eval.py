@@ -276,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--golden", type=Path, default=PROJECT_ROOT / "data" / "golden_test_set.json")
     parser.add_argument("--split-manifest", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--pool-size", type=int, default=20)
+    parser.add_argument("--pool-size", type=int, default=15)
     parser.add_argument("--embedding-backend", choices=("deterministic", "qwen"), default="deterministic")
     parser.add_argument("--bm25-weight", type=float, default=0.35)
     parser.add_argument("--limit", type=int, default=None)

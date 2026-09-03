@@ -1200,30 +1200,31 @@ Final = (1 - bm25_weight) * Dense_Hybrid + bm25_weight * BM25_Normalized
 
 同口径 Dense-only 对照为 Recall@5/10/15/20=`0.2961/0.3389/0.3706/0.3817`，Card Recall@20=`0.8000`，Turn coverage@20=`0.5000`。BM25+Dense 对精确数字、短语和对白词面命中带来明确收益。
 
-Qwen embedding 隔离索引结果：Recall@5/10/15/20=`0.6550/0.7739/0.8072/0.8183`，Turn coverage=`0.7444/0.8000/0.8444/0.8444`，Card Recall 全部=`1.0000`。按 Recall 优先选择 Top-20 作为 reranker candidate pool；Top-15 的 Turn coverage 相同但整体 Recall 更低。
+Qwen embedding 隔离索引结果：Recall@5/10/15/20=`0.6550/0.7739/0.8072/0.8183`，Turn coverage=`0.7444/0.8000/0.8444/0.8444`，Card Recall 全部=`1.0000`。若只按最大 Recall，Top-20 最高；但 Top-15 与 Top-20 Recall 差仅 `0.0111`，Turn coverage 相同，因此按“最大 Recall 容忍 0.02、选择最小池”规则，正式选择 Top-15 作为 reranker candidate pool。
 
 报告：
 
 - deterministic sweep：`reports/eval/bm25-dense-sweep-production-20260903-232000/summary.md`
 - Dense-only 对照：`reports/eval/dense-only-sweep-production-20260903-233000/summary.md`
 - Qwen sweep：`reports/eval/bm25-dense-sweep-qwen-20260904-020000/summary.md`
+- 更新后的容忍度选择 sweep（selected Top-15）：`reports/eval/bm25-dense-sweep-qwen-20260904-040000/summary.md`
 
 ### 22.3 Qwen3-Reranker-0.6B
 
 新增 `src/reranker_provider.py`，调用 SiliconFlow `/v1/rerank`，模型为 `Qwen/Qwen3-Reranker-0.6B`；新增 `PedagogicalGoldAssembler(model_reranker=...)`，模型重排发生在 MMR/槽位装配之前。reranker 输入包含卡片文本和已回溯的直接证据 Turn，避免只优化卡片语义而忽略证据。
 
-完整 30-case 结果（BM25+Dense Top-20、Qwen embedding）：
+完整 30-case 结果（BM25+Dense Top-15、Qwen embedding）：
 
 - provider success/failure=`30/0`，retry=`0`，reranker latency P50=`511.9ms`、P95=`1080.5ms`。
 - rerank 前 candidate pool Card MRR=`0.9333`、Card Turn coverage=`0.8722`。
 - rerank 后 Card Recall@5/10/15/20 均=`1.0000`，Card MRR=`0.9833`，nDCG@5=`0.9236`，Precision@5=`0.3600`。
 - rerank 后 Card Turn coverage=`0.8722`，与 pool 相同；说明 reranker 改善了卡片排序，但没有增加卡片本身缺失的证据 Turn。
 
-报告：`reports/eval/qwen-reranker-full-qwen-20260904-023000/summary.md`；逐 case 顺序和分数在 `results.jsonl`。2-case probe 和 deterministic reranker 对照也保留在同目录邻近版本中。
+报告：`reports/eval/qwen-reranker-full-qwen-top15-20260904-030000/summary.md`；逐 case 顺序和分数在 `results.jsonl`。Top-20 对照报告为 `reports/eval/qwen-reranker-full-qwen-20260904-023000/summary.md`，Top-15 的最终 Card Recall/MRR/证据覆盖不退化，reranker P50/P95 从 `511.9/1080.5ms` 降至 `379.4/759.3ms`。2-case probe 和 deterministic reranker 对照也保留在同目录邻近版本中。
 
 ### 22.4 运行方式与边界
 
-CLI 已增加：
+CLI 已增加（启用 reranker 时 pipeline 自动至少抓取 Top-15）：
 
 ```powershell
 python -m src.cli --retrieval-mode bm25_dense --bm25-weight 0.35 --reranker-backend siliconflow
