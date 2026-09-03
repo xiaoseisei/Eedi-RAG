@@ -187,3 +187,25 @@ def test_raw_query_rank_breaks_rrf_score_saturation_for_slot_selection():
     selected = assembler._select_mmr_best(candidates, "direct answer", ["rounding", "place", "value"], [])
 
     assert selected is candidates[0]
+
+
+def test_model_reranker_is_applied_before_mmr_selection():
+    class FakeReranker:
+        def name(self):
+            return "fake-reranker"
+
+        def rerank(self, query, documents, *, top_n):
+            from src.reranker_provider import RerankResult
+
+            return [RerankResult(index=1, relevance_score=0.95, document=documents[1]), RerankResult(index=0, relevance_score=0.1, document=documents[0])]
+
+    assembler = PedagogicalGoldAssembler(model_reranker=FakeReranker())
+    result = assembler.assemble("q", {
+        "misconceptions": [
+            {"hybrid_score": 1.0, "document": "first", "metadata": {"session_id": 1, "subject_path": "Number"}, "evidence_turns": []},
+            {"hybrid_score": 0.1, "document": "second", "metadata": {"session_id": 2, "subject_path": "Number"}, "evidence_turns": []},
+        ],
+        "strategies": [],
+    })
+    assert result.selected_misconception["metadata"]["session_id"] == 2
+    assert result.selected_misconception["reranking_applied"] is True

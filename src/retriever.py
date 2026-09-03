@@ -1,22 +1,24 @@
 """
 ================================================================================
 模块名称: src/retriever.py
-业务定位: Step 4 - 双度量向量混合检索器与多视角 RRF 融合引擎 (Dual-Metric Hybrid Vector Retriever)
+业务定位: Step 4 - BM25 + Dense 混合检索器、多视角 RRF 融合引擎
 核心职责:
   1. 原始提问向量化 (Raw Query Embedding):
      - 接收用户原始提问，经由 EmbeddingFunction 计算为高维稠密浮点向量。
-  2. 余弦相似度 (Cosine) + 欧氏距离相似度 (Euclidean L2) 联合打分:
+  2. Dense 余弦相似度 (Cosine) + 欧氏距离相似度 (Euclidean L2) 联合打分，并与 BM25 lexical score 加权融合:
      - Cosine Score: 衡量夹角方向 (消除字数模长偏置)
      - Euclidean L2 Score: 1 / (1 + L2_Distance)，衡量绝对空间邻近度
      - Hybrid Score: α * Cosine + (1 - α) * Euclidean (默认 α=0.5)
-  3. 多视角子查询生成 + RRF 晚期融合 (Multi-Perspective RRF Fusion):
+  3. BM25 lexical index 与 Dense 候选 union，按归一化分数加权保留精确数字/短语命中:
+     - Final = (1 - bm25_weight) * Dense_Hybrid + bm25_weight * BM25_Normalized
+  4. 多视角子查询生成 + RRF 晚期融合 (Multi-Perspective RRF Fusion):
      - 调用 MultiPerspectiveQueryRewriter 动态注入考纲并派生 3 个视角
      - 并发检索多视角后按倒数排名融合: RRF(d) = ∑ 1 / (60 + Rank_p(d))
-  4. 跨集合多路召回与重排序:
+  5. 跨集合多路召回与重排序:
      - student_misconceptions (学情诊断与错因机理)
      - tutor_strategies (名师破局提问与启发脚手架)
      - fallback_windows (零信任纯原文滑动窗口)
-  5. 瞬时跨引擎证据回溯 (Grounding Assembly):
+  6. 瞬时跨引擎证据回溯 (Grounding Assembly):
      - 命中候选卡片后，自动提取 source_turn_ids 指针，从 DuckDB 中瞬时拉取真实对话对白作为不可篡改证据。
 ================================================================================
 """
@@ -37,6 +39,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.models import MultiPerspectiveQueries
+from src.bm25 import BM25Index
 from src.query_rewriter import MultiPerspectiveQueryRewriter
 from src.storage_manager import DualEngineStorageManager, FastDeterministicEmbeddingFunction
 
@@ -144,8 +147,8 @@ def compute_hybrid_score(
 
 class DualMetricRetriever:
     """
-    双度量混合向量检索器与多视角 RRF 融合引擎:
-    - 结合余弦相似度与欧氏距离相似度对候选向量执行二次精细重排
+    BM25 + Dense 混合检索器与多视角 RRF 融合引擎:
+    - 结合 lexical BM25 与余弦/欧氏 Dense 分数召回并排序
     - 支持多视角子查询派生与倒数排名融合 (RRF)
     - 自动联动 DuckDB 完成 [Turn N] 原声证据回溯
     """
@@ -157,6 +160,8 @@ class DualMetricRetriever:
         query_rewrite_mode: Optional[str] = None,
         alpha: float = 0.5,
         fusion_strategy: str = "raw_inclusive_rrf",
+        retrieval_mode: str = "bm25_dense",
+        bm25_weight: float = 0.35,
     ):
         """
         初始化检索器。
@@ -170,6 +175,14 @@ class DualMetricRetriever:
         if fusion_strategy not in {"raw_first", "raw_inclusive_rrf"}:
             raise ValueError("fusion_strategy must be raw_first or raw_inclusive_rrf")
         self.fusion_strategy = fusion_strategy
+        if retrieval_mode not in {"dense", "bm25_dense"}:
+            raise ValueError("retrieval_mode must be dense or bm25_dense")
+        if not 0.0 <= bm25_weight <= 1.0:
+            raise ValueError("bm25_weight must be in [0, 1]")
+        self.retrieval_mode = retrieval_mode
+        self.bm25_weight = float(bm25_weight)
+        self.dense_weight = 1.0 - self.bm25_weight
+        self._bm25_indexes: Dict[str, BM25Index] = {}
         if storage_manager is None:
             raise ValueError("必须显式传入已配置 embedding 后端的 storage_manager")
         self.storage = storage_manager
@@ -185,6 +198,14 @@ class DualMetricRetriever:
             raise ValueError(
                 "必须显式传入 rewriter，或设置 query_rewrite_mode='deterministic'"
             )
+
+    def _get_bm25_index(self, collection_name: str) -> BM25Index:
+        index = self._bm25_indexes.get(collection_name)
+        if index is None:
+            collection = self.storage.chroma_client.get_collection(collection_name)
+            index = BM25Index.from_chroma_collection(collection)
+            self._bm25_indexes[collection_name] = index
+        return index
 
     def _embed_query_batch(self, query_texts: List[str]) -> tuple[Dict[str, List[float]], Dict[str, Any]]:
         """Embed all unique lane queries in one provider call and expose safe telemetry."""
@@ -219,7 +240,8 @@ class DualMetricRetriever:
         collection_name: str,
         query_vector: List[float],
         top_k: int = 3,
-        where_filter: Optional[Dict] = None
+        where_filter: Optional[Dict] = None,
+        lexical_query: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         从指定 ChromaDB 集合中获取所有/初筛候选，并按 (Cosine + Euclidean L2) 双度量重新精确打分排序。
@@ -240,34 +262,83 @@ class DualMetricRetriever:
             query_kwargs["where"] = where_filter
             
         raw_res = coll.query(**query_kwargs)
+        raw_res = raw_res or {}
         if not raw_res or not raw_res.get("ids") or len(raw_res["ids"][0]) == 0:
-            return []
+            dense_ids: list[str] = []
+        else:
+            dense_ids = [str(item) for item in raw_res["ids"][0]]
             
+        dense_docs = raw_res.get("documents", [[]])[0] if raw_res.get("documents") else []
+        dense_metas = raw_res.get("metadatas", [[]])[0] if raw_res.get("metadatas") else []
+        dense_embeddings = raw_res.get("embeddings", [[]])[0] if raw_res.get("embeddings") else []
+        dense_records = {
+            document_id: {
+                "document": dense_docs[index] if index < len(dense_docs) else "",
+                "metadata": dense_metas[index] if index < len(dense_metas) else {},
+                "embedding": dense_embeddings[index] if index < len(dense_embeddings) else None,
+            }
+            for index, document_id in enumerate(dense_ids)
+        }
+        bm25_hits = []
+        if self.retrieval_mode == "bm25_dense":
+            bm25_hits = self._get_bm25_index(collection_name).search(
+                lexical_query or "", top_k=candidate_k, where=where_filter
+            )
+        bm25_by_id = {hit.document_id: hit for hit in bm25_hits}
+        all_ids = list(dict.fromkeys(dense_ids + list(bm25_by_id)))
+        missing_ids = [document_id for document_id in all_ids if document_id not in dense_records]
+        if missing_ids:
+            fetched = coll.get(ids=missing_ids, include=["documents", "metadatas", "embeddings"])
+            fetched_docs = fetched.get("documents")
+            fetched_docs = [] if fetched_docs is None else fetched_docs
+            fetched_metas = fetched.get("metadatas")
+            fetched_metas = [] if fetched_metas is None else fetched_metas
+            fetched_embeddings = fetched.get("embeddings")
+            fetched_embeddings = [] if fetched_embeddings is None else fetched_embeddings
+            for index, document_id in enumerate(fetched.get("ids", []) or []):
+                dense_records[str(document_id)] = {
+                    "document": fetched_docs[index] if index < len(fetched_docs) else "",
+                    "metadata": fetched_metas[index] if index < len(fetched_metas) else {},
+                    "embedding": fetched_embeddings[index] if index < len(fetched_embeddings) else None,
+                }
+        max_bm25 = max((hit.score for hit in bm25_hits), default=0.0)
         rescored_candidates = []
-        ids = raw_res["ids"][0]
-        docs = raw_res["documents"][0] if raw_res.get("documents") else [""] * len(ids)
-        metas = raw_res["metadatas"][0] if raw_res.get("metadatas") else [{}] * len(ids)
-        embeddings = raw_res["embeddings"][0] if raw_res.get("embeddings") else []
-        
-        for i in range(len(ids)):
-            doc_vec = embeddings[i] if len(embeddings) > i else None
+
+        for document_id in all_ids:
+            record = dense_records.get(document_id, {})
+            doc_vec = record.get("embedding")
             if doc_vec is not None and len(doc_vec) > 0:
                 hybrid_s, cos_s, l2_s = compute_hybrid_score(query_vector, doc_vec, alpha=self.alpha)
             else:
                 hybrid_s, cos_s, l2_s = 0.0, 0.0, 0.0
-                
+            bm25_raw = bm25_by_id.get(document_id).score if document_id in bm25_by_id else 0.0
+            bm25_norm = (bm25_raw / max_bm25) if max_bm25 > 0 else 0.0
+            final_score = hybrid_s if self.retrieval_mode == "dense" else (
+                self.dense_weight * hybrid_s + self.bm25_weight * bm25_norm
+            )
+            channels = []
+            if document_id in dense_records and document_id in dense_ids:
+                channels.append("dense")
+            if document_id in bm25_by_id:
+                channels.append("bm25")
             rescored_candidates.append({
-                "chunk_id": ids[i],
-                "document": docs[i],
-                "metadata": metas[i],
-                "hybrid_score": round(hybrid_s, 5),
+                "chunk_id": document_id,
+                "document": record.get("document", ""),
+                "metadata": record.get("metadata", {}),
+                "hybrid_score": round(final_score, 5),
+                "dense_hybrid_score": round(hybrid_s, 5),
                 "cosine_score": round(cos_s, 5),
                 "euclidean_score": round(l2_s, 5),
+                "bm25_raw_score": round(bm25_raw, 5),
+                "bm25_score": round(bm25_norm, 5),
+                "retrieval_channels": channels,
                 "collection": collection_name
             })
             
         # 按综合混合得分降序排列
-        rescored_candidates.sort(key=lambda x: x["hybrid_score"], reverse=True)
+        rescored_candidates.sort(
+            key=lambda x: (-x["hybrid_score"], -x["bm25_score"], -x["dense_hybrid_score"], str(x["chunk_id"]))
+        )
         return rescored_candidates[:top_k]
 
     def retrieve_misconceptions(
@@ -286,6 +357,7 @@ class DualMetricRetriever:
             top_k=top_k,
             fetch_evidence=fetch_evidence,
             where_filter=where_filter,
+            lexical_query=query_text,
         )
 
     def _retrieve_misconceptions_by_vector(
@@ -294,9 +366,10 @@ class DualMetricRetriever:
         top_k: int = 3,
         fetch_evidence: bool = True,
         where_filter: Optional[Dict] = None,
+        lexical_query: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """按预计算向量直接检索错因库 (跳过重复 embedding)，供多视角 RRF 复用同一批向量。"""
-        hits = self._rank_collection_candidates("student_misconceptions", query_vector, top_k=top_k, where_filter=where_filter)
+        hits = self._rank_collection_candidates("student_misconceptions", query_vector, top_k=top_k, where_filter=where_filter, lexical_query=lexical_query)
         
         if fetch_evidence:
             for item in hits:
@@ -324,6 +397,7 @@ class DualMetricRetriever:
             top_k=top_k,
             fetch_evidence=fetch_evidence,
             where_filter=where_filter,
+            lexical_query=query_text,
         )
 
     def _retrieve_strategies_by_vector(
@@ -332,9 +406,10 @@ class DualMetricRetriever:
         top_k: int = 3,
         fetch_evidence: bool = True,
         where_filter: Optional[Dict] = None,
+        lexical_query: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """按预计算向量直接检索策略库 (跳过重复 embedding)，供多视角 RRF 复用同一批向量。"""
-        hits = self._rank_collection_candidates("tutor_strategies", query_vector, top_k=top_k, where_filter=where_filter)
+        hits = self._rank_collection_candidates("tutor_strategies", query_vector, top_k=top_k, where_filter=where_filter, lexical_query=lexical_query)
         
         if fetch_evidence:
             for item in hits:
@@ -364,6 +439,7 @@ class DualMetricRetriever:
             query_vector,
             top_k=max(top_k, 50),
             where_filter=where_filter,
+            lexical_query=query_text,
         )
         for candidate in candidates:
             exact_score = numeric_formula_exact_score(query_text, candidate.get("document", ""))
@@ -397,9 +473,11 @@ class DualMetricRetriever:
         return {
             "query": query_text,
             "metric_config": {
-                "metric": "Cosine + Euclidean (L2) Hybrid",
+                "metric": "BM25 + Dense (Cosine/L2) Hybrid" if self.retrieval_mode == "bm25_dense" else "Cosine + Euclidean (L2) Dense Hybrid",
                 "alpha": self.alpha,
-                "formula": "Score = alpha * Cosine_Norm + (1 - alpha) * (1 / (1 + L2_Dist))"
+                "bm25_weight": self.bm25_weight,
+                "dense_weight": self.dense_weight,
+                "formula": "Dense_Hybrid = alpha * Cosine_Norm + (1 - alpha) * (1 / (1 + L2_Dist)); Final = dense_weight * Dense_Hybrid + bm25_weight * BM25_Normalized" if self.retrieval_mode == "bm25_dense" else "Score = alpha * Cosine_Norm + (1 - alpha) * (1 / (1 + L2_Dist))"
             },
             "misconceptions": misc_hits,
             "strategies": strat_hits,
@@ -436,9 +514,9 @@ class DualMetricRetriever:
         ])
 
         # 2. 错因库多视角检索与 RRF 融合 (3-Way: misconception + curriculum + raw_query)
-        misc_ranks_p1 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.misconception_query], top_k=15, fetch_evidence=False)
-        misc_ranks_p2 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False)
-        misc_ranks_p3 = self._retrieve_misconceptions_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False)
+        misc_ranks_p1 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.misconception_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.misconception_query)
+        misc_ranks_p2 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query)
+        misc_ranks_p3 = self._retrieve_misconceptions_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query)
         
         misc_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(misc_ranks_p1, start=1):
@@ -482,9 +560,9 @@ class DualMetricRetriever:
             top_misc_results.append(c)
 
         # 3. 策略库多视角检索与 RRF 融合 (3-Way: strategy + curriculum + raw_query)
-        strat_ranks_p1 = self._retrieve_strategies_by_vector(query_vectors[rewritten.strategy_query], top_k=15, fetch_evidence=False)
-        strat_ranks_p2 = self._retrieve_strategies_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False)
-        strat_ranks_p3 = self._retrieve_strategies_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False)
+        strat_ranks_p1 = self._retrieve_strategies_by_vector(query_vectors[rewritten.strategy_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.strategy_query)
+        strat_ranks_p2 = self._retrieve_strategies_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query)
+        strat_ranks_p3 = self._retrieve_strategies_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query)
 
         lane_trace = {
             "misconception": [
@@ -570,6 +648,9 @@ class DualMetricRetriever:
                 "query_rewrite_backend": self.rewriter.backend_name,
                 "embedding_backend": self.storage.embedding_backend,
                 "fusion_strategy": self.fusion_strategy,
+                "retrieval_mode": self.retrieval_mode,
+                "bm25_weight": self.bm25_weight,
+                "dense_weight": self.dense_weight,
             },
             "rewritten_queries": rewritten.model_dump(),
             "trace": {
@@ -579,6 +660,8 @@ class DualMetricRetriever:
                 "fused_rankings": fused_trace,
                 "fusion": self.fusion_strategy,
                 "rrf_k": k_constant,
+                "retrieval_mode": self.retrieval_mode,
+                "bm25_weight": self.bm25_weight,
                 "candidate_count": len(top_misc_results) + len(top_strat_results),
             },
             "misconceptions": top_misc_results,

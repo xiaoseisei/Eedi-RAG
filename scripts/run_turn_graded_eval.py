@@ -144,6 +144,8 @@ def evaluate(
     expected_artifact_hash: str | None = None,
     split_manifest_path: Path | None = None,
     embedding_backend: str = "qwen",
+    retrieval_mode: str = "bm25_dense",
+    bm25_weight: float = 0.35,
 ) -> dict[str, Any]:
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"refusing to overwrite Turn graded eval: {output_dir}")
@@ -269,7 +271,13 @@ def evaluate(
                 embedding_function=provider,
                 embedding_index_version=provider.index_version if embedding_backend == "qwen" else None,
             )
-            retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", fusion_strategy="raw_first")
+            retriever = DualMetricRetriever(
+                storage_manager=storage,
+                query_rewrite_mode="deterministic",
+                fusion_strategy="raw_first",
+                retrieval_mode=retrieval_mode,
+                bm25_weight=bm25_weight,
+            )
             for case in cases:
                 started = time.perf_counter()
                 ranked = retriever.retrieve_fallback_windows(case["query"], top_k=top_k)
@@ -300,6 +308,7 @@ def evaluate(
                     "graded_recall_at_3": _graded_recall(ranked_ids, qrels, 3),
                     "graded_recall_at_5": _graded_recall(ranked_ids, qrels, 5),
                     "graded_recall_at_10": _graded_recall(ranked_ids, qrels, 10),
+                    "graded_recall_at_15": _graded_recall(ranked_ids, qrels, 15),
                     "graded_recall_at_20": _graded_recall(ranked_ids, qrels, 20),
                     "graded_precision_at_5": _graded_precision(ranked_ids, qrels, 5),
                     "graded_ndcg_at_5": ndcg_at_k(ranked_ids, qrels, 5),
@@ -307,6 +316,9 @@ def evaluate(
                     "turn_coverage_at_1": turn_coverage_at_k(ranked_windows, required, 1),
                     "turn_coverage_at_3": turn_coverage_at_k(ranked_windows, required, 3),
                     "turn_coverage_at_5": turn_coverage_at_k(ranked_windows, required, 5),
+                    "turn_coverage_at_10": turn_coverage_at_k(ranked_windows, required, 10),
+                    "turn_coverage_at_15": turn_coverage_at_k(ranked_windows, required, 15),
+                    "turn_coverage_at_20": turn_coverage_at_k(ranked_windows, required, 20),
                     "latency_ms": latency_ms,
                     "pointer_coverage": case["pointer_coverage"],
                 }
@@ -328,6 +340,8 @@ def evaluate(
                 rows[-1]["card_ranked_ids"] = card_ranked_ids
                 rows[-1]["card_graded_recall_at_3"] = _graded_recall(card_ranked_ids, card_qrels, 3)
                 rows[-1]["card_graded_recall_at_5"] = _graded_recall(card_ranked_ids, card_qrels, 5)
+                rows[-1]["card_graded_recall_at_10"] = _graded_recall(card_ranked_ids, card_qrels, 10)
+                rows[-1]["card_graded_recall_at_15"] = _graded_recall(card_ranked_ids, card_qrels, 15)
                 rows[-1]["card_graded_recall_at_20"] = _graded_recall(card_ranked_ids, card_qrels, 20)
                 rows[-1]["card_graded_precision_at_5"] = _graded_precision(card_ranked_ids, card_qrels, 5)
                 rows[-1]["card_graded_ndcg_at_5"] = ndcg_at_k(card_ranked_ids, card_qrels, 5)
@@ -352,10 +366,10 @@ def evaluate(
     _write_jsonl(output_dir / "raw_cases.jsonl", rows)
 
     metric_names = [
-        "graded_recall_at_3", "graded_recall_at_5", "graded_recall_at_10", "graded_recall_at_20",
+        "graded_recall_at_3", "graded_recall_at_5", "graded_recall_at_10", "graded_recall_at_15", "graded_recall_at_20",
         "graded_precision_at_5", "graded_ndcg_at_5", "graded_mrr",
-        "turn_coverage_at_1", "turn_coverage_at_3", "turn_coverage_at_5", "latency_ms",
-        "card_graded_recall_at_3", "card_graded_recall_at_5", "card_graded_recall_at_20",
+        "turn_coverage_at_1", "turn_coverage_at_3", "turn_coverage_at_5", "turn_coverage_at_10", "turn_coverage_at_15", "turn_coverage_at_20", "latency_ms",
+        "card_graded_recall_at_3", "card_graded_recall_at_5", "card_graded_recall_at_10", "card_graded_recall_at_15", "card_graded_recall_at_20",
         "card_graded_precision_at_5", "card_graded_ndcg_at_5", "card_graded_mrr",
     ]
     aggregates: dict[str, Any] = {}
@@ -400,6 +414,8 @@ def evaluate(
             "embedding_model": provider.model if hasattr(provider, "model") else provider.name(),
             "embedding_dimension": provider.dimension if hasattr(provider, "dimension") else provider.dim,
             "fusion_strategy": "raw_first",
+            "retrieval_mode": retrieval_mode,
+            "bm25_weight": bm25_weight,
             "top_k": top_k,
         },
         "aggregates": aggregates,
@@ -459,6 +475,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-artifact-hash", type=str, default=None)
     parser.add_argument("--split-manifest", type=Path, default=None)
     parser.add_argument("--embedding-backend", choices=("qwen", "deterministic"), default="qwen")
+    parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
+    parser.add_argument("--bm25-weight", type=float, default=0.35)
     args = parser.parse_args(argv)
     if args.top_k <= 0:
         parser.error("--top-k must be positive")
@@ -472,6 +490,8 @@ def main(argv: list[str] | None = None) -> int:
         expected_artifact_hash=args.expected_artifact_hash,
         split_manifest_path=args.split_manifest.resolve(strict=True) if args.split_manifest else None,
         embedding_backend=args.embedding_backend,
+        retrieval_mode=args.retrieval_mode,
+        bm25_weight=args.bm25_weight,
     )
     print(json.dumps({"output_dir": str(args.output_dir), "dataset_version": manifest["dataset_version"], "case_count": manifest["case_count"], "qrel_count": manifest["qrel_count"], "artifact_mutated": manifest["artifact_mutated"]}, ensure_ascii=False))
     return 0

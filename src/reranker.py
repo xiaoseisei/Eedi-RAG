@@ -1,21 +1,22 @@
 """
 ================================================================================
 模块名称: src/reranker.py
-业务定位: Step 4 - 轻量级 MMR 压缩与教研多样性黄金装配器 (Pedagogical Gold Assembler)
+业务定位: Step 4 - Qwen Cross-Encoder 可选重排 + MMR 压缩与教研多样性黄金装配器
 核心职责:
-  1. 业务置信度与证据加权 (Business Quality & Evidence Boost):
+  1. 可选 Qwen3-Reranker-0.6B 对 BM25+Dense 候选进行语义重排；未配置时保持确定性 MMR 回归模式。
+  2. 业务置信度与证据加权 (Business Quality & Evidence Boost):
      - 真实 DuckDB 原声证据覆盖 (evidence_turns > 0): 得分 +0.10
      - 破局一问完备度 (key_aha_question 非空): 得分 +0.05
      - 核心数值与题型关键词精确重合: 得分 +0.15
-  2. MMR 多样性贪心去重 (MMR Diversity Greedy Selection):
+  3. MMR 多样性贪心去重 (MMR Diversity Greedy Selection):
      - MMR(d) = λ * Score_boosted(d) - (1 - λ) * max(Sim(d, S))
      - 平衡因子 λ=0.7，从初筛候选池中提纯出黄金 Top-1 错因卡 + Top-1 策略卡，彻底消除同质化冗余。
-  3. 教研四槽位黄金装配 (The 4-Slot Gold Context Assembly):
+  4. 教研四槽位黄金装配 (The 4-Slot Gold Context Assembly):
      - [槽位 1: 学情认知误区诊断] -> 揭示深层思维障碍与错误选项
      - [槽位 2: 名师破局启发策略] -> 提纯核心破局一问与脚手架链
      - [槽位 3: 不可篡改原声实录] -> DuckDB 真实 [Turn N] 证据链
      - [槽位 4: 考纲考点与原题]   -> 题目题干与标准答案
-  4. Token 预算压缩与防迷失 (Lost-in-the-Middle Mitigation):
+  5. Token 预算压缩与防迷失 (Lost-in-the-Middle Mitigation):
      - 将上下文严格压缩至 1,000~1,500 Tokens，首字延迟降低 70%，杜绝大模型注意力迷失。
 ================================================================================
 """
@@ -75,7 +76,8 @@ class PedagogicalGoldAssembler:
     def __init__(
         self,
         lambda_diversity: float = 0.7,
-        max_prompt_tokens: int = 1500
+        max_prompt_tokens: int = 1500,
+        model_reranker: Any | None = None,
     ):
         """
         初始化装配器。
@@ -86,6 +88,42 @@ class PedagogicalGoldAssembler:
         """
         self.lambda_param = max(0.0, min(1.0, lambda_diversity))
         self.max_prompt_tokens = max_prompt_tokens
+        self.model_reranker = model_reranker
+
+    def _apply_model_reranker(
+        self,
+        raw_query: str,
+        candidates: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """Apply an explicitly configured cross-encoder reranker to candidates.
+
+        The model stage is separate from MMR assembly. If configured, provider
+        errors are propagated; silently falling back would make the audit claim
+        a model rerank that never happened.
+        """
+        if self.model_reranker is None or not candidates:
+            return candidates
+        documents = []
+        for candidate in candidates:
+            document = str(candidate.get("document", ""))
+            evidence = candidate.get("evidence_turns", []) or []
+            evidence_text = "\n".join(
+                f"[Turn {turn.get('turn_id')}] [{turn.get('speaker')}] {turn.get('text', '')}"
+                for turn in evidence
+            )
+            documents.append(f"{document}\n【直接证据】\n{evidence_text}" if evidence_text else document)
+        results = self.model_reranker.rerank(raw_query, documents, top_n=len(documents))
+        reranked: List[Dict[str, Any]] = []
+        for rank, result in enumerate(results, start=1):
+            candidate = dict(candidates[result.index])
+            candidate["reranker_score"] = float(result.relevance_score)
+            candidate["reranker_rank"] = rank
+            candidate["reranker_model"] = self.model_reranker.name()
+            candidate["reranking_applied"] = True
+            reranked.append(candidate)
+        if len(reranked) != len(candidates):
+            raise ValueError("reranker returned an incomplete candidate permutation")
+        return reranked
 
     def _calculate_boosted_score(
         self,
@@ -96,12 +134,16 @@ class PedagogicalGoldAssembler:
         """
         计算业务置信度与证据加权后的综合相关性得分。
         """
-        base_score = candidate.get("rrf_score") or candidate.get("hybrid_score", 0.5)
-        # 归一化 RRF 分数至 0~1 区间 (RRF 理论最大值约 0.033)
-        if candidate.get("rrf_score") is not None:
-            norm_base = min(1.0, base_score * 30.0)
+        if candidate.get("reranker_score") is not None:
+            base_score = float(candidate["reranker_score"])
+            norm_base = max(0.0, min(1.0, base_score))
         else:
-            norm_base = base_score
+            base_score = candidate.get("rrf_score") or candidate.get("hybrid_score", 0.5)
+            # 归一化 RRF 分数至 0~1 区间 (RRF 理论最大值约 0.033)
+            if candidate.get("rrf_score") is not None:
+                norm_base = min(1.0, base_score * 30.0)
+            else:
+                norm_base = base_score
 
         bonus = 0.0
         meta = candidate.get("metadata", {})
@@ -176,8 +218,12 @@ class PedagogicalGoldAssembler:
         """
         执行 MMR 提纯与教研四槽位黄金装配。
         """
-        misc_candidates = retrieval_results.get("misconceptions", [])
-        strat_candidates = retrieval_results.get("strategies", [])
+        misc_candidates = self._apply_model_reranker(
+            raw_query, retrieval_results.get("misconceptions", [])
+        )
+        strat_candidates = self._apply_model_reranker(
+            raw_query, retrieval_results.get("strategies", [])
+        )
         
         rewritten_meta = retrieval_results.get("rewritten_queries", {})
         keywords = rewritten_meta.get("extracted_keywords", [])

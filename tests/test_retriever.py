@@ -91,6 +91,9 @@ def test_retriever_misconception_retrieval(in_memory_storage):
     assert "hybrid_score" in top_hit
     assert "cosine_score" in top_hit
     assert "euclidean_score" in top_hit
+    assert "bm25_score" in top_hit
+    assert "dense_hybrid_score" in top_hit
+    assert "retrieval_channels" in top_hit
     assert top_hit["hybrid_score"] > 0.0
     assert top_hit["metadata"]["session_id"] is not None
     assert "evidence_turns" in top_hit
@@ -190,3 +193,26 @@ def test_raw_first_fusion_cannot_demote_raw_top_results(in_memory_storage):
     assert [item["chunk_id"] for item in result["misconceptions"]] == [item["chunk_id"] for item in raw_misc]
     assert [item["chunk_id"] for item in result["strategies"]] == [item["chunk_id"] for item in raw_strategy]
     assert result["trace"]["fusion"] == "raw_first"
+
+
+def test_dense_mode_remains_available_for_regression(in_memory_storage):
+    retriever = DualMetricRetriever(
+        storage_manager=in_memory_storage,
+        query_rewrite_mode="deterministic",
+        retrieval_mode="dense",
+    )
+    hits = retriever.retrieve_misconceptions("四舍五入 5.4598", top_k=1, fetch_evidence=False)
+    assert hits and hits[0]["retrieval_channels"] == ["dense"]
+
+
+def test_bm25_dense_mode_exposes_both_channels(in_memory_storage):
+    retriever = DualMetricRetriever(
+        storage_manager=in_memory_storage,
+        query_rewrite_mode="deterministic",
+        retrieval_mode="bm25_dense",
+        bm25_weight=0.35,
+    )
+    hits = retriever.retrieve_misconceptions("四舍五入 5.4598", top_k=3, fetch_evidence=False)
+    assert hits
+    assert all("bm25_score" in hit for hit in hits)
+    assert retriever.retrieval_mode == "bm25_dense"

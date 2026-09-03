@@ -47,7 +47,7 @@ BANNER = r"""
   |______\___| \__,_|_|       |____/ /_/    \_\\_____|                              
                                                                                     
   🎓 Eedi-RAG 权威名师教研备课与启发辅导副驾驶 · 交互式控制台
-  🔗 关系底表: DuckDB (真实原声对话) | 语义向量: ChromaDB | 检索融合: Multi-Query RRF
+  🔗 关系底表: DuckDB (真实原声对话) | 语义向量: ChromaDB | 检索: BM25 + Dense + Multi-Query RRF
 ========================================================================================
 """
 
@@ -86,6 +86,9 @@ class PedagogicalCLI:
         chroma_dir: str = "data/chroma",
         default_mode: str = "auto",
         embedding_backend: str = "deterministic",
+        retrieval_mode: str = "bm25_dense",
+        bm25_weight: float = 0.35,
+        reranker_backend: str = "none",
     ):
         """
         Args:
@@ -98,7 +101,16 @@ class PedagogicalCLI:
         self.mode = default_mode
         if embedding_backend not in {"deterministic", "siliconflow"}:
             raise ValueError("embedding_backend must be deterministic or siliconflow")
+        if retrieval_mode not in {"dense", "bm25_dense"}:
+            raise ValueError("retrieval_mode must be dense or bm25_dense")
+        if not 0.0 <= bm25_weight <= 1.0:
+            raise ValueError("bm25_weight must be in [0, 1]")
+        if reranker_backend not in {"none", "siliconflow"}:
+            raise ValueError("reranker_backend must be none or siliconflow")
         self.embedding_backend = embedding_backend
+        self.retrieval_mode = retrieval_mode
+        self.bm25_weight = bm25_weight
+        self.reranker_backend = reranker_backend
         self.storage: Optional[DualEngineStorageManager] = None
         self.retriever: Optional[DualMetricRetriever] = None
         self.pipeline: Optional[EndToEndPedagogicalRAGPipeline] = None
@@ -115,8 +127,15 @@ class PedagogicalCLI:
             storage_manager=self.storage,
             query_rewrite_mode="deterministic",
             alpha=0.5,
+            retrieval_mode=self.retrieval_mode,
+            bm25_weight=self.bm25_weight,
         )
-        assembler = PedagogicalGoldAssembler(lambda_diversity=0.7)
+        model_reranker = None
+        if self.reranker_backend == "siliconflow":
+            from src.reranker_provider import SiliconFlowQwen3Reranker
+
+            model_reranker = SiliconFlowQwen3Reranker.from_env()
+        assembler = PedagogicalGoldAssembler(lambda_diversity=0.7, model_reranker=model_reranker)
         self.pipeline = EndToEndPedagogicalRAGPipeline(
             retriever=self.retriever,
             assembler=assembler
@@ -198,12 +217,22 @@ class PedagogicalCLI:
 
 def main():
     """CLI 入口: 解析启动参数 (--db-path / --chroma-dir / --embedding-backend) 并进入 REPL。"""
-    parser = argparse.ArgumentParser(description="Eedi-RAG interactive pedagogical CLI")
+    parser = argparse.ArgumentParser(description="Eedi-RAG interactive pedagogical CLI (BM25 + Dense + optional Qwen reranker)")
     parser.add_argument("--db-path", default="data/db/tutoring_knowledge.duckdb")
     parser.add_argument("--chroma-dir", default="data/chroma")
     parser.add_argument("--embedding-backend", choices=("deterministic", "siliconflow"), default="deterministic")
+    parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
+    parser.add_argument("--bm25-weight", type=float, default=0.35)
+    parser.add_argument("--reranker-backend", choices=("none", "siliconflow"), default="none")
     args = parser.parse_args()
-    cli = PedagogicalCLI(db_path=args.db_path, chroma_dir=args.chroma_dir, embedding_backend=args.embedding_backend)
+    cli = PedagogicalCLI(
+        db_path=args.db_path,
+        chroma_dir=args.chroma_dir,
+        embedding_backend=args.embedding_backend,
+        retrieval_mode=args.retrieval_mode,
+        bm25_weight=args.bm25_weight,
+        reranker_backend=args.reranker_backend,
+    )
     cli.run()
 
 

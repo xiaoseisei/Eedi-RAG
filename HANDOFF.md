@@ -1171,3 +1171,62 @@ L3 最新全量 proxy 仍为 `reports/eval/l3-business-proxy-20260903-051500/`�
 ### 21.4 当前边界
 
 生产卡库已经是全量新抽取版本，但 L1 尚未整体通过，不能宣称发布质量已达标。Generator citation coverage、窗口 Turn 排序、Assembler Turn 级 trace 和 provisional qrels 人工复核仍需继续；若需回滚，可使用上述带时间戳的 DB/Chroma 备份，禁止直接删除当前生产数据。
+
+## 22. BM25 + Dense 与 Qwen Reranker（2026-09-04）
+
+### 22.1 检索实现
+
+当前 `src/retriever.py` 已从 Dense-only 扩展为真实 BM25 + Dense：每个 Chroma collection 启动时构建内存 BM25 index，取 BM25 与 Dense 候选 union，再按归一化分数融合：
+
+```text
+Dense_Hybrid = alpha * Cosine_Norm + (1 - alpha) * L2_Similarity
+Final = (1 - bm25_weight) * Dense_Hybrid + bm25_weight * BM25_Normalized
+```
+
+默认 `retrieval_mode=bm25_dense`、`bm25_weight=0.35`；仍保留 `retrieval_mode=dense` 回归模式。候选会记录 `bm25_raw_score`、`bm25_score`、`dense_hybrid_score` 和 `retrieval_channels`。这不是 BM25 与 Dense 的 RRF，而是 lexical/dense 候选合并后的加权排序；多视角 RRF 仍在更上层用于多个查询视角融合。
+
+### 22.2 Top-K sweep
+
+脚本：`scripts/run_bm25_dense_sweep.py`；数据：30 cases、21,570 provisional window qrels、同一 dev/holdout split；BM25 weight=`0.35`。
+
+生产 deterministic 结果：
+
+| Candidate cutoff | Recall@cutoff | Card Recall@cutoff | Turn coverage@cutoff | nDCG@5 | MRR |
+|---:|---:|---:|---:|---:|---:|
+| 5 | 0.6050 | 0.9333 | 0.6667 | 0.6073 | 0.6844 |
+| 10 | 0.6906 | 0.9667 | 0.7444 | 0.6073 | 0.6892 |
+| 15 | 0.7239 | 0.9667 | 0.7556 | 0.6073 | 0.6892 |
+| 20 | 0.7433 | 1.0000 | 0.7889 | 0.6073 | 0.6912 |
+
+同口径 Dense-only 对照为 Recall@5/10/15/20=`0.2961/0.3389/0.3706/0.3817`，Card Recall@20=`0.8000`，Turn coverage@20=`0.5000`。BM25+Dense 对精确数字、短语和对白词面命中带来明确收益。
+
+Qwen embedding 隔离索引结果：Recall@5/10/15/20=`0.6550/0.7739/0.8072/0.8183`，Turn coverage=`0.7444/0.8000/0.8444/0.8444`，Card Recall 全部=`1.0000`。按 Recall 优先选择 Top-20 作为 reranker candidate pool；Top-15 的 Turn coverage 相同但整体 Recall 更低。
+
+报告：
+
+- deterministic sweep：`reports/eval/bm25-dense-sweep-production-20260903-232000/summary.md`
+- Dense-only 对照：`reports/eval/dense-only-sweep-production-20260903-233000/summary.md`
+- Qwen sweep：`reports/eval/bm25-dense-sweep-qwen-20260904-020000/summary.md`
+
+### 22.3 Qwen3-Reranker-0.6B
+
+新增 `src/reranker_provider.py`，调用 SiliconFlow `/v1/rerank`，模型为 `Qwen/Qwen3-Reranker-0.6B`；新增 `PedagogicalGoldAssembler(model_reranker=...)`，模型重排发生在 MMR/槽位装配之前。reranker 输入包含卡片文本和已回溯的直接证据 Turn，避免只优化卡片语义而忽略证据。
+
+完整 30-case 结果（BM25+Dense Top-20、Qwen embedding）：
+
+- provider success/failure=`30/0`，retry=`0`，reranker latency P50=`511.9ms`、P95=`1080.5ms`。
+- rerank 前 candidate pool Card MRR=`0.9333`、Card Turn coverage=`0.8722`。
+- rerank 后 Card Recall@5/10/15/20 均=`1.0000`，Card MRR=`0.9833`，nDCG@5=`0.9236`，Precision@5=`0.3600`。
+- rerank 后 Card Turn coverage=`0.8722`，与 pool 相同；说明 reranker 改善了卡片排序，但没有增加卡片本身缺失的证据 Turn。
+
+报告：`reports/eval/qwen-reranker-full-qwen-20260904-023000/summary.md`；逐 case 顺序和分数在 `results.jsonl`。2-case probe 和 deterministic reranker 对照也保留在同目录邻近版本中。
+
+### 22.4 运行方式与边界
+
+CLI 已增加：
+
+```powershell
+python -m src.cli --retrieval-mode bm25_dense --bm25-weight 0.35 --reranker-backend siliconflow
+```
+
+`--reranker-backend siliconflow` 是显式外部 API 开关；未配置时仍使用确定性 MMR。BM25 index 是进程内从 Chroma 文档构建的，不改变生产 artifact。当前最终 L1 仍不能发布：qrels 需要人工复核，窗口 Turn coverage 和 Generator citation coverage 仍未达到门禁；reranker 分数不能替代引用审计或回答质量评测。
