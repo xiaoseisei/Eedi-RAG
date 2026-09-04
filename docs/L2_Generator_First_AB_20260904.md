@@ -33,6 +33,19 @@ generator = LLM_MODEL from .env
 
 在 API 恢复后，已重新启动四个新分片（run id 后缀 `20260905-0200`），参数为 `generator-contract=v1`、`gold-context-version=v2`、`rubric-version=v1`，其余参数与 v2 相同。必须等四个分片均完成并合并后，才可报告 v1 全量均值。
 
+截至当前，恢复后的 v1 checkpoint 已完成 12/30 case（1–3、9–11、17–19、24–26），共 144 条 SUCCESS 指标；随后因 DeepEval 长请求停止，未形成 v1 全量报告。与 v2 在这 12 个相同 case 的方向性对照如下（rubric 不同，仅供诊断）：
+
+| Track | Metric | v1 rubric v1 | v2 rubric v2 | 解释 |
+| --- | --- | ---: | ---: | --- |
+| Gold | Faithfulness | 0.9097 | 0.9333 | v2 较高，但 rubric 变化，不能单独归因 |
+| Gold | Pedagogical GEval | 0.5833 | 0.9167 | 结构化教学输出改善明显，仍受 rubric 变化影响 |
+| Gold | Citation Audit | 0.3472 | 0.5278 | 有改善但远低于 0.95 |
+| Real | Faithfulness | 0.8889 | 0.8250 | 方向不稳定，不能据此选型 |
+| Real | Pedagogical GEval | 0.6167 | 0.9000 | v2 较高，但需同 rubric v2 复测 |
+| Real | Citation Audit | 0.3333 | 0.5139 | 有改善但仍未达标 |
+
+这组 12-case 结果不是全量 A/B，也没有改变生产 promotion 决策。
+
 ## 解释规则
 
 - `Gold` 高、`Real` 低：仍有检索/装配上下文损失。
@@ -43,4 +56,3 @@ generator = LLM_MODEL from .env
 ## 当前阻断
 
 生产 release 仍受历史 `BLOCKED_L1_PRECONDITION` 阻断。L2 v2 结果不构成自动 promotion；v1 全量完成前不做 Generator 选型结论。
-
