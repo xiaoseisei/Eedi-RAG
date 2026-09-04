@@ -27,6 +27,13 @@ from src.models import (
     DialogueCitation,
     PedagogicalGuidanceResponse,
 )
+from src.generator_contract import (
+    GeneratorGuidancePayloadV2,
+    build_evidence_catalog,
+    materialize_generator_citations,
+    render_evidence_catalog,
+    validate_role_coverage,
+)
 from src.retriever import DualMetricRetriever
 from src.reranker import PedagogicalGoldAssembler, GoldAssembledContext
 
@@ -100,6 +107,50 @@ SYSTEM_PEDAGOGICAL_PROMPT = """你是资深中学数学教研专家。根据【�
 """
 
 
+SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据最终知识基座回答用户提问。
+
+【回答目标】
+- 直接回答用户的问题，不要回答另一个相关但未被询问的问题。
+- 输出可以是结构化的完整教研答复：诊断学生错因、解释证据、给出可执行的教学干预。
+- 保持清晰、具体、可供教研员直接使用；不要为了压缩而省略必要的证据解释或教学动作。
+
+【事实与推断】
+- claim_type=fact：只能陈述最终知识基座中直接支持的事实，至少绑定一个 evidence_id。
+- claim_type=inference：允许基于对白做明确推断，但必须填写 qualification，说明这是基于证据的解释而不是原话事实。
+- claim_type=recommendation：给出可执行教学动作；如果引用了历史事实，也要绑定 evidence_id。
+- 不要把卡片摘要当作真实对白；真实对白只通过 Evidence catalog 的 evidence_id 引用。
+
+【引用硬约束】
+- dialogue_citations 只能输出 evidence_id，禁止输出 session_id、turn_id 或 quote_text。
+- 每个事实 claim 的 evidence_ids 至少一个，并且该 claim 至少有一个 evidence_id 出现在 dialogue_citations。
+- 如果问题同时询问学生错因和导师引导，dialogue_citations 必须同时覆盖 student 和 tutor 的 evidence_id。
+- 不要创造 Evidence catalog 中不存在的 ID，不要复制 `[Turn N]` 等展示标记到任何 citation 字段。
+
+【输出格式】严格输出 JSON，不要输出 Markdown 或额外文字：
+{
+  "subject_path": "学科考纲路径",
+  "answer": "完整、直接回答问题的核心答复（600 字符以内）",
+  "misconception_diagnosis": "学生错因诊断；没有学生证据时明确说明未观察到",
+  "evidence_explanation": "逐条说明哪些结论由哪些 evidence_id 支持，哪些是有限定的推断",
+  "key_aha_question": "可直接用于课堂点拨的核心问题",
+  "scaffolding_steps": ["按顺序给出可执行的引导步骤"],
+  "pedagogical_intervention": ["给教研员的可执行教学动作"],
+  "recommended_talk_moves": ["<Press for Accuracy>"],
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "一个事实、推断或教学建议",
+      "claim_type": "fact",
+      "evidence_ids": ["E001"],
+      "qualification": null
+    }
+  ],
+  "dialogue_citations": [{"evidence_id": "E001"}],
+  "transfer_question": null
+}
+"""
+
+
 class EndToEndPedagogicalRAGPipeline:
     """
     端到端 RAG 问答与意图精准路由教研生成管道。
@@ -114,6 +165,7 @@ class EndToEndPedagogicalRAGPipeline:
         model_name: Optional[str] = None,
         chunk_strategy: str = "card",
         llm_timeout_seconds: float | None = None,
+        generator_contract_version: str = "v1",
     ):
         self.retriever = retriever
         self.assembler = assembler or PedagogicalGoldAssembler(lambda_diversity=0.7)
@@ -129,6 +181,9 @@ class EndToEndPedagogicalRAGPipeline:
         if llm_timeout_seconds <= 0:
             raise ValueError("llm_timeout_seconds must be positive")
         self.llm_timeout_seconds = float(llm_timeout_seconds)
+        if generator_contract_version not in {"v1", "v2"}:
+            raise ValueError("generator_contract_version must be v1 or v2")
+        self.generator_contract_version = generator_contract_version
         if chunk_strategy not in {"card", "fallback"}:
             raise ValueError("chunk_strategy must be card or fallback")
         self.chunk_strategy = chunk_strategy
@@ -278,6 +333,24 @@ class EndToEndPedagogicalRAGPipeline:
             fetch_evidence=fetch_evidence,
         )
         return retrieval_res, gold_ctx
+
+    def _generator_context_text(self, gold_ctx: GoldAssembledContext) -> str:
+        """Build the exact context string supplied to the selected Generator contract."""
+
+        return self._generator_context_text_for_version(
+            gold_ctx, self.generator_contract_version
+        )
+
+    @staticmethod
+    def _generator_context_text_for_version(
+        gold_ctx: GoldAssembledContext, contract_version: str
+    ) -> str:
+        if contract_version == "v1":
+            return gold_ctx.prompt_context_markdown
+        catalog = build_evidence_catalog(gold_ctx)
+        return "\n\n".join(
+            [gold_ctx.prompt_context_markdown, render_evidence_catalog(catalog)]
+        )
 
     def _synthesize_deterministic_grounding(
         self,
@@ -431,6 +504,8 @@ class EndToEndPedagogicalRAGPipeline:
         query: str,
         gold_ctx: GoldAssembledContext,
         retrieval_res: Dict[str, Any],
+        *,
+        contract_version: str | None = None,
     ) -> PedagogicalGuidanceResponse:
         """调用 LLM；两次尝试均失败时显式抛错，不在内部静默降级。"""
         import time as _time
@@ -450,18 +525,31 @@ class EndToEndPedagogicalRAGPipeline:
         except Exception as exc:
             raise RAGGenerationError(f"LLM 客户端初始化失败: {exc}") from exc
 
+        effective_contract = contract_version or self.generator_contract_version
+        if effective_contract not in {"v1", "v2"}:
+            raise ValueError("contract_version must be v1 or v2")
+        system_prompt = (
+            SYSTEM_PEDAGOGICAL_PROMPT_V2
+            if effective_contract == "v2"
+            else SYSTEM_PEDAGOGICAL_PROMPT
+        )
         # 探针: prompt 构建
         t_prompt = _time.time()
+        generator_context = (
+            self._generator_context_text(gold_ctx)
+            if effective_contract == self.generator_contract_version
+            else self._generator_context_text_for_version(gold_ctx, effective_contract)
+        )
         user_prompt = (
             f"【用户教研提问】: {query}\n\n"
-            f"{gold_ctx.prompt_context_markdown}\n\n"
+            f"{generator_context}\n\n"
             "仅输出 JSON，不要输出其他内容。"
         )
         prompt_tokens_est = len(user_prompt) // 2  # 粗估: ~2 字符/token
         logger.info(f"  📏 [探针] Prompt 构建: {round(_time.time()-t_prompt, 3)}s | 预估输入 tokens: ~{prompt_tokens_est}")
 
         last_error: Optional[Exception] = None
-        payload: Optional[LLMGuidancePayload] = None
+        payload: Any = None
         for attempt in range(2):
             try:
                 # 探针: LLM API 调用 (核心瓶颈)
@@ -469,7 +557,7 @@ class EndToEndPedagogicalRAGPipeline:
                 llm_response = client.chat.completions.create(
                     model=self.model_name,
                     messages=[
-                        {"role": "system", "content": SYSTEM_PEDAGOGICAL_PROMPT},
+                        {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt},
                     ],
                     temperature=0.2,
@@ -494,7 +582,12 @@ class EndToEndPedagogicalRAGPipeline:
 
                 # 探针: JSON 解析 + Pydantic 校验
                 t_parse = _time.time()
-                payload = LLMGuidancePayload.model_validate(json.loads(raw_content))
+                payload_type = (
+                    GeneratorGuidancePayloadV2
+                    if effective_contract == "v2"
+                    else LLMGuidancePayload
+                )
+                payload = payload_type.model_validate(json.loads(raw_content))
                 logger.info(f"  🔧 [探针] JSON 解析+校验: {round(_time.time()-t_parse, 3)}s")
 
                 break
@@ -512,7 +605,54 @@ class EndToEndPedagogicalRAGPipeline:
         if payload is None:
             raise RAGGenerationError(f"LLM 生成在 2 次尝试后失败: {last_error}") from last_error
 
-        # ── 后处理: 只接受模型从最终 Assembler evidence 复制的四元组 ──
+        if effective_contract == "v2":
+            catalog = build_evidence_catalog(gold_ctx)
+            try:
+                validate_role_coverage(
+                    payload.dialogue_citations,
+                    catalog,
+                    query=query,
+                )
+                citations = materialize_generator_citations(
+                    payload.dialogue_citations,
+                    catalog,
+                )
+            except ValueError as exc:
+                raise RAGGenerationError(f"Generator v2 evidence contract failed: {exc}") from exc
+            referenced_ids = list(dict.fromkeys(citation.session_id for citation in citations))
+            talk_moves = list(payload.recommended_talk_moves)[:4]
+            debug_sources = self._extract_debug_sources(retrieval_res)
+            answer_content = "\n\n".join(
+                [
+                    payload.answer,
+                    f"诊断：{payload.misconception_diagnosis}",
+                    f"证据解释：{payload.evidence_explanation}",
+                    "教学干预：\n" + "\n".join(f"- {step}" for step in payload.pedagogical_intervention),
+                ]
+            )
+            response = PedagogicalGuidanceResponse(
+                query=query,
+                subject_path=payload.subject_path,
+                session_id=referenced_ids[0] if referenced_ids else None,
+                answer_content=answer_content,
+                misconception_diagnosis=payload.misconception_diagnosis,
+                key_aha_question=payload.key_aha_question,
+                recommended_talk_moves=talk_moves,
+                scaffolding_steps=list(payload.scaffolding_steps),
+                dialogue_citations=citations,
+                transfer_question=payload.transfer_question,
+                retrieved_sources_debug=debug_sources,
+                audit_status="PENDING",
+            )
+            response.__dict__["generator_contract_version"] = "v2"
+            response.__dict__["generator_claims"] = [
+                claim.model_dump() for claim in payload.claims
+            ]
+            response.__dict__["generator_context_text"] = generator_context
+            response.rendered_markdown = self._render_pretty_markdown(response, gold_ctx, debug_sources)
+            return response
+
+        # ── v1 后处理: 只接受模型从最终 Assembler evidence 复制的四元组 ──
         t_lookup = _time.time()
         citations = [
             DialogueCitation(**citation.model_dump(), verifiable_in_duckdb=False)

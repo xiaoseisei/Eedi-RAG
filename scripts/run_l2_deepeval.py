@@ -281,6 +281,131 @@ def _build_gold_context(case: dict[str, Any], sessions: dict[int, Any]):
     )
 
 
+def _build_gold_context_v2(
+    case: dict[str, Any], sessions: dict[int, Any], storage: Any
+):
+    """Build a sufficient, evaluation-only Gold Context from real artifacts.
+
+    Gold v2 contains stored card facts and complete deterministic W6/S3 raw
+    windows for the case's source sessions.  It intentionally excludes the
+    case's expected answer and qrels so DeepEval can test grounded reasoning
+    rather than prompt leakage.
+    """
+
+    from src.evidence_index import build_evidence_index
+    from src.reranker import GoldAssembledContext
+
+    source_session_ids = sorted(
+        {int(item["session_id"]) for item in case.get("verbatim_grounding_quotes", [])}
+    )
+    if not source_session_ids:
+        raise ValueError("Gold Context v2 requires at least one source session")
+    misconception_rows = storage.query_misconceptions_sql()
+    strategy_rows = storage.query_strategies_sql()
+    lines = [
+        "# Gold Context v2 (evaluation-only sufficient context)",
+        "This context is built from real stored card facts and authoritative raw Turns.",
+        "Expected answers and qrels are intentionally excluded from the Generator input.",
+        "",
+        "## [CARD_FACT] Structured card facts",
+    ]
+    def has_value(value: Any) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, (str, bytes)):
+            return bool(value.strip())
+        if isinstance(value, (list, tuple, set, dict)):
+            return bool(value)
+        size = getattr(value, "size", None)
+        if size is not None:
+            return int(size) > 0
+        return True
+
+    for session_id in source_session_ids:
+        session = sessions.get(session_id)
+        if session is None:
+            raise ValueError(f"missing session {session_id} for Gold Context v2")
+        subject_path = session.subjects.paths[0] if session.subjects.paths else ""
+        lines.append(f"[Session {session_id}] subject_path={subject_path}")
+        lines.append(f"question={session.question.question_text}")
+        for label, rows in (
+            ("misconception", misconception_rows),
+            ("strategy", strategy_rows),
+        ):
+            matching = [row for row in rows if int(row.get("session_id", -1)) == session_id]
+            for row in matching:
+                safe_fields = {
+                    key: row.get(key)
+                    for key in (
+                        "misconception_name",
+                        "error_choice",
+                        "deep_mechanism",
+                        "confusion_triggers",
+                        "pedagogical_goal",
+                        "strategy_category",
+                        "key_aha_question",
+                        "scaffolding_steps",
+                        "talk_moves",
+                        "resolution_outcome",
+                    )
+                    if has_value(row.get(key))
+                }
+                lines.append(
+                    f"card_type={label} "
+                    + json.dumps(safe_fields, ensure_ascii=False, sort_keys=True, default=str)
+                )
+    lines.extend(
+        [
+            "",
+            "## [AUTHORITATIVE_TURN] Complete logical W6/S3 raw dialogue",
+        ]
+    )
+    evidence_turns: list[dict[str, Any]] = []
+    seen_turns: set[tuple[int, int]] = set()
+    for session_id in source_session_ids:
+        session = sessions[session_id]
+        index = build_evidence_index(session, window_size=6, step=3)
+        for window in index.windows:
+            lines.append(
+                f"### Session {session_id} · Turn {window.window_start_turn}~{window.window_end_turn}"
+            )
+            for turn in session.turns:
+                if turn.turn_id not in window.source_turn_ids:
+                    continue
+                speaker = "tutor" if turn.is_tutor else "student"
+                lines.append(
+                    f"[AUTHORITATIVE_TURN] [Turn {turn.turn_id}] [{speaker}] {turn.text}"
+                )
+                key = (session_id, int(turn.turn_id))
+                if key not in seen_turns:
+                    evidence_turns.append(
+                        {
+                            "session_id": session_id,
+                            "turn_id": int(turn.turn_id),
+                            "speaker": speaker,
+                            "text": turn.text,
+                        }
+                    )
+                    seen_turns.add(key)
+    lines.extend(
+        [
+            "",
+            "## [ALLOWED_INFERENCE] Inference boundary",
+            "You may infer a likely misconception or teaching rationale from the card facts and dialogue, but label it as an inference and explain its evidence basis. Do not present an inference as a verbatim Turn fact.",
+        ]
+    )
+    prompt = "\n".join(lines)
+    estimated = max(1, len(prompt) // 2)
+    return GoldAssembledContext(
+        raw_query=case["question"],
+        prompt_context_markdown=prompt,
+        evidence_turns=evidence_turns,
+        estimated_token_count=estimated,
+        budget_violation=False,
+        truncation_loss=0,
+    )
+
+
 def build_l2_dataset(
     *,
     output_dir: Path,
@@ -370,7 +495,21 @@ def build_l2_dataset(
     return manifest
 
 
-def _metrics(judge_model: Any) -> list[tuple[str, Any, float]]:
+def _rubric_config(version: str) -> dict[str, str]:
+    if version not in {"v1", "v2"}:
+        raise ValueError("rubric version must be v1 or v2")
+    if version == "v1":
+        return {
+            "faithfulness": "The answer is supported by the retrieval context and does not invent facts.",
+            "pedagogical_geval": "The answer is useful to an education researcher, separates student misconception from tutor strategy, and proposes an evidence-grounded pedagogical intervention without inventing facts.",
+        }
+    return {
+        "faithfulness": "Every direct factual statement must be supported by the final retrieval context. A reasoned inference is acceptable only when it is explicitly qualified as an inference and its evidence basis is cited; unsupported claims or presenting inference as a verbatim fact should fail.",
+        "pedagogical_geval": "The answer directly addresses the user question, separates student misconception from tutor strategy, explains which evidence supports the diagnosis, and proposes an actionable pedagogical intervention. Concise answers are acceptable when all required elements are present; unsupported facts and generic advice should fail.",
+    }
+
+
+def _metrics(judge_model: Any, rubric_version: str = "v1") -> list[tuple[str, Any, float]]:
     from deepeval.metrics import (
         AnswerRelevancyMetric,
         ContextualPrecisionMetric,
@@ -380,8 +519,29 @@ def _metrics(judge_model: Any) -> list[tuple[str, Any, float]]:
     )
     from deepeval.test_case import SingleTurnParams
 
+    rubric = _rubric_config(rubric_version)
+    faithfulness_metric = (
+        FaithfulnessMetric(
+            threshold=None,
+            model=judge_model,
+            async_mode=False,
+            verbose_mode=False,
+        )
+        if rubric_version == "v1"
+        else GEval(
+            name="FaithfulnessV2",
+            evaluation_params=[
+                SingleTurnParams.ACTUAL_OUTPUT,
+                SingleTurnParams.RETRIEVAL_CONTEXT,
+            ],
+            criteria=rubric["faithfulness"],
+            model=judge_model,
+            threshold=None,
+            async_mode=False,
+        )
+    )
     return [
-        ("faithfulness", FaithfulnessMetric(threshold=None, model=judge_model, async_mode=False, verbose_mode=False), 0.90),
+        ("faithfulness", faithfulness_metric, 0.90),
         ("answer_relevancy", AnswerRelevancyMetric(threshold=None, model=judge_model, async_mode=False, verbose_mode=False), 0.85),
         ("contextual_recall", ContextualRecallMetric(threshold=None, model=judge_model, async_mode=False, verbose_mode=False), 0.90),
         ("contextual_precision", ContextualPrecisionMetric(threshold=None, model=judge_model, async_mode=False, verbose_mode=False), 0.85),
@@ -390,7 +550,7 @@ def _metrics(judge_model: Any) -> list[tuple[str, Any, float]]:
             GEval(
                 name="PedagogicalAdaptation",
                 evaluation_params=[SingleTurnParams.INPUT, SingleTurnParams.ACTUAL_OUTPUT, SingleTurnParams.RETRIEVAL_CONTEXT],
-                criteria="The answer is useful to an education researcher, separates student misconception from tutor strategy, and proposes an evidence-grounded pedagogical intervention without inventing facts.",
+                criteria=rubric["pedagogical_geval"],
                 model=judge_model,
                 threshold=None,
                 async_mode=False,
@@ -455,6 +615,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--judge-api-key-env", default=None)
     parser.add_argument("--judge-temperature", type=float, default=0.0)
     parser.add_argument("--generator-timeout-seconds", type=float, default=60.0)
+    parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v1")
+    parser.add_argument("--gold-context-version", choices=("v1", "v2"), default="v1")
+    parser.add_argument("--rubric-version", choices=("v1", "v2"), default="v1")
     parser.add_argument(
         "--reranker-backend",
         choices=("none", "siliconflow"),
@@ -533,7 +696,10 @@ def main(argv: list[str] | None = None) -> int:
                 "rerank_unit": route["rerank_unit"],
                 "reranker_pool_size": route["reranker_pool_size"],
                 "parent_card_count": route["parent_card_count"],
-                "evidence_selection_count": route["evidence_selection_count"],
+            "evidence_selection_count": route["evidence_selection_count"],
+            "generator_contract": args.generator_contract,
+            "gold_context_version": args.gold_context_version,
+            "rubric_version": args.rubric_version,
             },
         )
     l2_split_manifest = json.loads((args.dataset_output.resolve() / "split_manifest.json").read_text(encoding="utf-8"))
@@ -570,7 +736,7 @@ def main(argv: list[str] | None = None) -> int:
         if readiness.status.value == "SUCCESS":
             try:
                 judge_model_obj = make_deepeval_model(settings)
-                judge_metrics = _metrics(judge_model_obj)
+                judge_metrics = _metrics(judge_model_obj, rubric_version=args.rubric_version)
             except Exception as exc:
                 readiness = readiness.model_copy(update={"status": "ERROR", "error_message": f"judge initialization failed: {type(exc).__name__}: {exc}"})
     else:
@@ -621,6 +787,7 @@ def main(argv: list[str] | None = None) -> int:
                 assembler=assembler,
                 model_name=os.getenv("LLM_MODEL"),
                 llm_timeout_seconds=args.generator_timeout_seconds,
+                generator_contract_version=args.generator_contract,
             )
             for index, case in selected_cases:
                 if index in completed_case_indices:
@@ -634,7 +801,11 @@ def main(argv: list[str] | None = None) -> int:
                     retrieval_trace: dict[str, Any] = {}
                     errors: list[str] = []
                     if track == "gold":
-                        context = _build_gold_context(case, sessions)
+                        context = (
+                            _build_gold_context_v2(case, sessions, storage)
+                            if args.gold_context_version == "v2"
+                            else _build_gold_context(case, sessions)
+                        )
                         retrieval_trace = {"policy": "gold_context_evaluation_only", "retrieved_evidence": [item.model_dump() for item in required]}
                     else:
                         try:
@@ -646,6 +817,9 @@ def main(argv: list[str] | None = None) -> int:
                         except Exception as exc:
                             errors.append(f"retrieval/assembly {type(exc).__name__}: {exc}")
                             context = None
+                    generator_context_text = None
+                    if context is not None:
+                        generator_context_text = pipeline._generator_context_text(context)
                     response = None
                     if context is not None:
                         try:
@@ -684,6 +858,17 @@ def main(argv: list[str] | None = None) -> int:
                         "answer": response.answer_content if response is not None else None,
                         "citations": [item.model_dump() for item in response.dialogue_citations] if response is not None else [],
                         "final_context": context.prompt_context_markdown if context is not None else None,
+                        "generator_context": generator_context_text,
+                        "generator_contract_version": args.generator_contract,
+                        "gold_context_version": args.gold_context_version,
+                        # Preserve the validated claim-level contract for auditability.
+                        # Citation materialization remains backend-owned; this field is
+                        # only the model's structured claim ledger.
+                        "generator_claims": _safe(
+                            getattr(response, "__dict__", {}).get("generator_claims", [])
+                        )
+                        if response is not None
+                        else [],
                         "retrieval_trace": _safe(retrieval_trace),
                         "assembler_evidence": _safe(context.evidence_turns if context is not None else []),
                         "citation_audit": citation,
@@ -719,7 +904,7 @@ def main(argv: list[str] | None = None) -> int:
                                 input=case["question"],
                                 actual_output=response.answer_content or response.misconception_diagnosis,
                                 expected_output=case["ground_truth"],
-                                final_retrieval_context=[context.prompt_context_markdown],
+                                final_retrieval_context=[generator_context_text or context.prompt_context_markdown],
                             ),
                             judge_metrics,
                             track=track,
@@ -784,6 +969,9 @@ def main(argv: list[str] | None = None) -> int:
             "window_step": 3,
             "max_prompt_tokens": 1500,
             "generator_timeout_seconds": args.generator_timeout_seconds,
+            "generator_contract": args.generator_contract,
+            "gold_context_version": args.gold_context_version,
+            "rubric_version": args.rubric_version,
         },
         "l1_precondition": l1_closeout.get("decision"),
         "judge_readiness": readiness_payload,

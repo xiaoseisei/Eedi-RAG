@@ -94,6 +94,7 @@ class PedagogicalCLI:
         evidence_selection_count: int = 5,
         reranker_pool_size: Optional[int] = None,
         parent_card_count: int = 3,
+        generator_contract_version: str = "v1",
     ):
         """
         Args:
@@ -139,6 +140,8 @@ class PedagogicalCLI:
             reranker_pool_size = 20 if rerank_unit == "anchored_logical_window" else 15
         if parent_card_count <= 0:
             raise ValueError("parent_card_count must be positive")
+        if generator_contract_version not in {"v1", "v2"}:
+            raise ValueError("generator_contract_version must be v1 or v2")
         self.embedding_backend = embedding_backend
         self.retrieval_mode = retrieval_mode
         self.bm25_weight = bm25_weight
@@ -148,6 +151,7 @@ class PedagogicalCLI:
         self.evidence_selection_count = evidence_selection_count
         self.reranker_pool_size = reranker_pool_size
         self.parent_card_count = parent_card_count
+        self.generator_contract_version = generator_contract_version
         self.storage: Optional[DualEngineStorageManager] = None
         self.retriever: Optional[DualMetricRetriever] = None
         self.pipeline: Optional[EndToEndPedagogicalRAGPipeline] = None
@@ -176,6 +180,7 @@ class PedagogicalCLI:
             lambda_diversity=0.7,
             model_reranker=model_reranker,
             chunk_strategy=self.chunk_strategy,
+            generator_contract_version=self.generator_contract_version,
             rerank_unit=self.rerank_unit,
             evidence_selection_count=self.evidence_selection_count,
             reranker_pool_size=self.reranker_pool_size,
@@ -280,6 +285,7 @@ def main():
     parser.add_argument("--evidence-selection-count", type=int, default=5)
     parser.add_argument("--reranker-pool-size", type=int, default=None)
     parser.add_argument("--parent-card-count", type=int, default=3)
+    parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v1")
     args = parser.parse_args()
     cli = PedagogicalCLI(
         db_path=args.db_path,
@@ -293,6 +299,7 @@ def main():
         evidence_selection_count=args.evidence_selection_count,
         reranker_pool_size=args.reranker_pool_size,
         parent_card_count=args.parent_card_count,
+        generator_contract_version=args.generator_contract,
     )
     cli.run()
 

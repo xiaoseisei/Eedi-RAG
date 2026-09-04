@@ -31,6 +31,7 @@ from src.rag_pipeline import (
     EndToEndPedagogicalRAGPipeline,
     LLMGuidancePayload,
     RAGGenerationError,
+    SYSTEM_PEDAGOGICAL_PROMPT_V2,
 )
 
 
@@ -340,6 +341,69 @@ def test_llm_generation_uses_only_final_assembler_evidence(monkeypatch):
         "quote_text": "What does it round to?",
     }
     assert response.audit_status == "AUDITED_100_VERIFIED"
+
+
+def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatch):
+    sent = []
+    content = json.dumps(
+        {
+            "subject_path": "Number > Rounding",
+            "answer": "The student confused decimal places.",
+            "misconception_diagnosis": "The student treated 1dp as retaining two decimal places.",
+            "evidence_explanation": "The dialogue records the student's answer exactly.",
+            "key_aha_question": "Which digit decides?",
+            "scaffolding_steps": ["Ask the student to identify the target place."],
+            "pedagogical_intervention": ["Ask the student to inspect the next digit before rounding."],
+            "recommended_talk_moves": ["<Press for Accuracy>"],
+            "claims": [
+                {
+                    "claim_id": "C1",
+                    "claim_text": "The student gave 5.45.",
+                    "claim_type": "fact",
+                    "evidence_ids": ["E001"],
+                }
+            ],
+            "dialogue_citations": [{"evidence_id": "E001"}],
+            "transfer_question": None,
+        },
+        ensure_ascii=False,
+    )
+
+    class Completions:
+        def create(self, **kwargs):
+            sent.append(kwargs)
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
+                usage=None,
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
+        ],
+    )
+
+    response = pipeline._generate_with_llm("q", ctx, {})
+
+    assert response.dialogue_citations[0].quote_text == "What does it round to?"
+    assert response.misconception_diagnosis.startswith("The student treated")
+    assert response.key_aha_question == "Which digit decides?"
+    assert response.scaffolding_steps == ["Ask the student to identify the target place."]
+    assert response.__dict__["generator_contract_version"] == "v2"
+    assert "evidence_id=E001" in sent[0]["messages"][1]["content"]
+    assert sent[0]["messages"][0]["content"] == SYSTEM_PEDAGOGICAL_PROMPT_V2
+    assert "80 字" not in sent[0]["messages"][0]["content"]
+    assert "证据解释" in sent[0]["messages"][0]["content"]
 
 
 def test_exact_citation_fact_is_verified_and_promotes_audit_status():

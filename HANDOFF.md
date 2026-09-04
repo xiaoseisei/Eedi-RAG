@@ -1394,3 +1394,11 @@ L2 runner 已改为复用生产 `prepare_context()`，并通过 4 个可恢复 s
 Real 的相关性和上下文排序已较好，但 Citation Audit `0.2222`（0/30 达到 0.95）、Faithfulness `0.7528`、Contextual Recall `0.8022` 和 Pedagogical GEval `0.5600` 均未达首轮门槛。全量 6 条 `generation/audit CitationAuditError`：Gold 1、Real 5；主要是 Generator 复制 `[Turn N]` 标记进 quote_text 或只输出部分 required 引用。结论：Assembler 上下文优化已验证有效，但 L2 的主要剩余瓶颈是 Generator 引用契约、忠实度和教学表达，不应宣称“全线飘绿”。下一步固定 Anchored Parent-3/W5，专项修复 Generator citation schema/prompt，并用多相关 graded qrels 和教研员 rubric 校准 DeepEval。
 
 L2 runner 现支持 `--case-start/--max-cases` 分片、每 case checkpoint 和 `--resume`，并新增 `scripts/merge_l2_deepeval_reports.py` 做 artifact/route/case 完整性校验后合并。由于全量远端调用存在长尾，后续必须优先使用分片运行；不能把串行长时间无输出视为成功。
+
+### 24.8 Generator-first v2 与 v1 对照（2026-09-05）
+
+已提交基线 commit：`2040f15`（L1 Anchored 与 L2 baseline）。Generator v2 实现位于 `src/generator_contract.py`、`src/rag_pipeline.py` 和 `scripts/run_l2_deepeval.py`，包含 Prompt v2、evidence ID 物化、claim-level 校验、Gold Context v2 和 rubric v2。v2 全量合并报告：`reports/eval/l2-generator-v2-full-20260905-000000/`；Gold/Real 各 30 case，主要均值为 Gold Faithfulness `0.9241`、Pedagogical `0.9286`，Real Faithfulness `0.7704`、Pedagogical `0.9231`，但 Citation Audit 为 `0.5690/0.4877`，Real Contextual Recall 为 `0.7404`，尚未通过 L2 门禁。
+
+恢复 API 余额后已启动新的 v1 分片：`l2-generator-v1-shard1..4-20260905-0200`，参数固定为 Anchored Parent-3/W5、BM25+Dense、Gold Context v2、Generator contract v1、Judge `mimo-v2.5`。完成前不得把此前 `20260905-0100-partial` 的 402 结果用于选型。trace 现在额外保存 `generator_claims`，便于后续按 claim 分析引用覆盖。
+
+当前 release 仍为 `BLOCKED_L1_PRECONDITION`；远端 API 的 402/connection error 必须按 ERROR 记录，禁止用默认回答或估计分数补齐。此前曾有凭据误打印到工具输出，需轮换对应密钥；文档与报告不保存密钥值。

@@ -173,6 +173,12 @@ def test_cli_real_reranker_defaults_to_anchored_parent3_w5() -> None:
     assert local_cli.rerank_unit == "card"
 
 
+def test_cli_generator_contract_v2_is_explicit() -> None:
+    cli = PedagogicalCLI(generator_contract_version="v2")
+
+    assert cli.generator_contract_version == "v2"
+
+
 def test_pipeline_prepare_context_exposes_anchored_route_without_generation() -> None:
     class PreparedRetriever:
         retrieval_mode = "bm25_dense"

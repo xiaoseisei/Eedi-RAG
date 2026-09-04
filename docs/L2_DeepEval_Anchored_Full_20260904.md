@@ -112,3 +112,16 @@ Real `0.5600`、Gold `0.5033`，显著低于 `0.80`。当前 Generator 输出虽
   --shard reports\eval\l2-anchored-p3w5-shard4-<id> `
   --output-dir reports\eval\l2-anchored-parent3-w5-full-<id>
 ```
+
+## Generator-first v2 回归补充（2026-09-05）
+
+本节记录在同一 Anchored Parent-3/W5 路线上切换 Generator v2 后的真实结果。完整报告：`reports/eval/l2-generator-v2-full-20260905-000000/`；A/B 参数与边界：`docs/L2_Generator_First_AB_20260904.md`。
+
+| Track | Answer Relevancy | Contextual Precision | Contextual Recall | Faithfulness | Pedagogical GEval | Citation Audit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Gold | 0.7932 (29) | 1.0000 (28) | 0.9557 (29) | 0.9241 (29) | 0.9286 (28) | 0.5690 (29) |
+| Real | 0.8625 (26) | 0.8979 (26) | 0.7404 (26) | 0.7704 (27) | 0.9231 (26) | 0.4877 (27) |
+
+v2 使 Faithfulness/Pedagogical GEval 显著高于旧基线，但 Citation Audit 仍低于 0.95，Real Contextual Recall 也未达 0.90。4 条 trace 的远端 connection error 已保留，未以默认值替代；release 仍为 `BLOCKED_L1_PRECONDITION`。
+
+API 余额不足时产生的 v1 partial 报告 `reports/eval/l2-generator-v1-full-20260905-0100-partial/` 仅作故障记录，不用于 A/B 选型。API 恢复后已启动新的 v1 分片（`20260905-0200`），待全部完成后再补充同口径对照。
