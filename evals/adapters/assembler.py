@@ -31,11 +31,21 @@ def assemble_with_trace(raw_query: str, retrieval_results: dict[str, Any], assem
         selected = getattr(context, attr, None)
         if selected and selected.get("chunk_id"):
             selected_ids.append(str(selected["chunk_id"]))
+    selected_ids.extend(
+        str(item["chunk_id"])
+        for item in (getattr(context, "selected_windows", None) or [])
+        if item.get("chunk_id")
+    )
+    selected_ids.extend(
+        str(item["chunk_id"])
+        for item in (getattr(context, "selected_evidence_units", None) or [])
+        if item.get("chunk_id")
+    )
     prompt = str(getattr(context, "prompt_context_markdown", ""))
     return _json_value({
         "input_candidate_ids": [
             str(candidate["chunk_id"])
-            for key in ("misconceptions", "strategies", "fallback_windows")
+            for key in ("misconceptions", "strategies", "fallback_windows", "evidence_units")
             for candidate in retrieval_results.get(key, [])
             if candidate.get("chunk_id")
         ],

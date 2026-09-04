@@ -111,13 +111,173 @@ class EndToEndPedagogicalRAGPipeline:
         assembler: Optional[PedagogicalGoldAssembler] = None,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        model_name: Optional[str] = None
+        model_name: Optional[str] = None,
+        chunk_strategy: str = "card",
+        llm_timeout_seconds: float | None = None,
     ):
         self.retriever = retriever
         self.assembler = assembler or PedagogicalGoldAssembler(lambda_diversity=0.7)
         self.api_key = api_key or os.getenv("LLM_API_KEY")
         self.base_url = base_url or os.getenv("LLM_BASE_URL")
         self.model_name = model_name or os.getenv("LLM_MODEL")
+        if llm_timeout_seconds is None:
+            raw_timeout = os.getenv("LLM_TIMEOUT_SECONDS", "60")
+            try:
+                llm_timeout_seconds = float(raw_timeout)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("LLM_TIMEOUT_SECONDS must be a positive number") from exc
+        if llm_timeout_seconds <= 0:
+            raise ValueError("llm_timeout_seconds must be positive")
+        self.llm_timeout_seconds = float(llm_timeout_seconds)
+        if chunk_strategy not in {"card", "fallback"}:
+            raise ValueError("chunk_strategy must be card or fallback")
+        self.chunk_strategy = chunk_strategy
+
+    def _prepare_context_with_timings(
+        self,
+        query: str,
+        *,
+        top_k_each: int = 3,
+        fetch_evidence: bool = True,
+    ) -> tuple[Dict[str, Any], GoldAssembledContext, Dict[str, float]]:
+        """Run retrieval and final context assembly without Generator calls."""
+
+        import time as _time
+
+        if self.retriever is None:
+            raise RuntimeError("DualMetricRetriever 未初始化，无法执行检索！")
+        if top_k_each <= 0:
+            raise ValueError("top_k_each must be positive")
+        timings: Dict[str, float] = {}
+        t0 = _time.time()
+        configured_pool = (
+            getattr(self.assembler, "reranker_pool_size", top_k_each)
+            if getattr(self.assembler, "model_reranker", None) is not None
+            else top_k_each
+        )
+        if self.chunk_strategy == "fallback":
+            windows = self.retriever.retrieve_fallback_windows(
+                query,
+                top_k=max(top_k_each, configured_pool),
+                fetch_evidence=fetch_evidence,
+            )
+            retrieval_res = {
+                "chunk_strategy": "fallback",
+                "raw_query": query,
+                "windows": windows,
+                "misconceptions": [],
+                "strategies": [],
+                "rewritten_queries": {"extracted_keywords": []},
+                "trace": {
+                    "retrieval_mode": self.retriever.retrieval_mode,
+                    "chunk_strategy": "fallback",
+                },
+            }
+        else:
+            retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
+                raw_query=query,
+                top_k_each=max(top_k_each, configured_pool),
+                fetch_evidence=fetch_evidence,
+            )
+            rerank_unit = getattr(self.assembler, "rerank_unit", "card")
+            if rerank_unit == "anchored_logical_window":
+                if getattr(self.assembler, "model_reranker", None) is None:
+                    raise RAGGenerationError(
+                        "anchored_logical_window requires an explicitly configured model reranker"
+                    )
+                ranked_lanes: Dict[str, List[Dict[str, Any]]] = {}
+                for lane in ("misconceptions", "strategies"):
+                    ranked_cards = self.assembler.rerank_candidates(
+                        query,
+                        list(retrieval_res.get(lane, []) or []),
+                        unit_name="card",
+                    )
+                    retrieval_res[lane] = ranked_cards
+                    ranked_lanes[lane] = ranked_cards
+                parent_limit = getattr(self.assembler, "parent_card_count", 3)
+                parent_cards: List[Dict[str, Any]] = []
+                for lane in ("misconceptions", "strategies"):
+                    if ranked_lanes[lane] and len(parent_cards) < parent_limit:
+                        parent_cards.append(ranked_lanes[lane][0])
+                remaining_cards = sorted(
+                    [
+                        card
+                        for cards in ranked_lanes.values()
+                        for card in cards
+                        if card not in parent_cards
+                    ],
+                    key=lambda card: (
+                        -float(card.get("reranker_score", 0.0)),
+                        int(card.get("reranker_rank", 10**9)),
+                        str(card.get("chunk_id", "")),
+                    ),
+                )
+                parent_cards.extend(
+                    remaining_cards[: max(0, parent_limit - len(parent_cards))]
+                )
+                card_candidates = list(retrieval_res.get("misconceptions", []) or []) + list(
+                    retrieval_res.get("strategies", []) or []
+                )
+                anchored_units = self.retriever.expand_anchored_logical_windows(
+                    card_candidates,
+                    parent_cards,
+                    window_size=6,
+                    step=3,
+                )
+                ranked_units = self.assembler.rerank_candidates(
+                    query,
+                    anchored_units,
+                    unit_name="anchored_logical_window",
+                )
+                retrieval_res["evidence_units"] = ranked_units
+                retrieval_res["anchored_parent_cards"] = parent_cards
+                retrieval_res.setdefault("trace", {}).update(
+                    {
+                        "rerank_unit": "anchored_logical_window",
+                        "parent_card_count": len(parent_cards),
+                        "parent_card_limit": parent_limit,
+                        "evidence_unit_count": len(ranked_units),
+                        "evidence_window_size": 6,
+                        "evidence_window_step": 3,
+                    }
+                )
+            elif rerank_unit == "logical_evidence":
+                card_candidates = list(retrieval_res.get("misconceptions", []) or []) + list(
+                    retrieval_res.get("strategies", []) or []
+                )
+                retrieval_res["evidence_units"] = self.retriever.expand_card_candidates_to_evidence_units(
+                    card_candidates,
+                    window_size=6,
+                    step=3,
+                )
+                retrieval_res.setdefault("trace", {})["rerank_unit"] = "logical_evidence"
+                retrieval_res["trace"]["evidence_unit_count"] = len(
+                    retrieval_res["evidence_units"]
+                )
+        timings["retrieval"] = round(_time.time() - t0, 3)
+        t0 = _time.time()
+        gold_ctx = self.assembler.assemble(
+            raw_query=query,
+            retrieval_results=retrieval_res,
+        )
+        timings["assembly"] = round(_time.time() - t0, 3)
+        return retrieval_res, gold_ctx, timings
+
+    def prepare_context(
+        self,
+        query: str,
+        *,
+        top_k_each: int = 3,
+        fetch_evidence: bool = True,
+    ) -> tuple[Dict[str, Any], GoldAssembledContext]:
+        """Return the production final context without invoking the Generator."""
+
+        retrieval_res, gold_ctx, _ = self._prepare_context_with_timings(
+            query,
+            top_k_each=top_k_each,
+            fetch_evidence=fetch_evidence,
+        )
+        return retrieval_res, gold_ctx
 
     def _synthesize_deterministic_grounding(
         self,
@@ -131,6 +291,47 @@ class EndToEndPedagogicalRAGPipeline:
         """
         misc_candidates = retrieval_res.get("misconceptions", [])
         strat_candidates = retrieval_res.get("strategies", [])
+
+        if gold_ctx.chunk_strategy == "fallback":
+            windows = gold_ctx.selected_windows
+            if not windows or not gold_ctx.evidence_turns:
+                raise RAGGenerationError("fallback content-first generation lacks real window evidence")
+            first_meta = windows[0].get("metadata", {})
+            session_id = first_meta.get("session_id")
+            subject_path = first_meta.get("subject_path") or "Mathematics"
+            if isinstance(session_id, str):
+                session_id = int(session_id)
+            if session_id is None:
+                raise RAGGenerationError("fallback content-first generation lacks session_id")
+            answer_content = (
+                f"针对教研问题【{query}】，直接依据检索到的真实对话窗口总结："
+                "先保留学生的原始困惑，再依据导师的连续追问和解释归纳教学处理方式。"
+            )
+            citations = [
+                DialogueCitation(
+                    session_id=int(turn["session_id"]),
+                    turn_id=int(turn["turn_id"]),
+                    speaker=turn["speaker"],
+                    quote_text=turn["text"],
+                    verifiable_in_duckdb=False,
+                )
+                for turn in gold_ctx.evidence_turns
+            ]
+            response = PedagogicalGuidanceResponse(
+                query=query,
+                subject_path=subject_path,
+                session_id=int(session_id),
+                answer_content=answer_content,
+                misconception_diagnosis="本次为真实对话窗口直取，未依赖卡片摘要。",
+                key_aha_question="请以窗口中的连续师生对白作为教学证据。",
+                recommended_talk_moves=[],
+                scaffolding_steps=[],
+                dialogue_citations=citations,
+                transfer_question=None,
+                retrieved_sources_debug=self._extract_debug_sources(retrieval_res),
+                audit_status="PENDING",
+            )
+            return response
 
         misc = gold_ctx.selected_misconception or (misc_candidates[0] if misc_candidates else {})
         strat = gold_ctx.selected_strategy or (strat_candidates[0] if strat_candidates else {})
@@ -241,7 +442,11 @@ class EndToEndPedagogicalRAGPipeline:
 
         try:
             import openai
-            client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
+            client = openai.OpenAI(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.llm_timeout_seconds,
+            )
         except Exception as exc:
             raise RAGGenerationError(f"LLM 客户端初始化失败: {exc}") from exc
 
@@ -352,6 +557,18 @@ class EndToEndPedagogicalRAGPipeline:
     def _extract_debug_sources(self, retrieval_res: Dict[str, Any]) -> List[Dict[str, Any]]:
         """从检索结果中提取用于调试溯源展示的卡片明细。"""
         debug_sources = []
+
+        for window in retrieval_res.get("windows", [])[:5]:
+            metadata = window.get("metadata", {})
+            debug_sources.append({
+                "type": "fallback_window",
+                "session_id": metadata.get("session_id"),
+                "similarity_score": round(window.get("fallback_combined_score", window.get("hybrid_score", 0.0)), 4),
+                "subject_path": metadata.get("subject_path"),
+                "title": f"Turn {metadata.get('window_start_turn', '?')}~{metadata.get('window_end_turn', '?')}",
+                "document_text": window.get("document", ""),
+                "evidence_turns": window.get("evidence_turns", []),
+            })
         
         # 错因卡 (Top 5)
         for c in retrieval_res.get("misconceptions", [])[:5]:
@@ -458,12 +675,18 @@ class EndToEndPedagogicalRAGPipeline:
         lines.append("> ℹ️ *以下为本次问答从底层 ChromaDB 向量库与 DuckDB 关系表检索命中的真实知识卡片原文与历史师生对话记录，供调试与教研白盒核验：*\n")
 
         for idx, src in enumerate(debug_sources, 1):
-            type_tag = "🏷️ [学生错因卡]" if src["type"] == "student_misconception" else "💡 [名师策略卡]"
+            type_tag = {
+                "student_misconception": "🏷️ [学生错因卡]",
+                "tutor_strategy": "💡 [名师策略卡]",
+                "fallback_window": "🪟 [真实滑动窗口]",
+            }.get(src.get("type"), "📚 [检索证据]")
             lines.append(f"### {idx}. {type_tag} 会话 Session #{src.get('session_id', 'N/A')} (相关度得分: {src.get('similarity_score', 0.0)})")
             lines.append(f"- **考纲路径**: `{src.get('subject_path', '数学考纲')}`")
-            lines.append(f"- **卡片核心**: **{src.get('title', 'N/A')}**")
+            core_label = "窗口范围" if src.get("type") == "fallback_window" else "卡片核心"
+            lines.append(f"- **{core_label}**: **{src.get('title', 'N/A')}**")
             
-            lines.append(f"- **卡片向量文本切片**:")
+            text_label = "窗口原文切片" if src.get("type") == "fallback_window" else "卡片向量文本切片"
+            lines.append(f"- **{text_label}**:")
             lines.append("```text")
             doc_lines = src.get("document_text", "").strip().split("\n")
             lines.extend(doc_lines[:6])
@@ -505,23 +728,13 @@ class EndToEndPedagogicalRAGPipeline:
         timings = {}
         logger.info(f"🚀 [Step5_RAG] 接收提问: '{query}' (mode={mode})")
 
-        # 1. 多视角检索
-        t0 = _time.time()
-        configured_pool = getattr(self.assembler, "reranker_pool_size", top_k_each) if getattr(self.assembler, "model_reranker", None) is not None else top_k_each
-        retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
-            raw_query=query,
-            top_k_each=max(top_k_each, configured_pool),
-            fetch_evidence=fetch_evidence
+        # 1. 检索与 MMR 黄金装配
+        retrieval_res, gold_ctx, prepare_timings = self._prepare_context_with_timings(
+            query,
+            top_k_each=top_k_each,
+            fetch_evidence=fetch_evidence,
         )
-        timings["retrieval"] = round(_time.time() - t0, 3)
-
-        # 2. MMR 黄金装配
-        t0 = _time.time()
-        gold_ctx = self.assembler.assemble(
-            raw_query=query,
-            retrieval_results=retrieval_res
-        )
-        timings["assembly"] = round(_time.time() - t0, 3)
+        timings.update(prepare_timings)
 
         # 3. 生成
         t0 = _time.time()

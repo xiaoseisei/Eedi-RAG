@@ -6,6 +6,7 @@ import argparse
 import gc
 import hashlib
 import json
+import os
 import shutil
 import sys
 import tempfile
@@ -29,6 +30,167 @@ from evals.live_storage import hash_storage_artifacts
 from evals.metrics.citation import audit_grounding
 from evals.contracts import EvidenceRef
 from src.embedding_provider import SiliconFlowQwen3EmbeddingFunction
+
+
+def _resolve_l2_route(
+    *,
+    reranker_backend: str,
+    rerank_unit: str | None,
+    reranker_pool_size: int | None,
+    parent_card_count: int,
+    evidence_selection_count: int,
+) -> dict[str, Any]:
+    """Resolve L2 runtime defaults without contacting external services."""
+
+    if reranker_backend not in {"none", "siliconflow"}:
+        raise ValueError("reranker_backend must be none or siliconflow")
+    if rerank_unit is not None and rerank_unit not in {
+        "card",
+        "logical_evidence",
+        "anchored_logical_window",
+    }:
+        raise ValueError(
+            "rerank_unit must be card, logical_evidence, or anchored_logical_window"
+        )
+    if parent_card_count <= 0 or evidence_selection_count <= 0:
+        raise ValueError("parent_card_count and evidence_selection_count must be positive")
+    if reranker_pool_size is not None and reranker_pool_size <= 0:
+        raise ValueError("reranker_pool_size must be positive")
+    resolved_unit = rerank_unit or (
+        "anchored_logical_window" if reranker_backend == "siliconflow" else "card"
+    )
+    resolved_pool = reranker_pool_size or (
+        20 if resolved_unit == "anchored_logical_window" else 15
+    )
+    return {
+        "reranker_backend": reranker_backend,
+        "rerank_unit": resolved_unit,
+        "reranker_pool_size": resolved_pool,
+        "parent_card_count": parent_card_count,
+        "evidence_selection_count": evidence_selection_count,
+    }
+
+
+def _resolve_expected_artifact_hash(
+    l1_manifest: dict[str, Any], override: str | None
+) -> tuple[str, bool]:
+    """Resolve the artifact hash without mutating the frozen L1 manifest."""
+
+    frozen = str(l1_manifest.get("artifact_hashes", {}).get("qwen_combined_sha256", "")).strip()
+    if not frozen:
+        raise ValueError("L1 manifest is missing artifact_hashes.qwen_combined_sha256")
+    if override is None:
+        return frozen, True
+    candidate = str(override).strip()
+    if len(candidate) != 64 or any(char not in "0123456789abcdefABCDEF" for char in candidate):
+        raise ValueError("--expected-artifact-hash must be a 64-character SHA-256 hex digest")
+    return candidate, candidate.casefold() == frozen.casefold()
+
+
+def _select_l2_cases(
+    golden: list[dict[str, Any]], *, case_start: int, max_cases: int
+) -> list[tuple[int, dict[str, Any]]]:
+    """Select a 1-based contiguous case shard without renumbering cases."""
+
+    if case_start <= 0:
+        raise ValueError("case_start must be positive")
+    if max_cases <= 0:
+        raise ValueError("max_cases must be positive")
+    start_index = case_start - 1
+    if start_index >= len(golden):
+        raise ValueError(
+            f"case_start {case_start} exceeds golden case count {len(golden)}"
+        )
+    return list(enumerate(golden[start_index : start_index + max_cases], case_start))
+
+
+def _load_checkpoint(
+    checkpoint_dir: Path,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], set[int]]:
+    """Load only complete two-track cases from an existing checkpoint."""
+
+    traces_path = checkpoint_dir / "traces.jsonl"
+    metrics_path = checkpoint_dir / "metrics.jsonl"
+    completed_path = checkpoint_dir / "completed_cases.jsonl"
+    traces: list[dict[str, Any]] = []
+    metrics: list[dict[str, Any]] = []
+    if traces_path.exists():
+        for line in traces_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                traces.append(json.loads(line))
+    if metrics_path.exists():
+        for line in metrics_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                metrics.append(json.loads(line))
+    completed: set[int] = set()
+    if completed_path.exists():
+        for line in completed_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                completed.add(int(json.loads(line)["case_index"]))
+    else:
+        by_case: dict[int, set[str]] = {}
+        for row in traces:
+            case_id = str(row.get("case_id", ""))
+            try:
+                case_index = int(case_id.rsplit("-", 1)[-1])
+            except ValueError:
+                continue
+            by_case.setdefault(case_index, set()).add(str(row.get("track", "")))
+        completed = {
+            case_index
+            for case_index, tracks in by_case.items()
+            if {"gold", "real"} <= tracks
+        }
+    if completed:
+        traces = [
+            row
+            for row in traces
+            if int(str(row.get("case_id", "0")).rsplit("-", 1)[-1]) in completed
+        ]
+        metrics = [
+            row
+            for row in metrics
+            if int(str(row.get("case_id", "0")).rsplit("-", 1)[-1]) in completed
+        ]
+    else:
+        traces = []
+        metrics = []
+    return traces, metrics, completed
+
+
+def _append_checkpoint(
+    checkpoint_dir: Path,
+    traces: list[dict[str, Any]],
+    metrics: list[dict[str, Any]],
+) -> None:
+    """Append completed case records with flush+fsync for crash recovery."""
+
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    for filename, rows in (("traces.jsonl", traces), ("metrics.jsonl", metrics)):
+        if not rows:
+            continue
+        with (checkpoint_dir / filename).open("a", encoding="utf-8") as handle:
+            for row in rows:
+                handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+    tracks_by_case: dict[int, set[str]] = {}
+    for row in traces:
+        if not row.get("case_id"):
+            continue
+        case_index = int(str(row["case_id"]).rsplit("-", 1)[-1])
+        tracks_by_case.setdefault(case_index, set()).add(str(row.get("track", "")))
+    case_indices = sorted(
+        case_index
+        for case_index, tracks in tracks_by_case.items()
+        if {"gold", "real"} <= tracks
+    )
+    if case_indices:
+        with (checkpoint_dir / "completed_cases.jsonl").open("a", encoding="utf-8") as handle:
+            for case_index in case_indices:
+                handle.write(json.dumps({"case_index": case_index}) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
 
 
 def _safe(value: Any) -> Any:
@@ -278,18 +440,58 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--chroma", type=Path, required=True)
     parser.add_argument("--l1-closeout", type=Path, required=True)
     parser.add_argument("--l1-manifest", type=Path, required=True)
+    parser.add_argument(
+        "--expected-artifact-hash",
+        default=None,
+        help="explicit current artifact SHA-256 when the L1 manifest predates a controlled staging update",
+    )
     parser.add_argument("--dataset-output", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, default=Path("reports/eval"))
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--max-cases", type=int, default=2)
+    parser.add_argument("--case-start", type=int, default=1)
     parser.add_argument("--judge-model", default=None)
     parser.add_argument("--judge-base-url", default=None)
     parser.add_argument("--judge-api-key-env", default=None)
     parser.add_argument("--judge-temperature", type=float, default=0.0)
+    parser.add_argument("--generator-timeout-seconds", type=float, default=60.0)
+    parser.add_argument(
+        "--reranker-backend",
+        choices=("none", "siliconflow"),
+        default="siliconflow",
+        help="reranker backend for the real track; SiliconFlow defaults to Anchored Parent-3/W5",
+    )
+    parser.add_argument(
+        "--rerank-unit",
+        choices=("card", "logical_evidence", "anchored_logical_window"),
+        default=None,
+    )
+    parser.add_argument("--reranker-pool-size", type=int, default=None)
+    parser.add_argument("--parent-card-count", type=int, default=3)
+    parser.add_argument("--evidence-selection-count", type=int, default=5)
+    parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
+    parser.add_argument("--bm25-weight", type=float, default=0.35)
     parser.add_argument("--allow-l1-blocked", action="store_true")
+    parser.add_argument("--resume", action="store_true")
     args = parser.parse_args(argv)
     if args.max_cases <= 0:
         parser.error("--max-cases must be positive")
+    if args.case_start <= 0:
+        parser.error("--case-start must be positive")
+    try:
+        route = _resolve_l2_route(
+            reranker_backend=args.reranker_backend,
+            rerank_unit=args.rerank_unit,
+            reranker_pool_size=args.reranker_pool_size,
+            parent_card_count=args.parent_card_count,
+            evidence_selection_count=args.evidence_selection_count,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
+    if not 0.0 <= args.bm25_weight <= 1.0:
+        parser.error("--bm25-weight must be in [0, 1]")
+    if args.generator_timeout_seconds <= 0:
+        parser.error("--generator-timeout-seconds must be positive")
     l1_closeout = json.loads(args.l1_closeout.resolve(strict=True).read_text(encoding="utf-8"))
     if l1_closeout.get("decision") != "GO_TO_L2_TECHNICAL" and not args.allow_l1_blocked:
         raise SystemExit("L1 is not GO_TO_L2_TECHNICAL; pass --allow-l1-blocked only for explicit pipeline validation")
@@ -302,25 +504,54 @@ def main(argv: list[str] | None = None) -> int:
     chroma_path = args.chroma.resolve(strict=True)
     artifact_hash = hash_storage_artifacts(db_path, chroma_path)
     l1_manifest = json.loads(args.l1_manifest.resolve(strict=True).read_text(encoding="utf-8"))
-    if artifact_hash != l1_manifest["artifact_hashes"]["qwen_combined_sha256"]:
-        raise ValueError("L2 artifact hash does not match frozen L1 manifest")
-    dataset_manifest = build_l2_dataset(
-        output_dir=args.dataset_output.resolve(),
-        golden_path=(PROJECT_ROOT / "data/golden_test_set.json"),
-        l1_manifest_path=args.l1_manifest.resolve(strict=True),
-        artifact_hash=artifact_hash,
-        generator_model=__import__("os").getenv("LLM_MODEL", "explicit-generator-model"),
-        generator_config={"mode": "production_llm", "citation_contract": "quadruple"},
+    expected_artifact_hash, matches_frozen_manifest = _resolve_expected_artifact_hash(
+        l1_manifest, args.expected_artifact_hash
     )
+    if artifact_hash != expected_artifact_hash:
+        raise ValueError(
+            "L2 artifact hash does not match expected hash: "
+            f"actual={artifact_hash}, expected={expected_artifact_hash}"
+        )
+    dataset_output = args.dataset_output.resolve()
+    if args.resume and (dataset_output / "manifest.json").exists():
+        dataset_manifest = json.loads(
+            (dataset_output / "manifest.json").read_text(encoding="utf-8")
+        )
+    else:
+        dataset_manifest = build_l2_dataset(
+            output_dir=dataset_output,
+            golden_path=(PROJECT_ROOT / "data/golden_test_set.json"),
+            l1_manifest_path=args.l1_manifest.resolve(strict=True),
+            artifact_hash=artifact_hash,
+            generator_model=os.getenv("LLM_MODEL", "explicit-generator-model"),
+            generator_config={
+                "mode": "production_llm",
+                "citation_contract": "quadruple",
+                "retrieval_mode": args.retrieval_mode,
+                "bm25_weight": args.bm25_weight,
+                "reranker_backend": route["reranker_backend"],
+                "rerank_unit": route["rerank_unit"],
+                "reranker_pool_size": route["reranker_pool_size"],
+                "parent_card_count": route["parent_card_count"],
+                "evidence_selection_count": route["evidence_selection_count"],
+            },
+        )
     l2_split_manifest = json.loads((args.dataset_output.resolve() / "split_manifest.json").read_text(encoding="utf-8"))
     split_assignments = l2_split_manifest["query_assignments"]
-    golden = json.loads((PROJECT_ROOT / "data/golden_test_set.json").read_text(encoding="utf-8"))[: args.max_cases]
+    golden_all = json.loads((PROJECT_ROOT / "data/golden_test_set.json").read_text(encoding="utf-8"))
+    selected_cases = _select_l2_cases(
+        golden_all, case_start=args.case_start, max_cases=args.max_cases
+    )
     sessions = _load_sessions(PROJECT_ROOT / "data/cleaned_sessions.jsonl")
     provider = SiliconFlowQwen3EmbeddingFunction.from_env()
     scratch_root = args.output_root.resolve() / ".scratch"
     scratch_root.mkdir(parents=True, exist_ok=True)
     trace_rows: list[dict[str, Any]] = []
     metric_rows: list[dict[str, Any]] = []
+    checkpoint_dir = args.output_root.resolve() / ".l2-checkpoints" / args.run_id
+    completed_case_indices: set[int] = set()
+    if args.resume:
+        trace_rows, metric_rows, completed_case_indices = _load_checkpoint(checkpoint_dir)
     readiness: Any = None
     judge_metrics: list[tuple[str, Any, float]] = []
     settings = None
@@ -364,12 +595,40 @@ def main(argv: list[str] | None = None) -> int:
             from src.retriever import DualMetricRetriever
             from src.reranker import PedagogicalGoldAssembler
             from src.rag_pipeline import EndToEndPedagogicalRAGPipeline
-            retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic", fusion_strategy="raw_first")
-            assembler = PedagogicalGoldAssembler(lambda_diversity=0.7, max_prompt_tokens=1500)
-            pipeline = EndToEndPedagogicalRAGPipeline(retriever=retriever, assembler=assembler, model_name=__import__("os").getenv("LLM_MODEL"))
-            for index, case in enumerate(golden, 1):
+            model_reranker = None
+            if route["reranker_backend"] == "siliconflow":
+                from src.reranker_provider import SiliconFlowQwen3Reranker
+
+                model_reranker = SiliconFlowQwen3Reranker.from_env()
+            retriever = DualMetricRetriever(
+                storage_manager=storage,
+                query_rewrite_mode="deterministic",
+                fusion_strategy="raw_first",
+                retrieval_mode=args.retrieval_mode,
+                bm25_weight=args.bm25_weight,
+            )
+            assembler = PedagogicalGoldAssembler(
+                lambda_diversity=0.7,
+                max_prompt_tokens=1500,
+                model_reranker=model_reranker,
+                rerank_unit=route["rerank_unit"],
+                reranker_pool_size=route["reranker_pool_size"],
+                parent_card_count=route["parent_card_count"],
+                evidence_selection_count=route["evidence_selection_count"],
+            )
+            pipeline = EndToEndPedagogicalRAGPipeline(
+                retriever=retriever,
+                assembler=assembler,
+                model_name=os.getenv("LLM_MODEL"),
+                llm_timeout_seconds=args.generator_timeout_seconds,
+            )
+            for index, case in selected_cases:
+                if index in completed_case_indices:
+                    continue
                 case_id = f"eedi-l2-{index:04d}"
                 required, authoritative = _evidence_refs(case, sessions)
+                case_trace_rows: list[dict[str, Any]] = []
+                case_metric_rows: list[dict[str, Any]] = []
                 for track in ("gold", "real"):
                     started = time.perf_counter()
                     retrieval_trace: dict[str, Any] = {}
@@ -379,8 +638,11 @@ def main(argv: list[str] | None = None) -> int:
                         retrieval_trace = {"policy": "gold_context_evaluation_only", "retrieved_evidence": [item.model_dump() for item in required]}
                     else:
                         try:
-                            retrieval_trace = retriever.retrieve_multi_perspective_rrf(case["question"], top_k_each=5, fetch_evidence=True)
-                            context = assembler.assemble(case["question"], retrieval_trace)
+                            retrieval_trace, context = pipeline.prepare_context(
+                                case["question"],
+                                top_k_each=route["reranker_pool_size"],
+                                fetch_evidence=True,
+                            )
                         except Exception as exc:
                             errors.append(f"retrieval/assembly {type(exc).__name__}: {exc}")
                             context = None
@@ -428,6 +690,7 @@ def main(argv: list[str] | None = None) -> int:
                         "latency_ms": round((time.perf_counter() - started) * 1000.0, 3),
                     }
                     trace_rows.append(trace)
+                    case_trace_rows.append(trace)
                     if citation is not None:
                         citation_score = min(
                             float(citation.get("citation_precision") or 0.0),
@@ -436,7 +699,7 @@ def main(argv: list[str] | None = None) -> int:
                             float(citation.get("quote_grounding_precision") or 0.0),
                             float(citation.get("candidate_authorization_rate") or 0.0),
                         )
-                        metric_rows.append({
+                        metric_row = {
                             "case_id": case_id,
                             "track": track,
                             "metric": "citation_audit",
@@ -446,9 +709,11 @@ def main(argv: list[str] | None = None) -> int:
                             "passed": citation_score >= 0.95,
                             "reason": "minimum of precision/recall/role/quote/authorization",
                             "latency_ms": 0.0,
-                        })
+                        }
+                        metric_rows.append(metric_row)
+                        case_metric_rows.append(metric_row)
                     if response is not None and context is not None and judge_metrics:
-                        metric_rows.extend(_run_deepeval_case(
+                        deepeval_rows = _run_deepeval_case(
                             DeepEvalCasePayload(
                                 case_id=f"{case_id}-{track}",
                                 input=case["question"],
@@ -459,7 +724,10 @@ def main(argv: list[str] | None = None) -> int:
                             judge_metrics,
                             track=track,
                             case_id=case_id,
-                        ))
+                        )
+                        metric_rows.extend(deepeval_rows)
+                        case_metric_rows.extend(deepeval_rows)
+                _append_checkpoint(checkpoint_dir, case_trace_rows, case_metric_rows)
         finally:
             if storage is not None:
                 storage.close()
@@ -501,6 +769,22 @@ def main(argv: list[str] | None = None) -> int:
         "schema_version": "l2-deepeval-report/v1",
         "run_id": args.run_id,
         "dataset": dataset_manifest,
+        "artifact_hash_expectation": {
+            "expected": expected_artifact_hash,
+            "matches_frozen_l1_manifest": matches_frozen_manifest,
+            "override_used": args.expected_artifact_hash is not None,
+            "frozen_l1_manifest_hash": l1_manifest["artifact_hashes"]["qwen_combined_sha256"],
+        },
+        "runtime_route": {
+            **route,
+            "retrieval_mode": args.retrieval_mode,
+            "bm25_weight": args.bm25_weight,
+            "chunk_strategy": "card",
+            "window_size": 6,
+            "window_step": 3,
+            "max_prompt_tokens": 1500,
+            "generator_timeout_seconds": args.generator_timeout_seconds,
+        },
         "l1_precondition": l1_closeout.get("decision"),
         "judge_readiness": readiness_payload,
         "judge_config": {
@@ -510,6 +794,23 @@ def main(argv: list[str] | None = None) -> int:
             "api_key_env": settings.api_key_env if settings else None,
             "temperature": settings.temperature if settings else None,
             "deepeval_version": readiness_payload.get("deepeval_version"),
+        },
+        "case_shard": {
+            "case_start": args.case_start,
+            "case_count": len(selected_cases),
+            "case_end": args.case_start + len(selected_cases) - 1,
+            "golden_total": len(golden_all),
+        },
+        "checkpoint": {
+            "directory": str(checkpoint_dir),
+            "resume_requested": args.resume,
+            "completed_case_count": len(
+                {
+                    int(row["case_id"].rsplit("-", 1)[-1])
+                    for row in trace_rows
+                    if row.get("track") == "gold"
+                }
+            ),
         },
         "tracks": {"gold_case_count": sum(row["track"] == "gold" for row in trace_rows), "real_case_count": sum(row["track"] == "real" for row in trace_rows)},
         "metric_aggregates": metric_aggregates,
@@ -537,7 +838,7 @@ def main(argv: list[str] | None = None) -> int:
     ]
     for item in metric_aggregates:
         lines.append(f"| {item['track']} | {item['metric']} | {item['measured']} | {item['mean']} | {item['threshold']} |")
-    lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --max-cases {args.max_cases} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --allow-l1-blocked`", ""])
+    lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --expected-artifact-hash {expected_artifact_hash} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --case-start {args.case_start} --max-cases {args.max_cases} --generator-timeout-seconds {args.generator_timeout_seconds} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --reranker-backend {route['reranker_backend']} --rerank-unit {route['rerank_unit']} --reranker-pool-size {route['reranker_pool_size']} --parent-card-count {route['parent_card_count']} --evidence-selection-count {route['evidence_selection_count']} --retrieval-mode {args.retrieval_mode} --bm25-weight {args.bm25_weight} --allow-l1-blocked`", ""])
     (run_dir / "report.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"run_id": args.run_id, "release_decision": release_decision, "judge_status": readiness_payload.get("status"), "trace_count": len(trace_rows), "metric_count": len(metric_rows), "report_dir": str(run_dir), "artifact_hash": artifact_hash}, ensure_ascii=False))
     return 0 if release_decision == "L2_PASSED" else 2

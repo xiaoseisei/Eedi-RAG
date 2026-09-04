@@ -1231,3 +1231,166 @@ python -m src.cli --retrieval-mode bm25_dense --bm25-weight 0.35 --reranker-back
 ```
 
 `--reranker-backend siliconflow` 是显式外部 API 开关；未配置时仍使用确定性 MMR。BM25 index 是进程内从 Chroma 文档构建的，不改变生产 artifact。当前最终 L1 仍不能发布：qrels 需要人工复核，窗口 Turn coverage 和 Generator citation coverage 仍未达到门禁；reranker 分数不能替代引用审计或回答质量评测。
+
+## 23. 生产双 Chunk 路线与 L1 全量对照（2026-09-04）
+
+### 23.1 生产可选开关
+
+已在 `src/cli.py`、`src/rag_pipeline.py`、`src/reranker.py`、`src/retriever.py` 和 `evals/adapters/assembler.py` 接入显式 `chunk_strategy`：
+
+```powershell
+python -m src.cli --chunk-strategy card
+python -m src.cli --chunk-strategy fallback
+```
+
+`card` 检索 misconception/strategy 卡片并通过 `source_turn_ids` 回溯原文；`fallback` 直接检索 `fallback_windows`，将真实窗口作为 Context 和 citation evidence。默认仍是 `card`，没有因为一次评测自动切换生产默认值。
+
+### 23.2 两套完整 L1 运行
+
+统一脚本：`scripts/run_l1_qwen_full_eval.py`，同一 Qwen artifact、30-case、split、provisional qrels 和 hash 保护，覆盖 Storage、Chunk Structure、Chunking、Grounding、Rewrite、Fusion、Retrieval、Assembler。
+
+- Card：`reports/eval/l1-card-strategy-20260904-090000/`，`SUCCESS=2009 / FAILED=461 / UNMEASURED=263`，`release_status=BLOCKED`。
+- Fallback：`reports/eval/l1-fallback-strategy-20260904-110000/`，`SUCCESS=1317 / FAILED=543 / UNMEASURED=878`，`release_status=BLOCKED`；Rewrite/Fusion 因 content-first 生产链路不执行而显式标记 `UNMEASURED/NOT_APPLICABLE`。
+- 两次运行的 Qwen combined hash 均为 `c47318847151b90023f2dceddc7ab60b265725f546bc633b8d8f6e211c1408bb`，评测前后未改变。
+- 详细解释和专项 Top-15 + reranker 对照见 `docs/Chunk_Strategy_L1_Comparison_20260904.md`。
+
+### 23.3 结论
+
+L1 门禁结果不支持“fallback 全面优于 card”：无 reranker 的当前 L1 中，card 的目标定位、Turn MRR、Assembler retention 和延迟更好；fallback 的 selection precision 更高但真实窗口排序和 P95 仍是硬问题。专项同一 Top-15 + Qwen reranker 对照则显示 fallback 的**全部 required Turn evidence recall=0.8222**，明显高于 card 的 `0.4889`，而 card 的目标角色证据 recall=`0.8556` 略高于 fallback 的 `0.8222`。这说明两条路线优化目标不同：
+
+- `card`：短 Context、语义摘要集中、首个目标卡命中强，适合摘要/诊断。
+- `fallback`：保留连续真实对白、绕过卡片指针遗漏、直接引用更完整，适合证据型问答。
+
+当前建议：保留双开关；证据型问答显式选择 fallback，摘要/诊断优先 card。下一步优先优化 fallback 的候选召回/P95、Generator citation recall 和人工多相关 graded qrels，完成前不得宣称 L1 通过或 NBCOT 业务质量已证明。
+
+## 24. 卡片语义与原文索引解耦、增量录入（2026-09-04）
+
+本轮新增：
+
+- `src/evidence_index.py`：从真实 `CleanedSession.turns` 构建 6-turn/3-step 重叠逻辑链窗口，强制 union 覆盖整场会话；不调用 LLM，不生成原文或 Turn ID。
+- `bind_card_to_evidence_index()`：misconception 绑定所有非 noise 学生 Turn，strategy 绑定所有非 noise 导师 Turn；忽略 LLM 返回的 source pointers，并写入 `source_index_ids`、`evidence_binding_policy`、`evidence_index_version`、`evidence_index_hash`。
+- `src/extraction_cache.py`：按完整 session hash + Prompt/model/schema/temperature/binding/index contract 做 success-only 原子缓存；损坏、失败、契约不匹配按 miss 处理。
+- `scripts/incremental_card_ingest.py`：支持 `changed-only`、`audit-only`、`full`、指定 `--session-ids`、有限并发和可恢复失败 manifest。`audit-only` 不调用语义 LLM；每次还会独立写出 `evidence-index-<run_id>.jsonl`。
+- 旧 `reextract_cards_staging.py` 与 `expand_knowledge_base.py` 已切到 `semantic_only=True → deterministic evidence binding`，避免旧全量入口继续信任 LLM 指针。
+- 运行手册：`docs/Incremental_Card_Ingestion_Runbook.md`。
+
+典型增量命令：
+
+```powershell
+python scripts/incremental_card_ingest.py --db data/db/tutoring_knowledge.duckdb --cache-dir reports/cache/card-extraction --mode changed-only --workers 4
+python scripts/incremental_card_ingest.py --db data/db/tutoring_knowledge.duckdb --cache-dir reports/cache/card-extraction --mode audit-only --session-ids 14,206,469
+```
+
+首次运行仍需处理全部 cache miss；同一输入第二次运行应 `llm_processed_count=0`。修改 BM25、RRF、Reranker、Generator 或仅重绑原文时不需要重新调用 100 场 LLM。语义缓存 key 不包含 evidence binding policy/index version；只改原文索引规则会复用语义卡并重新绑定，不会触发 LLM。修改 Prompt/model/schema 时只重新处理契约不匹配的会话。当前实现仍只写隔离 cache/staging JSONL，不自动 promotion 到生产 DB/Chroma；promotion 必须在 hash、Storage parity、L1 和人工复核通过后显式执行。
+
+本次历史卡片确定性回填与 card-specific 评测：`scripts/rebind_card_evidence_staging.py` 在 `reports/eval/card-evidence-rebind-staging-20260904-001500/` 生成 100 场/200 张卡片 staging，`llm_calls=0`；`scripts/eval_card_evidence_rebind.py` 在 `reports/eval/card-evidence-rebind-card-metrics-20260904-003000/` 对 30 cases 做同口径前后对照。Card evidence Recall@20 从 `0.8722` 提升到 `1.0000`，Assembler final Context evidence recall 从 `0.6556` 提升到 `0.7667`；但指针均值 `128.2→242.1`、evidence precision 下降，当前是 recall-first 结果，仍需最小充分证据筛选和人工 qrels 复核。生产 DB/Chroma 未 promotion。
+
+### 24.1 Card-level vs logical-evidence-level Rerank（2026-09-04）
+
+按用户要求，对同一 Qwen Embedding Top-20 卡片池、同一 30-case/split、同一 BM25+Dense 配置和真实 Qwen3-Reranker 做了两种重排单位的 A/B：
+
+- `card_N`：重排 20 张卡片，选择 N=`1/2/3` 张；再展开卡片证据。
+- `logical_evidence_M`：从这 20 张卡片展开真实 W6/S3 逻辑链窗口，重排原文窗口，选择 M=`3/5/8/10` 个证据单元。
+
+报告：`reports/eval/card-vs-evidence-rerank-20260904-033000/`。
+
+| Variant | Target-role Recall | All-required Recall | Evidence precision | Context tokens | Reranker input tokens | Reranker mean ms |
+|---|---:|---:|---:|---:|---:|---:|
+| card_1 | 0.9667 | 0.5833 | 0.1739 | 476 | 10,338 | 666 |
+| card_2 | 1.0000 | 0.6056 | 0.0819 | 957 | 10,338 | 666 |
+| card_3 | 1.0000 | 0.6056 | 0.0538 | 1,451 | 10,338 | 666 |
+| logical_evidence_3 | 0.9389 | 0.9000 | 0.1191 | 817 | 38,974 | 2,582 |
+| logical_evidence_5 | **0.9833** | **0.9556** | 0.0827 | **1,300** | 38,974 | 2,582 |
+| logical_evidence_8 | 1.0000 | 1.0000 | 0.0551 | 2,028 | 38,974 | 2,582 |
+
+Dev/holdout 稳定性：`logical_evidence_5` 的 all-required Recall=`0.9444/1.0000`，Context=`1314.6/1242.5 tokens`；`logical_evidence_3` 为 Recall=`0.8889/0.9444`。因此按“回复全面 + token≤1500”的约束，数据选择 `logical_evidence_5` 作为证据型问答的首选；`card_1` 保留为低延迟/短摘要路线。`logical_evidence_8/10` 虽 Recall=1.0，但平均 Context 超过 1500，不作为默认。
+
+重要实现差距：当前 `PedagogicalGoldAssembler` 的生产 card 路径仍是“先重排卡片、每槽位 MMR 选 1 张、再按 session/turn 排证据”，没有原样消费 logical-evidence Reranker 的排序结果。下一步改造必须增加 `rerank_unit=logical_evidence` 和 `evidence_selection_count=5`，让 Assembler 只做去重/预算截断并保留 Reranker 顺序；最终回复全面性需再用 L2 citation/answer-completeness 评测确认。Reranker 输入 token 约为 card route 的 `3.77x`，均值延迟约 `3.9x`，不能在没有延迟预算决策的情况下无条件替换所有请求。
+
+该实现差距已关闭：`PedagogicalGoldAssembler` 新增 `rerank_unit=card|logical_evidence` 和 `evidence_selection_count`；`DualMetricRetriever.expand_card_candidates_to_evidence_units()` 从 DuckDB 真实 Turn 构建 W6/S3 窗口；card pipeline 在 evidence-level 模式注入这些 units；Assembler 按 Reranker rank 最多选 5 个逻辑链单元，预算不足时停止、保序去重而不做破坏性截断。CLI 新增 `--rerank-unit`、`--evidence-selection-count` 和 `--reranker-pool-size`，默认池仍为 15；若要复现本次 Top-20 A/B，需显式设为 20。真实 staging smoke 已通过 `AUDITED_100_VERIFIED`（实际 4 个 units、20 条引用、1390 tokens、无截断，总耗时约 7.7s）。数据选择仍为：证据型问答用 `logical_evidence_5` 上限，低延迟摘要用 `card_1`；生产默认未自动切换。
+
+### 24.2 三路 A/B/C：Context-Injected Child Rerank（2026-09-04）
+
+按用户要求完成同口径三路真实 Qwen Reranker 评测：A=`Card-1`、B=`Logical-evidence-5`、C=`Context-injected Child-3/5/8`。报告：`reports/eval/card-evidence-child-rerank-20260904-110000/`，详细分析：`docs/Card_LogicalEvidence_ContextInjectedChild_Eval_20260904.md`。
+
+结果：B 的 all-required Recall=`0.9556`，明显优于 A=`0.5833` 和 C-3/5/8=`0.4611/0.6278/0.7667`；C-3/5/8 的 mean Rerank=`1726ms`，介于 A=`683ms` 与 B=`2388ms`，但没有换来相应召回提升。额外 Parent Top-5 检查显示目标 Session `30/30` 都在 Parent Top-5，因此 C 的损失发生在 Child 排序而不是 Parent 初检；平均 Child 候选 `123.2` 个，短 required Turn 被同 Session 普通邻近 Turn 淹没。C-8 还有 `16/30` cases 超过 1500-token budget。
+
+决策：当前不把 C 接入生产。继续使用 B 的 logical-evidence 路线（最多 Evidence-5，Assembler 按预算实际选择 4～5 个）处理证据型问答，A Card-1 处理低延迟摘要。C 保留为实验候选；下一版必须减少 Child 候选池并增加 coverage-aware selection，不能仅靠 Parent 摘要注入宣称 Recall 提升。
+
+### 24.3 Anchored Context-Injected Child 复测（2026-09-04）
+
+按用户指定的 `Top-20 Cards → Card Rerank → Parent Top-3/5 → source_turn_ids ±1 Child → per-session quota → coverage-aware selection → Assembler` 重新做全矩阵评测。报告：`reports/eval/anchored-context-injected-child-20260904-130000/`，分析：`docs/Anchored_Context_Injected_Child_Eval_20260904.md`。
+
+结果最佳为 `Parent3 / quota5 / Child5`：all-required Recall=`0.7056`（dev=`0.7153`、holdout=`0.6667`）、Precision=`0.1659`、Context=`1151.9 tokens`；仍低于 B Logical-evidence-5 的 Recall=`0.9556`。Parent Top-5 目标 Session=`30/30`，所以损失发生在 Child 排序/选择，而不是 Parent 初检。当前 coverage-aware 只覆盖“任意 anchor”，无法识别 required anchor；Child±1 重叠窗口仍被普通邻接 Turn 淹没。C 继续保留为实验候选，不接入生产默认。
+
+### 24.4 Anchored Logical Windows 独立 A/B（2026-09-04）
+
+按用户同意的独立 A/B 口径完成真实 Qwen 评测：
+
+```text
+Baseline: Top-20 Cards → Card Rerank → 全部 W6/S3 Logical Windows → Window Rerank → W4/W5 → Assembler
+Anchored: Top-20 Cards → Card Rerank → Parent Top-3/5 → 仅保留覆盖 source_turn_ids 的 W6/S3 → Window Rerank → W4/W5 → Assembler
+```
+
+报告：`reports/eval/anchored-logical-windows-ab-20260904-152000/`；详细分析：`docs/Anchored_Logical_Windows_Eval_20260904.md`。运行状态为 `MEASURED`，30/30 cases、180 条变体记录、0 case 失败；源 DB/Chroma 前后 artifact hash 一致。
+
+结果矩阵（最终 `Assembler context.evidence_turns` 指标）：
+
+| Variant | Final Context Recall | Dev / Holdout | Final Precision | Candidate windows | Candidate reduction | Window Rerank mean | Context tokens |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline W4/W5 | `0.7889` | `0.7500 / 0.9444` | `0.1699` | `154.4` | `0%` | `2182ms` | `1324.7` |
+| Anchored Parent-3 W4/W5 | `0.7500` | `0.7431 / 0.7778` | `0.1556` | `21.2` | `86.2%` | `366ms` | `1282.6` |
+| Anchored Parent-5 W4/W5 | `0.7278` | `0.7292 / 0.7222` | `0.1539` | `34.8` | `77.3%` | `543ms` | `1275.9` |
+
+Anchored 候选窗口 union Recall 全部为 `1.0000`，与 Baseline 相同；Parent Session Recall 也为 `1.0000`。因此锚定过滤没有直接删除 required Turn，Recall 损失发生在 Window Rerank 与 Assembler 预算选择。Parent-3 相对 Baseline 将 Window Reranker 输入减少 `72.3%`、均值延迟减少 `83.2%`，但最终 Recall 低 `3.89` 个百分点；Parent-5 成本更高且 Recall 再低 `2.22` 个百分点。1500-token 预算下 Assembler 平均实际只装入约 `3.0` 个窗口，所以 W5 请求没有提高最终 Context Recall。
+
+决策：Anchored Logical Windows 当前不接入生产默认；可作为显式低延迟实验开关，但必须接受 provisional Recall 损失。下一轮应优先优化 Assembler 的预算选择/窗口去冗余，并用多相关 graded qrels 与 L2/DeepEval 验证，不应继续仅增加 Parent Top-K。
+
+### 24.5 生产默认切换为 Anchored Parent-3/W5（2026-09-04）
+
+用户确认 4～6pp 的 provisional Recall 损失可接受，以换取超过 80% 的窗口 Reranker 输入与延迟下降。生产代码现已接入两段式 Anchored 路线：
+
+```text
+Embedding/BM25+Dense Top-20 Cards
+→ Card Rerank（每个语义 lane）
+→ 总 Parent Top-3（双 lane 至少各 1 张）
+→ source_turn_ids 锚定 W6/S3 Logical Windows
+→ 注入 Parent metadata 的 Window Rerank
+→ Window Top-5
+→ Assembler（1500-token budget）
+```
+
+实现位置：`src/retriever.py` 的 `expand_anchored_logical_windows()`、`src/reranker.py` 的 `anchored_logical_window` 模式、`src/rag_pipeline.py` 的两段 Rerank 编排，以及 `src/cli.py` 的默认解析。启用真实 `SiliconFlow` Reranker 且未指定 `--rerank-unit` 时，CLI 默认 `anchored_logical_window`、`reranker_pool_size=20`、总 `parent_card_count=3`（两个非空语义 lane 各保留至少 1 张，再按分数补足）、`evidence_selection_count=5`；无外部 Reranker 的 deterministic 本地运行仍默认 `card`。旧 `card` 和 `logical_evidence` 路线均可显式回退。
+
+Anchored 生产模式要求显式配置模型 Reranker；缺少模型时会抛出受检错误，不会静默退回或伪造“已重排”状态。父卡元数据只用于窗口 Reranker 输入，最终 citation 仍由真实 Turn 审计授权。
+
+回归证据：Anchored 生产新增测试与既有 RAG/Reranker/Retriever 测试共 `45 passed`；完整报告见 `docs/Anchored_Logical_Windows_Eval_20260904.md` 和 `reports/eval/anchored-logical-windows-ab-20260904-152000/`。生产 DB/Chroma 未被重写。
+
+### 24.6 Assembler 重叠感知优化（2026-09-04）
+
+用户确认两套路线被 1500-token 预算卡住的主要原因是 W6/S3 窗口重叠重复消耗 Token。本轮仅优化 Assembler：同一 `(session_id, turn_id)` 在最终 Prompt 中只渲染一次，按新增 Turn 的增量 Token 判断预算，同时保留窗口 rank 和真实 Turn provenance。
+
+最终真实 Qwen 复测报告：`reports/eval/anchored-logical-windows-assembler-final-20260904-134055/`；状态 `MEASURED`，30/30 cases、180 条变体记录、0 case 失败，源 artifact hash 未变化。
+
+| Variant | Target-role Recall | Final All-required Recall | Dev / Holdout | Evidence Precision | Context Tokens | 实际装入窗口 | Window Input Tokens | 平均 Rerank |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline W5 | `0.9500` | **`0.9222`** | `0.9028 / 1.0000` | `0.1342` | `1277.1` | `4.83` | `22862.3` | `2018ms` |
+| Anchored Parent-3 W5 | `0.9056` | **`0.9000`** | `0.9028 / 0.8889` | `0.1340` | `1257.3` | `4.87` | **`6354.9`** | **`372ms`** |
+| Anchored Parent-5 W5 | `0.9222` | `0.9000` | `0.9028 / 0.8889` | `0.1344` | `1252.7` | `4.87` | `10218.2` | `548ms` |
+
+相对优化前，Baseline W5 Final Recall `0.7889→0.9222`，Anchored Parent-3 W5 `0.7500→0.9000`；平均实际窗口由约 `3` 提升到约 `4.8`，两者均无预算违规。Anchored Parent-3 相对 Baseline 仍低 `2.22pp` Recall，但 Window Reranker 输入减少 `72.2%`、均值延迟减少 `81.6%`，Precision 基本持平。最终生产默认继续为真实 SiliconFlow Reranker 下的 Anchored Parent-3/W5；最大召回需求可显式回退 logical-evidence W5。
+
+### 24.7 L2 DeepEval Anchored Parent-3/W5 全量回归（2026-09-04）
+
+L2 runner 已改为复用生产 `prepare_context()`，并通过 4 个可恢复 shard 完成 30 Gold + 30 Real 全量 DeepEval。合并报告：`reports/eval/l2-anchored-parent3-w5-full-20260904-160000/`；专项分析：`docs/L2_DeepEval_Anchored_Full_20260904.md`。
+
+运行状态：Judge `mimo-v2.5-pro` 可用，360 条指标记录，源 artifact hash `b45860c8…a8aeb9` 前后不变；报告 release decision 为 `BLOCKED_L1_PRECONDITION`，因为历史 L1 closeout 仍为 `BLOCKED`。
+
+| Track | Answer Relevancy | Contextual Precision | Contextual Recall | Faithfulness | Pedagogical GEval | Citation Audit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Gold | `0.9583` | `0.9667` | `0.6867` | `0.6972` | `0.5033` | `0.7111` |
+| Real | `0.9400` | `0.9550` | `0.8022` | `0.7528` | `0.5600` | `0.2222` |
+
+Real 的相关性和上下文排序已较好，但 Citation Audit `0.2222`（0/30 达到 0.95）、Faithfulness `0.7528`、Contextual Recall `0.8022` 和 Pedagogical GEval `0.5600` 均未达首轮门槛。全量 6 条 `generation/audit CitationAuditError`：Gold 1、Real 5；主要是 Generator 复制 `[Turn N]` 标记进 quote_text 或只输出部分 required 引用。结论：Assembler 上下文优化已验证有效，但 L2 的主要剩余瓶颈是 Generator 引用契约、忠实度和教学表达，不应宣称“全线飘绿”。下一步固定 Anchored Parent-3/W5，专项修复 Generator citation schema/prompt，并用多相关 graded qrels 和教研员 rubric 校准 DeepEval。
+
+L2 runner 现支持 `--case-start/--max-cases` 分片、每 case checkpoint 和 `--resume`，并新增 `scripts/merge_l2_deepeval_reports.py` 做 artifact/route/case 完整性校验后合并。由于全量远端调用存在长尾，后续必须优先使用分片运行；不能把串行长时间无输出视为成功。

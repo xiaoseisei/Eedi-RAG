@@ -89,6 +89,11 @@ class PedagogicalCLI:
         retrieval_mode: str = "bm25_dense",
         bm25_weight: float = 0.35,
         reranker_backend: str = "none",
+        chunk_strategy: str = "card",
+        rerank_unit: Optional[str] = None,
+        evidence_selection_count: int = 5,
+        reranker_pool_size: Optional[int] = None,
+        parent_card_count: int = 3,
     ):
         """
         Args:
@@ -107,10 +112,42 @@ class PedagogicalCLI:
             raise ValueError("bm25_weight must be in [0, 1]")
         if reranker_backend not in {"none", "siliconflow"}:
             raise ValueError("reranker_backend must be none or siliconflow")
+        if chunk_strategy not in {"card", "fallback"}:
+            raise ValueError("chunk_strategy must be card or fallback")
+        if rerank_unit is not None and rerank_unit not in {
+            "card",
+            "logical_evidence",
+            "anchored_logical_window",
+        }:
+            raise ValueError(
+                "rerank_unit must be card, logical_evidence, or anchored_logical_window"
+            )
+        if evidence_selection_count <= 0:
+            raise ValueError("evidence_selection_count must be positive")
+        if reranker_pool_size is not None and reranker_pool_size <= 0:
+            raise ValueError("reranker_pool_size must be positive")
+        # A real external reranker uses the production Anchored Parent-3/W5
+        # route by default.  Local deterministic/no-reranker runs retain the
+        # legacy card route unless the caller explicitly selects another unit.
+        if rerank_unit is None:
+            rerank_unit = (
+                "anchored_logical_window"
+                if reranker_backend == "siliconflow"
+                else "card"
+            )
+        if reranker_pool_size is None:
+            reranker_pool_size = 20 if rerank_unit == "anchored_logical_window" else 15
+        if parent_card_count <= 0:
+            raise ValueError("parent_card_count must be positive")
         self.embedding_backend = embedding_backend
         self.retrieval_mode = retrieval_mode
         self.bm25_weight = bm25_weight
         self.reranker_backend = reranker_backend
+        self.chunk_strategy = chunk_strategy
+        self.rerank_unit = rerank_unit
+        self.evidence_selection_count = evidence_selection_count
+        self.reranker_pool_size = reranker_pool_size
+        self.parent_card_count = parent_card_count
         self.storage: Optional[DualEngineStorageManager] = None
         self.retriever: Optional[DualMetricRetriever] = None
         self.pipeline: Optional[EndToEndPedagogicalRAGPipeline] = None
@@ -135,10 +172,19 @@ class PedagogicalCLI:
             from src.reranker_provider import SiliconFlowQwen3Reranker
 
             model_reranker = SiliconFlowQwen3Reranker.from_env()
-        assembler = PedagogicalGoldAssembler(lambda_diversity=0.7, model_reranker=model_reranker)
+        assembler = PedagogicalGoldAssembler(
+            lambda_diversity=0.7,
+            model_reranker=model_reranker,
+            chunk_strategy=self.chunk_strategy,
+            rerank_unit=self.rerank_unit,
+            evidence_selection_count=self.evidence_selection_count,
+            reranker_pool_size=self.reranker_pool_size,
+            parent_card_count=self.parent_card_count,
+        )
         self.pipeline = EndToEndPedagogicalRAGPipeline(
             retriever=self.retriever,
-            assembler=assembler
+            assembler=assembler,
+            chunk_strategy=self.chunk_strategy,
         )
         print(" ✅ 就绪！\n")
 
@@ -224,6 +270,16 @@ def main():
     parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
     parser.add_argument("--bm25-weight", type=float, default=0.35)
     parser.add_argument("--reranker-backend", choices=("none", "siliconflow"), default="none")
+    parser.add_argument("--chunk-strategy", choices=("card", "fallback"), default="card")
+    parser.add_argument(
+        "--rerank-unit",
+        choices=("card", "logical_evidence", "anchored_logical_window"),
+        default=None,
+        help="rerank unit; with SiliconFlow defaults to anchored Parent-3/W5",
+    )
+    parser.add_argument("--evidence-selection-count", type=int, default=5)
+    parser.add_argument("--reranker-pool-size", type=int, default=None)
+    parser.add_argument("--parent-card-count", type=int, default=3)
     args = parser.parse_args()
     cli = PedagogicalCLI(
         db_path=args.db_path,
@@ -232,6 +288,11 @@ def main():
         retrieval_mode=args.retrieval_mode,
         bm25_weight=args.bm25_weight,
         reranker_backend=args.reranker_backend,
+        chunk_strategy=args.chunk_strategy,
+        rerank_unit=args.rerank_unit,
+        evidence_selection_count=args.evidence_selection_count,
+        reranker_pool_size=args.reranker_pool_size,
+        parent_card_count=args.parent_card_count,
     )
     cli.run()
 

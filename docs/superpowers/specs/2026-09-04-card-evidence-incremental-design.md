@@ -75,7 +75,7 @@ The old extraction path remains available for backward compatibility. The new re
 
 ### C. Versioned per-session cache and invalidation
 
-Store one cache record per session under an isolated cache root. A cache key is:
+Store one cache record per session under an isolated cache root. The semantic cache key is deliberately independent of evidence binding/index versions:
 
 ```text
 session_content_hash
@@ -84,11 +84,10 @@ llm_provider
 llm_model
 extraction_schema_version
 temperature
-evidence_binding_policy
-evidence_index_version
+semantic_extraction_mode
 ```
 
-Only records with `status=SUCCESS` and matching all fields are reusable. Cache records include the serialized `ExtractedPIU`, deterministic evidence metadata, timestamps, latency, and error history. Cache writes are atomic per session.
+Only records with `status=SUCCESS` and matching all semantic fields are reusable. Binding policy and index version are recorded separately in the run manifest and are applied deterministically on every cache hit. Cache records include the serialized `ExtractedPIU`, timestamps, latency, and error history. Cache writes are atomic per session.
 
 Invalidation rules:
 

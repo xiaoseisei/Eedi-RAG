@@ -47,6 +47,11 @@ class GoldAssembledContext(BaseModel):
     prompt_context_markdown: str = Field(description="渲染完成的高密度标准 Markdown 上下文 (可直接注入 LLM System/User Prompt)")
     selected_misconception: Optional[Dict[str, Any]] = Field(default=None, description="经 MMR 提纯出的 Top-1 学情认知误区卡")
     selected_strategy: Optional[Dict[str, Any]] = Field(default=None, description="经 MMR 提纯出的 Top-1 名师启发策略卡")
+    selected_windows: List[Dict[str, Any]] = Field(default_factory=list, description="content-first 模式下选定的真实滑动窗口")
+    selected_evidence_units: List[Dict[str, Any]] = Field(default_factory=list, description="card evidence-level 模式下按 Reranker 顺序选定的逻辑链单元")
+    chunk_strategy: str = Field(default="card", description="card 或 fallback")
+    rerank_unit: str = Field(default="card", description="card、logical_evidence 或 anchored_logical_window")
+    evidence_selection_count: int = Field(default=0, ge=0, description="evidence-level 模式选定的逻辑链单元数")
     evidence_turns: List[Dict[str, Any]] = Field(default_factory=list, description="不可篡改的 DuckDB 真实师生对白证据列表")
     estimated_token_count: int = Field(default=0, description="装配后的预估 Token 消耗数")
     compression_ratio: float = Field(default=0.0, description="相比全量候选的 Token 压缩率")
@@ -79,6 +84,10 @@ class PedagogicalGoldAssembler:
         max_prompt_tokens: int = 1500,
         model_reranker: Any | None = None,
         reranker_pool_size: int = 15,
+        chunk_strategy: str = "card",
+        rerank_unit: str = "card",
+        evidence_selection_count: int = 5,
+        parent_card_count: int = 3,
     ):
         """
         初始化装配器。
@@ -90,9 +99,74 @@ class PedagogicalGoldAssembler:
         self.lambda_param = max(0.0, min(1.0, lambda_diversity))
         self.max_prompt_tokens = max_prompt_tokens
         self.model_reranker = model_reranker
+        if chunk_strategy not in {"card", "fallback"}:
+            raise ValueError("chunk_strategy must be card or fallback")
+        self.chunk_strategy = chunk_strategy
+        if rerank_unit not in {"card", "logical_evidence", "anchored_logical_window"}:
+            raise ValueError("rerank_unit must be card, logical_evidence, or anchored_logical_window")
+        if evidence_selection_count <= 0:
+            raise ValueError("evidence_selection_count must be positive")
+        self.rerank_unit = rerank_unit
+        self.evidence_selection_count = evidence_selection_count
+        if parent_card_count <= 0:
+            raise ValueError("parent_card_count must be positive")
+        self.parent_card_count = parent_card_count
         if reranker_pool_size <= 0:
             raise ValueError("reranker_pool_size must be positive")
         self.reranker_pool_size = reranker_pool_size
+
+    def rerank_candidates(
+        self,
+        raw_query: str,
+        candidates: List[Dict[str, Any]],
+        *,
+        unit_name: str,
+    ) -> List[Dict[str, Any]]:
+        """Public model-rerank stage used by multi-stage anchored retrieval.
+
+        Anchored mode needs one model pass for Parent cards and another pass for
+        anchored logical windows.  Requiring a configured model prevents a
+        deterministic MMR result from being mislabeled as model reranking.
+        """
+
+        if self.model_reranker is None:
+            raise ValueError(
+                f"{unit_name} rerank requires an explicitly configured model_reranker"
+            )
+        if not candidates:
+            return []
+        if unit_name == "anchored_logical_window":
+            documents: List[str] = []
+            for candidate in candidates:
+                metadata = candidate.get("metadata", {}) or {}
+                lines = ["[Parent metadata: ranking context only]"]
+                for parent in metadata.get("parent_contexts", []) or []:
+                    lines.extend(
+                        [
+                            f"[Parent Session {parent.get('session_id', '?')}]",
+                            f"[Topic] {parent.get('subject_path', '')}",
+                            f"[Parent Card] {parent.get('parent_title', '')}",
+                            f"[Parent Summary] {parent.get('parent_summary', '')}",
+                        ]
+                    )
+                lines.extend(["[Logical Window]", str(candidate.get("document", ""))])
+                documents.append("\n".join(lines))
+            results = self.model_reranker.rerank(raw_query, documents, top_n=len(documents))
+            reranked: List[Dict[str, Any]] = []
+            for rank, result in enumerate(results, start=1):
+                if result.index < 0 or result.index >= len(candidates):
+                    raise ValueError(f"reranker returned invalid candidate index {result.index}")
+                candidate = dict(candidates[result.index])
+                candidate["reranker_score"] = float(result.relevance_score)
+                candidate["reranker_rank"] = rank
+                candidate["reranker_model"] = self.model_reranker.name()
+                candidate["reranking_applied"] = True
+                candidate["reranker_unit"] = unit_name
+                reranked.append(candidate)
+            if len(reranked) != len(candidates):
+                raise ValueError("reranker returned an incomplete candidate permutation")
+            return reranked
+        return self._apply_model_reranker(raw_query, candidates)
 
     def _apply_model_reranker(
         self,
@@ -214,6 +288,311 @@ class PedagogicalGoldAssembler:
 
         return best_cand
 
+    @staticmethod
+    def _ordered_unit_evidence(selected_units: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Deduplicate Turn facts while preserving logical-unit/reranker order."""
+        evidence: List[Dict[str, Any]] = []
+        seen: Set[Tuple[int, int]] = set()
+        for unit in selected_units:
+            metadata = unit.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            if session_id is None:
+                raise ValueError("logical evidence unit missing session_id")
+            session_id = int(session_id)
+            for turn in unit.get("evidence_turns", []) or []:
+                turn_id = int(turn["turn_id"])
+                key = (session_id, turn_id)
+                if key in seen:
+                    continue
+                item = dict(turn)
+                item["session_id"] = session_id
+                evidence.append(item)
+                seen.add(key)
+        return evidence
+
+    @staticmethod
+    def _window_context_prefix(document: str) -> str:
+        """Keep non-Turn window headers while removing repeated dialogue lines."""
+
+        lines = []
+        for line in str(document or "").splitlines():
+            if re.match(r"^\s*\[Turn\s+\d+\]", line):
+                continue
+            if line.strip():
+                lines.append(line)
+        return "\n".join(lines).strip()
+
+    @classmethod
+    def _unique_window_payload(
+        cls,
+        units: List[Dict[str, Any]],
+    ) -> List[Tuple[int, Dict[str, Any], str, List[Dict[str, Any]]]]:
+        """Return rank, unit, one-time header, and newly introduced Turns.
+
+        Window documents are overlapping by design.  Packing uses authoritative
+        ``evidence_turns`` as the deduplication key and never infers or creates
+        Turn IDs from generated text.  A session header is emitted once, while
+        each window retains its original reranker rank in the caller's heading.
+        """
+
+        seen_turns: Set[Tuple[int, int]] = set()
+        seen_sessions: Set[int] = set()
+        payload: List[Tuple[int, Dict[str, Any], str, List[Dict[str, Any]]]] = []
+        for rank, unit in enumerate(units, start=1):
+            metadata = unit.get("metadata", {}) or {}
+            raw_session_id = metadata.get("session_id")
+            if raw_session_id is None:
+                raise ValueError("logical evidence unit missing session_id")
+            session_id = int(raw_session_id)
+            new_turns: List[Dict[str, Any]] = []
+            for turn in unit.get("evidence_turns", []) or []:
+                if turn.get("turn_id") is None:
+                    raise ValueError("logical evidence Turn is missing turn_id")
+                key = (session_id, int(turn["turn_id"]))
+                if key in seen_turns:
+                    continue
+                seen_turns.add(key)
+                item = dict(turn)
+                item["session_id"] = session_id
+                new_turns.append(item)
+            prefix = ""
+            if session_id not in seen_sessions:
+                prefix = cls._window_context_prefix(str(unit.get("document", "")))
+                seen_sessions.add(session_id)
+            payload.append((rank, unit, prefix, new_turns))
+        return payload
+
+    @classmethod
+    def _render_unique_window_block(
+        cls,
+        units: List[Dict[str, Any]],
+        *,
+        anchored: bool,
+    ) -> List[str]:
+        """Render selected windows with overlap-aware, provenance-safe text."""
+
+        lines: List[str] = []
+        for rank, unit, prefix, new_turns in cls._unique_window_payload(units):
+            metadata = unit.get("metadata", {}) or {}
+            label = "Anchored Reranker" if anchored else "Reranker"
+            lines.append(
+                f"### {rank}. Session #{metadata.get('session_id', 'N/A')} · "
+                f"Turn {metadata.get('window_start_turn', '?')}~{metadata.get('window_end_turn', '?')} "
+                f"({label}={unit.get('reranker_score', 'n/a')}; "
+                f"rank={unit.get('reranker_rank', 'n/a')})"
+            )
+            lines.append("```text")
+            if prefix:
+                lines.append(prefix)
+            if new_turns:
+                lines.extend(
+                    f"[Turn {turn['turn_id']}] [{turn.get('speaker', '')}] {turn.get('text', '')}"
+                    for turn in new_turns
+                )
+            else:
+                lines.append("[Window dialogue overlaps already selected Turns; omitted]")
+            lines.append("```")
+        return lines
+
+    def _assemble_card_logical_evidence(
+        self,
+        raw_query: str,
+        retrieval_results: Dict[str, Any],
+    ) -> GoldAssembledContext:
+        """Use reranked raw logical chains as the final card-route context."""
+        misc_candidates = retrieval_results.get("misconceptions", []) or []
+        strat_candidates = retrieval_results.get("strategies", []) or []
+        rewritten_meta = retrieval_results.get("rewritten_queries", {}) or {}
+        keywords = rewritten_meta.get("extracted_keywords", [])
+
+        # Card semantics remain available as anchors, but cards are not the
+        # evidence ranking unit in this mode.
+        selected_misc = self._select_mmr_best(misc_candidates, raw_query, keywords, [])
+        selected_strat = self._select_mmr_best(strat_candidates, raw_query, keywords, [])
+        evidence_units = retrieval_results.get("evidence_units", []) or []
+        if not evidence_units:
+            raise ValueError(
+                "logical_evidence rerank requires retrieval_results['evidence_units']; "
+                "refusing to silently fall back to card evidence order"
+            )
+        ranked_units = self._apply_model_reranker(raw_query, evidence_units)
+        def render(units: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]], int]:
+            ordered = self._ordered_unit_evidence(units)
+            lines = [
+                "# 【权威教研参考知识基座 (Logical-evidence Reranked Context)】",
+                "> 卡片仅提供语义锚点；最终对白按逻辑链 Reranker 顺序进入上下文。",
+                "",
+                "## 一、 卡片语义锚点",
+            ]
+            for label, card in (("学生错因卡", selected_misc), ("名师策略卡", selected_strat)):
+                if not card:
+                    lines.append(f"- *(未检索到{label})*")
+                    continue
+                meta = card.get("metadata", {}) or {}
+                lines.append(
+                    f"- **{label}** Session #{meta.get('session_id', 'N/A')}："
+                    f"{meta.get('misconception_name') or meta.get('key_aha_question') or card.get('chunk_id', '')}"
+                )
+                # Keep only compact semantic anchors here.  The full evidence
+                # text, not the card document, is the reranked context unit.
+                if meta.get("deep_mechanism"):
+                    lines.append(f"  - 错因机理：{meta['deep_mechanism']}")
+                if meta.get("pedagogical_goal"):
+                    lines.append(f"  - 教学目标：{meta['pedagogical_goal']}")
+                if meta.get("key_aha_question"):
+                    lines.append(f"  - 破局问题：{meta['key_aha_question']}")
+            lines.extend(["", "## 二、 Reranker 排序后的真实逻辑链证据"])
+            lines.extend(self._render_unique_window_block(units, anchored=False))
+            # Window documents already contain the verbatim [Turn N] text.
+            # Keep an authorization marker without duplicating every Turn in
+            # the prompt; duplication would consume the budget twice.
+            lines.extend([
+                "",
+                "## 三、 可引用的真实 Turn 证据",
+                "- 仅允许引用上方逻辑链窗口中逐字出现的 `[Turn N]` 原文。",
+            ])
+            prompt = "\n".join(lines)
+            return prompt, ordered, int(len(prompt) * 0.5 + len(re.findall(r"\w+", prompt)) * 0.5)
+
+        # The configured count is an upper bound.  Preserve Reranker order,
+        # but stop before adding a unit that would exceed the final budget.
+        selected_units: List[Dict[str, Any]] = []
+        prompt_markdown, ordered_evidence, estimated_tokens = render(selected_units)
+        for unit in ranked_units[: self.evidence_selection_count]:
+            trial_prompt, trial_evidence, trial_tokens = render(selected_units + [unit])
+            if selected_units and trial_tokens > self.max_prompt_tokens:
+                break
+            selected_units.append(unit)
+            prompt_markdown, ordered_evidence, estimated_tokens = trial_prompt, trial_evidence, trial_tokens
+
+        untruncated_chars = len(prompt_markdown)
+        budget_violation = estimated_tokens > self.max_prompt_tokens
+        truncation_loss = 0
+        if budget_violation:
+            target_chars = max(1, self.max_prompt_tokens * 2)
+            truncation_loss = max(0, len(prompt_markdown) - target_chars)
+            prompt_markdown = prompt_markdown[:target_chars].rstrip() + "\n[Context truncated to token budget]"
+            estimated_tokens = min(
+                self.max_prompt_tokens,
+                int(len(prompt_markdown) * 0.5 + len(re.findall(r"\w+", prompt_markdown)) * 0.5),
+            )
+        raw_chars = sum(len(str(unit.get("document", ""))) for unit in ranked_units)
+        compression_ratio = max(0.0, round(1.0 - untruncated_chars / max(1, raw_chars), 2))
+        return GoldAssembledContext(
+            raw_query=raw_query,
+            prompt_context_markdown=prompt_markdown,
+            selected_misconception=selected_misc,
+            selected_strategy=selected_strat,
+            selected_windows=[],
+            selected_evidence_units=selected_units,
+            chunk_strategy="card",
+            rerank_unit="logical_evidence",
+            evidence_selection_count=len(selected_units),
+            evidence_turns=ordered_evidence,
+            estimated_token_count=estimated_tokens,
+            compression_ratio=compression_ratio,
+            budget_violation=budget_violation,
+            truncation_loss=truncation_loss,
+        )
+
+    def _assemble_anchored_logical_windows(
+        self,
+        raw_query: str,
+        retrieval_results: Dict[str, Any],
+    ) -> GoldAssembledContext:
+        """Assemble windows that were already card- and window-reranked.
+
+        The pipeline performs the two model passes before calling the
+        Assembler.  This method intentionally does not rerank again: it only
+        preserves the supplied window rank, deduplicates authoritative Turns,
+        and enforces the final token budget.
+        """
+
+        misc_candidates = retrieval_results.get("misconceptions", []) or []
+        strat_candidates = retrieval_results.get("strategies", []) or []
+        rewritten_meta = retrieval_results.get("rewritten_queries", {}) or {}
+        keywords = rewritten_meta.get("extracted_keywords", [])
+        selected_misc = self._select_mmr_best(misc_candidates, raw_query, keywords, [])
+        selected_strat = self._select_mmr_best(strat_candidates, raw_query, keywords, [])
+        evidence_units = retrieval_results.get("evidence_units", []) or []
+        if not evidence_units:
+            raise ValueError(
+                "anchored logical-window rerank requires retrieval_results['evidence_units']"
+            )
+        if any(unit.get("reranker_rank") is None for unit in evidence_units):
+            raise ValueError(
+                "anchored logical-window Assembler requires pre-ranked evidence units"
+            )
+        ranked_units = sorted(
+            (dict(unit) for unit in evidence_units),
+            key=lambda unit: (
+                int(unit.get("reranker_rank", 10**9)),
+                -float(unit.get("reranker_score", 0.0)),
+                str(unit.get("chunk_id", "")),
+            ),
+        )
+
+        def render(units: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]], int]:
+            ordered = self._ordered_unit_evidence(units)
+            lines = [
+                "# 【权威教研参考知识基座 (Anchored Logical-Window Context)】",
+                "> Parent 卡片仅用于锚定和窗口排序；最终上下文只注入窗口中的真实 Turn。",
+                "",
+                "## 一、 Anchored Reranker 排序后的真实逻辑链证据",
+            ]
+            lines.extend(self._render_unique_window_block(units, anchored=True))
+            lines.extend(
+                [
+                    "",
+                    "## 二、 可引用的真实 Turn 证据",
+                    "- 仅允许引用上方逻辑链窗口中逐字出现的 `[Turn N]` 原文。",
+                ]
+            )
+            prompt = "\n".join(lines)
+            estimated = int(len(prompt) * 0.5 + len(re.findall(r"\w+", prompt)) * 0.5)
+            return prompt, ordered, estimated
+
+        selected_units: List[Dict[str, Any]] = []
+        prompt_markdown, ordered_evidence, estimated_tokens = render(selected_units)
+        for unit in ranked_units[: self.evidence_selection_count]:
+            trial_prompt, trial_evidence, trial_tokens = render(selected_units + [unit])
+            if selected_units and trial_tokens > self.max_prompt_tokens:
+                break
+            selected_units.append(unit)
+            prompt_markdown, ordered_evidence, estimated_tokens = (
+                trial_prompt,
+                trial_evidence,
+                trial_tokens,
+            )
+        budget_violation = estimated_tokens > self.max_prompt_tokens
+        truncation_loss = 0
+        if budget_violation:
+            target_chars = max(1, self.max_prompt_tokens * 2)
+            truncation_loss = max(0, len(prompt_markdown) - target_chars)
+            prompt_markdown = prompt_markdown[:target_chars].rstrip() + "\n[Context truncated to token budget]"
+            estimated_tokens = min(
+                self.max_prompt_tokens,
+                int(len(prompt_markdown) * 0.5 + len(re.findall(r"\w+", prompt_markdown)) * 0.5),
+            )
+        raw_chars = sum(len(str(unit.get("document", ""))) for unit in ranked_units)
+        compression_ratio = max(0.0, round(1.0 - len(prompt_markdown) / max(1, raw_chars), 2))
+        return GoldAssembledContext(
+            raw_query=raw_query,
+            prompt_context_markdown=prompt_markdown,
+            selected_misconception=selected_misc,
+            selected_strategy=selected_strat,
+            selected_windows=[],
+            selected_evidence_units=selected_units,
+            chunk_strategy="card",
+            rerank_unit="anchored_logical_window",
+            evidence_selection_count=len(selected_units),
+            evidence_turns=ordered_evidence,
+            estimated_token_count=estimated_tokens,
+            compression_ratio=compression_ratio,
+            budget_violation=budget_violation,
+            truncation_loss=truncation_loss,
+        )
+
     def assemble(
         self,
         raw_query: str,
@@ -222,6 +601,76 @@ class PedagogicalGoldAssembler:
         """
         执行 MMR 提纯与教研四槽位黄金装配。
         """
+        effective_strategy = retrieval_results.get("chunk_strategy", self.chunk_strategy)
+        if effective_strategy not in {"card", "fallback"}:
+            raise ValueError("retrieval_results chunk_strategy must be card or fallback")
+        if effective_strategy == "card" and self.rerank_unit == "anchored_logical_window":
+            return self._assemble_anchored_logical_windows(raw_query, retrieval_results)
+        if effective_strategy == "card" and self.rerank_unit == "logical_evidence":
+            return self._assemble_card_logical_evidence(raw_query, retrieval_results)
+        if effective_strategy == "fallback":
+            windows = self._apply_model_reranker(raw_query, retrieval_results.get("windows", []))
+            selected_windows = windows[: min(5, len(windows))]
+            evidence_dict: Dict[Tuple[int, int], Dict[str, Any]] = {}
+            for window in selected_windows:
+                metadata = window.get("metadata", {})
+                session_id = metadata.get("session_id")
+                if isinstance(session_id, str):
+                    session_id = int(session_id)
+                raw_turn_ids = metadata.get("source_turn_ids", [])
+                if isinstance(raw_turn_ids, str):
+                    raw_turn_ids = json.loads(raw_turn_ids)
+                for turn in window.get("evidence_turns", []) or []:
+                    evidence = dict(turn)
+                    evidence["session_id"] = session_id
+                    evidence_dict[(int(session_id), int(turn["turn_id"]))] = evidence
+                window["metadata"] = {**metadata, "source_turn_ids": list(raw_turn_ids or [])}
+            sorted_evidence = [evidence_dict[key] for key in sorted(evidence_dict)]
+            lines = [
+                "# 【真实对话窗口知识基座 (Content-first Grounding Context)】",
+                "> 本模式直接以 fallback sliding windows 作为证据入口；卡片不是必要条件。",
+                "",
+                "## 一、 检索到的真实对话窗口",
+            ]
+            for index, window in enumerate(selected_windows, start=1):
+                metadata = window.get("metadata", {})
+                lines.append(
+                    f"### {index}. Session #{metadata.get('session_id')} · "
+                    f"Turn {metadata.get('window_start_turn', '?')}~{metadata.get('window_end_turn', '?')}"
+                )
+                lines.append(f"- **窗口检索得分**: `{window.get('hybrid_score', 0.0)}`; BM25=`{window.get('bm25_score', 0.0)}`")
+                lines.append("```text")
+                lines.append(str(window.get("document", "")))
+                lines.append("```")
+            lines.extend(["", "## 二、 可引用的真实 Turn 证据"])
+            for turn in sorted_evidence:
+                speaker_tag = "🎓 [学生]" if turn["speaker"] == "student" else "👩‍🏫 [导师]"
+                lines.append(f"- **[Turn {turn['turn_id']} · Session {turn['session_id']}] {speaker_tag}**: \"{turn['text']}\"")
+            prompt_markdown = "\n".join(lines)
+            char_count = len(prompt_markdown)
+            word_count = len(re.findall(r"\w+", prompt_markdown))
+            est_tokens = int(char_count * 0.5 + word_count * 0.5)
+            budget_violation = est_tokens > self.max_prompt_tokens
+            truncation_loss = 0
+            if budget_violation:
+                target_chars = max(1, self.max_prompt_tokens * 2)
+                truncation_loss = max(0, len(prompt_markdown) - target_chars)
+                prompt_markdown = prompt_markdown[:target_chars].rstrip() + "\n[Context truncated to token budget]"
+                est_tokens = min(self.max_prompt_tokens, int(len(prompt_markdown) * 0.5 + len(re.findall(r"\w+", prompt_markdown)) * 0.5))
+            return GoldAssembledContext(
+                raw_query=raw_query,
+                prompt_context_markdown=prompt_markdown,
+                selected_misconception=None,
+                selected_strategy=None,
+                selected_windows=selected_windows,
+                chunk_strategy="fallback",
+                evidence_turns=sorted_evidence,
+                estimated_token_count=est_tokens,
+                compression_ratio=max(0.0, round(1.0 - len(prompt_markdown) / max(1, sum(len(str(w.get("document", ""))) for w in windows)), 2)),
+                budget_violation=budget_violation,
+                truncation_loss=truncation_loss,
+            )
+
         misc_candidates = self._apply_model_reranker(
             raw_query, retrieval_results.get("misconceptions", [])
         )
@@ -376,6 +825,8 @@ class PedagogicalGoldAssembler:
             prompt_context_markdown=prompt_markdown,
             selected_misconception=selected_misc,
             selected_strategy=selected_strat,
+            selected_windows=[],
+            chunk_strategy="card",
             evidence_turns=sorted_evidence,
             estimated_token_count=est_tokens,
             compression_ratio=max(0.0, compression_ratio),

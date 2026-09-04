@@ -209,3 +209,180 @@ def test_model_reranker_is_applied_before_mmr_selection():
     })
     assert result.selected_misconception["metadata"]["session_id"] == 2
     assert result.selected_misconception["reranking_applied"] is True
+
+
+def test_logical_evidence_rerank_preserves_ranked_units_as_context():
+    class FakeReranker:
+        def name(self):
+            return "fake-evidence-reranker"
+
+        def rerank(self, query, documents, *, top_n):
+            from src.reranker_provider import RerankResult
+
+            return [
+                RerankResult(index=1, relevance_score=0.95, document=documents[1]),
+                RerankResult(index=0, relevance_score=0.10, document=documents[0]),
+            ]
+
+    assembler = PedagogicalGoldAssembler(
+        model_reranker=FakeReranker(),
+        rerank_unit="logical_evidence",
+        evidence_selection_count=1,
+    )
+    result = assembler.assemble("q", {
+        "chunk_strategy": "card",
+        "misconceptions": [{
+            "hybrid_score": 1.0,
+            "document": "card anchor",
+            "metadata": {"session_id": 1, "subject_path": "Number", "misconception_name": "anchor"},
+            "evidence_turns": [],
+        }],
+        "strategies": [],
+        "evidence_units": [
+            {
+                "chunk_id": "evidence-low",
+                "document": "low-ranked chain",
+                "metadata": {"session_id": 1, "window_start_turn": 1, "window_end_turn": 2},
+                "evidence_turns": [{"turn_id": 1, "speaker": "student", "text": "low"}],
+            },
+            {
+                "chunk_id": "evidence-high",
+                "document": "high-ranked chain",
+                "metadata": {"session_id": 1, "window_start_turn": 3, "window_end_turn": 4},
+                "evidence_turns": [{"turn_id": 3, "speaker": "tutor", "text": "high"}],
+            },
+        ],
+    })
+
+    assert result.rerank_unit == "logical_evidence"
+    assert result.evidence_selection_count == 1
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["evidence-high"]
+    assert [(item["turn_id"], item["text"]) for item in result.evidence_turns] == [(3, "high")]
+    assert "high-ranked chain" in result.prompt_context_markdown
+    assert "可引用的真实 Turn 证据" in result.prompt_context_markdown
+
+
+def _overlapping_window(window_id: str, turns: list[int]) -> dict:
+    evidence = [
+        {"session_id": 10, "turn_id": turn_id, "speaker": "student", "text": f"Turn {turn_id} " + "x" * 60}
+        for turn_id in turns
+    ]
+    document = "\n".join(
+        f"[Turn {item['turn_id']}] [{item['speaker']}] {item['text']}"
+        for item in evidence
+    )
+    return {
+        "chunk_id": window_id,
+        "document": document,
+        "metadata": {
+            "session_id": 10,
+            "window_start_turn": turns[0],
+            "window_end_turn": turns[-1],
+        },
+        "evidence_turns": evidence,
+    }
+
+
+def test_logical_evidence_assembler_packs_overlapping_windows_by_unique_turns():
+    class IdentityReranker:
+        def name(self):
+            return "identity"
+
+        def rerank(self, query, documents, *, top_n):
+            from src.reranker_provider import RerankResult
+
+            return [
+                RerankResult(index=index, relevance_score=1.0 - index * 0.01, document=document)
+                for index, document in enumerate(documents)
+            ]
+
+    windows = [
+        _overlapping_window("w1", [1, 2, 3, 4, 5, 6]),
+        _overlapping_window("w2", [4, 5, 6, 7, 8, 9]),
+        _overlapping_window("w3", [7, 8, 9, 10, 11, 12]),
+        _overlapping_window("w4", [10, 11, 12, 13, 14, 15]),
+        _overlapping_window("w5", [13, 14, 15, 16, 17, 18]),
+    ]
+    assembler = PedagogicalGoldAssembler(
+        model_reranker=IdentityReranker(),
+        rerank_unit="logical_evidence",
+        evidence_selection_count=5,
+        max_prompt_tokens=1500,
+    )
+
+    result = assembler.assemble(
+        "q",
+        {"chunk_strategy": "card", "misconceptions": [], "strategies": [], "evidence_units": windows},
+    )
+
+    assert len(result.selected_evidence_units) == 5
+    assert [item["reranker_rank"] for item in result.selected_evidence_units] == [1, 2, 3, 4, 5]
+    assert len(result.evidence_turns) == 18
+    assert result.prompt_context_markdown.count("[Turn 4]") == 1
+    assert result.prompt_context_markdown.count("[Turn 18]") == 1
+    assert result.estimated_token_count <= 1500
+
+
+def test_anchored_assembler_uses_same_overlap_aware_packing():
+    windows = [
+        _overlapping_window("w1", [1, 2, 3, 4, 5, 6]),
+        _overlapping_window("w2", [4, 5, 6, 7, 8, 9]),
+        _overlapping_window("w3", [7, 8, 9, 10, 11, 12]),
+        _overlapping_window("w4", [10, 11, 12, 13, 14, 15]),
+        _overlapping_window("w5", [13, 14, 15, 16, 17, 18]),
+    ]
+    for rank, window in enumerate(windows, start=1):
+        window["reranker_rank"] = rank
+        window["reranker_score"] = 1.0 - rank * 0.01
+    assembler = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=5,
+        max_prompt_tokens=1500,
+    )
+
+    result = assembler.assemble(
+        "q",
+        {"chunk_strategy": "card", "misconceptions": [], "strategies": [], "evidence_units": windows},
+    )
+
+    assert len(result.selected_evidence_units) == 5
+    assert [item["reranker_rank"] for item in result.selected_evidence_units] == [1, 2, 3, 4, 5]
+    assert len(result.evidence_turns) == 18
+    assert result.prompt_context_markdown.count("[Turn 4]") == 1
+    assert result.estimated_token_count <= 1500
+
+
+def test_anchored_assembler_does_not_inject_parent_metadata_into_final_prompt():
+    window = _overlapping_window("w1", [1, 2])
+    window["reranker_rank"] = 1
+    window["reranker_score"] = 0.99
+    parent = {
+        "chunk_id": "parent-1",
+        "document": "parent card document",
+        "metadata": {
+            "session_id": 10,
+            "source_turn_ids": [1],
+            "misconception_name": "parent-only title",
+            "deep_mechanism": "parent-only summary",
+        },
+        "evidence_turns": [],
+    }
+    assembler = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=1500,
+    )
+
+    result = assembler.assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [parent],
+            "strategies": [],
+            "evidence_units": [window],
+        },
+    )
+
+    assert "parent-only title" not in result.prompt_context_markdown
+    assert "parent-only summary" not in result.prompt_context_markdown
+    assert "[Turn 1]" in result.prompt_context_markdown

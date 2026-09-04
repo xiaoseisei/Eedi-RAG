@@ -255,6 +255,12 @@ def test_auto_mode_without_llm_credentials_does_not_silently_fallback():
         pipeline.ask("How should this misconception be addressed?", mode="auto")
 
 
+def test_pipeline_exposes_bounded_llm_timeout() -> None:
+    pipeline = EndToEndPedagogicalRAGPipeline(llm_timeout_seconds=60.0)
+
+    assert pipeline.llm_timeout_seconds == 60.0
+
+
 def test_invalid_mode_is_rejected_before_retrieval():
     pipeline = EndToEndPedagogicalRAGPipeline(retriever=SimpleNamespace())
     with pytest.raises(ValueError, match="mode"):
@@ -423,3 +429,111 @@ def test_explicit_deterministic_mode_uses_only_supplied_facts():
     assert response.transfer_question == strategy["metadata"]["transfer_question"]
     assert "典型概念混淆" not in response.answer_content
     assert "Step 1: 提出启发式核心问题" not in response.answer_content
+
+
+def test_card_logical_evidence_path_expands_and_audits_ranked_context():
+    evidence = {"session_id": 10, "turn_id": 2, "speaker": "student", "text": "I chose 5.45"}
+    misconception = {
+        "chunk_id": "session_10_misconception",
+        "hybrid_score": 1.0,
+        "document": "card",
+        "metadata": {
+            "session_id": 10,
+            "subject_path": "Number > Rounding",
+            "misconception_name": "Place-value confusion",
+            "deep_mechanism": "The target place is confused.",
+            "error_choice": "B",
+        },
+        "evidence_turns": [evidence],
+    }
+    strategy = {
+        "chunk_id": "session_10_tutor_strategy",
+        "hybrid_score": 1.0,
+        "document": "strategy",
+        "metadata": {
+            "session_id": 10,
+            "subject_path": "Number > Rounding",
+            "key_aha_question": "Which digit decides?",
+            "pedagogical_goal": "Locate the target place.",
+            "talk_moves": [],
+            "scaffolding_steps": ["Check the next digit."],
+        },
+        "evidence_turns": [{"session_id": 10, "turn_id": 1, "speaker": "tutor", "text": "Which digit decides?"}],
+    }
+
+    class Reranker:
+        def name(self):
+            return "fake"
+
+        def rerank(self, query, documents, *, top_n):
+            from src.reranker_provider import RerankResult
+
+            return [RerankResult(index=1, relevance_score=0.9, document=documents[1]), RerankResult(index=0, relevance_score=0.1, document=documents[0])]
+
+    class CardRetriever:
+        retrieval_mode = "bm25_dense"
+
+        def __init__(self):
+            self.expanded = False
+
+        def retrieve_multi_perspective_rrf(self, *, raw_query, top_k_each, fetch_evidence):
+            return {"chunk_strategy": "card", "misconceptions": [misconception], "strategies": [strategy], "rewritten_queries": {"extracted_keywords": []}}
+
+        def expand_card_candidates_to_evidence_units(self, candidates, *, window_size, step):
+            self.expanded = True
+            return [
+                {"chunk_id": "low", "document": "low chain", "metadata": {"session_id": 10, "window_start_turn": 1, "window_end_turn": 2}, "evidence_turns": [evidence]},
+                {"chunk_id": "high", "document": "high chain", "metadata": {"session_id": 10, "window_start_turn": 3, "window_end_turn": 4}, "evidence_turns": [{"session_id": 10, "turn_id": 3, "speaker": "tutor", "text": "Which digit decides?"}]},
+            ]
+
+    retriever = CardRetriever()
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=retriever,
+        assembler=PedagogicalGoldAssembler(model_reranker=Reranker(), rerank_unit="logical_evidence", evidence_selection_count=1),
+        chunk_strategy="card",
+    )
+    response = pipeline.ask("学生为什么选 5.45？", mode="deterministic")
+    assert retriever.expanded is True
+    assert response.audit_status == "AUDITED_100_VERIFIED"
+    assert [citation.turn_id for citation in response.dialogue_citations] == [3]
+
+
+def test_fallback_chunk_strategy_uses_real_windows_as_evidence():
+    evidence = {"turn_id": 2, "speaker": "student", "text": "I chose 5.45"}
+    retrieval = {
+        "chunk_strategy": "fallback",
+        "windows": [{
+            "chunk_id": "session_10_win_1_6",
+            "hybrid_score": 0.9,
+            "bm25_score": 1.0,
+            "document": "[Turn 1] [Tutor]: What does it round to?\n[Turn 2] [Student]: I chose 5.45",
+            "metadata": {
+                "session_id": 10,
+                "subject_path": "Number > Rounding",
+                "window_start_turn": 1,
+                "window_end_turn": 6,
+                "source_turn_ids": "[1, 2]",
+            },
+            "evidence_turns": [evidence],
+        }],
+        "misconceptions": [],
+        "strategies": [],
+        "rewritten_queries": {"extracted_keywords": []},
+    }
+
+    class FallbackRetriever:
+        retrieval_mode = "bm25_dense"
+
+        def retrieve_fallback_windows(self, query, *, top_k, fetch_evidence):
+            assert top_k >= 1
+            assert fetch_evidence is True
+            return retrieval["windows"]
+
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=FallbackRetriever(),
+        assembler=PedagogicalGoldAssembler(chunk_strategy="fallback"),
+        chunk_strategy="fallback",
+    )
+    response = pipeline.ask("学生为什么选 5.45？", mode="deterministic")
+    assert response.audit_status == "AUDITED_100_VERIFIED"
+    assert response.dialogue_citations[0].turn_id == 2

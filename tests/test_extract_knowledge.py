@@ -37,6 +37,7 @@ from src.extract_knowledge import (
     build_evidence_audit_prompt,
     validate_verbatim_grounding,
     extract_knowledge_from_session,
+    extract_semantic_cards_from_session,
     batch_extract_knowledge,
     LLMUnavailableError,
     LLMExtractionError
@@ -372,6 +373,30 @@ def test_grounding_rejects_student_quote_bound_to_wrong_role_turn(
 
     with pytest.raises(LLMExtractionError, match="学生"):
         extract_knowledge_from_session(sample_session, llm_client=StaticClient(), max_retries=1)
+
+
+def test_semantic_only_ignores_llm_source_turn_ids_and_grounds_quotes_by_role(
+    sample_session: CleanedSession, mock_llm_response: dict
+):
+    student_turns = [turn for turn in sample_session.turns if not turn.is_tutor]
+    tutor_turns = [turn for turn in sample_session.turns if turn.is_tutor]
+    response = json.loads(json.dumps(mock_llm_response))
+    response["misconception"]["verbatim_student_quotes"] = [student_turns[-1].text]
+    response["misconception"]["source_turn_ids"] = [tutor_turns[0].turn_id]
+    response["tutor_strategy"]["key_aha_question"] = tutor_turns[-1].text
+    response["tutor_strategy"]["source_turn_ids"] = [student_turns[0].turn_id]
+
+    class StaticClient:
+        def generate_structured(self, prompt):
+            return response
+
+    extracted = extract_semantic_cards_from_session(
+        sample_session,
+        llm_client=StaticClient(),
+        max_retries=1,
+    )
+    assert extracted.misconception.source_turn_ids == [turn.turn_id for turn in student_turns]
+    assert extracted.tutor_strategy.source_turn_ids == [turn.turn_id for turn in tutor_turns]
 
 
 def test_grounding_rejects_aha_bound_to_wrong_or_unmatched_turn(

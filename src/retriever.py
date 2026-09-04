@@ -425,7 +425,8 @@ class DualMetricRetriever:
         self,
         query_text: str,
         top_k: int = 3,
-        where_filter: Optional[Dict] = None
+        where_filter: Optional[Dict] = None,
+        fetch_evidence: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         零信任模式：纯原文滑动窗口直接检索 (fallback_windows)。
@@ -456,7 +457,171 @@ class DualMetricRetriever:
                 str(item["chunk_id"]),
             )
         )
-        return candidates[:top_k]
+        results = candidates[:top_k]
+        if fetch_evidence:
+            for item in results:
+                metadata = item.get("metadata", {})
+                session_id = metadata.get("session_id")
+                raw_turn_ids = metadata.get("source_turn_ids", [])
+                if isinstance(raw_turn_ids, str):
+                    raw_turn_ids = json.loads(raw_turn_ids)
+                if session_id is not None:
+                    item["evidence_turns"] = self.storage.get_dialogue_turns(int(session_id), list(raw_turn_ids or []))
+        return results
+
+    def expand_card_candidates_to_evidence_units(
+        self,
+        candidates: List[Dict[str, Any]],
+        *,
+        window_size: int = 6,
+        step: int = 3,
+    ) -> List[Dict[str, Any]]:
+        """Expand retrieved cards into deterministic raw logical-chain windows.
+
+        This is intentionally independent of the LLM card pointer selection.
+        Each selected card contributes its source session; the complete raw
+        session is windowed from DuckDB and duplicate windows are merged while
+        retaining the originating card IDs for traceability.
+        """
+        if window_size <= 0 or step <= 0:
+            raise ValueError("window_size and step must be positive")
+        units: Dict[str, Dict[str, Any]] = {}
+        for candidate in candidates:
+            metadata = candidate.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            if session_id is None:
+                raise ValueError("card candidate evidence expansion requires session_id")
+            session_id = int(session_id)
+            turns = self.storage.get_dialogue_turns(session_id)
+            if not turns:
+                raise ValueError(f"session {session_id} has no authoritative dialogue turns")
+            card_id = str(candidate.get("chunk_id", ""))
+            for start in range(0, len(turns), step):
+                window_turns = turns[start : start + window_size]
+                if not window_turns:
+                    continue
+                first_id = int(window_turns[0]["turn_id"])
+                last_id = int(window_turns[-1]["turn_id"])
+                unit_id = f"session_{session_id}_evidence_{first_id}_{last_id}"
+                unit = units.setdefault(
+                    unit_id,
+                    {
+                        "chunk_id": unit_id,
+                        "document": "\n".join(
+                            [
+                                f"[Session {session_id}] [完整逻辑链原文]",
+                                *[
+                                    f"[Turn {turn['turn_id']}] [{turn['speaker']}] {turn['text']}"
+                                    for turn in window_turns
+                                ],
+                            ]
+                        ),
+                        "metadata": {
+                            "session_id": session_id,
+                            "window_start_turn": first_id,
+                            "window_end_turn": last_id,
+                            "source_turn_ids": [int(turn["turn_id"]) for turn in window_turns],
+                            "source_card_ids": [],
+                            "subject_path": metadata.get("subject_path", ""),
+                        },
+                        "evidence_turns": [
+                            {**dict(turn), "session_id": session_id}
+                            for turn in window_turns
+                        ],
+                    },
+                )
+                if card_id and card_id not in unit["metadata"]["source_card_ids"]:
+                    unit["metadata"]["source_card_ids"].append(card_id)
+                # The final partial window is valid and closes the union; the
+                # next start would otherwise duplicate only its tail.
+                if start + window_size >= len(turns):
+                    break
+        return list(units.values())
+
+    def expand_anchored_logical_windows(
+        self,
+        candidates: List[Dict[str, Any]],
+        parent_cards: List[Dict[str, Any]],
+        *,
+        window_size: int = 6,
+        step: int = 3,
+    ) -> List[Dict[str, Any]]:
+        """Expand only logical windows anchored by selected parent card pointers.
+
+        ``candidates`` is the complete post-embedding card pool.  ``parent_cards``
+        is the post-card-rerank Parent Top-N subset.  The filter is deterministic
+        and uses only real ``source_turn_ids``; qrels and generated text are not
+        consulted.  Parent metadata is attached for the downstream reranker and
+        is deliberately not copied into the window document/citation evidence.
+        """
+
+        if not parent_cards:
+            raise ValueError("anchored logical-window expansion requires parent_cards")
+
+        all_units = self.expand_card_candidates_to_evidence_units(
+            candidates, window_size=window_size, step=step
+        )
+
+        def pointer_ids(card: Dict[str, Any]) -> set[Tuple[int, int]]:
+            metadata = card.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            if session_id is None:
+                raise ValueError("anchored parent card is missing session_id")
+            raw_ids = metadata.get("source_turn_ids", [])
+            if isinstance(raw_ids, str):
+                raw_ids = json.loads(raw_ids)
+            return {(int(session_id), int(turn_id)) for turn_id in (raw_ids or [])}
+
+        parent_keys = set().union(*(pointer_ids(card) for card in parent_cards))
+        if not parent_keys:
+            raise ValueError("anchored parent cards contain no source_turn_ids")
+
+        def compact_parent_metadata(card: Dict[str, Any]) -> Dict[str, str]:
+            metadata = card.get("metadata", {}) or {}
+            return {
+                "card_id": str(card.get("chunk_id", "")),
+                "session_id": str(metadata.get("session_id", "")),
+                "subject_path": str(metadata.get("subject_path", "")),
+                "parent_title": str(
+                    metadata.get("misconception_name")
+                    or metadata.get("key_aha_question")
+                    or card.get("chunk_id", "")
+                )[:300],
+                "parent_summary": str(
+                    metadata.get("deep_mechanism")
+                    or metadata.get("pedagogical_goal")
+                    or ""
+                )[:500],
+            }
+
+        anchored: List[Dict[str, Any]] = []
+        for unit in all_units:
+            metadata = unit.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            if session_id is None:
+                raise ValueError("logical window is missing session_id")
+            session_id = int(session_id)
+            raw_ids = metadata.get("source_turn_ids", [])
+            if isinstance(raw_ids, str):
+                raw_ids = json.loads(raw_ids)
+            window_keys = {(session_id, int(turn_id)) for turn_id in (raw_ids or [])}
+            overlap = window_keys & parent_keys
+            if not overlap:
+                continue
+            item = dict(unit)
+            item_metadata = dict(metadata)
+            item_metadata["anchor_turn_ids"] = sorted(
+                turn_id for sid, turn_id in overlap if sid == session_id
+            )
+            item_metadata["parent_contexts"] = [
+                compact_parent_metadata(card)
+                for card in parent_cards
+                if int((card.get("metadata", {}) or {}).get("session_id", -1)) == session_id
+                and pointer_ids(card) & window_keys
+            ]
+            item["metadata"] = item_metadata
+            anchored.append(item)
+        return anchored
 
     def retrieve_hybrid(
         self,

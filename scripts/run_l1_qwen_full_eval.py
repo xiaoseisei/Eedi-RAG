@@ -8,8 +8,10 @@ import json
 import shutil
 import sys
 import tempfile
+import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,6 +36,78 @@ from evals.suite import run_component_suite
 from src.embedding_provider import SiliconFlowQwen3EmbeddingFunction
 
 
+def _index_rows(storage, table: str) -> list[dict[str, Any]]:
+    """Read immutable chunk metadata used to derive strategy-specific qrels."""
+    if table not in {"misconception_chunks", "tutor_strategy_chunks", "sliding_window_chunks"}:
+        raise ValueError(f"unsupported chunk table: {table}")
+    return [
+        {
+            "chunk_id": str(row[0]),
+            "session_id": int(row[1]),
+            "subject_path": row[2] or "",
+            "source_turn_ids": list(row[3] or []),
+        }
+        for row in storage.duck_conn.execute(
+            f"SELECT chunk_id, session_id, subject_path, source_turn_ids FROM {table} ORDER BY chunk_id"
+        ).fetchall()
+    ]
+
+
+def _strategy_slot(case: dict[str, Any]) -> str:
+    """Select the role-bearing card lane without consulting system output."""
+    intent = case.get("category", "UNKNOWN")
+    preferred = "misconception" if intent == "STUDENT_INSIGHT" else "strategy"
+    speakers = {str(item.get("speaker")) for item in case.get("verbatim_grounding_quotes", [])}
+    expected = "student" if preferred == "misconception" else "tutor"
+    if expected in speakers:
+        return preferred
+    return "strategy" if preferred == "misconception" else "misconception"
+
+
+def _ranked_window_records(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Convert live retriever output to the minimal Chunking contract shape."""
+    from src.chunker import estimate_tokens
+
+    records = []
+    for candidate in candidates:
+        metadata = candidate.get("metadata", {})
+        raw_turn_ids = metadata.get("source_turn_ids", [])
+        if isinstance(raw_turn_ids, str):
+            raw_turn_ids = json.loads(raw_turn_ids)
+        records.append({
+            "chunk_id": str(candidate["chunk_id"]),
+            "session_id": int(metadata["session_id"]),
+            "subject_path": metadata.get("subject_path") or "",
+            "source_turn_ids": [int(value) for value in (raw_turn_ids or [])],
+            "token_count": estimate_tokens(str(candidate.get("document", ""))),
+        })
+    return records
+
+
+def _query_lane_for_intent(intent: str) -> str:
+    if intent == "STUDENT_INSIGHT":
+        return "misconception"
+    if intent == "TUTOR_INTERVENTION":
+        return "strategy"
+    return "curriculum"
+
+
+def _rewrite_query(raw_query: str, rewriter, lane: str) -> str:
+    result = rewriter.rewrite(raw_query)
+    field = {
+        "misconception": "misconception_query",
+        "strategy": "strategy_query",
+        "curriculum": "curriculum_query",
+    }.get(lane)
+    return getattr(result, field, None) or raw_query
+
+
+def _protected_tokens(question: str) -> set[str]:
+    import re
+
+    return set(re.findall(r"\d+(?:\.\d+)?|[A-D](?![a-z])", question))
+
+
 def _load_dotenv_if_available() -> None:
     try:
         from dotenv import load_dotenv
@@ -55,27 +129,232 @@ def _target_id(case: dict) -> tuple[str, str]:
     return f"session_{quotes[0]['session_id']}_{slot if slot == 'misconception' else 'tutor_strategy'}", slot
 
 
-def build_retrieval_cases(golden: list[dict], retriever, *, top_k: int) -> list[RetrievalEvalCase]:
+def build_retrieval_cases(
+    golden: list[dict],
+    retriever,
+    *,
+    top_k: int,
+    chunk_strategy: str = "card",
+    index_rows: dict[str, list[dict[str, Any]]] | None = None,
+) -> list[RetrievalEvalCase]:
+    if chunk_strategy not in {"card", "fallback"}:
+        raise ValueError("chunk_strategy must be card or fallback")
+    if index_rows is None:
+        index_rows = {
+            "misconception": _index_rows(retriever.storage, "misconception_chunks"),
+            "strategy": _index_rows(retriever.storage, "tutor_strategy_chunks"),
+            "fallback": _index_rows(retriever.storage, "sliding_window_chunks"),
+        }
     cases: list[RetrievalEvalCase] = []
     for index, case in enumerate(golden, 1):
-        target_id, slot = _target_id(case)
-        collection = "student_misconceptions" if slot == "misconception" else "tutor_strategies"
-        import time
-
-        started = time.perf_counter()
-        candidates = (
-            retriever.retrieve_misconceptions(case["question"], top_k=top_k, fetch_evidence=False)
-            if slot == "misconception"
-            else retriever.retrieve_strategies(case["question"], top_k=top_k, fetch_evidence=False)
+        slot = _strategy_slot(case)
+        collection = "fallback_windows" if chunk_strategy == "fallback" else (
+            "student_misconceptions" if slot == "misconception" else "tutor_strategies"
         )
+        query_id = f"eedi-l1-{index:04d}"
+        started = time.perf_counter()
+        if chunk_strategy == "fallback":
+            candidates = retriever.retrieve_fallback_windows(case["question"], top_k=top_k, fetch_evidence=False)
+            from evals.graded_qrels import build_window_graded_qrels
+
+            qrel_rows = build_window_graded_qrels({**case, "query_id": query_id}, index_rows["fallback"])
+        else:
+            candidates = (
+                retriever.retrieve_misconceptions(case["question"], top_k=top_k, fetch_evidence=False)
+                if slot == "misconception"
+                else retriever.retrieve_strategies(case["question"], top_k=top_k, fetch_evidence=False)
+            )
+            from evals.graded_qrels import build_card_graded_qrels
+
+            qrel_rows = build_card_graded_qrels(
+                {**case, "query_id": query_id},
+                index_rows[slot],
+                target_slot=slot,
+            )
+
         cases.append(RetrievalEvalCase(
-            case_id=f"golden-{index:02d}-qwen-retrieval",
+            case_id=f"golden-{index:02d}-{chunk_strategy}-qwen-retrieval",
             query=case["question"],
             ranked_ids=[str(item["chunk_id"]) for item in candidates],
-            qrels={target_id: 3},
+            qrels={row["document_id"]: int(row["relevance"]) for row in qrel_rows},
             latency_ms=(time.perf_counter() - started) * 1000.0,
-            slices={"category": case.get("category", "unknown"), "collection": collection, "embedding": "qwen3-0.6b"},
+            slices={
+                "category": case.get("category", "unknown"),
+                "collection": collection,
+                "embedding": "qwen3-0.6b",
+                "chunk_strategy": chunk_strategy,
+            },
         ))
+    return cases
+
+
+def build_card_chunking_cases(golden: list[dict], retriever, index_rows: dict[str, list[dict[str, Any]]]) -> list[dict]:
+    """Measure card pointer coverage using the actual card ranking, not windows."""
+    from evals.contracts import ChunkRankedRecord, ChunkingEvalCase, TurnKey
+    from src.chunker import estimate_tokens
+
+    cases: list[dict] = []
+    for index, case in enumerate(golden, 1):
+        quotes = case.get("verbatim_grounding_quotes", [])
+        if not quotes:
+            continue
+        slot = _strategy_slot(case)
+        expected_speaker = "student" if slot == "misconception" else "tutor"
+        target_turns = [
+            TurnKey(session_id=int(item["session_id"]), turn_id=int(item["turn_id"]))
+            for item in quotes
+            if str(item.get("speaker")) == expected_speaker
+        ]
+        if not target_turns:
+            target_turns = [TurnKey(session_id=int(item["session_id"]), turn_id=int(item["turn_id"])) for item in quotes]
+        started = time.perf_counter()
+        candidates = (
+            retriever.retrieve_misconceptions(case["question"], top_k=20, fetch_evidence=False)
+            if slot == "misconception"
+            else retriever.retrieve_strategies(case["question"], top_k=20, fetch_evidence=False)
+        )
+        ranked = []
+        for candidate in candidates:
+            metadata = candidate.get("metadata", {})
+            raw_turn_ids = metadata.get("source_turn_ids", [])
+            if isinstance(raw_turn_ids, str):
+                raw_turn_ids = json.loads(raw_turn_ids)
+            ranked.append(ChunkRankedRecord(
+                chunk_id=str(candidate["chunk_id"]),
+                session_id=int(metadata["session_id"]),
+                source_turn_ids={int(value) for value in (raw_turn_ids or [])},
+                token_count=estimate_tokens(str(candidate.get("document", ""))),
+            ))
+        # Retrieved candidates are not chunk-generation output; inflation is N/A.
+        original_tokens = max(1, sum(
+            estimate_tokens(str(item.get("document", "")))
+            for item in candidates
+        ))
+        cases.append(json.loads(ChunkingEvalCase(
+            case_id=f"golden-{index:02d}-card-chunk-retrieval",
+            query=case["question"],
+            target_turns=target_turns,
+            ranked_chunks=ranked,
+            original_token_count=original_tokens,
+            emitted_chunk_token_count=sum(item.token_count for item in ranked),
+            latency_ms=round((time.perf_counter() - started) * 1000.0, 3),
+            inflation_applicable=False,
+            slices={"category": case.get("category", "unknown"), "chunk_strategy": "card", "source": "card_actual_ranking"},
+        ).model_dump_json()))
+    return cases
+
+
+def build_fallback_rewrite_cases(golden: list[dict], retriever, rewriter, index_rows: list[dict[str, Any]]) -> list[dict]:
+    """Run rewrite diagnostics against real windows; fallback does not use fusion."""
+    from evals.contracts import RewriteEvalCase
+    from evals.graded_qrels import build_window_graded_qrels
+
+    cases: list[dict] = []
+    for index, case in enumerate(golden, 1):
+        if not case.get("verbatim_grounding_quotes"):
+            continue
+        query_id = f"eedi-l1-{index:04d}"
+        started = time.perf_counter()
+        raw = retriever.retrieve_fallback_windows(case["question"], top_k=20, fetch_evidence=False)
+        rewritten_query = _rewrite_query(case["question"], rewriter, _query_lane_for_intent(case.get("category", "UNKNOWN")))
+        rewritten = retriever.retrieve_fallback_windows(rewritten_query, top_k=20, fetch_evidence=False)
+        qrels = build_window_graded_qrels({**case, "query_id": query_id}, index_rows)
+        protected = _protected_tokens(case["question"])
+        cases.append(json.loads(RewriteEvalCase(
+            case_id=f"golden-{index:02d}-fallback-rewrite",
+            raw_query=case["question"],
+            rewritten_query=rewritten_query,
+            protected_tokens=protected,
+            critical_entities=set(),
+            intent_preserved=None,
+            intent_label_source=None,
+            domain_injection_expected=False,
+            raw_ranked_ids=[str(item["chunk_id"]) for item in raw],
+            rewritten_ranked_ids=[str(item["chunk_id"]) for item in rewritten],
+            qrels={row["document_id"]: int(row["relevance"]) for row in qrels},
+            latency_ms=round((time.perf_counter() - started) * 1000.0, 3),
+            slices={"category": case.get("category", "unknown"), "chunk_strategy": "fallback", "rewrite_usage": "not_applicable_content_first"},
+        ).model_dump_json()))
+    return cases
+
+
+def build_fallback_fusion_cases(golden: list[dict], retriever, rewriter, index_rows: list[dict[str, Any]]) -> list[dict]:
+    """Record the content-first route's explicit no-fusion behavior."""
+    from evals.contracts import FusionEvalCase
+    from evals.graded_qrels import build_window_graded_qrels
+
+    cases: list[dict] = []
+    for index, case in enumerate(golden, 1):
+        if not case.get("verbatim_grounding_quotes"):
+            continue
+        query_id = f"eedi-l1-{index:04d}"
+        started = time.perf_counter()
+        raw = retriever.retrieve_fallback_windows(case["question"], top_k=20, fetch_evidence=False)
+        rewritten_query = _rewrite_query(case["question"], rewriter, _query_lane_for_intent(case.get("category", "UNKNOWN")))
+        rewritten = retriever.retrieve_fallback_windows(rewritten_query, top_k=20, fetch_evidence=False)
+        qrels = build_window_graded_qrels({**case, "query_id": query_id}, index_rows)
+        raw_ids = [str(item["chunk_id"]) for item in raw]
+        rewritten_ids = [str(item["chunk_id"]) for item in rewritten]
+        cases.append(json.loads(FusionEvalCase(
+            case_id=f"golden-{index:02d}-fallback-fusion",
+            raw_query=case["question"],
+            intent=case.get("category") if case.get("category") in {"STUDENT_INSIGHT", "TUTOR_INTERVENTION", "CONTENT_IMPROVEMENT"} else "UNKNOWN",
+            lane_ranked_ids={"raw": raw_ids, "fallback_rewrite_diagnostic": rewritten_ids},
+            rewrite_only_ranked_ids=rewritten_ids,
+            raw_inclusive_ranked_ids=raw_ids,
+            selected_ranked_ids=raw_ids,
+            selected_strategy="raw_first",
+            qrels={row["document_id"]: int(row["relevance"]) for row in qrels},
+            latency_ms=round((time.perf_counter() - started) * 1000.0, 3),
+            slices={"category": case.get("category", "unknown"), "chunk_strategy": "fallback", "fusion_usage": "not_applicable_content_first"},
+        ).model_dump_json()))
+    return cases
+
+
+def build_fallback_assembler_cases(golden: list[dict], retriever, assembler, index_rows: list[dict[str, Any]]) -> list[dict]:
+    """Assemble the real fallback windows and retain their evidence trace."""
+    from evals.adapters.assembler import assemble_with_trace
+    from evals.contracts import AssemblerEvalCase, EvidenceRef
+    from evals.graded_qrels import build_window_graded_qrels
+
+    cases: list[dict] = []
+    for index, case in enumerate(golden, 1):
+        if not case.get("verbatim_grounding_quotes"):
+            continue
+        query_id = f"eedi-l1-{index:04d}"
+        retrieval_res = {
+            "chunk_strategy": "fallback",
+            "windows": retriever.retrieve_fallback_windows(case["question"], top_k=20, fetch_evidence=True),
+            "misconceptions": [],
+            "strategies": [],
+            "rewritten_queries": {"extracted_keywords": []},
+        }
+        started = time.perf_counter()
+        trace = assemble_with_trace(case["question"], retrieval_res, assembler)
+        context = assembler.assemble(raw_query=case["question"], retrieval_results=retrieval_res)
+        qrel_rows = build_window_graded_qrels({**case, "query_id": query_id}, index_rows)
+        qrels = {row["document_id"]: int(row["relevance"]) for row in qrel_rows}
+        final_ids = [str(item["chunk_id"]) for item in (context.selected_windows or [])]
+        slot_by_id = {row["document_id"]: "fallback_window" for row in qrel_rows}
+        final_evidence = [EvidenceRef(session_id=int(item["session_id"]), turn_id=int(item["turn_id"]), speaker=item["speaker"], quote_text=item["text"]) for item in trace["final_evidence_turns"]]
+        cases.append(json.loads(AssemblerEvalCase(
+            case_id=f"golden-{index:02d}-fallback-assembler",
+            input_ranked_ids=[str(item["chunk_id"]) for item in retrieval_res["windows"]],
+            final_context_ids=final_ids,
+            qrels=qrels,
+            required_evidence_ids={row["document_id"] for row in qrel_rows if int(row["relevance"]) >= 2},
+            slot_by_id=slot_by_id,
+            final_evidence_turns=final_evidence,
+            actual_prompt_context=trace["actual_prompt_context"],
+            trace=trace,
+            candidate_char_count=sum(len(str(item.get("document", ""))) for item in retrieval_res["windows"]),
+            assembled_char_count=len(context.prompt_context_markdown),
+            estimated_tokens=context.estimated_token_count,
+            max_prompt_tokens=assembler.max_prompt_tokens,
+            evidence_count=len(final_evidence),
+            latency_ms=round((time.perf_counter() - started) * 1000.0, 3),
+            slices={"category": case.get("category", "unknown"), "chunk_strategy": "fallback"},
+        ).model_dump_json()))
     return cases
 
 
@@ -207,6 +486,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dataset-manifest", type=Path, required=True)
     parser.add_argument("--expected-artifact-hash", type=str, default=None)
     parser.add_argument("--split-manifest", type=Path, default=None)
+    parser.add_argument("--chunk-strategy", choices=("card", "fallback"), default="card")
     args = parser.parse_args(argv)
     _load_dotenv_if_available()
     if args.top_k <= 0:
@@ -269,21 +549,46 @@ def main(argv: list[str] | None = None) -> int:
                 alpha=0.5,
                 fusion_strategy="raw_first",
             )
-            assembler = PedagogicalGoldAssembler(lambda_diversity=0.7, max_prompt_tokens=1500)
-            pipeline = EndToEndPedagogicalRAGPipeline(retriever=retriever, assembler=assembler)
+            assembler = PedagogicalGoldAssembler(
+                lambda_diversity=0.7,
+                max_prompt_tokens=1500,
+                chunk_strategy=args.chunk_strategy,
+            )
+            pipeline = EndToEndPedagogicalRAGPipeline(
+                retriever=retriever,
+                assembler=assembler,
+                chunk_strategy=args.chunk_strategy,
+            )
             rewriter = MultiPerspectiveQueryRewriter(mode="deterministic")
             sessions = load_sessions()
             indexed_session_ids = {
                 int(row[0])
                 for row in storage.duck_conn.execute("SELECT DISTINCT session_id FROM sliding_window_chunks").fetchall()
             }
-            retrieval_cases = build_retrieval_cases(golden, retriever, top_k=args.top_k)
+            index_rows = {
+                "misconception": _index_rows(storage, "misconception_chunks"),
+                "strategy": _index_rows(storage, "tutor_strategy_chunks"),
+                "fallback": _index_rows(storage, "sliding_window_chunks"),
+            }
+            retrieval_cases = build_retrieval_cases(
+                golden,
+                retriever,
+                top_k=args.top_k,
+                chunk_strategy=args.chunk_strategy,
+                index_rows=index_rows,
+            )
             grounding_cases = [GroundingEvalCase.model_validate(item) for item in build_grounding_cases(golden, sessions, pipeline)]
             chunk_structure_cases = [ChunkStructuralEvalCase.model_validate(item) for item in build_chunk_structure_cases(sessions, indexed_session_ids)]
-            chunking_cases = [ChunkingEvalCase.model_validate(item) for item in build_chunk_retrieval_cases(golden, retriever)]
-            rewrite_cases = [RewriteEvalCase.model_validate(item) for item in build_rewrite_cases(golden, sessions, retriever, rewriter)]
-            fusion_cases = [FusionEvalCase.model_validate(item) for item in build_fusion_cases(golden, retriever)]
-            assembler_cases = [AssemblerEvalCase.model_validate(item) for item in build_assembler_cases(golden, sessions, retriever, assembler, top_k_each=20)]
+            if args.chunk_strategy == "fallback":
+                chunking_cases = [ChunkingEvalCase.model_validate(item) for item in build_chunk_retrieval_cases(golden, retriever)]
+                rewrite_cases = [RewriteEvalCase.model_validate(item) for item in build_fallback_rewrite_cases(golden, retriever, rewriter, index_rows["fallback"])]
+                fusion_cases = [FusionEvalCase.model_validate(item) for item in build_fallback_fusion_cases(golden, retriever, rewriter, index_rows["fallback"])]
+                assembler_cases = [AssemblerEvalCase.model_validate(item) for item in build_fallback_assembler_cases(golden, retriever, assembler, index_rows["fallback"])]
+            else:
+                chunking_cases = [ChunkingEvalCase.model_validate(item) for item in build_card_chunking_cases(golden, retriever, index_rows)]
+                rewrite_cases = [RewriteEvalCase.model_validate(item) for item in build_rewrite_cases(golden, sessions, retriever, rewriter)]
+                fusion_cases = [FusionEvalCase.model_validate(item) for item in build_fusion_cases(golden, retriever)]
+                assembler_cases = [AssemblerEvalCase.model_validate(item) for item in build_assembler_cases(golden, sessions, retriever, assembler, top_k_each=20)]
             for cases in (retrieval_cases, grounding_cases, chunking_cases, rewrite_cases, fusion_cases, assembler_cases):
                 _attach_split(cases, split_assignments)
             for case in chunk_structure_cases:
@@ -318,6 +623,12 @@ def main(argv: list[str] | None = None) -> int:
         "query_rewrite_mode": "deterministic_rules",
         "retrieval_backend": "dense-chroma-plus-dialogue-numeric-formula-exact",
         "fusion_strategy": "raw_first",
+        "chunk_strategy": args.chunk_strategy,
+        "rewrite_fusion_semantics": (
+            "multi_perspective_rrf_on_role_card_lanes"
+            if args.chunk_strategy == "card"
+            else "not_applicable_content_first; raw_window_ranking_retained_as_diagnostic"
+        ),
         "rrf_k": 60,
         "mmr_lambda": 0.7,
         "assembler_top_k_each": 20,
@@ -368,6 +679,7 @@ def main(argv: list[str] | None = None) -> int:
         f".venv\\Scripts\\python.exe scripts\\run_l1_qwen_full_eval.py --db {args.db} "
         f"--chroma {args.chroma} --dataset-manifest {args.dataset_manifest} "
         f"--output-root {args.output_root} --run-id <new-unique-run-id> --top-k {args.top_k}"
+        f" --chunk-strategy {args.chunk_strategy}"
     )
     closeout = _write_closeout(
         run_dir=run_dir,

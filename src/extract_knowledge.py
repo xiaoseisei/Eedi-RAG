@@ -115,7 +115,44 @@ class _StrictEvidenceAuditPayload(BaseModel):
     tutor_strategy_source_turn_ids: List[int] = Field(min_length=1)
 
 
-def build_extraction_prompt(session: CleanedSession) -> str:
+class _SemanticMisconceptionPayload(BaseModel):
+    """Semantic-only payload; model pointers are advisory and ignored."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    misconception_name: NonEmptyStr
+    error_choice: Optional[NonEmptyStr] = None
+    deep_mechanism: NonEmptyStr
+    confusion_triggers: List[NonEmptyStr] = Field(min_length=1)
+    verbatim_student_quotes: List[NonEmptyStr] = Field(min_length=1)
+    source_turn_ids: List[int] = Field(default_factory=list)
+
+
+class _SemanticTutorStrategyPayload(BaseModel):
+    """Semantic-only payload; model pointers are advisory and ignored."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    pedagogical_goal: NonEmptyStr
+    strategy_category: Literal[
+        "Socratic_Questioning", "Scaffolding", "Counter_Example", "Analogy", "Revoicing"
+    ]
+    key_aha_question: NonEmptyStr
+    scaffolding_steps: List[NonEmptyStr] = Field(min_length=1)
+    analogy_or_metaphor: Optional[NonEmptyStr] = None
+    talk_moves: List[NonEmptyStr] = Field(min_length=1)
+    resolution_outcome: NonEmptyStr
+    source_turn_ids: List[int] = Field(default_factory=list)
+
+
+class _SemanticExtractionPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    misconception: _SemanticMisconceptionPayload
+    tutor_strategy: _SemanticTutorStrategyPayload
+
+
+def build_extraction_prompt(session: CleanedSession, semantic_only: bool = False) -> str:
     """
     组装供 LLM 消费的教育知识蒸馏 Prompt 上下文。
     
@@ -136,6 +173,13 @@ def build_extraction_prompt(session: CleanedSession) -> str:
         turns_formatted.append(f"[Turn {t.turn_id}] {speaker_tag}{moves_tag}: {t.text}")
     
     turns_str = "\n".join(turns_formatted)
+
+    semantic_instruction = """
+【Semantic-only 抽取模式】
+本次只抽取卡片语义，不要把 source_turn_ids 当作可信证据指针。source_turn_ids 仅为兼容字段，
+可以留空，后续由外部 evidence index 基于完整原文逻辑链重新绑定。每条学生原声只需能在全量学生轮次中
+找到；核心提问只需能在全量导师轮次中找到。不要因为模型自选的 source_turn_ids 不包含对应原文而修改语义。
+""" if semantic_only else ""
     
     prompt = f"""你是一名资深的教育测量与教学法专家（Educational Measurement & Pedagogy Expert）。
 请你仔细阅读以下这场真实的 1v1 在线数学辅导多轮交互实录，并为该辅导提炼两大物理隔离的【原子知识卡片】：
@@ -169,6 +213,7 @@ def build_extraction_prompt(session: CleanedSession) -> str:
 6. 在输出 JSON 前先进行一次“证据完整性自检”：逐轮扫描完整实录，分别建立学生和导师的直接证据清单，再将清单中的全部 Turn ID 写入对应 `source_turn_ids`。禁止只返回一条最能代表主题的 Turn，也禁止为了减少字段而省略同一论证链上的其他直接证据。
 7. `misconception.verbatim_student_quotes` 应覆盖所选学生证据中的关键原声；每条引用必须能在对应学生 Turn 中逐字找到。`tutor_strategy.key_aha_question` 必须逐字来自所选导师 Turn；其他导师证据通过 `source_turn_ids` 保留，不要把它们改写成不存在的引用。
 8. `key_aha_question` 必须是**单个导师 Turn 内的短精确子串**（建议只保留核心问题句）；不得拼接多个 Turn，不得添加 `Turn N` 标签、引号或实录中不存在的表扬/emoji 文本。对应 `source_turn_ids` 至少包含该问题所在的 Tutor Turn。
+{semantic_instruction}
 
 请严格按照以下 JSON Schema 键名结构输出:
 ```json
@@ -427,31 +472,53 @@ def _run_evidence_audit(
     ) from last_error
 
 
-def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU:
-    """严格解析一轮 LLM 响应，并将每条证据绑定到正确角色的声明轮次。"""
+def _parse_and_ground_payload(
+    raw: Any,
+    session: CleanedSession,
+    semantic_only: bool = False,
+) -> ExtractedPIU:
+    """解析 LLM 输出并执行角色/原文门禁。
+
+    In ``semantic_only`` mode the model's source pointers are advisory only;
+    quote and Aha validation run against all authoritative turns of the
+    corresponding role.  The deterministic evidence index binds final
+    pointers after this function returns.
+    """
     if isinstance(raw, str):
         raw = json.loads(raw)
-    payload = _StrictExtractionPayload.model_validate(raw)
+    payload = (
+        _SemanticExtractionPayload.model_validate(raw)
+        if semantic_only
+        else _StrictExtractionPayload.model_validate(raw)
+    )
     turns_by_id = {turn.turn_id: turn for turn in session.turns}
 
-    student_turns = []
-    for turn_id in payload.misconception.source_turn_ids:
-        turn = turns_by_id.get(turn_id)
-        if turn is None or turn.is_tutor:
-            raise ValueError(f"学生 source_turn_ids 包含不存在或非学生轮次: {turn_id}")
-        student_turns.append(turn)
+    all_student_turns = [turn for turn in session.turns if not turn.is_tutor]
+    all_tutor_turns = [turn for turn in session.turns if turn.is_tutor]
+    if semantic_only:
+        student_turns = all_student_turns
+    else:
+        student_turns = []
+        for turn_id in payload.misconception.source_turn_ids:
+            turn = turns_by_id.get(turn_id)
+            if turn is None or turn.is_tutor:
+                raise ValueError(f"学生 source_turn_ids 包含不存在或非学生轮次: {turn_id}")
+            student_turns.append(turn)
     for quote in payload.misconception.verbatim_student_quotes:
         if not any(validate_verbatim_grounding(quote, [turn])[0] for turn in student_turns):
             raise ValueError(
                 f"学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): {quote!r}"
             )
 
-    tutor_turns = []
-    for turn_id in payload.tutor_strategy.source_turn_ids:
-        turn = turns_by_id.get(turn_id)
-        if turn is None or not turn.is_tutor:
-            raise ValueError(f"导师 source_turn_ids 包含不存在或非导师轮次: {turn_id}")
-        tutor_turns.append(turn)
+    if semantic_only:
+        tutor_turns = all_tutor_turns
+    else:
+        tutor_turns = []
+        for turn_id in payload.tutor_strategy.source_turn_ids:
+            turn = turns_by_id.get(turn_id)
+            if turn is None or not turn.is_tutor:
+                raise ValueError(f"导师 source_turn_ids 包含不存在或非导师轮次: {turn_id}")
+            tutor_turns.append(turn)
     if not any(
         _canonicalize_evidence_text(payload.tutor_strategy.key_aha_question)
         in _canonicalize_evidence_text(turn.text)
@@ -463,12 +530,18 @@ def _parse_and_ground_payload(raw: Any, session: CleanedSession) -> ExtractedPIU
         )
 
     misc_data = payload.misconception.model_dump()
+    if semantic_only:
+        # Compatibility values are complete role sets until the external
+        # evidence index replaces them with its logical-chain binding.
+        misc_data["source_turn_ids"] = [turn.turn_id for turn in all_student_turns]
     misc_data.update(
         session_id=session.intervention_id,
         question_id=session.question_id,
         subject_path=session.subjects.paths[0] if session.subjects.paths else "",
     )
     strategy_data = payload.tutor_strategy.model_dump()
+    if semantic_only:
+        strategy_data["source_turn_ids"] = [turn.turn_id for turn in all_tutor_turns]
     strategy_data.update(session_id=session.intervention_id, question_id=session.question_id)
     return ExtractedPIU(
         session_id=session.intervention_id,
@@ -488,7 +561,8 @@ def extract_knowledge_from_session(
     temperature: float = 0.1,
     max_retries: int = 3,
     evidence_audit: bool = False,
-    allow_none_on_failure: bool = False
+    allow_none_on_failure: bool = False,
+    semantic_only: bool = False,
 ) -> ExtractedPIU:
     """
     对单个 CleanedSession 执行知识蒸馏抽取，内置“错误反馈自纠重试循环 (Self-Correction Loop)”。
@@ -508,6 +582,7 @@ def extract_knowledge_from_session(
       max_retries (int): 校验失败时的最大自纠重试次数 (默认 3 次)
       evidence_audit (bool): 是否在首轮抽取后执行第二遍最小充分证据审计 (默认关闭，需显式开启)
       allow_none_on_failure (bool): 已废弃兼容参数；任何取值都始终 Fail-Fast
+      semantic_only (bool): 只抽取卡片语义；忽略 LLM source_turn_ids，由外部 evidence index 绑定证据
       
     返回:
       ExtractedPIU: 仅返回两张卡均通过严格 schema 与 grounding 的真实成功对象
@@ -517,7 +592,7 @@ def extract_knowledge_from_session(
     if allow_none_on_failure:
         logger.warning("allow_none_on_failure 已废弃；真实性门禁始终 Fail-Fast")
 
-    prompt = build_extraction_prompt(session)
+    prompt = build_extraction_prompt(session, semantic_only=semantic_only)
     messages: List[Dict[str, str]] = [
         {"role": "system", "content": "You are an expert pedagogical knowledge extractor. Output structured JSON only."},
         {"role": "user", "content": prompt}
@@ -557,7 +632,7 @@ def extract_knowledge_from_session(
                 prompt=prompt,
                 temperature=temperature,
             )
-            parsed = _parse_and_ground_payload(last_raw, session)
+            parsed = _parse_and_ground_payload(last_raw, session, semantic_only=semantic_only)
             if evidence_audit:
                 return _run_evidence_audit(
                     extracted=parsed,
@@ -594,6 +669,32 @@ def extract_knowledge_from_session(
     raise LLMExtractionError(
         f"LLM 在 {max_retries} 次自纠尝试后仍然失败 (Session {session.intervention_id}): {last_error}"
     ) from last_error
+
+
+def extract_semantic_cards_from_session(
+    session: CleanedSession,
+    llm_client: Any = None,
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    model: Optional[str] = None,
+    temperature: float = 0.1,
+    max_retries: int = 3,
+) -> ExtractedPIU:
+    """Explicit semantic-only extraction entry point.
+
+    The caller must bind evidence through ``src.evidence_index`` after this
+    function returns; model-selected source pointers are never authoritative.
+    """
+    return extract_knowledge_from_session(
+        session,
+        llm_client=llm_client,
+        api_key=api_key,
+        base_url=base_url,
+        model=model,
+        temperature=temperature,
+        max_retries=max_retries,
+        semantic_only=True,
+    )
 
 
 def batch_extract_knowledge(

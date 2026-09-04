@@ -17,9 +17,19 @@ class DeepEvalUnavailableError(RuntimeError):
 class OpenAICompatibleDeepEvalModel:
     """Minimal DeepEvalBaseLLM adapter for an explicit OpenAI-compatible judge."""
 
-    def __init__(self, *, model_name: str, api_key: str, base_url: str | None, temperature: float = 0.0) -> None:
+    def __init__(
+        self,
+        *,
+        model_name: str,
+        api_key: str,
+        base_url: str | None,
+        temperature: float = 0.0,
+        timeout_seconds: float = 60.0,
+    ) -> None:
         if not model_name.strip() or not api_key.strip():
             raise ValueError("DeepEval judge model and API key are required")
+        if timeout_seconds <= 0:
+            raise ValueError("DeepEval judge timeout_seconds must be positive")
         try:
             from deepeval.models.base_model import DeepEvalBaseLLM
         except ImportError as exc:
@@ -44,12 +54,17 @@ class OpenAICompatibleDeepEvalModel:
 
         self.model_name = model_name
         self.temperature = temperature
+        self.timeout_seconds = float(timeout_seconds)
         self._adapter = _Adapter(self)
         try:
             from openai import OpenAI
         except ImportError as exc:
             raise DeepEvalUnavailableError("openai package is required for the DeepEval judge") from exc
-        self._client = OpenAI(api_key=api_key, base_url=base_url)
+        self._client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=self.timeout_seconds,
+        )
 
     @property
     def model(self) -> Any:
@@ -78,11 +93,17 @@ def make_deepeval_model(settings: DeepEvalSettings, *, environment: Mapping[str,
         raise DeepEvalUnavailableError(readiness.error_message or "DeepEval judge is not ready")
     env = os.environ if environment is None else environment
     api_key = env.get(settings.api_key_env, "")
+    raw_timeout = env.get("DEEPEVAL_TIMEOUT_SECONDS", "60")
+    try:
+        timeout_seconds = float(raw_timeout)
+    except (TypeError, ValueError) as exc:
+        raise DeepEvalUnavailableError("DEEPEVAL_TIMEOUT_SECONDS must be a positive number") from exc
     return OpenAICompatibleDeepEvalModel(
         model_name=settings.evaluation_model,
         api_key=api_key,
         base_url=settings.base_url,
         temperature=settings.temperature,
+        timeout_seconds=timeout_seconds,
     ).model
 
 

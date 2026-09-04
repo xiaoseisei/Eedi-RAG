@@ -52,3 +52,4 @@
    - 功能实现 ➔ `test-driven-development` (红-绿-重构)
    - 交付陈述 ➔ `verification-before-completion` (先出具真实测试证据，再下结论)
 3. **证据先行**：交付成果时必须提供可重现的运行与验证日志证据（Evidence before Assertions）。
+4. **子智能体**：子智能体默认用gpt5.6-luna，如果没有优先当前可调用的最便宜的模型。

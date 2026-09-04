@@ -91,6 +91,32 @@ class RewriteRunner:
         return result
 
     def _evaluate_fusion_case(self, context: RunContext, case: FusionEvalCase) -> list[MetricObservation]:
+        if case.slices.get("fusion_usage") == "not_applicable_content_first":
+            return [
+                unmeasured_observation(
+                    context=context,
+                    case_id=case.case_id,
+                    stage="fusion",
+                    metric_name=metric_name,
+                    threshold=0.0,
+                    operator=ComparisonOperator.GTE,
+                    hard_gate=False,
+                    reason="fallback content-first route has no production fusion stage; raw window ranking is retained only as a diagnostic",
+                    slices=case.slices,
+                )
+                for metric_name in (
+                    "raw_rrf_mrr",
+                    "rewrite_only_rrf_mrr",
+                    "raw_inclusive_rrf_mrr",
+                    "rewrite_only_rrf_mrr_lift",
+                    "raw_inclusive_rrf_mrr_lift",
+                    "raw_inclusive_rrf_recall_at_5_lift",
+                    "selected_fusion_mrr",
+                    "selected_fusion_mrr_lift",
+                    "selected_fusion_recall_at_5_lift",
+                    "latency_ms",
+                )
+            ]
         raw = case.lane_ranked_ids["raw"]
         raw_mrr = mean_reciprocal_rank(raw, case.qrels)
         rewrite_mrr = mean_reciprocal_rank(case.rewrite_only_ranked_ids, case.qrels)
@@ -130,6 +156,33 @@ class RewriteRunner:
         return result
 
     def _evaluate_case(self, context: RunContext, case: RewriteEvalCase) -> list[MetricObservation]:
+        if case.slices.get("rewrite_usage") == "not_applicable_content_first":
+            return [
+                unmeasured_observation(
+                    context=context,
+                    case_id=case.case_id,
+                    stage=self.stage,
+                    metric_name=metric_name,
+                    threshold=0.0,
+                    operator=ComparisonOperator.GTE,
+                    hard_gate=False,
+                    reason="fallback content-first route does not execute query rewrite in production; metric retained as not applicable",
+                    slices=case.slices,
+                )
+                for metric_name in (
+                    "protected_token_preservation",
+                    "entity_preservation",
+                    "intent_preservation",
+                    "domain_injection_coverage",
+                    "raw_mrr",
+                    "rewritten_mrr",
+                    "retrieval_mrr_lift",
+                    "raw_recall_at_5",
+                    "rewritten_recall_at_5",
+                    "retrieval_recall_at_5_lift",
+                    "latency_ms",
+                )
+            ]
         observations: list[MetricObservation] = []
         rewritten = case.rewritten_query.casefold()
         optional_values = (

@@ -25,6 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.chunker import SessionChunker
 from src.extract_knowledge import EXTRACTION_PROMPT_VERSION, extract_knowledge_from_session
+from src.evidence_index import bind_card_to_evidence_index, build_evidence_index
 from src.models import CleanedSession, ExtractedPIU
 from src.storage_manager import DualEngineStorageManager
 
@@ -152,10 +153,16 @@ def run_reextraction(
             max_retries=max_retries,
             temperature=temperature,
             evidence_audit=False,
+            semantic_only=True,
         )
         if piu.extraction_status != "success" or piu.misconception is None or piu.tutor_strategy is None:
             raise RuntimeError("抽取结果不是完整 success 双卡片")
         session_map = {session.intervention_id: session}
+        evidence_index = build_evidence_index(session, window_size=6, step=3)
+        piu = piu.model_copy(update={
+            "misconception": bind_card_to_evidence_index(piu.misconception, evidence_index),
+            "tutor_strategy": bind_card_to_evidence_index(piu.tutor_strategy, evidence_index),
+        })
         # Reuse the same strict storage validator before staging write.
         DualEngineStorageManager._validate_extracted_pius([piu], session_map)
         session_chunks = chunker.chunk_session(session, piu)

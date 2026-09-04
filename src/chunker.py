@@ -115,7 +115,11 @@ class KnowledgeDistilledChunker(BaseChunker):
                     "misconception_name": misc.misconception_name,
                     "error_choice": misc.error_choice,
                     "confusion_triggers": misc.confusion_triggers,
-                    "source_turn_ids": misc.source_turn_ids
+                    "source_turn_ids": misc.source_turn_ids,
+                    "source_index_ids": list(getattr(misc, "source_index_ids", []) or []),
+                    "evidence_binding_policy": getattr(misc, "evidence_binding_policy", "") or "",
+                    "evidence_index_version": getattr(misc, "evidence_index_version", "") or "",
+                    "evidence_index_hash": getattr(misc, "evidence_index_hash", "") or "",
                 },
                 token_count=estimate_tokens(misc_content),
                 source_turn_ids=misc.source_turn_ids
@@ -152,7 +156,11 @@ class KnowledgeDistilledChunker(BaseChunker):
                     "strategy_category": strat.strategy_category,
                     "key_aha_question": strat.key_aha_question,
                     "talk_moves": strat.talk_moves,
-                    "source_turn_ids": strat.source_turn_ids
+                    "source_turn_ids": strat.source_turn_ids,
+                    "source_index_ids": list(getattr(strat, "source_index_ids", []) or []),
+                    "evidence_binding_policy": getattr(strat, "evidence_binding_policy", "") or "",
+                    "evidence_index_version": getattr(strat, "evidence_index_version", "") or "",
+                    "evidence_index_hash": getattr(strat, "evidence_index_hash", "") or "",
                 },
                 token_count=estimate_tokens(strat_content),
                 source_turn_ids=strat.source_turn_ids

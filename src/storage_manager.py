@@ -547,7 +547,11 @@ class DualEngineStorageManager:
                 "deep_mechanism": misc.deep_mechanism,
                 "confusion_triggers": json.dumps(misc.confusion_triggers, ensure_ascii=False),
                 "verbatim_student_quotes": json.dumps(misc.verbatim_student_quotes, ensure_ascii=False),
-                "source_turn_ids": json.dumps(misc.source_turn_ids)
+                "source_turn_ids": json.dumps(misc.source_turn_ids),
+                "source_index_ids": json.dumps(list(getattr(misc, "source_index_ids", []) or []), ensure_ascii=False),
+                "evidence_binding_policy": getattr(misc, "evidence_binding_policy", "") or "",
+                "evidence_index_version": getattr(misc, "evidence_index_version", "") or "",
+                "evidence_index_hash": getattr(misc, "evidence_index_hash", "") or "",
             })
             
             strat_doc = build_tutor_strategy_embedding_doc(strat, question_text=q_text, subject_path=subj_p)
@@ -563,7 +567,11 @@ class DualEngineStorageManager:
                 "scaffolding_steps": json.dumps(strat.scaffolding_steps, ensure_ascii=False),
                 "talk_moves": json.dumps(strat.talk_moves, ensure_ascii=False),
                 "resolution_outcome": strat.resolution_outcome,
-                "source_turn_ids": json.dumps(strat.source_turn_ids)
+                "source_turn_ids": json.dumps(strat.source_turn_ids),
+                "source_index_ids": json.dumps(list(getattr(strat, "source_index_ids", []) or []), ensure_ascii=False),
+                "evidence_binding_policy": getattr(strat, "evidence_binding_policy", "") or "",
+                "evidence_index_version": getattr(strat, "evidence_index_version", "") or "",
+                "evidence_index_hash": getattr(strat, "evidence_index_hash", "") or "",
             })
             
         # 写入 DuckDB 关系表

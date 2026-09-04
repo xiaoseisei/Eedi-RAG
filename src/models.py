@@ -148,6 +148,16 @@ class CleanedSession(BaseModel):
 # Step 2: 结构化教学知识卡片与切块模型契约 (Knowledge Distillation & Chunking Contracts)
 # ================================================================================
 
+class EvidenceIndexProvenance(BaseModel):
+    """确定性原文证据索引的版本与绑定来源。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_index_ids: List[str] = Field(default_factory=list)
+    evidence_binding_policy: Optional[str] = None
+    evidence_index_version: Optional[str] = None
+    evidence_index_hash: Optional[str] = None
+
 class StudentMisconceptionProfile(BaseModel):
     """
     学生认知误区卡片 (Student Misconception Profile Card)。
@@ -194,6 +204,10 @@ class StudentMisconceptionProfile(BaseModel):
         min_length=1,
         description="对应的学生发言轮次序号列表 (1-based Turn IDs)"
     )
+    source_index_ids: List[str] = Field(default_factory=list)
+    evidence_binding_policy: Optional[str] = None
+    evidence_index_version: Optional[str] = None
+    evidence_index_hash: Optional[str] = None
 
     @model_validator(mode="after")
     def validate_grounding_fields(self) -> "StudentMisconceptionProfile":
@@ -260,6 +274,10 @@ class TutorStrategyProfile(BaseModel):
         min_length=1,
         description="涉及的导师关键引导轮次序号列表 (1-based Turn IDs)"
     )
+    source_index_ids: List[str] = Field(default_factory=list)
+    evidence_binding_policy: Optional[str] = None
+    evidence_index_version: Optional[str] = None
+    evidence_index_hash: Optional[str] = None
 
     @model_validator(mode="after")
     def validate_strategy_grounding(self) -> "TutorStrategyProfile":

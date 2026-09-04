@@ -48,13 +48,13 @@
 
 **Interfaces:**
 - `build_session_content_hash(session: CleanedSession) -> str`
-- `ExtractionCacheKey.from_session(session, *, model, prompt_version, schema_version, temperature, binding_policy, index_version) -> ExtractionCacheKey`
+- `ExtractionCacheKey.from_session(session, *, model, prompt_version, schema_version, temperature, semantic_only) -> ExtractionCacheKey`
 - `ExtractionCache.get(key) -> CacheHit | None`
 - `ExtractionCache.put_success(key, extracted: ExtractedPIU, evidence_metadata: dict) -> None`
 - `ExtractionCache.put_failure(key, error_type: str, error_message: str) -> None`
 - `extract_semantic_cards_from_session(...) -> ExtractedPIU`
 
-- [ ] **Step 1: Add tests** proving equivalent sessions produce the same hash, any dialogue/question change changes the hash, contract changes miss the cache, and failed records are never returned as hits.
+- [ ] **Step 1: Add tests** proving equivalent sessions produce the same hash, any dialogue/question change changes the hash, semantic contract changes miss the cache, binding-policy changes reuse semantic cache, and failed records are never returned as hits.
 - [ ] **Step 2: Add tests** proving semantic extraction validates quotes against authoritative role turns but does not trust returned pointer IDs for final binding.
 - [ ] **Step 3: Implement** JSON cache records with atomic temp-file replacement and strict key comparison; serialize no API key or prompt secrets.
 - [ ] **Step 4: Implement** an explicit semantic extraction mode that accepts the existing strict payload, validates model facts, and leaves evidence binding to Task 1. Keep the legacy function behavior unchanged unless the new mode is explicitly selected.

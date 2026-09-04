@@ -39,6 +39,7 @@ from src.models import (
     Chunk
 )
 from src.chunker import SessionChunker
+from src.evidence_index import bind_card_to_evidence_index, build_evidence_index
 from src.storage_manager import DualEngineStorageManager
 from src.extract_knowledge import (
     EXTRACTION_PROMPT_VERSION,
@@ -111,9 +112,15 @@ def extract_piu_with_llm(
             max_retries=max_retries,
             # 第二遍 evidence audit 尚未通过真实 provider 评测，保持显式关闭。
             evidence_audit=False,
+            semantic_only=True,
         )
-        # 用实际对话原文替换 LLM 转录，确保逐字精确
-        return _ground_quotes_to_actual_dialogue(session, piu)
+        if piu.misconception is None or piu.tutor_strategy is None:
+            raise LLMExtractionError("semantic-only 抽取没有生成完整双卡片")
+        evidence_index = build_evidence_index(session, window_size=6, step=3)
+        return piu.model_copy(update={
+            "misconception": bind_card_to_evidence_index(piu.misconception, evidence_index),
+            "tutor_strategy": bind_card_to_evidence_index(piu.tutor_strategy, evidence_index),
+        })
     except (LLMExtractionError, LLMUnavailableError):
         logger.error("Session #%s LLM 抽取失败，扩容任务立即终止", session.intervention_id)
         raise
