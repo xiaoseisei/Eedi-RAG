@@ -11,6 +11,7 @@ from scripts.merge_l2_deepeval_reports import merge_reports
 from scripts.run_l2_deepeval import (
     _build_gold_context_v2,
     _aggregate_trace_diagnostics,
+    _gold_alignment_status,
     audit_gold_alignment,
     _metric_eval_payload,
     _rubric_config,
@@ -299,3 +300,42 @@ def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
     assert result["claim_coverage"]["gold"]["measured"] == 2
     assert result["claim_coverage"]["gold"]["mean_fact_claim_coverage"] == 0.75
     assert result["context_nodes"]["gold"]["mean_node_count"] == 3.5
+
+
+def test_gold_alignment_status_blocks_unresolved_conflicts_without_changing_scores() -> None:
+    status = _gold_alignment_status(
+        {
+            "gold_alignment_warning_count": 1,
+            "gold_alignment_warnings": [{"case_id": "c1", "field": "error_choice"}],
+        }
+    )
+
+    assert status["status"] == "BLOCKED_DATA_CONFLICT"
+    assert status["warning_count"] == 1
+    assert status["warnings"][0]["case_id"] == "c1"
+    assert _gold_alignment_status({"gold_alignment_warning_count": 0})["status"] == "CLEAN"
+
+
+def test_gold_context_v2_accepts_explicit_derived_facts_without_expected_answer_leak() -> None:
+    import json
+    from pathlib import Path
+    from scripts.run_l2_deepeval import _load_sessions
+
+    root = Path(__file__).resolve().parents[1]
+    golden = json.loads((root / "data/golden_test_set.json").read_text(encoding="utf-8"))
+    case = dict(golden[0])
+    case["derived_facts"] = ["The deciding digit is the hundredths digit."]
+    sessions = _load_sessions(root / "data/cleaned_sessions.jsonl")
+
+    class Storage:
+        def query_misconceptions_sql(self):
+            return [{"session_id": 10, "misconception_name": "place-value confusion"}]
+
+        def query_strategies_sql(self):
+            return [{"session_id": 10, "key_aha_question": "Which digit decides?"}]
+
+    context = _build_gold_context_v2(case, sessions, Storage())
+
+    assert any(node.startswith("## [DERIVED_FACT]") for node in context.deepeval_context_nodes)
+    assert "The deciding digit is the hundredths digit." in context.prompt_context_markdown
+    assert case["ground_truth"] not in context.prompt_context_markdown

@@ -32,6 +32,7 @@ from src.generator_contract import (
     build_evidence_catalog,
     materialize_generator_citations,
     render_evidence_catalog,
+    validate_claim_citation_closure,
     validate_role_coverage,
 )
 from src.retriever import DualMetricRetriever
@@ -125,7 +126,7 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
 
 【事实与推断】
 - claim_type=fact：只能陈述最终知识基座中直接支持的事实，至少绑定一个 evidence_id。
-- claim_type=inference：允许基于对白做明确推断，但必须填写 qualification，说明这是基于证据的解释而不是原话事实。
+- claim_type=inference：允许基于对白做明确推断，但必须至少绑定一个 evidence_id，并填写 qualification，说明这是基于证据的解释而不是原话事实。
 - claim_type=recommendation：给出可执行教学动作；如果引用了历史事实，也要绑定 evidence_id。
 - 不要把卡片摘要当作真实对白；真实对白只通过 Evidence catalog 的 evidence_id 引用。
 - 如果上下文不足以支持某个事实，明确写“未观察到充分证据”，不要猜测。
@@ -133,6 +134,7 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
 【引用硬约束】
 - dialogue_citations 只能输出 evidence_id，禁止输出 session_id、turn_id 或 quote_text。
 - 每个事实 claim 的 evidence_ids 至少一个，并且该 claim 至少有一个 evidence_id 出现在 dialogue_citations。
+- 每个 inference claim 也必须至少绑定一个 evidence_id，并且该 ID 至少有一个出现在 dialogue_citations；recommendation 可不引用历史证据。
 - 如果问题同时询问学生错因和导师引导，dialogue_citations 必须同时覆盖 student 和 tutor 的 evidence_id。
 - 不要创造 Evidence catalog 中不存在的 ID，不要复制 `[Turn N]` 等展示标记到任何 citation 字段。
 
@@ -554,16 +556,19 @@ class EndToEndPedagogicalRAGPipeline:
             if effective_contract == self.generator_contract_version
             else self._generator_context_text_for_version(gold_ctx, effective_contract)
         )
-        user_prompt = (
+        base_user_prompt = (
             f"【用户教研提问】: {query}\n\n"
             f"{generator_context}\n\n"
             "仅输出 JSON，不要输出其他内容。"
         )
+        user_prompt = base_user_prompt
         prompt_tokens_est = len(user_prompt) // 2  # 粗估: ~2 字符/token
         logger.info(f"  📏 [探针] Prompt 构建: {round(_time.time()-t_prompt, 3)}s | 预估输入 tokens: ~{prompt_tokens_est}")
 
         last_error: Optional[Exception] = None
         payload: Any = None
+        catalog = build_evidence_catalog(gold_ctx) if effective_contract == "v2" else None
+        contract_repair_attempted = False
         for attempt in range(2):
             try:
                 # 探针: LLM API 调用 (核心瓶颈)
@@ -602,6 +607,13 @@ class EndToEndPedagogicalRAGPipeline:
                     else LLMGuidancePayload
                 )
                 payload = payload_type.model_validate(json.loads(raw_content))
+                if effective_contract == "v2":
+                    validate_claim_citation_closure(payload)
+                    validate_role_coverage(
+                        payload.dialogue_citations,
+                        catalog or {},
+                        query=query,
+                    )
                 logger.info(f"  🔧 [探针] JSON 解析+校验: {round(_time.time()-t_parse, 3)}s")
 
                 break
@@ -612,6 +624,15 @@ class EndToEndPedagogicalRAGPipeline:
                     attempt + 1,
                     exc,
                 )
+                if attempt == 0 and effective_contract == "v2":
+                    contract_repair_attempted = True
+                    user_prompt = (
+                        base_user_prompt
+                        + "\n\n【契约修复反馈】上一次 JSON 未通过证据契约："
+                        + str(exc)
+                        + "。请只修正 claims/dialogue_citations 的 evidence_id、角色覆盖或推断限定，"
+                        "然后重新输出完整 JSON；不要输出解释文字。"
+                    )
             except Exception as exc:
                 last_error = exc
                 logger.warning("LLM 请求失败 (attempt %s/2): %s", attempt + 1, exc)
@@ -620,7 +641,7 @@ class EndToEndPedagogicalRAGPipeline:
             raise RAGGenerationError(f"LLM 生成在 2 次尝试后失败: {last_error}") from last_error
 
         if effective_contract == "v2":
-            catalog = build_evidence_catalog(gold_ctx)
+            catalog = catalog or build_evidence_catalog(gold_ctx)
             try:
                 validate_role_coverage(
                     payload.dialogue_citations,
@@ -644,6 +665,25 @@ class EndToEndPedagogicalRAGPipeline:
                     "教学干预：\n" + "\n".join(f"- {step}" for step in payload.pedagogical_intervention),
                 ]
             )
+            grounding_claim_lines = []
+            for claim in payload.claims:
+                evidence = ", ".join(claim.evidence_ids) or "无"
+                qualification = (
+                    f"；限定：{claim.qualification}"
+                    if claim.qualification
+                    else ""
+                )
+                grounding_claim_lines.append(
+                    f"- [{claim.claim_type}] [{evidence}] {claim.claim_text}{qualification}"
+                )
+            grounding_text = "\n\n".join(
+                [
+                    payload.answer,
+                    f"诊断：{payload.misconception_diagnosis}",
+                    f"证据解释：{payload.evidence_explanation}",
+                    "事实与推断主张：\n" + "\n".join(grounding_claim_lines),
+                ]
+            )
             response = PedagogicalGuidanceResponse(
                 query=query,
                 subject_path=payload.subject_path,
@@ -659,7 +699,9 @@ class EndToEndPedagogicalRAGPipeline:
                 audit_status="PENDING",
             )
             response.__dict__["generator_contract_version"] = "v2"
+            response.__dict__["generator_contract_repair_attempted"] = contract_repair_attempted
             response.__dict__["generator_core_answer"] = payload.answer
+            response.__dict__["generator_grounding_text"] = grounding_text
             response.__dict__["generator_citation_evidence_ids"] = [
                 citation.evidence_id for citation in payload.dialogue_citations
             ]

@@ -11,6 +11,7 @@ from src.generator_contract import (
     materialize_generator_citations,
     render_evidence_catalog,
     summarize_claim_coverage,
+    validate_claim_citation_closure,
     validate_role_coverage,
 )
 from src.reranker import GoldAssembledContext
@@ -67,6 +68,14 @@ def test_factual_claim_requires_evidence_and_inference_requires_qualification() 
         qualification="This is a cautious interpretation of the dialogue.",
     )
     assert claim.qualification
+    with pytest.raises(ValidationError, match="inference claims require at least one evidence_id"):
+        GeneratorClaim(
+            claim_id="C3",
+            claim_text="unsupported inference",
+            claim_type="inference",
+            evidence_ids=[],
+            qualification="This is a cautious interpretation.",
+        )
 
 
 def test_v2_payload_contains_claims_and_evidence_ids_only() -> None:
@@ -128,7 +137,7 @@ def test_summarize_claim_coverage_distinguishes_fact_support_and_citations() -> 
             "pedagogical_intervention": ["动作"],
             "claims": [
                 {"claim_id": "C1", "claim_text": "事实", "claim_type": "fact", "evidence_ids": ["E001"]},
-                {"claim_id": "C2", "claim_text": "推断", "claim_type": "inference", "evidence_ids": [], "qualification": "基于对白推断"},
+                {"claim_id": "C2", "claim_text": "推断", "claim_type": "inference", "evidence_ids": ["E001"], "qualification": "基于对白推断"},
                 {"claim_id": "C3", "claim_text": "建议", "claim_type": "recommendation", "evidence_ids": []},
             ],
             "dialogue_citations": [{"evidence_id": "E001"}],
@@ -142,3 +151,21 @@ def test_summarize_claim_coverage_distinguishes_fact_support_and_citations() -> 
         "fact_claim_coverage": 1.0,
         "cited_evidence_count": 1,
     }
+
+
+def test_claim_citation_closure_requires_inference_evidence_to_be_cited() -> None:
+    payload = GeneratorGuidancePayloadV2.model_construct(
+        subject_path="Number",
+        answer="核心答案",
+        misconception_diagnosis="诊断",
+        evidence_explanation="解释",
+        key_aha_question="问题",
+        scaffolding_steps=["步骤"],
+        pedagogical_intervention=["动作"],
+        claims=[GeneratorClaim(claim_id="C1", claim_text="推断", claim_type="inference", evidence_ids=["E002"], qualification="基于对白推断")],
+        dialogue_citations=[GeneratorCitationRef(evidence_id="E001")],
+        recommended_talk_moves=[],
+        transfer_question=None,
+    )
+    with pytest.raises(ValueError, match="C1"):
+        validate_claim_citation_closure(payload)

@@ -305,6 +305,20 @@ def _build_gold_context_v2(
     misconception_rows = storage.query_misconceptions_sql()
     strategy_rows = storage.query_strategies_sql()
     context_nodes: list[str] = []
+    derived_facts = case.get("derived_facts", [])
+    if derived_facts:
+        if not isinstance(derived_facts, list) or any(
+            not isinstance(item, str) or not item.strip() for item in derived_facts
+        ):
+            raise ValueError("Gold Context v2 derived_facts must be a non-empty list of strings")
+        expected_answer = str(case.get("ground_truth", "")).strip()
+        if any(item.strip() == expected_answer for item in derived_facts):
+            raise ValueError("Gold Context v2 derived_facts must not copy ground_truth")
+        context_nodes.append(
+            "## [DERIVED_FACT] Independently derived facts\n"
+            "These facts must be independently computable from the question or structured data.\n"
+            + "\n".join(f"- {item.strip()}" for item in derived_facts)
+        )
     def has_value(value: Any) -> bool:
         if value is None:
             return False
@@ -740,6 +754,17 @@ def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, 
     }
 
 
+def _gold_alignment_status(diagnostics: dict[str, Any]) -> dict[str, Any]:
+    """Expose unresolved Golden/card conflicts as an explicit data-quality gate."""
+
+    warning_count = int(diagnostics.get("gold_alignment_warning_count", 0) or 0)
+    return {
+        "status": "BLOCKED_DATA_CONFLICT" if warning_count else "CLEAN",
+        "warning_count": warning_count,
+        "warnings": list(diagnostics.get("gold_alignment_warnings", [])),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=Path("data/db/tutoring_knowledge.duckdb"))
@@ -1011,6 +1036,11 @@ def main(argv: list[str] | None = None) -> int:
                         "final_context": context.prompt_context_markdown if context is not None else None,
                         "generator_context": generator_context_text,
                         "generator_contract_version": args.generator_contract,
+                        "generator_contract_repair_attempted": (
+                            response.__dict__.get("generator_contract_repair_attempted", False)
+                            if response is not None
+                            else False
+                        ),
                         "gold_context_version": args.gold_context_version,
                         # Preserve the validated claim-level contract for auditability.
                         # Citation materialization remains backend-owned; this field is
@@ -1022,6 +1052,11 @@ def main(argv: list[str] | None = None) -> int:
                         else [],
                         "generator_core_answer": (
                             response.__dict__.get("generator_core_answer")
+                            if response is not None
+                            else None
+                        ),
+                        "generator_grounding_text": (
+                            response.__dict__.get("generator_grounding_text")
                             if response is not None
                             else None
                         ),
@@ -1086,7 +1121,10 @@ def main(argv: list[str] | None = None) -> int:
                             track=track,
                             case_id=case_id,
                             actual_output_by_metric=(
-                                {"answer_relevancy": response.__dict__["generator_core_answer"]}
+                                {
+                                    "answer_relevancy": response.__dict__.get("generator_core_answer"),
+                                    "faithfulness": response.__dict__.get("generator_grounding_text"),
+                                }
                                 if response.__dict__.get("generator_core_answer")
                                 else None
                             ),
@@ -1190,6 +1228,7 @@ def main(argv: list[str] | None = None) -> int:
         "tracks": {"gold_case_count": sum(row["track"] == "gold" for row in trace_rows), "real_case_count": sum(row["track"] == "real" for row in trace_rows)},
         "metric_aggregates": metric_aggregates,
         "diagnostics": diagnostics,
+        "gold_alignment": _gold_alignment_status(diagnostics),
         "trace_status_counts": {status: sum(row["status"] == status for row in trace_rows) for status in ("SUCCESS", "ERROR", "UNMEASURED")},
         "artifact_hash_before": artifact_hash,
         "artifact_hash_after": after_hash,

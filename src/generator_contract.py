@@ -57,8 +57,11 @@ class GeneratorClaim(BaseModel):
     def validate_support(self) -> "GeneratorClaim":
         if self.claim_type == "fact" and not self.evidence_ids:
             raise ValueError("factual claims require at least one evidence_id")
-        if self.claim_type == "inference" and not self.qualification:
-            raise ValueError("inference claims require an explicit qualification")
+        if self.claim_type == "inference":
+            if not self.evidence_ids:
+                raise ValueError("inference claims require at least one evidence_id")
+            if not self.qualification:
+                raise ValueError("inference claims require an explicit qualification")
         return self
 
 
@@ -91,14 +94,32 @@ class GeneratorGuidancePayloadV2(BaseModel):
         missing_claim_citations = [
             claim.claim_id
             for claim in self.claims
-            if claim.claim_type == "fact" and not set(claim.evidence_ids) & cited
+            if claim.claim_type in {"fact", "inference"}
+            and not set(claim.evidence_ids) & cited
         ]
         if missing_claim_citations:
             raise ValueError(
-                "factual claims must be represented in dialogue_citations: "
+                "fact/inference claims must be represented in dialogue_citations: "
                 + ", ".join(missing_claim_citations)
             )
         return self
+
+
+def validate_claim_citation_closure(payload: GeneratorGuidancePayloadV2) -> None:
+    """Require every fact/inference claim's evidence to appear in citations."""
+
+    cited = {citation.evidence_id for citation in payload.dialogue_citations}
+    missing = [
+        claim.claim_id
+        for claim in payload.claims
+        if claim.claim_type in {"fact", "inference"}
+        and not set(claim.evidence_ids) & cited
+    ]
+    if missing:
+        raise ValueError(
+            "fact/inference claims must be represented in dialogue_citations: "
+            + ", ".join(missing)
+        )
 
 
 def summarize_claim_coverage(payload_or_response) -> dict[str, int | float]:

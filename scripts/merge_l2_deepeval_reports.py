@@ -124,6 +124,52 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
     else:
         release_decision = "L2_PASSED"
 
+    warning_map: dict[str, dict[str, Any]] = {}
+    claim_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    node_rows: dict[str, list[dict[str, float]]] = {"gold": [], "real": []}
+    for row in traces:
+        track = str(row.get("track", ""))
+        if track not in claim_rows:
+            continue
+        for warning in row.get("gold_alignment_warnings", []) or []:
+            warning_map[json.dumps(warning, ensure_ascii=False, sort_keys=True)] = warning
+        coverage = row.get("claim_coverage")
+        if isinstance(coverage, dict):
+            claim_rows[track].append(coverage)
+        node_rows[track].append(
+            {
+                "node_count": float(row.get("deepeval_context_node_count", 0) or 0),
+                "context_chars": float(row.get("generator_context_chars", 0) or 0),
+            }
+        )
+
+    def mean(rows: list[dict[str, Any]], field: str) -> float | None:
+        values = [float(row[field]) for row in rows if row.get(field) is not None]
+        return statistics.mean(values) if values else None
+
+    diagnostics = {
+        "gold_alignment_warning_count": len(warning_map),
+        "gold_alignment_warnings": list(warning_map.values()),
+        "claim_coverage": {
+            track: {
+                "measured": len(rows),
+                "mean_claim_count": mean(rows, "claim_count"),
+                "mean_fact_claim_count": mean(rows, "fact_claim_count"),
+                "mean_fact_claim_coverage": mean(rows, "fact_claim_coverage"),
+                "mean_cited_evidence_count": mean(rows, "cited_evidence_count"),
+            }
+            for track, rows in claim_rows.items()
+        },
+        "context_nodes": {
+            track: {
+                "measured": len(rows),
+                "mean_node_count": mean(rows, "node_count"),
+                "mean_context_chars": mean(rows, "context_chars"),
+            }
+            for track, rows in node_rows.items()
+        },
+    }
+
     output_dir.mkdir(parents=True, exist_ok=True)
     report = {
         "schema_version": "l2-deepeval-report/v1",
@@ -141,6 +187,12 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
             "real_case_count": sum(row.get("track") == "real" for row in traces),
         },
         "metric_aggregates": metric_aggregates,
+        "diagnostics": diagnostics,
+        "gold_alignment": {
+            "status": "BLOCKED_DATA_CONFLICT" if diagnostics["gold_alignment_warning_count"] else "CLEAN",
+            "warning_count": diagnostics["gold_alignment_warning_count"],
+            "warnings": diagnostics["gold_alignment_warnings"],
+        },
         "trace_status_counts": {
             status: sum(row.get("status") == status for row in traces)
             for status in ("SUCCESS", "ERROR", "UNMEASURED")

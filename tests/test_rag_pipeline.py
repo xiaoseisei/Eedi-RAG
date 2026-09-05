@@ -400,6 +400,9 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert response.key_aha_question == "Which digit decides?"
     assert response.scaffolding_steps == ["Ask the student to identify the target place."]
     assert response.__dict__["generator_contract_version"] == "v2"
+    assert response.__dict__["generator_core_answer"] == "The student confused decimal places."
+    assert "教学干预" not in response.__dict__["generator_grounding_text"]
+    assert "[fact] [E001]" in response.__dict__["generator_grounding_text"]
     assert "evidence_id=E001" in sent[0]["messages"][1]["content"]
     assert sent[0]["messages"][0]["content"] == SYSTEM_PEDAGOGICAL_PROMPT_V2
     assert "80 字" not in sent[0]["messages"][0]["content"]
@@ -414,7 +417,61 @@ def test_generator_v2_prompt_has_red_lines_and_scope_examples():
     assert "一句话" in prompt
     assert "正例与反例" in prompt
     assert "不得编造 evidence_id" in prompt
+    assert "inference claim 也必须至少绑定一个 evidence_id" in prompt
     assert "学生一定缺乏位值概念" in prompt
+
+
+def test_generator_v2_retries_with_contract_feedback_for_missing_role(monkeypatch):
+    responses = []
+    base = {
+        "subject_path": "Number",
+        "answer": "诊断学生并说明导师引导。",
+        "misconception_diagnosis": "学生存在相关误区。",
+        "evidence_explanation": "事实由证据支持。",
+        "key_aha_question": "Which digit decides?",
+        "scaffolding_steps": ["Ask the student to identify the next digit."],
+        "pedagogical_intervention": ["Use a worked example."],
+        "recommended_talk_moves": [],
+        "claims": [
+            {"claim_id": "C1", "claim_text": "学生给出错误答案。", "claim_type": "fact", "evidence_ids": ["E001"]}
+        ],
+        "transfer_question": None,
+    }
+    first = dict(base, dialogue_citations=[{"evidence_id": "E001"}])
+    second = dict(base, dialogue_citations=[{"evidence_id": "E001"}, {"evidence_id": "E002"}])
+
+    class Completions:
+        def create(self, **kwargs):
+            responses.append(kwargs)
+            content = first if len(responses) == 1 else second
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(content)))],
+                usage=None,
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="学生为什么错，导师如何引导？",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 1, "speaker": "student", "text": "I chose A"},
+            {"session_id": 7, "turn_id": 2, "speaker": "tutor", "text": "Which digit decides?"},
+        ],
+    )
+
+    response = pipeline._generate_with_llm(ctx.raw_query, ctx, {})
+
+    assert len(responses) == 2
+    assert "契约修复反馈" in responses[1]["messages"][1]["content"]
+    assert len(response.dialogue_citations) == 2
+    assert response.__dict__["generator_contract_repair_attempted"] is True
 
 
 def test_exact_citation_fact_is_verified_and_promotes_audit_status():
