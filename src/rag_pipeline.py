@@ -561,9 +561,18 @@ class EndToEndPedagogicalRAGPipeline:
             if effective_contract == self.generator_contract_version
             else self._generator_context_text_for_version(gold_ctx, effective_contract)
         )
+        catalog = build_evidence_catalog(gold_ctx) if effective_contract == "v2" else None
+        evidence_id_scope = ""
+        if catalog is not None:
+            evidence_id_scope = (
+                "\n\n【Evidence ID 白名单】只能使用以下当前 Context 中存在的 ID："
+                + ", ".join(catalog.keys())
+            )
         base_user_prompt = (
             f"【用户教研提问】: {query}\n\n"
             f"{generator_context}\n\n"
+            f"{evidence_id_scope}"
+            "\n"
             "仅输出 JSON，不要输出其他内容。"
         )
         user_prompt = base_user_prompt
@@ -572,7 +581,6 @@ class EndToEndPedagogicalRAGPipeline:
 
         last_error: Optional[Exception] = None
         payload: Any = None
-        catalog = build_evidence_catalog(gold_ctx) if effective_contract == "v2" else None
         contract_repair_attempted = False
         contract_auto_merged_ids: list[str] = []
         for attempt in range(2):
@@ -646,6 +654,7 @@ class EndToEndPedagogicalRAGPipeline:
                         + "\n\n【契约修复反馈】上一次 JSON 未通过证据契约："
                         + str(exc)
                         + "。请只修正 claims/dialogue_citations/student_evidence_ids/tutor_evidence_ids 的 evidence_id、角色覆盖或推断限定，"
+                        + "所有 evidence_id 必须从本次 Context 的 Evidence ID 白名单中选择，"
                         "然后重新输出完整 JSON；不要输出解释文字。"
                     )
             except Exception as exc:

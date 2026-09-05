@@ -17,7 +17,7 @@
      - [槽位 3: 不可篡改原声实录] -> DuckDB 真实 [Turn N] 证据链
      - [槽位 4: 考纲考点与原题]   -> 题目题干与标准答案
   5. Token 预算压缩与防迷失 (Lost-in-the-Middle Mitigation):
-     - 将上下文严格压缩至 1,000~1,500 Tokens，首字延迟降低 70%，杜绝大模型注意力迷失。
+     - 将上下文严格压缩至 2,000 Tokens，并通过独立节点和首尾锚点降低大模型注意力迷失。
 ================================================================================
 """
 
@@ -85,7 +85,7 @@ class PedagogicalGoldAssembler:
     def __init__(
         self,
         lambda_diversity: float = 0.7,
-        max_prompt_tokens: int = 1500,
+        max_prompt_tokens: int = 2000,
         model_reranker: Any | None = None,
         reranker_pool_size: int = 15,
         chunk_strategy: str = "card",
@@ -98,7 +98,7 @@ class PedagogicalGoldAssembler:
         
         参数:
           lambda_diversity: MMR 平衡参数 (0.0~1.0, 越大越侧重相关性，越小越侧重多样性去重，默认 0.7)
-          max_prompt_tokens: 黄金上下文最大 Token 预算上限 (默认 1500)
+          max_prompt_tokens: 黄金上下文最大 Token 预算上限 (默认 2000)
         """
         self.lambda_param = max(0.0, min(1.0, lambda_diversity))
         self.max_prompt_tokens = max_prompt_tokens
@@ -375,28 +375,147 @@ class PedagogicalGoldAssembler:
     ) -> List[str]:
         """Render selected windows with overlap-aware, provenance-safe text."""
 
+        return "\n\n".join(
+            cls._render_unique_window_nodes(units, anchored=anchored)
+        ).splitlines()
+
+    @classmethod
+    def _render_unique_window_nodes(
+        cls,
+        units: List[Dict[str, Any]],
+        *,
+        anchored: bool,
+    ) -> List[str]:
+        """Render each selected window as an independent evaluation node."""
+
         lines: List[str] = []
+        nodes: List[str] = []
         for rank, unit, prefix, new_turns in cls._unique_window_payload(units):
             metadata = unit.get("metadata", {}) or {}
             label = "Anchored Reranker" if anchored else "Reranker"
-            lines.append(
+            node_lines = [
                 f"### {rank}. Session #{metadata.get('session_id', 'N/A')} · "
                 f"Turn {metadata.get('window_start_turn', '?')}~{metadata.get('window_end_turn', '?')} "
                 f"({label}={unit.get('reranker_score', 'n/a')}; "
                 f"rank={unit.get('reranker_rank', 'n/a')})"
-            )
-            lines.append("```text")
+            ]
+            node_lines.append("```text")
             if prefix:
-                lines.append(prefix)
+                node_lines.append(prefix)
             if new_turns:
-                lines.extend(
+                node_lines.extend(
                     f"[Turn {turn['turn_id']}] [{turn.get('speaker', '')}] {turn.get('text', '')}"
                     for turn in new_turns
                 )
             else:
-                lines.append("[Window dialogue overlaps already selected Turns; omitted]")
-            lines.append("```")
-        return lines
+                node_lines.append("[Window dialogue overlaps already selected Turns; omitted]")
+            node_lines.append("```")
+            nodes.append("\n".join(node_lines))
+        return nodes
+
+    @staticmethod
+    def _metadata_turn_ids(card: Dict[str, Any]) -> List[int]:
+        metadata = card.get("metadata", {}) or {}
+        raw_ids = metadata.get("source_turn_ids", [])
+        if isinstance(raw_ids, str):
+            try:
+                raw_ids = json.loads(raw_ids)
+            except json.JSONDecodeError:
+                raw_ids = []
+        if not raw_ids:
+            raw_ids = [
+                turn.get("turn_id")
+                for turn in card.get("evidence_turns", []) or []
+                if turn.get("turn_id") is not None
+            ]
+        result: List[int] = []
+        for value in raw_ids or []:
+            try:
+                turn_id = int(value)
+            except (TypeError, ValueError):
+                continue
+            if turn_id > 0 and turn_id not in result:
+                result.append(turn_id)
+        return sorted(result)
+
+    @staticmethod
+    def _display_metadata_value(value: Any, max_chars: int) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            text = value.strip()
+            if text.startswith(("[", "{")):
+                try:
+                    value = json.loads(text)
+                except json.JSONDecodeError:
+                    pass
+            else:
+                value = text
+        if isinstance(value, (list, tuple, set)):
+            value = "；".join(str(item).strip() for item in value if str(item).strip())
+        elif isinstance(value, dict):
+            value = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        text = str(value).strip()
+        if len(text) <= max_chars:
+            return text
+        return text[: max(1, max_chars - 1)].rstrip() + "…"
+
+    @classmethod
+    def _render_parent_fact_nodes(
+        cls,
+        parent_cards: List[Dict[str, Any]],
+    ) -> List[str]:
+        """Render source-linked Parent Card abstractions as non-citation nodes."""
+
+        nodes: List[str] = []
+        seen_card_ids: Set[str] = set()
+        for card in parent_cards:
+            metadata = card.get("metadata", {}) or {}
+            card_id = str(card.get("chunk_id", "")).strip()
+            if not card_id or card_id in seen_card_ids:
+                continue
+            source_turn_ids = cls._metadata_turn_ids(card)
+            if not source_turn_ids:
+                continue
+            seen_card_ids.add(card_id)
+            collection = str(card.get("collection", "")).casefold()
+            is_strategy = (
+                "strategy" in collection
+                or bool(metadata.get("key_aha_question"))
+                or bool(metadata.get("pedagogical_goal"))
+            )
+            card_type = "tutor_strategy" if is_strategy else "student_misconception"
+            lines = [
+                f"## [DERIVED_FACT] Parent Card {card_id}",
+                "Stored card abstraction grounded by the listed source Turns; not verbatim dialogue.",
+                f"source_card_id={card_id}",
+                f"source_session_id={metadata.get('session_id', '')}",
+                f"source_turn_ids={source_turn_ids}",
+                f"card_type={card_type}",
+            ]
+            fields = (
+                (
+                    ("misconception_name", "misconception", 120),
+                    ("deep_mechanism", "deep_mechanism", 360),
+                    ("confusion_triggers", "confusion_triggers", 180),
+                    ("error_choice", "error_choice", 40),
+                )
+                if not is_strategy
+                else (
+                    ("strategy_category", "strategy_category", 100),
+                    ("pedagogical_goal", "pedagogical_goal", 260),
+                    ("key_aha_question", "key_aha_question", 180),
+                    ("scaffolding_steps", "scaffolding_steps", 300),
+                    ("talk_moves", "talk_moves", 140),
+                    ("resolution_outcome", "resolution_outcome", 220),
+                )
+            )
+            for source_key, display_key, max_chars in fields:
+                value = cls._display_metadata_value(metadata.get(source_key), max_chars)
+                if value:
+                    lines.append(f"{display_key}={value}")
+            nodes.append("\n".join(lines))
+        return nodes
 
     def _assemble_card_logical_evidence(
         self,
@@ -569,63 +688,161 @@ class PedagogicalGoldAssembler:
         for unit in ranked_units:
             unit_keys = _source_keys(unit)
             unit["anchor_coverage_count"] = len(unit_keys & parent_pointer_keys)
-        def render(units: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]], int]:
-            ordered = self._ordered_unit_evidence(units)
+        parent_fact_nodes = self._render_parent_fact_nodes(parent_cards)
+
+        def render(
+            units: List[Dict[str, Any]],
+        ) -> Tuple[str, List[Dict[str, Any]], int, List[str]]:
+            ordered_units = sorted(
+                units,
+                key=lambda unit: (
+                    int(unit.get("reranker_rank", 10**9)),
+                    -float(unit.get("reranker_score", 0.0)),
+                    str(unit.get("chunk_id", "")),
+                ),
+            )
+            ordered = self._ordered_unit_evidence(ordered_units)
+            window_nodes = self._render_unique_window_nodes(ordered_units, anchored=True)
+            context_nodes = [*parent_fact_nodes, *window_nodes]
             lines = [
                 "# 【权威教研参考知识基座 (Anchored Logical-Window Context)】",
-                "> Parent 卡片仅用于锚定和窗口排序；最终上下文只注入窗口中的真实 Turn。",
-                "",
-                "## 一、 Anchored Reranker 排序后的真实逻辑链证据",
+                "> Parent Card 提供有来源的派生事实；真实 Turn 仍是唯一可引用的原始证据。",
             ]
-            lines.extend(self._render_unique_window_block(units, anchored=True))
+            if parent_fact_nodes:
+                lines.extend(["", "## 一、 Parent Card 派生事实", *parent_fact_nodes])
+            lines.extend(["", "## 二、 Anchored Reranker 排序后的真实逻辑链证据", *window_nodes])
             lines.extend(
                 [
                     "",
-                    "## 二、 可引用的真实 Turn 证据",
+                    "## 三、 可引用的真实 Turn 证据",
                     "- 仅允许引用上方逻辑链窗口中逐字出现的 `[Turn N]` 原文。",
                 ]
             )
-            prompt = "\n".join(lines)
+            prompt = "\n\n".join(lines)
             estimated = int(len(prompt) * 0.5 + len(re.findall(r"\w+", prompt)) * 0.5)
-            return prompt, ordered, estimated
+            return prompt, ordered, estimated, context_nodes
 
         selected_units: List[Dict[str, Any]] = []
         uncovered_parent_keys = set(parent_pointer_keys)
-        prompt_markdown, ordered_evidence, estimated_tokens = render(selected_units)
+        prompt_markdown, ordered_evidence, estimated_tokens, context_nodes = render(selected_units)
+        if estimated_tokens > self.max_prompt_tokens:
+            raise ValueError(
+                "anchored logical-window Parent Card facts exceed the token budget"
+            )
         remaining_units = list(ranked_units)
+        selected_turn_keys: Set[Tuple[int, int]] = set()
+        selected_roles: Set[str] = set()
+        selected_endpoint_markers: Set[Tuple[int, str]] = set()
+
+        def unit_identity(unit: Dict[str, Any]) -> str:
+            metadata = unit.get("metadata", {}) or {}
+            session_id = int(metadata.get("session_id", -1))
+            source_ids = _source_keys(unit)
+            start = metadata.get("window_start_turn")
+            end = metadata.get("window_end_turn")
+            if start is None and source_ids:
+                start = min(turn_id for _, turn_id in source_ids)
+            if end is None and source_ids:
+                end = max(turn_id for _, turn_id in source_ids)
+            return f"{unit.get('chunk_id', '')}|{session_id}|{start}|{end}"
+
+        def unit_range(unit: Dict[str, Any]) -> Tuple[int, int, int]:
+            metadata = unit.get("metadata", {}) or {}
+            session_id = int(metadata.get("session_id", -1))
+            source_ids = _source_keys(unit)
+            if not source_ids:
+                return session_id, 10**9, -1
+            start = int(metadata.get("window_start_turn", min(turn_id for _, turn_id in source_ids)))
+            end = int(metadata.get("window_end_turn", max(turn_id for _, turn_id in source_ids)))
+            return session_id, start, end
+
+        endpoint_markers_by_unit: Dict[str, Set[Tuple[int, str]]] = {}
+        by_session: Dict[int, List[Dict[str, Any]]] = {}
+        for unit in ranked_units:
+            session_id, _, _ = unit_range(unit)
+            by_session.setdefault(session_id, []).append(unit)
+        for session_id, session_units in by_session.items():
+            first = min(
+                session_units,
+                key=lambda unit: (
+                    unit_range(unit)[1],
+                    int(unit.get("reranker_rank", 10**9)),
+                ),
+            )
+            last = max(
+                session_units,
+                key=lambda unit: (
+                    unit_range(unit)[2],
+                    -int(unit.get("reranker_rank", 10**9)),
+                ),
+            )
+            endpoint_markers_by_unit.setdefault(unit_identity(first), set()).add((session_id, "start"))
+            endpoint_markers_by_unit.setdefault(unit_identity(last), set()).add((session_id, "end"))
+
         while remaining_units and len(selected_units) < self.evidence_selection_count:
-            def selection_key(unit: Dict[str, Any]) -> tuple[int, int, float, str]:
+            def selection_key(unit: Dict[str, Any]) -> tuple[int, int, int, int, int, float, str]:
                 unit_keys = _source_keys(unit)
                 new_coverage = len(unit_keys & uncovered_parent_keys)
+                unit_roles = {
+                    str(turn.get("speaker", "")).strip()
+                    for turn in unit.get("evidence_turns", []) or []
+                    if str(turn.get("speaker", "")).strip()
+                }
+                new_turns = len(unit_keys - selected_turn_keys)
+                new_endpoints = len(
+                    endpoint_markers_by_unit.get(unit_identity(unit), set())
+                    - selected_endpoint_markers
+                )
                 return (
                     -new_coverage,
+                    -new_endpoints,
+                    -len(unit_roles - selected_roles),
+                    -new_turns,
                     int(unit.get("reranker_rank", 10**9)),
                     -float(unit.get("reranker_score", 0.0)),
                     str(unit.get("chunk_id", "")),
                 )
 
-            unit = min(remaining_units, key=selection_key)
+            viable_units = [
+                unit
+                for unit in remaining_units
+                if _source_keys(unit) - selected_turn_keys
+            ]
+            if not viable_units:
+                break
+            unit = min(viable_units, key=selection_key)
             remaining_units.remove(unit)
-            trial_prompt, trial_evidence, trial_tokens = render(selected_units + [unit])
+            trial_prompt, trial_evidence, trial_tokens, trial_nodes = render(selected_units + [unit])
             if selected_units and trial_tokens > self.max_prompt_tokens:
                 continue
             selected_units.append(unit)
             uncovered_parent_keys -= _source_keys(unit)
+            selected_turn_keys.update(_source_keys(unit))
+            selected_roles.update(
+                str(turn.get("speaker", "")).strip()
+                for turn in unit.get("evidence_turns", []) or []
+                if str(turn.get("speaker", "")).strip()
+            )
+            selected_endpoint_markers.update(
+                endpoint_markers_by_unit.get(unit_identity(unit), set())
+            )
             prompt_markdown, ordered_evidence, estimated_tokens = (
                 trial_prompt,
                 trial_evidence,
                 trial_tokens,
             )
+            context_nodes = trial_nodes
+        selected_units.sort(
+            key=lambda unit: (
+                int(unit.get("reranker_rank", 10**9)),
+                -float(unit.get("reranker_score", 0.0)),
+                str(unit.get("chunk_id", "")),
+            )
+        )
         budget_violation = estimated_tokens > self.max_prompt_tokens
         truncation_loss = 0
         if budget_violation:
-            target_chars = max(1, self.max_prompt_tokens * 2)
-            truncation_loss = max(0, len(prompt_markdown) - target_chars)
-            prompt_markdown = prompt_markdown[:target_chars].rstrip() + "\n[Context truncated to token budget]"
-            estimated_tokens = min(
-                self.max_prompt_tokens,
-                int(len(prompt_markdown) * 0.5 + len(re.findall(r"\w+", prompt_markdown)) * 0.5),
-            )
+            raise ValueError("anchored logical-window assembly exceeded the token budget")
         raw_chars = sum(len(str(unit.get("document", ""))) for unit in ranked_units)
         compression_ratio = max(0.0, round(1.0 - len(prompt_markdown) / max(1, raw_chars), 2))
         return GoldAssembledContext(
@@ -639,6 +856,7 @@ class PedagogicalGoldAssembler:
             rerank_unit="anchored_logical_window",
             evidence_selection_count=len(selected_units),
             evidence_turns=ordered_evidence,
+            deepeval_context_nodes=context_nodes,
             estimated_token_count=estimated_tokens,
             compression_ratio=compression_ratio,
             budget_violation=budget_violation,

@@ -227,3 +227,6 @@ def test_pipeline_prepare_context_exposes_anchored_route_without_generation() ->
     assert context.rerank_unit == "anchored_logical_window"
     assert context.selected_evidence_units[0]["reranker_rank"] == 1
     assert [(turn["session_id"], turn["turn_id"]) for turn in context.evidence_turns] == [(10, 1)]
+    assert len(context.deepeval_context_nodes) >= 2
+    assert any(node.startswith("## [DERIVED_FACT]") for node in context.deepeval_context_nodes)
+    assert all(node in context.prompt_context_markdown for node in context.deepeval_context_nodes)

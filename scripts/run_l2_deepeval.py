@@ -253,6 +253,75 @@ def _evidence_refs(case: dict[str, Any], sessions: dict[int, Any]) -> tuple[list
     return required, authoritative
 
 
+def _claim_segments(text: str) -> list[str]:
+    return [
+        segment.strip()
+        for segment in re.split(r"(?<=[。！？!?；;])\s*|\r?\n+", str(text or ""))
+        if segment.strip()
+    ]
+
+
+def _claim_tokens(text: str) -> set[str]:
+    return set(re.findall(r"[A-Za-z0-9]+|[\u4e00-\u9fff]", str(text or "").casefold()))
+
+
+def _row_value(row: Any, field: str) -> Any:
+    if isinstance(row, dict):
+        return row.get(field)
+    return getattr(row, field, None)
+
+
+def _context_coverage(
+    case: dict[str, Any],
+    required_turns: list[Any],
+    context_turns: list[Any],
+    context_nodes: list[str],
+) -> dict[str, Any]:
+    """Report physical Turn coverage and a transparent lexical claim proxy."""
+
+    required_keys = {
+        (int(_row_value(item, "session_id")), int(_row_value(item, "turn_id")))
+        for item in required_turns
+    }
+    context_keys = {
+        (int(_row_value(item, "session_id")), int(_row_value(item, "turn_id")))
+        for item in context_turns
+        if _row_value(item, "session_id") is not None
+        and _row_value(item, "turn_id") is not None
+    }
+    covered_keys = required_keys & context_keys
+    claims = _claim_segments(str(case.get("ground_truth", "")))
+    context_text = "\n".join(str(node) for node in context_nodes if str(node).strip())
+    if not context_text:
+        context_text = "\n".join(
+            str(_row_value(item, "text") or _row_value(item, "quote_text") or "")
+            for item in context_turns
+        )
+    context_tokens = _claim_tokens(context_text)
+    claim_scores: list[float] = []
+    for claim in claims:
+        tokens = _claim_tokens(claim)
+        if not tokens:
+            continue
+        numeric_tokens = set(re.findall(r"\d+(?:\.\d+)?", claim))
+        numeric_hits = numeric_tokens & set(re.findall(r"\d+(?:\.\d+)?", context_text))
+        token_score = len(tokens & context_tokens) / len(tokens)
+        if numeric_tokens and numeric_hits != numeric_tokens:
+            token_score = 0.0
+        claim_scores.append(token_score)
+    claim_recall = sum(claim_scores) / len(claim_scores) if claim_scores else None
+    supported_claim_count = sum(score >= 0.5 for score in claim_scores)
+    return {
+        "required_turn_count": len(required_keys),
+        "covered_turn_count": len(covered_keys),
+        "turn_recall": len(covered_keys) / len(required_keys) if required_keys else None,
+        "claim_count": len(claim_scores),
+        "supported_claim_count": supported_claim_count,
+        "claim_recall": claim_recall,
+        "claim_recall_method": "lexical_context_coverage_proxy",
+    }
+
+
 def _build_gold_context(case: dict[str, Any], sessions: dict[int, Any]):
     from src.reranker import GoldAssembledContext
 
@@ -703,11 +772,15 @@ def _run_deepeval_case(
     return rows
 
 
-def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def _aggregate_trace_diagnostics(
+    trace_rows: list[dict[str, Any]],
+    metric_rows: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Aggregate non-scoring diagnostics while preserving case-level provenance."""
 
     warnings_by_key: dict[str, dict[str, str]] = {}
     coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    context_coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     node_stats_by_track: dict[str, list[dict[str, int]]] = {"gold": [], "real": []}
     for row in trace_rows:
         track = str(row.get("track", ""))
@@ -719,6 +792,9 @@ def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, 
         coverage = row.get("claim_coverage")
         if isinstance(coverage, dict):
             coverage_by_track[track].append(coverage)
+        context_coverage = row.get("context_coverage")
+        if isinstance(context_coverage, dict):
+            context_coverage_by_track[track].append(context_coverage)
         node_stats_by_track[track].append(
             {
                 "node_count": int(row.get("deepeval_context_node_count", 0) or 0),
@@ -730,6 +806,7 @@ def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, 
         values = [float(row[field]) for row in rows if row.get(field) is not None]
         return sum(values) / len(values) if values else None
 
+    deep_eval_metrics = metric_rows or []
     return {
         "gold_alignment_warning_count": len(warnings_by_key),
         "gold_alignment_warnings": list(warnings_by_key.values()),
@@ -750,6 +827,56 @@ def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, 
                 "mean_context_chars": mean_field(rows, "context_chars"),
             }
             for track, rows in node_stats_by_track.items()
+        },
+        "context_coverage": {
+            track: {
+                "measured": len(rows),
+                "mean_turn_recall": mean_field(rows, "turn_recall"),
+                "mean_claim_recall": mean_field(rows, "claim_recall"),
+                "mean_required_turn_count": mean_field(rows, "required_turn_count"),
+                "mean_covered_turn_count": mean_field(rows, "covered_turn_count"),
+                "claim_recall_method": "lexical_context_coverage_proxy",
+            }
+            for track, rows in context_coverage_by_track.items()
+        },
+        "deep_eval": {
+            track: {
+                "measured_contextual_recall": sum(
+                    row.get("track") == track
+                    and row.get("metric") == "contextual_recall"
+                    and row.get("status") == "SUCCESS"
+                    and row.get("score") is not None
+                    for row in deep_eval_metrics
+                ),
+                "mean_contextual_recall": mean_field(
+                    [
+                        row
+                        for row in deep_eval_metrics
+                        if row.get("track") == track
+                        and row.get("metric") == "contextual_recall"
+                        and row.get("status") == "SUCCESS"
+                    ],
+                    "score",
+                ),
+                "measured_faithfulness": sum(
+                    row.get("track") == track
+                    and row.get("metric") == "faithfulness"
+                    and row.get("status") == "SUCCESS"
+                    and row.get("score") is not None
+                    for row in deep_eval_metrics
+                ),
+                "mean_faithfulness": mean_field(
+                    [
+                        row
+                        for row in deep_eval_metrics
+                        if row.get("track") == track
+                        and row.get("metric") == "faithfulness"
+                        and row.get("status") == "SUCCESS"
+                    ],
+                    "score",
+                ),
+            }
+            for track in ("gold", "real")
         },
     }
 
@@ -786,6 +913,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--judge-api-key-env", default=None)
     parser.add_argument("--judge-temperature", type=float, default=0.0)
     parser.add_argument("--generator-timeout-seconds", type=float, default=60.0)
+    parser.add_argument("--max-prompt-tokens", type=int, default=2000)
     parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v1")
     parser.add_argument("--gold-context-version", choices=("v1", "v2"), default="v1")
     parser.add_argument("--rubric-version", choices=("v1", "v2"), default="v1")
@@ -826,6 +954,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--bm25-weight must be in [0, 1]")
     if args.generator_timeout_seconds <= 0:
         parser.error("--generator-timeout-seconds must be positive")
+    if args.max_prompt_tokens <= 0:
+        parser.error("--max-prompt-tokens must be positive")
     l1_closeout = json.loads(args.l1_closeout.resolve(strict=True).read_text(encoding="utf-8"))
     if l1_closeout.get("decision") != "GO_TO_L2_TECHNICAL" and not args.allow_l1_blocked:
         raise SystemExit("L1 is not GO_TO_L2_TECHNICAL; pass --allow-l1-blocked only for explicit pipeline validation")
@@ -867,10 +997,11 @@ def main(argv: list[str] | None = None) -> int:
                 "rerank_unit": route["rerank_unit"],
                 "reranker_pool_size": route["reranker_pool_size"],
                 "parent_card_count": route["parent_card_count"],
-            "evidence_selection_count": route["evidence_selection_count"],
-            "generator_contract": args.generator_contract,
-            "gold_context_version": args.gold_context_version,
-            "rubric_version": args.rubric_version,
+                "evidence_selection_count": route["evidence_selection_count"],
+                "generator_contract": args.generator_contract,
+                "gold_context_version": args.gold_context_version,
+                "rubric_version": args.rubric_version,
+                "max_prompt_tokens": args.max_prompt_tokens,
             },
         )
     l2_split_manifest = json.loads((args.dataset_output.resolve() / "split_manifest.json").read_text(encoding="utf-8"))
@@ -946,7 +1077,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             assembler = PedagogicalGoldAssembler(
                 lambda_diversity=0.7,
-                max_prompt_tokens=1500,
+                max_prompt_tokens=args.max_prompt_tokens,
                 model_reranker=model_reranker,
                 rerank_unit=route["rerank_unit"],
                 reranker_pool_size=route["reranker_pool_size"],
@@ -1024,6 +1155,12 @@ def main(argv: list[str] | None = None) -> int:
                             for item in (context.evidence_turns if context else [])
                         ]
                         citation = _safe(audit_grounding(output, authoritative, required, retrieved_evidence=retrieved).__dict__)
+                    context_coverage = _context_coverage(
+                        case,
+                        required,
+                        context.evidence_turns if context is not None else [],
+                        context.deepeval_context_nodes if context is not None else [],
+                    )
                     trace = {
                         "case_id": case_id,
                         "track": track,
@@ -1070,6 +1207,7 @@ def main(argv: list[str] | None = None) -> int:
                             if response is not None and response.__dict__.get("generator_contract_version") == "v2"
                             else None
                         ),
+                        "context_coverage": context_coverage,
                         "gold_alignment_warnings": gold_alignment_warnings,
                         "deepeval_context_node_count": (
                             len(context.deepeval_context_nodes)
@@ -1167,7 +1305,7 @@ def main(argv: list[str] | None = None) -> int:
             threshold = next((row["threshold"] for row in metric_rows if row["track"] == track and row["metric"] == metric), None)
             metric_aggregates.append({"track": track, "metric": metric, "measured": len(values), "mean": sum(values) / len(values) if values else None, "threshold": threshold})
     errors = [row for row in trace_rows if row["status"] == "ERROR"] + [row for row in metric_rows if row["status"] == "ERROR"]
-    diagnostics = _aggregate_trace_diagnostics(trace_rows)
+    diagnostics = _aggregate_trace_diagnostics(trace_rows, metric_rows)
     judge_ready = readiness_payload.get("status") == "SUCCESS"
     all_thresholds_pass = bool(metric_aggregates) and all(item["mean"] is not None and item["mean"] >= item["threshold"] for item in metric_aggregates)
     if l1_closeout.get("decision") != "GO_TO_L2_TECHNICAL":
@@ -1199,7 +1337,7 @@ def main(argv: list[str] | None = None) -> int:
             "chunk_strategy": "card",
             "window_size": 6,
             "window_step": 3,
-            "max_prompt_tokens": 1500,
+            "max_prompt_tokens": args.max_prompt_tokens,
             "generator_timeout_seconds": args.generator_timeout_seconds,
             "generator_contract": args.generator_contract,
             "gold_context_version": args.gold_context_version,
@@ -1260,7 +1398,15 @@ def main(argv: list[str] | None = None) -> int:
     ]
     for item in metric_aggregates:
         lines.append(f"| {item['track']} | {item['metric']} | {item['measured']} | {item['mean']} | {item['threshold']} |")
-    lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --expected-artifact-hash {expected_artifact_hash} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --case-start {args.case_start} --max-cases {args.max_cases} --generator-timeout-seconds {args.generator_timeout_seconds} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --reranker-backend {route['reranker_backend']} --rerank-unit {route['rerank_unit']} --reranker-pool-size {route['reranker_pool_size']} --parent-card-count {route['parent_card_count']} --evidence-selection-count {route['evidence_selection_count']} --retrieval-mode {args.retrieval_mode} --bm25-weight {args.bm25_weight} --allow-l1-blocked`", ""])
+    lines.extend(["", "## Context coverage diagnostics", "", "| Track | Turn Recall | Claim Recall (proxy) | DeepEval Recall | Faithfulness |", "| --- | ---: | ---: | ---: | ---: |"])
+    for track in ("gold", "real"):
+        coverage = diagnostics["context_coverage"][track]
+        deep_eval = diagnostics["deep_eval"][track]
+        lines.append(
+            f"| {track} | {coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
+            f"{deep_eval['mean_contextual_recall']} | {deep_eval['mean_faithfulness']} |"
+        )
+    lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --expected-artifact-hash {expected_artifact_hash} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --case-start {args.case_start} --max-cases {args.max_cases} --generator-timeout-seconds {args.generator_timeout_seconds} --max-prompt-tokens {args.max_prompt_tokens} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --reranker-backend {route['reranker_backend']} --rerank-unit {route['rerank_unit']} --reranker-pool-size {route['reranker_pool_size']} --parent-card-count {route['parent_card_count']} --evidence-selection-count {route['evidence_selection_count']} --retrieval-mode {args.retrieval_mode} --bm25-weight {args.bm25_weight} --allow-l1-blocked`", ""])
     (run_dir / "report.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"run_id": args.run_id, "release_decision": release_decision, "judge_status": readiness_payload.get("status"), "trace_count": len(trace_rows), "metric_count": len(metric_rows), "report_dir": str(run_dir), "artifact_hash": artifact_hash}, ensure_ascii=False))
     return 0 if release_decision == "L2_PASSED" else 2

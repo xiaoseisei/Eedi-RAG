@@ -11,6 +11,7 @@ from scripts.merge_l2_deepeval_reports import merge_reports
 from scripts.run_l2_deepeval import (
     _build_gold_context_v2,
     _aggregate_trace_diagnostics,
+    _context_coverage,
     _gold_alignment_status,
     audit_gold_alignment,
     _metric_eval_payload,
@@ -336,6 +337,30 @@ def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
     assert result["claim_coverage"]["gold"]["measured"] == 2
     assert result["claim_coverage"]["gold"]["mean_fact_claim_coverage"] == 0.75
     assert result["context_nodes"]["gold"]["mean_node_count"] == 3.5
+
+
+def test_context_coverage_reports_turn_and_claim_recall_separately() -> None:
+    result = _context_coverage(
+        {
+            "ground_truth": "学生混淆了一位小数和两位小数。导师要求检查下一位数字。",
+        },
+        [
+            {"session_id": 10, "turn_id": 1},
+            {"session_id": 10, "turn_id": 2},
+        ],
+        [
+            {"session_id": 10, "turn_id": 1},
+            {"session_id": 10, "turn_id": 3},
+        ],
+        ["学生混淆了一位小数和两位小数。"],
+    )
+
+    assert result["turn_recall"] == 0.5
+    assert result["required_turn_count"] == 2
+    assert result["covered_turn_count"] == 1
+    assert result["claim_count"] == 2
+    assert result["claim_recall_method"] == "lexical_context_coverage_proxy"
+    assert 0.0 <= result["claim_recall"] <= 1.0
 
 
 def test_gold_alignment_status_blocks_unresolved_conflicts_without_changing_scores() -> None:

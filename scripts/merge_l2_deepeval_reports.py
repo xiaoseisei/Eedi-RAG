@@ -131,6 +131,7 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
 
     warning_map: dict[str, dict[str, Any]] = {}
     claim_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    context_coverage_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     node_rows: dict[str, list[dict[str, float]]] = {"gold": [], "real": []}
     for row in traces:
         track = str(row.get("track", ""))
@@ -141,6 +142,9 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
         coverage = row.get("claim_coverage")
         if isinstance(coverage, dict):
             claim_rows[track].append(coverage)
+        context_coverage = row.get("context_coverage")
+        if isinstance(context_coverage, dict):
+            context_coverage_rows[track].append(context_coverage)
         node_rows[track].append(
             {
                 "node_count": float(row.get("deepeval_context_node_count", 0) or 0),
@@ -151,6 +155,26 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
     def mean(rows: list[dict[str, Any]], field: str) -> float | None:
         values = [float(row[field]) for row in rows if row.get(field) is not None]
         return statistics.mean(values) if values else None
+
+    def metric_mean(track: str, metric: str) -> float | None:
+        values = [
+            float(row["score"])
+            for row in metrics
+            if row.get("track") == track
+            and row.get("metric") == metric
+            and row.get("status") == "SUCCESS"
+            and row.get("score") is not None
+        ]
+        return statistics.mean(values) if values else None
+
+    def metric_count(track: str, metric: str) -> int:
+        return sum(
+            row.get("track") == track
+            and row.get("metric") == metric
+            and row.get("status") == "SUCCESS"
+            and row.get("score") is not None
+            for row in metrics
+        )
 
     diagnostics = {
         "gold_alignment_warning_count": len(warning_map),
@@ -172,6 +196,26 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
                 "mean_context_chars": mean(rows, "context_chars"),
             }
             for track, rows in node_rows.items()
+        },
+        "context_coverage": {
+            track: {
+                "measured": len(rows),
+                "mean_turn_recall": mean(rows, "turn_recall"),
+                "mean_claim_recall": mean(rows, "claim_recall"),
+                "mean_required_turn_count": mean(rows, "required_turn_count"),
+                "mean_covered_turn_count": mean(rows, "covered_turn_count"),
+                "claim_recall_method": "lexical_context_coverage_proxy",
+            }
+            for track, rows in context_coverage_rows.items()
+        },
+        "deep_eval": {
+            track: {
+                "measured_contextual_recall": metric_count(track, "contextual_recall"),
+                "mean_contextual_recall": metric_mean(track, "contextual_recall"),
+                "measured_faithfulness": metric_count(track, "faithfulness"),
+                "mean_faithfulness": metric_mean(track, "faithfulness"),
+            }
+            for track in ("gold", "real")
         },
     }
 
@@ -231,6 +275,20 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
     for item in metric_aggregates:
         lines.append(
             f"| {item['track']} | {item['metric']} | {item['measured']} | {item['mean']} | {item['threshold']} |"
+        )
+    lines.extend([
+        "",
+        "## Context coverage diagnostics",
+        "",
+        "| Track | Turn Recall | Claim Recall (proxy) | DeepEval Recall | Faithfulness |",
+        "| --- | ---: | ---: | ---: | ---: |",
+    ])
+    for track in ("gold", "real"):
+        coverage = diagnostics["context_coverage"][track]
+        deep_eval = diagnostics["deep_eval"][track]
+        lines.append(
+            f"| {track} | {coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
+            f"{deep_eval['mean_contextual_recall']} | {deep_eval['mean_faithfulness']} |"
         )
     (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report

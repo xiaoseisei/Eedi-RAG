@@ -404,6 +404,7 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert "教学干预" not in response.__dict__["generator_grounding_text"]
     assert "[fact] [E001]" in response.__dict__["generator_grounding_text"]
     assert "evidence_id=E001" in sent[0]["messages"][1]["content"]
+    assert "Evidence ID 白名单" in sent[0]["messages"][1]["content"]
     assert sent[0]["messages"][0]["content"] == SYSTEM_PEDAGOGICAL_PROMPT_V2
     assert "80 字" not in sent[0]["messages"][0]["content"]
     assert "证据解释" in sent[0]["messages"][0]["content"]
