@@ -479,6 +479,52 @@ def test_generator_v2_retries_with_contract_feedback_for_missing_role(monkeypatc
     assert response.__dict__["generator_contract_repair_attempted"] is True
 
 
+def test_generator_v2_auto_closes_explicit_role_ids_in_citations(monkeypatch):
+    content = {
+        "subject_path": "Number",
+        "answer": "直接回答。",
+        "misconception_diagnosis": "诊断。",
+        "evidence_explanation": "证据。",
+        "key_aha_question": "问题。",
+        "scaffolding_steps": ["步骤"],
+        "pedagogical_intervention": ["动作"],
+        "recommended_talk_moves": [],
+        "claims": [
+            {"claim_id": "C1", "claim_text": "事实", "claim_type": "fact", "evidence_ids": ["E001"]}
+        ],
+        "student_evidence_ids": ["E001"],
+        "tutor_evidence_ids": ["E002"],
+        "dialogue_citations": [{"evidence_id": "E001"}],
+        "transfer_question": None,
+    }
+
+    class Completions:
+        def create(self, **kwargs):
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(content)))],
+                usage=None,
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(), api_key="test-key", model_name="test-model", generator_contract_version="v2"
+    )
+    ctx = GoldAssembledContext(
+        raw_query="学生为什么错，导师如何引导？",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 1, "speaker": "student", "text": "student fact"},
+            {"session_id": 7, "turn_id": 2, "speaker": "tutor", "text": "tutor fact"},
+        ],
+    )
+
+    response = pipeline._generate_with_llm(ctx.raw_query, ctx, {})
+
+    assert [citation.turn_id for citation in response.dialogue_citations] == [1, 2]
+    assert response.__dict__["generator_contract_auto_merged_ids"] == ["E002"]
+
+
 def test_exact_citation_fact_is_verified_and_promotes_audit_status():
     pipeline = EndToEndPedagogicalRAGPipeline()
     evidence = {

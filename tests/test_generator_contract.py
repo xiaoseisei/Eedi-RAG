@@ -11,6 +11,7 @@ from src.generator_contract import (
     materialize_generator_citations,
     render_evidence_catalog,
     summarize_claim_coverage,
+    normalize_v2_payload_data,
     validate_claim_citation_closure,
     validate_role_coverage,
 )
@@ -190,3 +191,20 @@ def test_claim_citation_closure_requires_all_declared_evidence_ids() -> None:
 
     with pytest.raises(ValueError, match="C1"):
         validate_claim_citation_closure(payload)
+
+
+def test_normalize_v2_payload_closes_declared_claim_and_role_ids_only() -> None:
+    catalog = build_evidence_catalog(_context())
+    raw = {
+        "claims": [{"evidence_ids": ["E001", "E002"]}],
+        "student_evidence_ids": ["E002"],
+        "tutor_evidence_ids": ["E001"],
+        "dialogue_citations": [{"evidence_id": "E001"}],
+    }
+
+    normalized, merged = normalize_v2_payload_data(raw, catalog)
+
+    assert merged == ["E002"]
+    assert [item["evidence_id"] for item in normalized["dialogue_citations"]] == ["E001", "E002"]
+    assert normalized["student_evidence_ids"] == ["E002"]
+    assert normalized["tutor_evidence_ids"] == ["E001"]

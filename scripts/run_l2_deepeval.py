@@ -1041,6 +1041,11 @@ def main(argv: list[str] | None = None) -> int:
                             if response is not None
                             else False
                         ),
+                        "generator_contract_auto_merged_ids": (
+                            response.__dict__.get("generator_contract_auto_merged_ids", [])
+                            if response is not None
+                            else []
+                        ),
                         "gold_context_version": args.gold_context_version,
                         # Preserve the validated claim-level contract for auditability.
                         # Citation materialization remains backend-owned; this field is

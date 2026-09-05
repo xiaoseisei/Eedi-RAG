@@ -140,6 +140,68 @@ def validate_claim_citation_closure(payload: GeneratorGuidancePayloadV2) -> None
         )
 
 
+def normalize_v2_payload_data(
+    raw_payload: dict,
+    catalog: Dict[str, EvidenceCatalogItem],
+) -> tuple[dict, list[str]]:
+    """Close citation lists using only IDs explicitly declared by the model.
+
+    The model often repeats an ID in a claim or role-specific list but omits it
+    from ``dialogue_citations``.  Adding that same declared ID is deterministic
+    canonicalization, not evidence selection; unknown IDs remain visible and
+    are rejected by the normal contract validators.
+    """
+
+    if not isinstance(raw_payload, dict):
+        raise ValueError("Generator v2 payload must be a JSON object")
+    payload = dict(raw_payload)
+    citations = list(payload.get("dialogue_citations") or [])
+    citation_ids = {
+        item.get("evidence_id")
+        for item in citations
+        if isinstance(item, dict) and isinstance(item.get("evidence_id"), str)
+    }
+    declared_ids: list[str] = []
+    for item in payload.get("claims") or []:
+        if isinstance(item, dict):
+            declared_ids.extend(
+                evidence_id
+                for evidence_id in item.get("evidence_ids") or []
+                if isinstance(evidence_id, str)
+            )
+    for field in ("student_evidence_ids", "tutor_evidence_ids"):
+        declared_ids.extend(
+            evidence_id
+            for evidence_id in payload.get(field) or []
+            if isinstance(evidence_id, str)
+        )
+    merged: list[str] = []
+    for evidence_id in dict.fromkeys(declared_ids):
+        if evidence_id not in citation_ids:
+            citations.append({"evidence_id": evidence_id})
+            citation_ids.add(evidence_id)
+            merged.append(evidence_id)
+    payload["dialogue_citations"] = citations
+
+    # Role lists are a convenience view; if omitted, derive them from the
+    # already-cited IDs and the authoritative catalog.
+    for field, role in (
+        ("student_evidence_ids", "student"),
+        ("tutor_evidence_ids", "tutor"),
+    ):
+        values = [
+            evidence_id
+            for evidence_id in payload.get(field) or []
+            if isinstance(evidence_id, str)
+        ]
+        for evidence_id in citation_ids:
+            item = catalog.get(evidence_id)
+            if item is not None and item.speaker == role and evidence_id not in values:
+                values.append(evidence_id)
+        payload[field] = values
+    return payload, merged
+
+
 def summarize_claim_coverage(payload_or_response) -> dict[str, int | float]:
     """Summarize validated fact-claim support without trusting free-form text."""
 

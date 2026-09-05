@@ -32,6 +32,7 @@ from src.generator_contract import (
     build_evidence_catalog,
     materialize_generator_citations,
     render_evidence_catalog,
+    normalize_v2_payload_data,
     validate_claim_citation_closure,
     validate_role_coverage,
 )
@@ -572,6 +573,7 @@ class EndToEndPedagogicalRAGPipeline:
         payload: Any = None
         catalog = build_evidence_catalog(gold_ctx) if effective_contract == "v2" else None
         contract_repair_attempted = False
+        contract_auto_merged_ids: list[str] = []
         for attempt in range(2):
             try:
                 # 探针: LLM API 调用 (核心瓶颈)
@@ -609,7 +611,14 @@ class EndToEndPedagogicalRAGPipeline:
                     if effective_contract == "v2"
                     else LLMGuidancePayload
                 )
-                payload = payload_type.model_validate(json.loads(raw_content))
+                decoded_payload = json.loads(raw_content)
+                if effective_contract == "v2":
+                    decoded_payload, merged_ids = normalize_v2_payload_data(
+                        decoded_payload,
+                        catalog or {},
+                    )
+                    contract_auto_merged_ids.extend(merged_ids)
+                payload = payload_type.model_validate(decoded_payload)
                 if effective_contract == "v2":
                     validate_claim_citation_closure(payload)
                     validate_role_coverage(
@@ -707,6 +716,9 @@ class EndToEndPedagogicalRAGPipeline:
             )
             response.__dict__["generator_contract_version"] = "v2"
             response.__dict__["generator_contract_repair_attempted"] = contract_repair_attempted
+            response.__dict__["generator_contract_auto_merged_ids"] = list(
+                dict.fromkeys(contract_auto_merged_ids)
+            )
             response.__dict__["generator_core_answer"] = payload.answer
             response.__dict__["generator_grounding_text"] = grounding_text
             response.__dict__["generator_citation_evidence_ids"] = [
