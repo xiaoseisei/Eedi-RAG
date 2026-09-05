@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Literal
+import re
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -75,8 +76,8 @@ class GeneratorGuidancePayloadV2(BaseModel):
     misconception_diagnosis: str = Field(min_length=1, max_length=1200)
     evidence_explanation: str = Field(min_length=1, max_length=1200)
     key_aha_question: str = Field(min_length=1, max_length=600)
-    scaffolding_steps: List[str] = Field(min_length=1, max_length=8)
-    pedagogical_intervention: List[str] = Field(min_length=1, max_length=8)
+    scaffolding_steps: List[str] = Field(default_factory=list, max_length=8)
+    pedagogical_intervention: List[str] = Field(default_factory=list, max_length=8)
     recommended_talk_moves: List[str] = Field(default_factory=list, max_length=8)
     claims: List[GeneratorClaim] = Field(min_length=1)
     dialogue_citations: List[GeneratorCitationRef] = Field(min_length=1)
@@ -155,7 +156,25 @@ def normalize_v2_payload_data(
     if not isinstance(raw_payload, dict):
         raise ValueError("Generator v2 payload must be a JSON object")
     payload = dict(raw_payload)
+
+    def canonical_id(value):
+        if not isinstance(value, str):
+            return value
+        match = re.fullmatch(r"E(\d{1,2})", value)
+        if not match:
+            return value
+        candidate = f"E{int(match.group(1)):03d}"
+        return candidate if candidate in catalog else value
+
+    for item in payload.get("claims") or []:
+        if isinstance(item, dict):
+            item["evidence_ids"] = [canonical_id(value) for value in item.get("evidence_ids") or []]
+    for field in ("student_evidence_ids", "tutor_evidence_ids"):
+        payload[field] = [canonical_id(value) for value in payload.get(field) or []]
     citations = list(payload.get("dialogue_citations") or [])
+    for item in citations:
+        if isinstance(item, dict):
+            item["evidence_id"] = canonical_id(item.get("evidence_id"))
     citation_ids = {
         item.get("evidence_id")
         for item in citations

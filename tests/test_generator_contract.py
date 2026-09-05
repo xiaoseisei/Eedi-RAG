@@ -103,6 +103,25 @@ def test_v2_payload_contains_claims_and_evidence_ids_only() -> None:
     assert "quote_text" not in payload.model_dump_json()
 
 
+def test_v2_payload_allows_empty_optional_teaching_lists_for_narrow_questions() -> None:
+    payload = GeneratorGuidancePayloadV2.model_validate(
+        {
+            "subject_path": "Number",
+            "answer": "核心答案",
+            "misconception_diagnosis": "未观察到",
+            "evidence_explanation": "E001 支持核心答案。",
+            "key_aha_question": "未要求",
+            "scaffolding_steps": [],
+            "pedagogical_intervention": [],
+            "claims": [{"claim_id": "C1", "claim_text": "事实", "claim_type": "fact", "evidence_ids": ["E001"]}],
+            "dialogue_citations": [{"evidence_id": "E001"}],
+        }
+    )
+
+    assert payload.scaffolding_steps == []
+    assert payload.pedagogical_intervention == []
+
+
 def test_multi_role_citations_must_cover_student_and_tutor_evidence() -> None:
     context = GoldAssembledContext(
         raw_query="学生为什么会错，导师如何引导？",
@@ -208,3 +227,18 @@ def test_normalize_v2_payload_closes_declared_claim_and_role_ids_only() -> None:
     assert [item["evidence_id"] for item in normalized["dialogue_citations"]] == ["E001", "E002"]
     assert normalized["student_evidence_ids"] == ["E002"]
     assert normalized["tutor_evidence_ids"] == ["E001"]
+
+
+def test_normalize_v2_payload_zero_pads_existing_short_ids_only() -> None:
+    catalog = build_evidence_catalog(_context())
+    normalized, merged = normalize_v2_payload_data(
+        {
+            "claims": [{"evidence_ids": ["E1", "E002"]}],
+            "dialogue_citations": [{"evidence_id": "E1"}],
+        },
+        catalog,
+    )
+
+    assert merged == ["E002"]
+    assert normalized["claims"][0]["evidence_ids"] == ["E001", "E002"]
+    assert [item["evidence_id"] for item in normalized["dialogue_citations"]] == ["E001", "E002"]
