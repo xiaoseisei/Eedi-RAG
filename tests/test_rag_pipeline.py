@@ -406,6 +406,17 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert "证据解释" in sent[0]["messages"][0]["content"]
 
 
+def test_generator_v2_prompt_has_red_lines_and_scope_examples():
+    prompt = SYSTEM_PEDAGOGICAL_PROMPT_V2
+
+    assert "最高优先级红线" in prompt
+    assert "最小充分集合" in prompt
+    assert "一句话" in prompt
+    assert "正例与反例" in prompt
+    assert "不得编造 evidence_id" in prompt
+    assert "学生一定缺乏位值概念" in prompt
+
+
 def test_exact_citation_fact_is_verified_and_promotes_audit_status():
     pipeline = EndToEndPedagogicalRAGPipeline()
     evidence = {
