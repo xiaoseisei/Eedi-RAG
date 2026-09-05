@@ -112,10 +112,11 @@ def summarize_claim_coverage(payload_or_response) -> dict[str, int | float]:
     cited_ids = set(
         getattr(payload_or_response, "generator_citation_evidence_ids", [])
     )
-    cited_ids.update({
-        citation.evidence_id if hasattr(citation, "evidence_id") else citation.get("evidence_id")
-        for citation in getattr(payload_or_response, "dialogue_citations", [])
-    })
+    for citation in getattr(payload_or_response, "dialogue_citations", []):
+        if hasattr(citation, "evidence_id"):
+            cited_ids.add(citation.evidence_id)
+        elif isinstance(citation, dict):
+            cited_ids.add(citation.get("evidence_id"))
     covered = [
         claim for claim in fact_claims
         if set(claim.get("evidence_ids", [])) & cited_ids
