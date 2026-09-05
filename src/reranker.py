@@ -53,6 +53,10 @@ class GoldAssembledContext(BaseModel):
     rerank_unit: str = Field(default="card", description="card、logical_evidence 或 anchored_logical_window")
     evidence_selection_count: int = Field(default=0, ge=0, description="evidence-level 模式选定的逻辑链单元数")
     evidence_turns: List[Dict[str, Any]] = Field(default_factory=list, description="不可篡改的 DuckDB 真实师生对白证据列表")
+    deepeval_context_nodes: List[str] = Field(
+        default_factory=list,
+        description="评测用的独立、去重、可单独评分的上下文节点",
+    )
     estimated_token_count: int = Field(default=0, description="装配后的预估 Token 消耗数")
     compression_ratio: float = Field(default=0.0, description="相比全量候选的 Token 压缩率")
     budget_violation: bool = False

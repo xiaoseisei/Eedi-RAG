@@ -302,12 +302,9 @@ def _build_gold_context_v2(
         raise ValueError("Gold Context v2 requires at least one source session")
     misconception_rows = storage.query_misconceptions_sql()
     strategy_rows = storage.query_strategies_sql()
-    lines = [
-        "# Gold Context v2 (evaluation-only sufficient context)",
-        "This context is built from real stored card facts and authoritative raw Turns.",
-        "Expected answers and qrels are intentionally excluded from the Generator input.",
-        "",
-        "## [CARD_FACT] Structured card facts",
+    context_nodes: list[str] = [
+        "## [CARD_FACT] Structured card facts\n"
+        "These are stored card fields, not verbatim dialogue."
     ]
     def has_value(value: Any) -> bool:
         if value is None:
@@ -326,8 +323,10 @@ def _build_gold_context_v2(
         if session is None:
             raise ValueError(f"missing session {session_id} for Gold Context v2")
         subject_path = session.subjects.paths[0] if session.subjects.paths else ""
-        lines.append(f"[Session {session_id}] subject_path={subject_path}")
-        lines.append(f"question={session.question.question_text}")
+        card_lines = [
+            f"[Session {session_id}] subject_path={subject_path}",
+            f"question={session.question.question_text}",
+        ]
         for label, rows in (
             ("misconception", misconception_rows),
             ("strategy", strategy_rows),
@@ -350,32 +349,46 @@ def _build_gold_context_v2(
                     )
                     if has_value(row.get(key))
                 }
-                lines.append(
+                card_lines.append(
                     f"card_type={label} "
                     + json.dumps(safe_fields, ensure_ascii=False, sort_keys=True, default=str)
                 )
-    lines.extend(
-        [
-            "",
-            "## [AUTHORITATIVE_TURN] Complete logical W6/S3 raw dialogue",
-        ]
-    )
+        context_nodes.append("\n".join(card_lines))
+
+    required_by_session: dict[int, set[int]] = {}
+    for item in case.get("verbatim_grounding_quotes", []):
+        required_by_session.setdefault(int(item["session_id"]), set()).add(int(item["turn_id"]))
+
     evidence_turns: list[dict[str, Any]] = []
     seen_turns: set[tuple[int, int]] = set()
     for session_id in source_session_ids:
         session = sessions[session_id]
         index = build_evidence_index(session, window_size=6, step=3)
+        required_turn_ids = required_by_session.get(session_id, set())
+        selected_ranges: list[tuple[int, int]] = []
         for window in index.windows:
-            lines.append(
-                f"### Session {session_id} · Turn {window.window_start_turn}~{window.window_end_turn}"
-            )
-            for turn in session.turns:
-                if turn.turn_id not in window.source_turn_ids:
+            window_ids = set(window.source_turn_ids)
+            if window_ids & required_turn_ids:
+                selected_ranges.append((window.window_start_turn, window.window_end_turn))
+        selected_ranges.sort()
+        merged_ranges: list[tuple[int, int]] = []
+        for start, end in selected_ranges:
+            if merged_ranges and start <= merged_ranges[-1][1]:
+                merged_ranges[-1] = (merged_ranges[-1][0], max(merged_ranges[-1][1], end))
+            else:
+                merged_ranges.append((start, end))
+        turn_by_id = {int(turn.turn_id): turn for turn in session.turns}
+        for start, end in merged_ranges:
+            node_lines = [
+                f"## [AUTHORITATIVE_TURN] Session {session_id} · Turn {start}~{end}",
+                "The following are verbatim stored dialogue turns.",
+            ]
+            for turn_id in sorted(turn_by_id):
+                if not start <= turn_id <= end:
                     continue
+                turn = turn_by_id[turn_id]
                 speaker = "tutor" if turn.is_tutor else "student"
-                lines.append(
-                    f"[AUTHORITATIVE_TURN] [Turn {turn.turn_id}] [{speaker}] {turn.text}"
-                )
+                node_lines.append(f"[AUTHORITATIVE_TURN] [Turn {turn.turn_id}] [{speaker}] {turn.text}")
                 key = (session_id, int(turn.turn_id))
                 if key not in seen_turns:
                     evidence_turns.append(
@@ -387,19 +400,27 @@ def _build_gold_context_v2(
                         }
                     )
                     seen_turns.add(key)
-    lines.extend(
+            context_nodes.append("\n".join(node_lines))
+
+    context_nodes.append(
+        "## [ALLOWED_INFERENCE] Inference boundary\n"
+        "You may infer a likely misconception or teaching rationale from the card facts and dialogue, "
+        "but label it as an inference and explain its evidence basis. Do not present an inference as a verbatim Turn fact."
+    )
+    prompt = "\n\n".join(
         [
-            "",
-            "## [ALLOWED_INFERENCE] Inference boundary",
-            "You may infer a likely misconception or teaching rationale from the card facts and dialogue, but label it as an inference and explain its evidence basis. Do not present an inference as a verbatim Turn fact.",
+            "# Gold Context v2 (evaluation-only sufficient context)",
+            "This context is built from real stored card facts and required-evidence raw Turns.",
+            "Expected answers and qrels are intentionally excluded from the Generator input.",
+            *context_nodes,
         ]
     )
-    prompt = "\n".join(lines)
     estimated = max(1, len(prompt) // 2)
     return GoldAssembledContext(
         raw_query=case["question"],
         prompt_context_markdown=prompt,
         evidence_turns=evidence_turns,
+        deepeval_context_nodes=context_nodes,
         estimated_token_count=estimated,
         budget_violation=False,
         truncation_loss=0,
@@ -560,12 +581,48 @@ def _metrics(judge_model: Any, rubric_version: str = "v1") -> list[tuple[str, An
     ]
 
 
-def _run_deepeval_case(payload: DeepEvalCasePayload, metrics: list[tuple[str, Any, float]], *, track: str, case_id: str) -> list[dict[str, Any]]:
-    test_case = build_deepeval_test_case(payload)
+def _metric_eval_payload(
+    metric_name: str,
+    structured_output: str,
+    *,
+    actual_output_by_metric: dict[str, str] | None = None,
+    retrieval_context: list[str] | None = None,
+) -> tuple[str, list[str]]:
+    """Select metric-specific output while preserving one evaluation context contract."""
+
+    output = (actual_output_by_metric or {}).get(metric_name, structured_output)
+    context = list(retrieval_context or [])
+    if not context:
+        raise ValueError("DeepEval retrieval context cannot be empty")
+    return output, context
+
+
+def _run_deepeval_case(
+    payload: DeepEvalCasePayload,
+    metrics: list[tuple[str, Any, float]],
+    *,
+    track: str,
+    case_id: str,
+    actual_output_by_metric: dict[str, str] | None = None,
+    retrieval_context: list[str] | None = None,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for metric_name, metric, threshold in metrics:
         started = time.perf_counter()
         try:
+            actual_output, context = _metric_eval_payload(
+                metric_name,
+                payload.actual_output,
+                actual_output_by_metric=actual_output_by_metric,
+                retrieval_context=retrieval_context or payload.final_retrieval_context,
+            )
+            metric_payload = payload.model_copy(
+                update={
+                    "actual_output": actual_output,
+                    "final_retrieval_context": context,
+                }
+            )
+            test_case = build_deepeval_test_case(metric_payload)
             score = metric.measure(test_case, _show_indicator=False)
             value = float(score)
             rows.append({
@@ -904,11 +961,25 @@ def main(argv: list[str] | None = None) -> int:
                                 input=case["question"],
                                 actual_output=response.answer_content or response.misconception_diagnosis,
                                 expected_output=case["ground_truth"],
-                                final_retrieval_context=[generator_context_text or context.prompt_context_markdown],
+                                final_retrieval_context=(
+                                    list(context.deepeval_context_nodes)
+                                    if context.deepeval_context_nodes
+                                    else [generator_context_text or context.prompt_context_markdown]
+                                ),
                             ),
                             judge_metrics,
                             track=track,
                             case_id=case_id,
+                            actual_output_by_metric=(
+                                {"answer_relevancy": response.__dict__["generator_core_answer"]}
+                                if response.__dict__.get("generator_core_answer")
+                                else None
+                            ),
+                            retrieval_context=(
+                                list(context.deepeval_context_nodes)
+                                if context.deepeval_context_nodes
+                                else [generator_context_text or context.prompt_context_markdown]
+                            ),
                         )
                         metric_rows.extend(deepeval_rows)
                         case_metric_rows.extend(deepeval_rows)
