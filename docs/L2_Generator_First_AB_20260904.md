@@ -54,6 +54,12 @@ generator = LLM_MODEL from .env
 
 最新 Gold smoke：`reports/eval/l2-gold-alignment-smoke-20260905-0901/`。Gold 指标为 Answer Relevancy `1.00`、Contextual Recall `1.00`、Faithfulness `0.90`、Pedagogical GEval `0.90`、Citation Audit `0.50`、Contextual Precision `0.58`。其中 Precision 仍需多 case 验证；Citation Audit 的 `0.50` 是 required evidence 覆盖不足，不是引用文本伪造。
 
+## Prompt v2 红线与示例增强（2026-09-05）
+
+`SYSTEM_PEDAGOGICAL_PROMPT_V2` 已增加最高优先级红线：先回答实际问题、窄问题的 `answer` 限制为 1～2 句、禁止伪造或改写引用、只使用最小充分证据；同时增加问题范围路由、上下文不足时的明确声明，以及体积/表面积的一正一反示例。`evidence_explanation` 也明确只解释本题实际使用的 evidence ID，不复述全部上下文。
+
+这只改变 Generator Prompt，不改变 Pydantic schema、后端 citation materialization 或生产检索路由。相关测试已覆盖 Prompt 红线、示例和 v2 evidence ID 路径；完整回归结果为 `237 passed`。下一步应在新 Prompt 下重新运行 Gold smoke/全量，不能直接复用旧 Prompt 的 DeepEval 分数。
+
 ## 解释规则
 
 - `Gold` 高、`Real` 低：仍有检索/装配上下文损失。

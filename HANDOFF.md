@@ -1404,3 +1404,4 @@ L2 runner 现支持 `--case-start/--max-cases` 分片、每 case checkpoint 和 
 当前 release 仍为 `BLOCKED_L1_PRECONDITION`；远端 API 的 402/connection error 必须按 ERROR 记录，禁止用默认回答或估计分数补齐。此前曾有凭据误打印到工具输出，需轮换对应密钥；文档与报告不保存密钥值。
 
 Gold 对齐修复已完成并提交：Gold Context v2 现在按 required Turn 生成去重节点，DeepEval 按指标分别使用核心答案/结构化答案和多节点上下文；trace/report 增加 `generator_core_answer`、`claim_coverage`、`gold_alignment_warnings`、节点数与上下文长度。30-case 本地结构审计 required Turn 缺失为 `0`、ground-truth 泄漏为 `0`；Gold smoke `l2-gold-alignment-smoke-20260905-0901` 的核心语义指标为 `1.00/1.00/0.90/0.90`，但 Citation Audit 为 `0.50`，尚未构成全量通过。完整本地回归：`235 passed`（后续新增诊断测试需再次执行）。
+后续 Prompt v2 又加入了最高优先级红线、窄问题 1–2 句范围控制、最小充分引用，以及正/反例；该变更只作用于 Generator prompt。最新完整回归为 `237 passed`，需要在新 Prompt 下重新跑 Gold smoke/全量，不能复用旧 Prompt 分数。
