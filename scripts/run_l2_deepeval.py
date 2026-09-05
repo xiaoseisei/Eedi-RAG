@@ -1171,6 +1171,8 @@ def main(argv: list[str] | None = None) -> int:
         release_decision = "BLOCKED_JUDGE_UNMEASURED"
     elif errors:
         release_decision = "BLOCKED_ERRORS"
+    elif diagnostics.get("gold_alignment_warning_count", 0):
+        release_decision = "BLOCKED_GOLD_DATA_CONFLICT"
     elif not all_thresholds_pass:
         release_decision = "BLOCKED_METRIC_GATE"
     else:

@@ -143,6 +143,42 @@ def test_l2_merge_rejects_overlapping_shards(tmp_path) -> None:
         merge_reports([first, second], tmp_path / "merged")
 
 
+def test_l2_merge_blocks_gold_alignment_conflicts_before_metric_gate(tmp_path) -> None:
+    shard = tmp_path / "conflict"
+    shard.mkdir()
+    (shard / "report.json").write_text(
+        __import__("json").dumps(
+            {
+                "artifact_hash_before": "a" * 64,
+                "l1_precondition": "GO_TO_L2_TECHNICAL",
+                "runtime_route": {"rerank_unit": "anchored_logical_window"},
+                "judge_readiness": {"status": "SUCCESS"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (shard / "traces.jsonl").write_text(
+        "\n".join(
+            __import__("json").dumps(
+                {
+                    "case_id": "eedi-l2-0001",
+                    "track": track,
+                    "gold_alignment_warnings": [{"case_id": "eedi-l2-0001", "field": "error_choice"}],
+                }
+            )
+            for track in ("gold", "real")
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (shard / "metrics.jsonl").write_text("", encoding="utf-8")
+
+    report = merge_reports([shard], tmp_path / "merged")
+
+    assert report["gold_alignment"]["status"] == "BLOCKED_DATA_CONFLICT"
+    assert report["release_decision"] == "BLOCKED_GOLD_DATA_CONFLICT"
+
+
 def test_gold_context_v2_has_card_facts_complete_windows_and_boundaries() -> None:
     import json
     from pathlib import Path

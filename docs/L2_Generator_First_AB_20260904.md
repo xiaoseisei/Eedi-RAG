@@ -46,6 +46,12 @@ generator = LLM_MODEL from .env
 
 这组 12-case 结果不是全量 A/B，也没有改变生产 promotion 决策。
 
+## Citation Contract 加强（2026-09-05）
+
+v2 现在要求：`fact` 和 `inference` claim 都必须绑定 evidence ID，且 claim 声明的全部 evidence ID 都必须出现在 `dialogue_citations`；多角色问题还必须分别填写 `student_evidence_ids`、`tutor_evidence_ids`，两组 ID 均需出现在引用列表并匹配对应 speaker。首次校验失败会把具体契约错误反馈给 Generator，触发一次 citation-only repair；是否触发 repair 会写入 trace。
+
+同时，Faithfulness 使用不包含教学建议的 grounding 文本（answer、诊断、证据解释和 claim ledger），避免把 recommendation 当作历史事实评分。未裁决的 Gold 卡片/G​​olden 冲突会在 report 中标记 `BLOCKED_GOLD_DATA_CONFLICT`，不修改指标值。
+
 ## Gold 对齐修复与 smoke（2026-09-05）
 
 已完成 Gold Context v2 的节点化改造：仅保留与 required Turn 相交的 W6/S3 窗口，合并重叠区间并保证每个 Turn 在 authoritative 节点中只出现一次；DeepEval 现在接收独立的卡片事实、原文窗口和推断边界节点。Answer Relevancy 使用 Generator 的核心 `answer`，Faithfulness/Pedagogical 使用完整结构化回答。

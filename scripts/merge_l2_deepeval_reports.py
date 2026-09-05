@@ -119,6 +119,11 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
         release_decision = "BLOCKED_JUDGE_UNMEASURED"
     elif errors:
         release_decision = "BLOCKED_ERRORS"
+    elif any(
+        report.get("gold_alignment", {}).get("warning_count", 0)
+        for report in reports
+    ) or any(row.get("gold_alignment_warnings") for row in traces):
+        release_decision = "BLOCKED_GOLD_DATA_CONFLICT"
     elif not all_thresholds_pass:
         release_decision = "BLOCKED_METRIC_GATE"
     else:

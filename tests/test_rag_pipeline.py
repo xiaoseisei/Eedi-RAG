@@ -438,7 +438,12 @@ def test_generator_v2_retries_with_contract_feedback_for_missing_role(monkeypatc
         "transfer_question": None,
     }
     first = dict(base, dialogue_citations=[{"evidence_id": "E001"}])
-    second = dict(base, dialogue_citations=[{"evidence_id": "E001"}, {"evidence_id": "E002"}])
+    second = dict(
+        base,
+        student_evidence_ids=["E001"],
+        tutor_evidence_ids=["E002"],
+        dialogue_citations=[{"evidence_id": "E001"}, {"evidence_id": "E002"}],
+    )
 
     class Completions:
         def create(self, **kwargs):

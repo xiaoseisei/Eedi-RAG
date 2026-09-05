@@ -136,6 +136,7 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
 - 每个事实 claim 的 evidence_ids 至少一个，并且该 claim 至少有一个 evidence_id 出现在 dialogue_citations。
 - 每个 inference claim 也必须至少绑定一个 evidence_id，并且该 ID 至少有一个出现在 dialogue_citations；recommendation 可不引用历史证据。
 - 如果问题同时询问学生错因和导师引导，dialogue_citations 必须同时覆盖 student 和 tutor 的 evidence_id。
+- 多角色问题还必须分别填写 `student_evidence_ids` 和 `tutor_evidence_ids`，两组 ID 都必须出现在 dialogue_citations。
 - 不要创造 Evidence catalog 中不存在的 ID，不要复制 `[Turn N]` 等展示标记到任何 citation 字段。
 
 【正例与反例（仅示范格式，不是本题证据）】
@@ -161,7 +162,9 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
       "qualification": null
     }
   ],
-  "dialogue_citations": [{"evidence_id": "E001"}],
+  "student_evidence_ids": ["E001"],
+  "tutor_evidence_ids": ["E002"],
+  "dialogue_citations": [{"evidence_id": "E001"}, {"evidence_id": "E002"}],
   "transfer_question": null
 }
 """
@@ -613,6 +616,8 @@ class EndToEndPedagogicalRAGPipeline:
                         payload.dialogue_citations,
                         catalog or {},
                         query=query,
+                        student_evidence_ids=payload.student_evidence_ids,
+                        tutor_evidence_ids=payload.tutor_evidence_ids,
                     )
                 logger.info(f"  🔧 [探针] JSON 解析+校验: {round(_time.time()-t_parse, 3)}s")
 
@@ -630,7 +635,7 @@ class EndToEndPedagogicalRAGPipeline:
                         base_user_prompt
                         + "\n\n【契约修复反馈】上一次 JSON 未通过证据契约："
                         + str(exc)
-                        + "。请只修正 claims/dialogue_citations 的 evidence_id、角色覆盖或推断限定，"
+                        + "。请只修正 claims/dialogue_citations/student_evidence_ids/tutor_evidence_ids 的 evidence_id、角色覆盖或推断限定，"
                         "然后重新输出完整 JSON；不要输出解释文字。"
                     )
             except Exception as exc:
@@ -647,6 +652,8 @@ class EndToEndPedagogicalRAGPipeline:
                     payload.dialogue_citations,
                     catalog,
                     query=query,
+                    student_evidence_ids=payload.student_evidence_ids,
+                    tutor_evidence_ids=payload.tutor_evidence_ids,
                 )
                 citations = materialize_generator_citations(
                     payload.dialogue_citations,

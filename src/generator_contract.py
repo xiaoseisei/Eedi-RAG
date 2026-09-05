@@ -80,7 +80,17 @@ class GeneratorGuidancePayloadV2(BaseModel):
     recommended_talk_moves: List[str] = Field(default_factory=list, max_length=8)
     claims: List[GeneratorClaim] = Field(min_length=1)
     dialogue_citations: List[GeneratorCitationRef] = Field(min_length=1)
+    student_evidence_ids: List[str] = Field(default_factory=list, max_length=16)
+    tutor_evidence_ids: List[str] = Field(default_factory=list, max_length=16)
     transfer_question: str | None = Field(default=None, max_length=600)
+
+    @field_validator("student_evidence_ids", "tutor_evidence_ids")
+    @classmethod
+    def role_evidence_ids_are_valid(cls, value: List[str]) -> List[str]:
+        for evidence_id in value:
+            if not __import__("re").fullmatch(r"E[0-9]{3,}", evidence_id):
+                raise ValueError("role evidence IDs must use E### identifiers")
+        return value
 
     @model_validator(mode="after")
     def validate_claim_ids_and_citations(self) -> "GeneratorGuidancePayloadV2":
@@ -95,13 +105,21 @@ class GeneratorGuidancePayloadV2(BaseModel):
             claim.claim_id
             for claim in self.claims
             if claim.claim_type in {"fact", "inference"}
-            and not set(claim.evidence_ids) & cited
+            and not set(claim.evidence_ids) <= cited
         ]
         if missing_claim_citations:
             raise ValueError(
                 "fact/inference claims must be represented in dialogue_citations: "
                 + ", ".join(missing_claim_citations)
             )
+        for role, evidence_ids in (
+            ("student", self.student_evidence_ids),
+            ("tutor", self.tutor_evidence_ids),
+        ):
+            if len(set(evidence_ids)) != len(evidence_ids):
+                raise ValueError(f"{role}_evidence_ids must be unique")
+            if not set(evidence_ids) <= cited:
+                raise ValueError(f"{role}_evidence_ids must be included in dialogue_citations")
         return self
 
 
@@ -113,7 +131,7 @@ def validate_claim_citation_closure(payload: GeneratorGuidancePayloadV2) -> None
         claim.claim_id
         for claim in payload.claims
         if claim.claim_type in {"fact", "inference"}
-        and not set(claim.evidence_ids) & cited
+        and not set(claim.evidence_ids) <= cited
     ]
     if missing:
         raise ValueError(
@@ -252,11 +270,17 @@ def validate_role_coverage(
     catalog: Dict[str, EvidenceCatalogItem],
     *,
     query: str,
+    student_evidence_ids: List[str] | None = None,
+    tutor_evidence_ids: List[str] | None = None,
 ) -> None:
     """Require both speakers when the query explicitly asks about both roles."""
 
     if not query_requires_both_roles(query):
         return
+    if student_evidence_ids is not None and not student_evidence_ids:
+        raise ValueError("multi-role query requires student_evidence_ids")
+    if tutor_evidence_ids is not None and not tutor_evidence_ids:
+        raise ValueError("multi-role query requires tutor_evidence_ids")
     speakers = set()
     for ref in citation_refs:
         item = catalog.get(ref.evidence_id)
@@ -265,3 +289,15 @@ def validate_role_coverage(
         speakers.add(item.speaker)
     if {"student", "tutor"} - speakers:
         raise ValueError("multi-role query citations must cover both student and tutor evidence")
+    for role, evidence_ids in (
+        ("student", student_evidence_ids),
+        ("tutor", tutor_evidence_ids),
+    ):
+        if evidence_ids is None:
+            continue
+        for evidence_id in evidence_ids:
+            item = catalog.get(evidence_id)
+            if item is None:
+                raise ValueError(f"{role}_evidence_ids contains unknown evidence_id: {evidence_id}")
+            if item.speaker != role:
+                raise ValueError(f"{role}_evidence_ids must identify {role} evidence")

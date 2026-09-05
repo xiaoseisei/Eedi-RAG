@@ -169,3 +169,24 @@ def test_claim_citation_closure_requires_inference_evidence_to_be_cited() -> Non
     )
     with pytest.raises(ValueError, match="C1"):
         validate_claim_citation_closure(payload)
+
+
+def test_claim_citation_closure_requires_all_declared_evidence_ids() -> None:
+    payload = GeneratorGuidancePayloadV2.model_construct(
+        subject_path="Number",
+        answer="核心答案",
+        misconception_diagnosis="诊断",
+        evidence_explanation="解释",
+        key_aha_question="问题",
+        scaffolding_steps=["步骤"],
+        pedagogical_intervention=["动作"],
+        claims=[GeneratorClaim(claim_id="C1", claim_text="事实", claim_type="fact", evidence_ids=["E001", "E002"])],
+        dialogue_citations=[GeneratorCitationRef(evidence_id="E001")],
+        recommended_talk_moves=[],
+        student_evidence_ids=[],
+        tutor_evidence_ids=[],
+        transfer_question=None,
+    )
+
+    with pytest.raises(ValueError, match="C1"):
+        validate_claim_citation_closure(payload)
