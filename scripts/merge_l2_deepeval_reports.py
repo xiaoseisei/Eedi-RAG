@@ -132,6 +132,7 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
     warning_map: dict[str, dict[str, Any]] = {}
     claim_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     context_coverage_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    budget_rows: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     node_rows: dict[str, list[dict[str, float]]] = {"gold": [], "real": []}
     for row in traces:
         track = str(row.get("track", ""))
@@ -145,6 +146,14 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
         context_coverage = row.get("context_coverage")
         if isinstance(context_coverage, dict):
             context_coverage_rows[track].append(context_coverage)
+        budget_rows[track].append(
+            {
+                "budget_tokens": int(row.get("context_budget_tokens", 0) or 0),
+                "context_tokens": int(row.get("generator_context_token_count", 0) or 0),
+                "catalog_tokens": int(row.get("catalog_token_count", 0) or 0),
+                "budget_violation": bool(row.get("budget_violation", False)),
+            }
+        )
         node_rows[track].append(
             {
                 "node_count": float(row.get("deepeval_context_node_count", 0) or 0),
@@ -204,9 +213,27 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
                 "mean_claim_recall": mean(rows, "claim_recall"),
                 "mean_required_turn_count": mean(rows, "required_turn_count"),
                 "mean_covered_turn_count": mean(rows, "covered_turn_count"),
+                "mean_parent_pointer_recall": mean(rows, "parent_pointer_recall"),
+                "mean_candidate_turn_recall": mean(rows, "candidate_turn_recall"),
+                "mean_parent_pointer_count": mean(rows, "parent_pointer_count"),
+                "mean_candidate_turn_count": mean(rows, "candidate_turn_count"),
                 "claim_recall_method": "lexical_context_coverage_proxy",
             }
             for track, rows in context_coverage_rows.items()
+        },
+        "context_budget": {
+            track: {
+                "measured": len(rows),
+                "budget_tokens": mean(rows, "budget_tokens"),
+                "mean_context_tokens": mean(rows, "context_tokens"),
+                "max_context_tokens": max(
+                    (int(row.get("context_tokens", 0) or 0) for row in rows),
+                    default=None,
+                ),
+                "mean_catalog_tokens": mean(rows, "catalog_tokens"),
+                "budget_violations": sum(bool(row.get("budget_violation")) for row in rows),
+            }
+            for track, rows in budget_rows.items()
         },
         "deep_eval": {
             track: {
@@ -281,14 +308,29 @@ def merge_reports(report_dirs: list[Path], output_dir: Path) -> dict[str, Any]:
         "## Context coverage diagnostics",
         "",
         "| Track | Turn Recall | Claim Recall (proxy) | DeepEval Recall | Faithfulness |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ])
     for track in ("gold", "real"):
         coverage = diagnostics["context_coverage"][track]
         deep_eval = diagnostics["deep_eval"][track]
         lines.append(
-            f"| {track} | {coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
+            f"| {track} | {coverage['mean_parent_pointer_recall']} | {coverage['mean_candidate_turn_recall']} | "
+            f"{coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
             f"{deep_eval['mean_contextual_recall']} | {deep_eval['mean_faithfulness']} |"
+        )
+    lines.extend([
+        "",
+        "## Context budget diagnostics",
+        "",
+        "| Track | Budget | Mean Context | Max Context | Mean Catalog | Violations |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ])
+    for track in ("gold", "real"):
+        budget = diagnostics["context_budget"][track]
+        lines.append(
+            f"| {track} | {budget['budget_tokens']} | {budget['mean_context_tokens']} | "
+            f"{budget['max_context_tokens']} | {budget['mean_catalog_tokens']} | "
+            f"{budget['budget_violations']} |"
         )
     (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report

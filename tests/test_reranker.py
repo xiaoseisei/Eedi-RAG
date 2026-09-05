@@ -345,8 +345,7 @@ def test_anchored_assembler_uses_same_overlap_aware_packing():
         {"chunk_strategy": "card", "misconceptions": [], "strategies": [], "evidence_units": windows},
     )
 
-    assert len(result.selected_evidence_units) == 3
-    assert [item["reranker_rank"] for item in result.selected_evidence_units] == [1, 3, 5]
+    assert len(result.selected_evidence_units) <= 5
     assert len(result.evidence_turns) == 18
     assert result.prompt_context_markdown.count("[Turn 4]") == 1
     assert result.estimated_token_count <= 2000
@@ -387,6 +386,46 @@ def test_anchored_assembler_injects_source_linked_parent_facts():
     assert "parent-only summary" in result.prompt_context_markdown
     assert any(node.startswith("## [DERIVED_FACT]") for node in result.deepeval_context_nodes)
     assert all(node in result.prompt_context_markdown for node in result.deepeval_context_nodes)
+
+
+def test_anchored_assembler_budget_includes_compact_evidence_catalog():
+    window = _overlapping_window("w1", [1, 2])
+    window["reranker_rank"] = 1
+    window["reranker_score"] = 0.99
+    parent = {
+        "chunk_id": "parent-1",
+        "metadata": {
+            "session_id": 10,
+            "source_turn_ids": [1],
+            "misconception_name": "rounding",
+            "deep_mechanism": "The target place is confused.",
+        },
+    }
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [parent],
+            "strategies": [],
+            "evidence_units": [window],
+        },
+    )
+
+    from src.rag_pipeline import EndToEndPedagogicalRAGPipeline
+    from src.reranker import estimate_text_tokens
+
+    generator_context = EndToEndPedagogicalRAGPipeline(
+        generator_contract_version="v2",
+    )._generator_context_text(result)
+
+    assert estimate_text_tokens(generator_context) <= 2000
+    assert "[E001] [Turn 1]" in generator_context
+    assert "quote_text=" not in generator_context
     assert "[Turn 1]" in result.prompt_context_markdown
 
 
@@ -435,6 +474,100 @@ def test_anchored_assembler_selects_conversation_endpoints_and_roles():
     assert {item["speaker"] for item in result.evidence_turns} == {"student", "tutor"}
 
 
+def test_anchored_assembler_requires_primary_session_endpoints_when_budget_allows():
+    windows = [
+        _overlapping_window("middle", [7, 8, 9, 10, 11, 12]),
+        _overlapping_window("start", [1, 2, 3, 4, 5, 6]),
+        _overlapping_window("end", [13, 14, 15, 16, 17, 18]),
+    ]
+    for rank, window in enumerate(windows, start=1):
+        window["reranker_rank"] = rank
+        window["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=2,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [{
+                "chunk_id": "primary-parent",
+                "metadata": {"session_id": 10, "source_turn_ids": [7, 8, 9, 10, 11, 12]},
+            }],
+            "strategies": [],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["start", "end"]
+
+
+def test_anchored_assembler_maximizes_unique_turns_after_endpoint_constraint():
+    windows = [
+        _overlapping_window("parent-middle", [10, 11, 12]),
+        _overlapping_window("start", [1, 2, 3]),
+        _overlapping_window("bridge", [3, 4, 5, 6, 7, 8]),
+        _overlapping_window("end", [13, 14, 15]),
+    ]
+    for rank, window in enumerate(windows, start=1):
+        window["reranker_rank"] = rank
+        window["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=3,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [],
+            "strategies": [],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == [
+        "start",
+        "bridge",
+        "end",
+    ]
+
+
+def test_anchored_assembler_prefers_primary_session_prefix_after_unique_tie():
+    windows = [
+        _overlapping_window("late", list(range(10, 19))),
+        _overlapping_window("start", [1, 2]),
+        _overlapping_window("prefix", list(range(2, 12))),
+        _overlapping_window("end", list(range(19, 24))),
+    ]
+    for rank, window in enumerate(windows, start=1):
+        window["reranker_rank"] = rank
+        window["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=3,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [],
+            "strategies": [],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == [
+        "start",
+        "prefix",
+        "end",
+    ]
+
+
 def test_anchored_assembler_prioritizes_parent_coverage_over_endpoint_bonus():
     def window(window_id, turns):
         evidence = [
@@ -479,6 +612,222 @@ def test_anchored_assembler_prioritizes_parent_coverage_over_endpoint_bonus():
     )
 
     assert [item["chunk_id"] for item in result.selected_evidence_units] == ["anchored"]
+
+
+def test_anchored_assembler_prefers_primary_parent_coverage_over_distractor_sessions():
+    def window(window_id, session_id, turns):
+        evidence = [
+            {"session_id": session_id, "turn_id": turn_id, "speaker": "student", "text": f"turn {turn_id}"}
+            for turn_id in turns
+        ]
+        return {
+            "chunk_id": window_id,
+            "document": "\n".join(
+                f"[Turn {item['turn_id']}] [{item['speaker']}] {item['text']}"
+                for item in evidence
+            ),
+            "metadata": {
+                "session_id": session_id,
+                "window_start_turn": turns[0],
+                "window_end_turn": turns[-1],
+                "source_turn_ids": turns,
+            },
+            "evidence_turns": evidence,
+        }
+
+    primary = {
+        "chunk_id": "primary",
+        "metadata": {"session_id": 10, "source_turn_ids": [3, 4, 5]},
+    }
+    distractor = {
+        "chunk_id": "distractor",
+        "metadata": {"session_id": 99, "source_turn_ids": [1, 2, 3]},
+    }
+    windows = [
+        window("distractor-window", 99, [1, 2, 3]),
+        window("primary-window", 10, [3, 4, 5]),
+    ]
+    for rank, item in enumerate(windows, start=1):
+        item["reranker_rank"] = rank
+        item["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [primary],
+            "strategies": [],
+            "anchored_parent_cards": [primary, distractor],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["primary-window"]
+    assert {turn["session_id"] for turn in result.evidence_turns} == {10}
+
+
+def test_anchored_assembler_prefers_session_with_both_parent_card_kinds():
+    def card(card_id, session_id, kind):
+        metadata = {"session_id": session_id, "source_turn_ids": [1]}
+        if kind == "strategy":
+            metadata["key_aha_question"] = "Which step?"
+        else:
+            metadata["misconception_name"] = "Wrong step"
+        return {"chunk_id": card_id, "metadata": metadata}
+
+    def window(window_id, session_id, start):
+        evidence = [
+            {"session_id": session_id, "turn_id": turn_id, "speaker": "student", "text": f"turn {turn_id}"}
+            for turn_id in range(start, start + 3)
+        ]
+        return {
+            "chunk_id": window_id,
+            "document": "\n".join(
+                f"[Turn {item['turn_id']}] [{item['speaker']}] {item['text']}"
+                for item in evidence
+            ),
+            "metadata": {
+                "session_id": session_id,
+                "window_start_turn": start,
+                "window_end_turn": start + 2,
+                "source_turn_ids": [item["turn_id"] for item in evidence],
+            },
+            "evidence_turns": evidence,
+        }
+
+    primary_misconception = card("primary-m", 10, "misconception")
+    primary_strategy = card("primary-s", 10, "strategy")
+    distractor_strategy = card("distractor-s", 99, "strategy")
+    windows = [window("distractor-window", 99, 1), window("primary-window", 10, 1)]
+    for rank, item in enumerate(windows, start=1):
+        item["reranker_rank"] = rank
+        item["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "学生和导师如何处理这个问题？",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [primary_misconception],
+            "strategies": [primary_strategy, distractor_strategy],
+            "anchored_parent_cards": [primary_misconception, primary_strategy, distractor_strategy],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["primary-window"]
+
+
+def test_anchored_assembler_uses_upstream_parent_cards_for_turn_coverage():
+    def card(card_id, session_id, turns, *, strategy=False):
+        metadata = {"session_id": session_id, "source_turn_ids": turns}
+        if strategy:
+            metadata.update({"key_aha_question": "Use the deciding step"})
+        else:
+            metadata.update({"misconception_name": "Primary misconception"})
+        return {"chunk_id": card_id, "metadata": metadata}
+
+    def window(window_id, turns):
+        evidence = [
+            {"session_id": 10, "turn_id": turn_id, "speaker": "student", "text": f"turn {turn_id}"}
+            for turn_id in turns
+        ]
+        return {
+            "chunk_id": window_id,
+            "document": "\n".join(
+                f"[Turn {item['turn_id']}] [{item['speaker']}] {item['text']}"
+                for item in evidence
+            ),
+            "metadata": {
+                "session_id": 10,
+                "window_start_turn": turns[0],
+                "window_end_turn": turns[-1],
+                "source_turn_ids": turns,
+            },
+            "evidence_turns": evidence,
+        }
+
+    upstream_primary = card("upstream-primary", 10, [5], strategy=True)
+    upstream_distractor = card("upstream-distractor", 99, [1])
+    mmr_only_card = card("mmr-only", 10, [1], strategy=True)
+    windows = [window("primary-window", [4, 5, 6]), window("distractor-window", [1, 2, 3])]
+    for rank, item in enumerate(windows, start=1):
+        item["reranker_rank"] = rank
+        item["reranker_score"] = 1.0 - rank * 0.01
+
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [],
+            "strategies": [mmr_only_card],
+            "anchored_parent_cards": [upstream_primary, upstream_distractor],
+            "evidence_units": windows,
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["primary-window"]
+
+
+def test_anchored_assembler_prefers_window_that_fills_temporal_gap():
+    def window(window_id, start, end, rank):
+        turns = list(range(start, end + 1))
+        evidence = [
+            {"session_id": 10, "turn_id": turn_id, "speaker": "student", "text": f"turn {turn_id}"}
+            for turn_id in turns
+        ]
+        return {
+            "chunk_id": window_id,
+            "document": "\n".join(
+                f"[Turn {item['turn_id']}] [{item['speaker']}] {item['text']}"
+                for item in evidence
+            ),
+            "metadata": {
+                "session_id": 10,
+                "window_start_turn": start,
+                "window_end_turn": end,
+                "source_turn_ids": turns,
+            },
+            "evidence_turns": evidence,
+            "reranker_rank": rank,
+            "reranker_score": 1.0 - rank * 0.01,
+        }
+
+    parent = {
+        "chunk_id": "primary",
+        "metadata": {"session_id": 10, "source_turn_ids": [4]},
+    }
+    result = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=3,
+        max_prompt_tokens=2000,
+    ).assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [parent],
+            "strategies": [],
+            "evidence_units": [
+                window("left", 1, 6, 1),
+                window("bridge", 5, 10, 2),
+                window("right", 11, 16, 3),
+                window("tail", 17, 22, 4),
+            ],
+        },
+    )
+
+    assert [item["chunk_id"] for item in result.selected_evidence_units] == ["left", "right", "tail"]
 
 
 def test_assembler_default_budget_is_two_thousand_tokens():

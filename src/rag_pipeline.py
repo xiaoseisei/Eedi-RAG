@@ -37,7 +37,7 @@ from src.generator_contract import (
     validate_role_coverage,
 )
 from src.retriever import DualMetricRetriever
-from src.reranker import PedagogicalGoldAssembler, GoldAssembledContext
+from src.reranker import PedagogicalGoldAssembler, GoldAssembledContext, estimate_text_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -370,7 +370,10 @@ class EndToEndPedagogicalRAGPipeline:
             return gold_ctx.prompt_context_markdown
         catalog = build_evidence_catalog(gold_ctx)
         return "\n\n".join(
-            [gold_ctx.prompt_context_markdown, render_evidence_catalog(catalog)]
+            [
+                gold_ctx.prompt_context_markdown,
+                render_evidence_catalog(catalog, include_quote_text=False),
+            ]
         )
 
     def _synthesize_deterministic_grounding(
@@ -561,12 +564,18 @@ class EndToEndPedagogicalRAGPipeline:
             if effective_contract == self.generator_contract_version
             else self._generator_context_text_for_version(gold_ctx, effective_contract)
         )
+        context_budget = int(getattr(gold_ctx, "context_budget_tokens", 0) or 0)
+        context_tokens = estimate_text_tokens(generator_context)
+        if context_budget and context_tokens > context_budget:
+            raise RAGGenerationError(
+                "Generator context exceeds token budget: "
+                f"estimated={context_tokens}, budget={context_budget}"
+            )
         catalog = build_evidence_catalog(gold_ctx) if effective_contract == "v2" else None
         evidence_id_scope = ""
         if catalog is not None:
             evidence_id_scope = (
-                "\n\n【Evidence ID 白名单】只能使用以下当前 Context 中存在的 ID："
-                + ", ".join(catalog.keys())
+                "\n\n【Evidence ID 白名单】见上方 Evidence catalog；只能使用其中存在的 ID。"
             )
         base_user_prompt = (
             f"【用户教研提问】: {query}\n\n"

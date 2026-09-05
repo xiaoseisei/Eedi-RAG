@@ -285,24 +285,33 @@ def build_evidence_catalog(context) -> Dict[str, EvidenceCatalogItem]:
     return catalog
 
 
-def render_evidence_catalog(catalog: Dict[str, EvidenceCatalogItem]) -> str:
-    """Render IDs and fields separately so quote text cannot absorb Turn tags."""
+def render_evidence_catalog(
+    catalog: Dict[str, EvidenceCatalogItem],
+    *,
+    include_quote_text: bool = True,
+) -> str:
+    """Render deterministic ID provenance, optionally omitting duplicated quotes."""
 
     if not catalog:
         raise ValueError("evidence catalog cannot be empty")
     lines = ["## Evidence catalog (cite IDs only)"]
+    if not include_quote_text:
+        for evidence_id, item in catalog.items():
+            if evidence_id != item.evidence_id:
+                raise ValueError("evidence catalog key does not match item evidence_id")
+        lines.append("Allowed IDs: " + ", ".join(catalog))
+        return "\n".join(lines)
     for evidence_id, item in catalog.items():
         if evidence_id != item.evidence_id:
             raise ValueError("evidence catalog key does not match item evidence_id")
-        lines.extend(
-            [
-                f"[evidence_id={item.evidence_id}]",
-                f"session_id={item.session_id}",
-                f"turn_id={item.turn_id}",
-                f"speaker={item.speaker}",
-                f"quote_text={item.quote_text}",
-            ]
-        )
+        lines.extend([
+            f"[evidence_id={item.evidence_id}]",
+            f"session_id={item.session_id}",
+            f"turn_id={item.turn_id}",
+            f"speaker={item.speaker}",
+        ])
+        if include_quote_text:
+            lines.append(f"quote_text={item.quote_text}")
     return "\n".join(lines)
 
 

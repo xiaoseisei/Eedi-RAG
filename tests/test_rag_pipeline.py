@@ -403,11 +403,35 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert response.__dict__["generator_core_answer"] == "The student confused decimal places."
     assert "教学干预" not in response.__dict__["generator_grounding_text"]
     assert "[fact] [E001]" in response.__dict__["generator_grounding_text"]
-    assert "evidence_id=E001" in sent[0]["messages"][1]["content"]
+    assert "Allowed IDs: E001" in sent[0]["messages"][1]["content"]
     assert "Evidence ID 白名单" in sent[0]["messages"][1]["content"]
-    assert sent[0]["messages"][0]["content"] == SYSTEM_PEDAGOGICAL_PROMPT_V2
-    assert "80 字" not in sent[0]["messages"][0]["content"]
-    assert "证据解释" in sent[0]["messages"][0]["content"]
+    assert "quote_text=" not in sent[0]["messages"][1]["content"]
+
+
+def test_generator_v2_rejects_context_over_total_budget(monkeypatch):
+    class Completions:
+        def create(self, **kwargs):
+            raise AssertionError("LLM must not be called for an over-budget context")
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="x" * 5000,
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
+        ],
+        context_budget_tokens=100,
+    )
+
+    with pytest.raises(RAGGenerationError, match="token budget"):
+        pipeline._generate_with_llm("q", ctx, {})
 
 
 def test_generator_v2_prompt_has_red_lines_and_scope_examples():

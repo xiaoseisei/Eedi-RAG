@@ -67,6 +67,22 @@ def test_retriever_anchored_expansion_uses_parent_pointers_only() -> None:
     assert all("5.45" in turn["text"] or turn["turn_id"] != 1 for unit in units for turn in unit["evidence_turns"])
 
 
+def test_retriever_completes_windows_for_a_paired_primary_session() -> None:
+    retriever = object.__new__(DualMetricRetriever)
+    retriever.storage = _FakeStorage()
+    candidates = [
+        _card("primary-misconception", "misconception", [1]),
+        _card("primary-strategy", "strategy", [3]),
+    ]
+    parents = list(candidates)
+
+    units = retriever.expand_anchored_logical_windows(candidates, parents, window_size=6, step=3)
+
+    assert len(units) == 2
+    assert all(unit["metadata"]["session_completion"] is True for unit in units)
+    assert {turn["turn_id"] for unit in units for turn in unit["evidence_turns"]} == set(range(1, 8))
+
+
 def test_pipeline_runs_card_then_anchored_window_rerank() -> None:
     class FakeRetriever:
         retrieval_mode = "bm25_dense"

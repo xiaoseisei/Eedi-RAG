@@ -576,6 +576,28 @@ class DualMetricRetriever:
         if not parent_keys:
             raise ValueError("anchored parent cards contain no source_turn_ids")
 
+        session_card_groups: Dict[int, List[Dict[str, Any]]] = {}
+        strategy_parent_sessions: set[int] = set()
+        for card in parent_cards:
+            metadata = card.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            if session_id is not None:
+                session_id = int(session_id)
+                session_card_groups.setdefault(session_id, []).append(card)
+                collection = str(card.get("collection", "")).casefold()
+                if (
+                    "strategy" in collection
+                    or metadata.get("key_aha_question")
+                    or metadata.get("pedagogical_goal")
+                ):
+                    strategy_parent_sessions.add(session_id)
+        session_completion_ids = {
+            session_id
+            for session_id, cards in session_card_groups.items()
+            if len(cards) >= 2
+        }
+        session_completion_ids.update(strategy_parent_sessions)
+
         def compact_parent_metadata(card: Dict[str, Any]) -> Dict[str, str]:
             metadata = card.get("metadata", {}) or {}
             return {
@@ -606,18 +628,20 @@ class DualMetricRetriever:
                 raw_ids = json.loads(raw_ids)
             window_keys = {(session_id, int(turn_id)) for turn_id in (raw_ids or [])}
             overlap = window_keys & parent_keys
-            if not overlap:
+            session_completion = session_id in session_completion_ids
+            if not overlap and not session_completion:
                 continue
             item = dict(unit)
             item_metadata = dict(metadata)
             item_metadata["anchor_turn_ids"] = sorted(
                 turn_id for sid, turn_id in overlap if sid == session_id
             )
+            item_metadata["session_completion"] = session_completion
             item_metadata["parent_contexts"] = [
                 compact_parent_metadata(card)
                 for card in parent_cards
                 if int((card.get("metadata", {}) or {}).get("session_id", -1)) == session_id
-                and pointer_ids(card) & window_keys
+                and (pointer_ids(card) & window_keys or session_completion)
             ]
             item["metadata"] = item_metadata
             anchored.append(item)

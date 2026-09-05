@@ -353,11 +353,15 @@ def test_context_coverage_reports_turn_and_claim_recall_separately() -> None:
             {"session_id": 10, "turn_id": 3},
         ],
         ["学生混淆了一位小数和两位小数。"],
+        parent_cards=[{"metadata": {"session_id": 10, "source_turn_ids": [1]}}],
+        candidate_units=[{"metadata": {"session_id": 10, "source_turn_ids": [1, 2]}}],
     )
 
     assert result["turn_recall"] == 0.5
     assert result["required_turn_count"] == 2
     assert result["covered_turn_count"] == 1
+    assert result["parent_pointer_recall"] == 0.5
+    assert result["candidate_turn_recall"] == 1.0
     assert result["claim_count"] == 2
     assert result["claim_recall_method"] == "lexical_context_coverage_proxy"
     assert 0.0 <= result["claim_recall"] <= 1.0

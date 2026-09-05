@@ -42,6 +42,15 @@ def test_evidence_catalog_ids_are_deterministic_and_preserve_exact_provenance() 
     assert "quote_text=Which digit decides?" in rendered
 
 
+def test_compact_evidence_catalog_preserves_id_provenance_without_quote_duplication() -> None:
+    catalog = build_evidence_catalog(_context())
+
+    rendered = render_evidence_catalog(catalog, include_quote_text=False)
+
+    assert "Allowed IDs: E001, E002" in rendered
+    assert "quote_text=" not in rendered
+
+
 def test_materialize_citations_uses_catalog_text_and_rejects_unknown_id() -> None:
     catalog = build_evidence_catalog(_context())
 

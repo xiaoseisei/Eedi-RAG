@@ -32,6 +32,7 @@ from evals.metrics.citation import audit_grounding
 from evals.contracts import EvidenceRef
 from src.embedding_provider import SiliconFlowQwen3EmbeddingFunction
 from src.generator_contract import summarize_claim_coverage
+from src.reranker import estimate_text_tokens
 
 
 def _resolve_l2_route(
@@ -276,8 +277,34 @@ def _context_coverage(
     required_turns: list[Any],
     context_turns: list[Any],
     context_nodes: list[str],
+    *,
+    parent_cards: list[Any] | None = None,
+    candidate_units: list[Any] | None = None,
 ) -> dict[str, Any]:
-    """Report physical Turn coverage and a transparent lexical claim proxy."""
+    """Report R/C/W/A Turn coverage and a transparent lexical claim proxy."""
+
+    def item_turn_keys(item: Any) -> set[tuple[int, int]]:
+        metadata = _row_value(item, "metadata") or {}
+        session_id = metadata.get("session_id") if isinstance(metadata, dict) else None
+        raw_ids = metadata.get("source_turn_ids", []) if isinstance(metadata, dict) else []
+        if isinstance(raw_ids, str):
+            try:
+                raw_ids = json.loads(raw_ids)
+            except json.JSONDecodeError:
+                raw_ids = []
+        keys: set[tuple[int, int]] = set()
+        if session_id is not None:
+            for turn_id in raw_ids or []:
+                try:
+                    keys.add((int(session_id), int(turn_id)))
+                except (TypeError, ValueError):
+                    continue
+        for turn in _row_value(item, "evidence_turns") or []:
+            turn_session = _row_value(turn, "session_id")
+            turn_id = _row_value(turn, "turn_id")
+            if turn_session is not None and turn_id is not None:
+                keys.add((int(turn_session), int(turn_id)))
+        return keys
 
     required_keys = {
         (int(_row_value(item, "session_id")), int(_row_value(item, "turn_id")))
@@ -290,6 +317,8 @@ def _context_coverage(
         and _row_value(item, "turn_id") is not None
     }
     covered_keys = required_keys & context_keys
+    parent_keys = set().union(*(item_turn_keys(item) for item in parent_cards or []))
+    candidate_keys = set().union(*(item_turn_keys(item) for item in candidate_units or []))
     claims = _claim_segments(str(case.get("ground_truth", "")))
     context_text = "\n".join(str(node) for node in context_nodes if str(node).strip())
     if not context_text:
@@ -315,6 +344,14 @@ def _context_coverage(
         "required_turn_count": len(required_keys),
         "covered_turn_count": len(covered_keys),
         "turn_recall": len(covered_keys) / len(required_keys) if required_keys else None,
+        "parent_pointer_count": len(required_keys & parent_keys),
+        "parent_pointer_recall": (
+            len(required_keys & parent_keys) / len(required_keys) if parent_cards else None
+        ),
+        "candidate_turn_count": len(required_keys & candidate_keys),
+        "candidate_turn_recall": (
+            len(required_keys & candidate_keys) / len(required_keys) if candidate_units else None
+        ),
         "claim_count": len(claim_scores),
         "supported_claim_count": supported_claim_count,
         "claim_recall": claim_recall,
@@ -781,6 +818,7 @@ def _aggregate_trace_diagnostics(
     warnings_by_key: dict[str, dict[str, str]] = {}
     coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     context_coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    budget_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     node_stats_by_track: dict[str, list[dict[str, int]]] = {"gold": [], "real": []}
     for row in trace_rows:
         track = str(row.get("track", ""))
@@ -799,6 +837,14 @@ def _aggregate_trace_diagnostics(
             {
                 "node_count": int(row.get("deepeval_context_node_count", 0) or 0),
                 "context_chars": int(row.get("generator_context_chars", 0) or 0),
+            }
+        )
+        budget_by_track[track].append(
+            {
+                "budget_tokens": int(row.get("context_budget_tokens", 0) or 0),
+                "context_tokens": int(row.get("generator_context_token_count", 0) or 0),
+                "catalog_tokens": int(row.get("catalog_token_count", 0) or 0),
+                "budget_violation": bool(row.get("budget_violation", False)),
             }
         )
 
@@ -835,6 +881,10 @@ def _aggregate_trace_diagnostics(
                 "mean_claim_recall": mean_field(rows, "claim_recall"),
                 "mean_required_turn_count": mean_field(rows, "required_turn_count"),
                 "mean_covered_turn_count": mean_field(rows, "covered_turn_count"),
+                "mean_parent_pointer_recall": mean_field(rows, "parent_pointer_recall"),
+                "mean_candidate_turn_recall": mean_field(rows, "candidate_turn_recall"),
+                "mean_parent_pointer_count": mean_field(rows, "parent_pointer_count"),
+                "mean_candidate_turn_count": mean_field(rows, "candidate_turn_count"),
                 "claim_recall_method": "lexical_context_coverage_proxy",
             }
             for track, rows in context_coverage_by_track.items()
@@ -877,6 +927,20 @@ def _aggregate_trace_diagnostics(
                 ),
             }
             for track in ("gold", "real")
+        },
+        "context_budget": {
+            track: {
+                "measured": len(rows),
+                "budget_tokens": mean_field(rows, "budget_tokens"),
+                "mean_context_tokens": mean_field(rows, "context_tokens"),
+                "max_context_tokens": max(
+                    (int(row.get("context_tokens", 0) or 0) for row in rows),
+                    default=None,
+                ),
+                "mean_catalog_tokens": mean_field(rows, "catalog_tokens"),
+                "budget_violations": sum(bool(row.get("budget_violation")) for row in rows),
+            }
+            for track, rows in budget_by_track.items()
         },
     }
 
@@ -1160,6 +1224,8 @@ def main(argv: list[str] | None = None) -> int:
                         required,
                         context.evidence_turns if context is not None else [],
                         context.deepeval_context_nodes if context is not None else [],
+                        parent_cards=(retrieval_trace.get("anchored_parent_cards", []) if retrieval_trace else []),
+                        candidate_units=(retrieval_trace.get("evidence_units", []) if retrieval_trace else []),
                     )
                     trace = {
                         "case_id": case_id,
@@ -1207,7 +1273,25 @@ def main(argv: list[str] | None = None) -> int:
                             if response is not None and response.__dict__.get("generator_contract_version") == "v2"
                             else None
                         ),
-                        "context_coverage": context_coverage,
+                    "context_coverage": context_coverage,
+                        "context_budget_tokens": (
+                            int(context.context_budget_tokens)
+                            if context is not None
+                            else 0
+                        ),
+                        "catalog_token_count": (
+                            int(context.catalog_token_count)
+                            if context is not None
+                            else 0
+                        ),
+                        "generator_context_token_count": (
+                            estimate_text_tokens(generator_context_text)
+                            if generator_context_text
+                            else 0
+                        ),
+                        "budget_violation": bool(
+                            context is not None and context.budget_violation
+                        ),
                         "gold_alignment_warnings": gold_alignment_warnings,
                         "deepeval_context_node_count": (
                             len(context.deepeval_context_nodes)
@@ -1398,12 +1482,13 @@ def main(argv: list[str] | None = None) -> int:
     ]
     for item in metric_aggregates:
         lines.append(f"| {item['track']} | {item['metric']} | {item['measured']} | {item['mean']} | {item['threshold']} |")
-    lines.extend(["", "## Context coverage diagnostics", "", "| Track | Turn Recall | Claim Recall (proxy) | DeepEval Recall | Faithfulness |", "| --- | ---: | ---: | ---: | ---: |"])
+    lines.extend(["", "## Context coverage diagnostics", "", "| Track | Parent Pointer | Candidate Turn | Final Turn | Claim Recall (proxy) | DeepEval Recall | Faithfulness |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: |"])
     for track in ("gold", "real"):
         coverage = diagnostics["context_coverage"][track]
         deep_eval = diagnostics["deep_eval"][track]
         lines.append(
-            f"| {track} | {coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
+            f"| {track} | {coverage['mean_parent_pointer_recall']} | {coverage['mean_candidate_turn_recall']} | "
+            f"{coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
             f"{deep_eval['mean_contextual_recall']} | {deep_eval['mean_faithfulness']} |"
         )
     lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --expected-artifact-hash {expected_artifact_hash} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --case-start {args.case_start} --max-cases {args.max_cases} --generator-timeout-seconds {args.generator_timeout_seconds} --max-prompt-tokens {args.max_prompt_tokens} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --reranker-backend {route['reranker_backend']} --rerank-unit {route['rerank_unit']} --reranker-pool-size {route['reranker_pool_size']} --parent-card-count {route['parent_card_count']} --evidence-selection-count {route['evidence_selection_count']} --retrieval-mode {args.retrieval_mode} --bm25-weight {args.bm25_weight} --allow-l1-blocked`", ""])
