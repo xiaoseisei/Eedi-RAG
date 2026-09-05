@@ -46,6 +46,14 @@ generator = LLM_MODEL from .env
 
 这组 12-case 结果不是全量 A/B，也没有改变生产 promotion 决策。
 
+## Gold 对齐修复与 smoke（2026-09-05）
+
+已完成 Gold Context v2 的节点化改造：仅保留与 required Turn 相交的 W6/S3 窗口，合并重叠区间并保证每个 Turn 在 authoritative 节点中只出现一次；DeepEval 现在接收独立的卡片事实、原文窗口和推断边界节点。Answer Relevancy 使用 Generator 的核心 `answer`，Faithfulness/Pedagogical 使用完整结构化回答。
+
+全 30-case 的本地结构审计结果：`bad_cases=0`、required Turn 缺失 `0`、ground-truth 泄漏 `0`；平均 `4.13` 个节点、`3006` 字符、`13.83` 个证据 Turn。发现 1 个数据一致性 warning：case 0025 的卡片 `error_choice=A` 与 Golden 明确选择 `C` 冲突，已记录为 warning，不改变分数。
+
+最新 Gold smoke：`reports/eval/l2-gold-alignment-smoke-20260905-0901/`。Gold 指标为 Answer Relevancy `1.00`、Contextual Recall `1.00`、Faithfulness `0.90`、Pedagogical GEval `0.90`、Citation Audit `0.50`、Contextual Precision `0.58`。其中 Precision 仍需多 case 验证；Citation Audit 的 `0.50` 是 required evidence 覆盖不足，不是引用文本伪造。
+
 ## 解释规则
 
 - `Gold` 高、`Real` 低：仍有检索/装配上下文损失。

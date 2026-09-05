@@ -304,10 +304,7 @@ def _build_gold_context_v2(
         raise ValueError("Gold Context v2 requires at least one source session")
     misconception_rows = storage.query_misconceptions_sql()
     strategy_rows = storage.query_strategies_sql()
-    context_nodes: list[str] = [
-        "## [CARD_FACT] Structured card facts\n"
-        "These are stored card fields, not verbatim dialogue."
-    ]
+    context_nodes: list[str] = []
     def has_value(value: Any) -> bool:
         if value is None:
             return False
@@ -326,6 +323,8 @@ def _build_gold_context_v2(
             raise ValueError(f"missing session {session_id} for Gold Context v2")
         subject_path = session.subjects.paths[0] if session.subjects.paths else ""
         card_lines = [
+            f"## [CARD_FACT] Session {session_id}",
+            "These are stored card fields, not verbatim dialogue.",
             f"[Session {session_id}] subject_path={subject_path}",
             f"question={session.question.question_text}",
         ]
@@ -404,7 +403,7 @@ def _build_gold_context_v2(
                     seen_turns.add(key)
             context_nodes.append("\n".join(node_lines))
 
-    context_nodes.append(
+    inference_boundary = (
         "## [ALLOWED_INFERENCE] Inference boundary\n"
         "You may infer a likely misconception or teaching rationale from the card facts and dialogue, "
         "but label it as an inference and explain its evidence basis. Do not present an inference as a verbatim Turn fact."
@@ -415,6 +414,7 @@ def _build_gold_context_v2(
             "This context is built from real stored card facts and required-evidence raw Turns.",
             "Expected answers and qrels are intentionally excluded from the Generator input.",
             *context_nodes,
+            inference_boundary,
         ]
     )
     estimated = max(1, len(prompt) // 2)
@@ -687,6 +687,57 @@ def _run_deepeval_case(
                 "latency_ms": round((time.perf_counter() - started) * 1000.0, 3),
             })
     return rows
+
+
+def _aggregate_trace_diagnostics(trace_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Aggregate non-scoring diagnostics while preserving case-level provenance."""
+
+    warnings_by_key: dict[str, dict[str, str]] = {}
+    coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    node_stats_by_track: dict[str, list[dict[str, int]]] = {"gold": [], "real": []}
+    for row in trace_rows:
+        track = str(row.get("track", ""))
+        if track not in coverage_by_track:
+            continue
+        for warning in row.get("gold_alignment_warnings", []) or []:
+            key = json.dumps(warning, ensure_ascii=False, sort_keys=True)
+            warnings_by_key[key] = warning
+        coverage = row.get("claim_coverage")
+        if isinstance(coverage, dict):
+            coverage_by_track[track].append(coverage)
+        node_stats_by_track[track].append(
+            {
+                "node_count": int(row.get("deepeval_context_node_count", 0) or 0),
+                "context_chars": int(row.get("generator_context_chars", 0) or 0),
+            }
+        )
+
+    def mean_field(rows: list[dict[str, Any]], field: str) -> float | None:
+        values = [float(row[field]) for row in rows if row.get(field) is not None]
+        return sum(values) / len(values) if values else None
+
+    return {
+        "gold_alignment_warning_count": len(warnings_by_key),
+        "gold_alignment_warnings": list(warnings_by_key.values()),
+        "claim_coverage": {
+            track: {
+                "measured": len(rows),
+                "mean_claim_count": mean_field(rows, "claim_count"),
+                "mean_fact_claim_count": mean_field(rows, "fact_claim_count"),
+                "mean_fact_claim_coverage": mean_field(rows, "fact_claim_coverage"),
+                "mean_cited_evidence_count": mean_field(rows, "cited_evidence_count"),
+            }
+            for track, rows in coverage_by_track.items()
+        },
+        "context_nodes": {
+            track: {
+                "measured": len(rows),
+                "mean_node_count": mean_field(rows, "node_count"),
+                "mean_context_chars": mean_field(rows, "context_chars"),
+            }
+            for track, rows in node_stats_by_track.items()
+        },
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -969,12 +1020,27 @@ def main(argv: list[str] | None = None) -> int:
                         )
                         if response is not None
                         else [],
+                        "generator_core_answer": (
+                            response.__dict__.get("generator_core_answer")
+                            if response is not None
+                            else None
+                        ),
                         "claim_coverage": (
                             summarize_claim_coverage(response)
                             if response is not None and response.__dict__.get("generator_contract_version") == "v2"
                             else None
                         ),
                         "gold_alignment_warnings": gold_alignment_warnings,
+                        "deepeval_context_node_count": (
+                            len(context.deepeval_context_nodes)
+                            if context is not None and context.deepeval_context_nodes
+                            else (1 if context is not None else 0)
+                        ),
+                        "generator_context_chars": (
+                            len(generator_context_text)
+                            if generator_context_text is not None
+                            else 0
+                        ),
                         "retrieval_trace": _safe(retrieval_trace),
                         "assembler_evidence": _safe(context.evidence_turns if context is not None else []),
                         "citation_audit": citation,
@@ -1058,6 +1124,7 @@ def main(argv: list[str] | None = None) -> int:
             threshold = next((row["threshold"] for row in metric_rows if row["track"] == track and row["metric"] == metric), None)
             metric_aggregates.append({"track": track, "metric": metric, "measured": len(values), "mean": sum(values) / len(values) if values else None, "threshold": threshold})
     errors = [row for row in trace_rows if row["status"] == "ERROR"] + [row for row in metric_rows if row["status"] == "ERROR"]
+    diagnostics = _aggregate_trace_diagnostics(trace_rows)
     judge_ready = readiness_payload.get("status") == "SUCCESS"
     all_thresholds_pass = bool(metric_aggregates) and all(item["mean"] is not None and item["mean"] >= item["threshold"] for item in metric_aggregates)
     if l1_closeout.get("decision") != "GO_TO_L2_TECHNICAL":
@@ -1122,6 +1189,7 @@ def main(argv: list[str] | None = None) -> int:
         },
         "tracks": {"gold_case_count": sum(row["track"] == "gold" for row in trace_rows), "real_case_count": sum(row["track"] == "real" for row in trace_rows)},
         "metric_aggregates": metric_aggregates,
+        "diagnostics": diagnostics,
         "trace_status_counts": {status: sum(row["status"] == status for row in trace_rows) for status in ("SUCCESS", "ERROR", "UNMEASURED")},
         "artifact_hash_before": artifact_hash,
         "artifact_hash_after": after_hash,

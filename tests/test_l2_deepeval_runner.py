@@ -10,6 +10,7 @@ from scripts.run_l2_deepeval import (
 from scripts.merge_l2_deepeval_reports import merge_reports
 from scripts.run_l2_deepeval import (
     _build_gold_context_v2,
+    _aggregate_trace_diagnostics,
     audit_gold_alignment,
     _metric_eval_payload,
     _rubric_config,
@@ -200,9 +201,10 @@ def test_gold_context_v2_exposes_deduplicated_required_evidence_nodes() -> None:
 
     context = _build_gold_context_v2(case, sessions, Storage())
 
-    assert len(context.deepeval_context_nodes) >= 3
+    assert len(context.deepeval_context_nodes) >= 2
     assert all(node.strip() for node in context.deepeval_context_nodes)
-    assert context.deepeval_context_nodes[-1].startswith("## [ALLOWED_INFERENCE]")
+    assert "## [ALLOWED_INFERENCE]" in context.prompt_context_markdown
+    assert all("[ALLOWED_INFERENCE]" not in node for node in context.deepeval_context_nodes)
     authoritative = [
         node for node in context.deepeval_context_nodes
         if node.startswith("## [AUTHORITATIVE_TURN]")
@@ -271,3 +273,29 @@ def test_audit_gold_alignment_reports_explicit_student_choice_conflict() -> None
     assert warnings[0]["field"] == "error_choice"
     assert warnings[0]["card_value"] == "B"
     assert warnings[0]["gold_value"] == "C"
+
+
+def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
+    result = _aggregate_trace_diagnostics(
+        [
+            {
+                "track": "gold",
+                "claim_coverage": {"claim_count": 2, "fact_claim_count": 1, "fact_claim_coverage": 1.0, "cited_evidence_count": 1},
+                "deepeval_context_node_count": 3,
+                "generator_context_chars": 100,
+                "gold_alignment_warnings": [{"case_id": "c1", "field": "error_choice"}],
+            },
+            {
+                "track": "gold",
+                "claim_coverage": {"claim_count": 4, "fact_claim_count": 2, "fact_claim_coverage": 0.5, "cited_evidence_count": 2},
+                "deepeval_context_node_count": 4,
+                "generator_context_chars": 200,
+                "gold_alignment_warnings": [{"case_id": "c1", "field": "error_choice"}],
+            },
+        ]
+    )
+
+    assert result["gold_alignment_warning_count"] == 1
+    assert result["claim_coverage"]["gold"]["measured"] == 2
+    assert result["claim_coverage"]["gold"]["mean_fact_claim_coverage"] == 0.75
+    assert result["context_nodes"]["gold"]["mean_node_count"] == 3.5
