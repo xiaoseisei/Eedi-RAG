@@ -645,6 +645,7 @@ class EndToEndPedagogicalRAGPipeline:
                 audit_status="PENDING",
             )
             response.__dict__["generator_contract_version"] = "v2"
+            response.__dict__["generator_core_answer"] = payload.answer
             response.__dict__["generator_claims"] = [
                 claim.model_dump() for claim in payload.claims
             ]
