@@ -10,6 +10,7 @@ from src.generator_contract import (
     build_evidence_catalog,
     materialize_generator_citations,
     render_evidence_catalog,
+    summarize_claim_coverage,
     validate_role_coverage,
 )
 from src.reranker import GoldAssembledContext
@@ -113,3 +114,31 @@ def test_multi_role_citations_must_cover_student_and_tutor_evidence() -> None:
         catalog,
         query=context.raw_query,
     )
+
+
+def test_summarize_claim_coverage_distinguishes_fact_support_and_citations() -> None:
+    payload = GeneratorGuidancePayloadV2.model_validate(
+        {
+            "subject_path": "Number",
+            "answer": "核心答案",
+            "misconception_diagnosis": "诊断",
+            "evidence_explanation": "解释",
+            "key_aha_question": "问题",
+            "scaffolding_steps": ["步骤"],
+            "pedagogical_intervention": ["动作"],
+            "claims": [
+                {"claim_id": "C1", "claim_text": "事实", "claim_type": "fact", "evidence_ids": ["E001"]},
+                {"claim_id": "C2", "claim_text": "推断", "claim_type": "inference", "evidence_ids": [], "qualification": "基于对白推断"},
+                {"claim_id": "C3", "claim_text": "建议", "claim_type": "recommendation", "evidence_ids": []},
+            ],
+            "dialogue_citations": [{"evidence_id": "E001"}],
+        }
+    )
+
+    assert summarize_claim_coverage(payload) == {
+        "claim_count": 3,
+        "fact_claim_count": 1,
+        "fact_claims_with_evidence": 1,
+        "fact_claim_coverage": 1.0,
+        "cited_evidence_count": 1,
+    }

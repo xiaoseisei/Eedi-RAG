@@ -101,6 +101,35 @@ class GeneratorGuidancePayloadV2(BaseModel):
         return self
 
 
+def summarize_claim_coverage(payload_or_response) -> dict[str, int | float]:
+    """Summarize validated fact-claim support without trusting free-form text."""
+
+    claims = getattr(payload_or_response, "claims", None)
+    if claims is None:
+        claims = getattr(payload_or_response, "__dict__", {}).get("generator_claims", [])
+    normalized = [claim if isinstance(claim, dict) else claim.model_dump() for claim in claims]
+    fact_claims = [claim for claim in normalized if claim.get("claim_type") == "fact"]
+    cited_ids = set(
+        getattr(payload_or_response, "generator_citation_evidence_ids", [])
+    )
+    cited_ids.update({
+        citation.evidence_id if hasattr(citation, "evidence_id") else citation.get("evidence_id")
+        for citation in getattr(payload_or_response, "dialogue_citations", [])
+    })
+    covered = [
+        claim for claim in fact_claims
+        if set(claim.get("evidence_ids", [])) & cited_ids
+    ]
+    fact_count = len(fact_claims)
+    return {
+        "claim_count": len(normalized),
+        "fact_claim_count": fact_count,
+        "fact_claims_with_evidence": len(covered),
+        "fact_claim_coverage": (len(covered) / fact_count) if fact_count else 1.0,
+        "cited_evidence_count": len(cited_ids),
+    }
+
+
 def build_evidence_catalog(context) -> Dict[str, EvidenceCatalogItem]:
     """Build deterministic IDs from final Assembler evidence order."""
 

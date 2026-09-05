@@ -7,6 +7,7 @@ import gc
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -30,6 +31,7 @@ from evals.live_storage import hash_storage_artifacts
 from evals.metrics.citation import audit_grounding
 from evals.contracts import EvidenceRef
 from src.embedding_provider import SiliconFlowQwen3EmbeddingFunction
+from src.generator_contract import summarize_claim_coverage
 
 
 def _resolve_l2_route(
@@ -425,6 +427,42 @@ def _build_gold_context_v2(
         budget_violation=False,
         truncation_loss=0,
     )
+
+
+def audit_gold_alignment(
+    case: dict[str, Any], card_rows: list[dict[str, Any]]
+) -> list[dict[str, str]]:
+    """Report explicit Golden-vs-card choice conflicts without changing scores."""
+
+    ground_truth = str(case.get("ground_truth", ""))
+    gold_choices = {
+        token.upper()
+        for token in re.findall(r"(?:选了|选择|choice|option)\s*([A-D])", ground_truth, flags=re.IGNORECASE)
+    }
+    if not gold_choices:
+        return []
+    warnings: list[dict[str, str]] = []
+    session_ids = {
+        int(item["session_id"])
+        for item in case.get("verbatim_grounding_quotes", [])
+        if item.get("session_id") is not None
+    }
+    for row in card_rows:
+        if int(row.get("session_id", -1)) not in session_ids:
+            continue
+        card_value = str(row.get("error_choice", "")).strip().upper()
+        if card_value and card_value not in gold_choices:
+            warnings.append(
+                {
+                    "case_id": str(case.get("case_id", "")),
+                    "session_id": str(row.get("session_id")),
+                    "field": "error_choice",
+                    "card_value": card_value,
+                    "gold_value": sorted(gold_choices)[0],
+                    "reason": "explicit Golden student choice conflicts with stored card error_choice",
+                }
+            )
+    return warnings
 
 
 def build_l2_dataset(
@@ -857,11 +895,16 @@ def main(argv: list[str] | None = None) -> int:
                     started = time.perf_counter()
                     retrieval_trace: dict[str, Any] = {}
                     errors: list[str] = []
+                    gold_alignment_warnings: list[dict[str, str]] = []
                     if track == "gold":
                         context = (
                             _build_gold_context_v2(case, sessions, storage)
                             if args.gold_context_version == "v2"
                             else _build_gold_context(case, sessions)
+                        )
+                        gold_alignment_warnings = audit_gold_alignment(
+                            {**case, "case_id": case_id},
+                            storage.query_misconceptions_sql(),
                         )
                         retrieval_trace = {"policy": "gold_context_evaluation_only", "retrieved_evidence": [item.model_dump() for item in required]}
                     else:
@@ -926,6 +969,12 @@ def main(argv: list[str] | None = None) -> int:
                         )
                         if response is not None
                         else [],
+                        "claim_coverage": (
+                            summarize_claim_coverage(response)
+                            if response is not None and response.__dict__.get("generator_contract_version") == "v2"
+                            else None
+                        ),
+                        "gold_alignment_warnings": gold_alignment_warnings,
                         "retrieval_trace": _safe(retrieval_trace),
                         "assembler_evidence": _safe(context.evidence_turns if context is not None else []),
                         "citation_audit": citation,

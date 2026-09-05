@@ -10,6 +10,7 @@ from scripts.run_l2_deepeval import (
 from scripts.merge_l2_deepeval_reports import merge_reports
 from scripts.run_l2_deepeval import (
     _build_gold_context_v2,
+    audit_gold_alignment,
     _metric_eval_payload,
     _rubric_config,
 )
@@ -255,3 +256,18 @@ def test_deepeval_payload_keeps_structured_output_for_grounding_metrics() -> Non
 
     assert answer == structured
     assert context == ["node-1", "node-2"]
+
+
+def test_audit_gold_alignment_reports_explicit_student_choice_conflict() -> None:
+    warnings = audit_gold_alignment(
+        {
+            "case_id": "eedi-l2-0001",
+            "ground_truth": "学生选了 C，但正确答案是 D。",
+            "verbatim_grounding_quotes": [{"session_id": 10}],
+        },
+        [{"session_id": 10, "error_choice": "B"}],
+    )
+
+    assert warnings[0]["field"] == "error_choice"
+    assert warnings[0]["card_value"] == "B"
+    assert warnings[0]["gold_value"] == "C"
