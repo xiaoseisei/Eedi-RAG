@@ -142,6 +142,7 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
 
 【正例与反例（仅示范格式，不是本题证据）】
 正例：用户问“导师如何用一句话区分体积和表面积？”时，`answer` 应只回答“体积用长×宽×高计算，表面积是各个面的面积总和。”；若该事实由 E001 支持，则 claims 和 dialogue_citations 都引用 E001。
+多角色正例：用户同时问“学生错在哪里，导师如何引导？”时，分别填写 `student_evidence_ids=["E010"]`、`tutor_evidence_ids=["E011"]`，并让 `dialogue_citations` 同时包含 `{"evidence_id":"E010"}` 和 `{"evidence_id":"E011"}`。
 反例：用户只问一句话，却在 `answer` 中继续展开完整错因、全部 Turn、证据审计和三步教学方案；或引用 E001，却把 E002 的内容写进答案；或把“可能是位值混淆”写成“学生一定缺乏位值概念”。
 
 【输出格式】严格输出 JSON，不要输出 Markdown 或额外文字：

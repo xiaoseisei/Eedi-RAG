@@ -419,6 +419,8 @@ def test_generator_v2_prompt_has_red_lines_and_scope_examples():
     assert "不得编造 evidence_id" in prompt
     assert "inference claim 也必须至少绑定一个 evidence_id" in prompt
     assert "学生一定缺乏位值概念" in prompt
+    assert "student_evidence_ids=[\"E010\"]" in prompt
+    assert "tutor_evidence_ids=[\"E011\"]" in prompt
 
 
 def test_generator_v2_retries_with_contract_feedback_for_missing_role(monkeypatch):

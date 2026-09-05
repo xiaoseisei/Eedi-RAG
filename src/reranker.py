@@ -536,6 +536,48 @@ class PedagogicalGoldAssembler:
             ),
         )
 
+        # Preserve coverage of the selected Parent card pointers before using
+        # the remaining rank budget.  This is deterministic and uses only the
+        # parent cards already selected by the production pipeline; it does not
+        # consult evaluation qrels or infer missing evidence.
+        parent_cards = retrieval_results.get("anchored_parent_cards") or []
+        if not parent_cards:
+            parent_cards = misc_candidates + strat_candidates
+
+        def _source_keys(card_or_unit: Dict[str, Any]) -> set[tuple[int, int]]:
+            metadata = card_or_unit.get("metadata", {}) or {}
+            session_id = metadata.get("session_id")
+            raw_ids = metadata.get("source_turn_ids", [])
+            if isinstance(raw_ids, str):
+                try:
+                    raw_ids = json.loads(raw_ids)
+                except json.JSONDecodeError:
+                    raw_ids = []
+            if session_id is None:
+                evidence_turns = card_or_unit.get("evidence_turns", []) or []
+                return {
+                    (int(turn.get("session_id", -1)), int(turn["turn_id"]))
+                    for turn in evidence_turns
+                    if turn.get("session_id") is not None and turn.get("turn_id") is not None
+                }
+            if not raw_ids:
+                evidence_turns = card_or_unit.get("evidence_turns", []) or []
+                raw_ids = [turn["turn_id"] for turn in evidence_turns if turn.get("turn_id") is not None]
+            return {(int(session_id), int(turn_id)) for turn_id in (raw_ids or [])}
+
+        parent_pointer_keys = set().union(*(_source_keys(card) for card in parent_cards)) if parent_cards else set()
+        for unit in ranked_units:
+            unit_keys = _source_keys(unit)
+            unit["anchor_coverage_count"] = len(unit_keys & parent_pointer_keys)
+        ranked_units.sort(
+            key=lambda unit: (
+                -int(unit.get("anchor_coverage_count", 0)),
+                int(unit.get("reranker_rank", 10**9)),
+                -float(unit.get("reranker_score", 0.0)),
+                str(unit.get("chunk_id", "")),
+            )
+        )
+
         def render(units: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]], int]:
             ordered = self._ordered_unit_evidence(units)
             lines = [

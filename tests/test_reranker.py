@@ -386,3 +386,38 @@ def test_anchored_assembler_does_not_inject_parent_metadata_into_final_prompt():
     assert "parent-only title" not in result.prompt_context_markdown
     assert "parent-only summary" not in result.prompt_context_markdown
     assert "[Turn 1]" in result.prompt_context_markdown
+
+
+def test_anchored_assembler_preserves_parent_anchor_coverage_when_budget_is_limited():
+    windows = [
+        _overlapping_window("noise", [1, 2, 3, 4, 5, 6]),
+        _overlapping_window("anchor", [7, 8, 9, 10, 11, 12]),
+    ]
+    for rank, window in enumerate(windows, start=1):
+        window["reranker_rank"] = rank
+        window["reranker_score"] = 1.0 - rank * 0.01
+    assembler = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=1,
+        max_prompt_tokens=1500,
+    )
+
+    windows[0]["metadata"]["parent_contexts"] = [{"card_id": "parent-misconception"}]
+    windows[1]["metadata"]["parent_contexts"] = [{"card_id": "parent-misconception"}]
+    result = assembler.assemble(
+        "q",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [{
+                "chunk_id": "parent-misconception",
+                "metadata": {"session_id": 10, "source_turn_ids": [10]},
+                "evidence_turns": [],
+            }],
+            "strategies": [],
+            "evidence_units": windows,
+        },
+    )
+
+    assert result.evidence_turns
+    assert {item["chunk_id"] for item in result.selected_evidence_units} == {"anchor"}
+    assert any(item["turn_id"] == 10 for item in result.evidence_turns)
