@@ -569,15 +569,6 @@ class PedagogicalGoldAssembler:
         for unit in ranked_units:
             unit_keys = _source_keys(unit)
             unit["anchor_coverage_count"] = len(unit_keys & parent_pointer_keys)
-        ranked_units.sort(
-            key=lambda unit: (
-                -int(unit.get("anchor_coverage_count", 0)),
-                int(unit.get("reranker_rank", 10**9)),
-                -float(unit.get("reranker_score", 0.0)),
-                str(unit.get("chunk_id", "")),
-            )
-        )
-
         def render(units: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]], int]:
             ordered = self._ordered_unit_evidence(units)
             lines = [
@@ -599,12 +590,27 @@ class PedagogicalGoldAssembler:
             return prompt, ordered, estimated
 
         selected_units: List[Dict[str, Any]] = []
+        uncovered_parent_keys = set(parent_pointer_keys)
         prompt_markdown, ordered_evidence, estimated_tokens = render(selected_units)
-        for unit in ranked_units[: self.evidence_selection_count]:
+        remaining_units = list(ranked_units)
+        while remaining_units and len(selected_units) < self.evidence_selection_count:
+            def selection_key(unit: Dict[str, Any]) -> tuple[int, int, float, str]:
+                unit_keys = _source_keys(unit)
+                new_coverage = len(unit_keys & uncovered_parent_keys)
+                return (
+                    -new_coverage,
+                    int(unit.get("reranker_rank", 10**9)),
+                    -float(unit.get("reranker_score", 0.0)),
+                    str(unit.get("chunk_id", "")),
+                )
+
+            unit = min(remaining_units, key=selection_key)
+            remaining_units.remove(unit)
             trial_prompt, trial_evidence, trial_tokens = render(selected_units + [unit])
             if selected_units and trial_tokens > self.max_prompt_tokens:
-                break
+                continue
             selected_units.append(unit)
+            uncovered_parent_keys -= _source_keys(unit)
             prompt_markdown, ordered_evidence, estimated_tokens = (
                 trial_prompt,
                 trial_evidence,
