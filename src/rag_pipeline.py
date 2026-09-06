@@ -14,7 +14,7 @@ import sys
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Callable, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -225,13 +225,15 @@ class EndToEndPedagogicalRAGPipeline:
         if top_k_each <= 0:
             raise ValueError("top_k_each must be positive")
         timings: Dict[str, float] = {}
-        t0 = _time.time()
+        prepare_started = _time.perf_counter()
+        retrieval_started = _time.perf_counter()
         configured_pool = (
             getattr(self.assembler, "reranker_pool_size", top_k_each)
             if getattr(self.assembler, "model_reranker", None) is not None
             else top_k_each
         )
         if self.chunk_strategy == "fallback":
+            fallback_retrieval_started = _time.perf_counter()
             windows = self.retriever.retrieve_fallback_windows(
                 query,
                 top_k=max(top_k_each, configured_pool),
@@ -249,11 +251,18 @@ class EndToEndPedagogicalRAGPipeline:
                     "chunk_strategy": "fallback",
                 },
             }
+            timings["retrieval_base"] = round(
+                _time.perf_counter() - fallback_retrieval_started, 6
+            )
         else:
+            base_retrieval_started = _time.perf_counter()
             retrieval_res = self.retriever.retrieve_multi_perspective_rrf(
                 raw_query=query,
                 top_k_each=max(top_k_each, configured_pool),
                 fetch_evidence=fetch_evidence,
+            )
+            timings["retrieval_base"] = round(
+                _time.perf_counter() - base_retrieval_started, 6
             )
             rerank_unit = getattr(self.assembler, "rerank_unit", "card")
             if rerank_unit == "anchored_logical_window":
@@ -262,6 +271,7 @@ class EndToEndPedagogicalRAGPipeline:
                         "anchored_logical_window requires an explicitly configured model reranker"
                     )
                 ranked_lanes: Dict[str, List[Dict[str, Any]]] = {}
+                card_rerank_started = _time.perf_counter()
                 for lane in ("misconceptions", "strategies"):
                     ranked_cards = self.assembler.rerank_candidates(
                         query,
@@ -270,6 +280,9 @@ class EndToEndPedagogicalRAGPipeline:
                     )
                     retrieval_res[lane] = ranked_cards
                     ranked_lanes[lane] = ranked_cards
+                timings["card_rerank"] = round(
+                    _time.perf_counter() - card_rerank_started, 6
+                )
                 parent_limit = getattr(self.assembler, "parent_card_count", 3)
                 parent_cards: List[Dict[str, Any]] = []
                 for lane in ("misconceptions", "strategies"):
@@ -294,16 +307,24 @@ class EndToEndPedagogicalRAGPipeline:
                 card_candidates = list(retrieval_res.get("misconceptions", []) or []) + list(
                     retrieval_res.get("strategies", []) or []
                 )
+                window_expand_started = _time.perf_counter()
                 anchored_units = self.retriever.expand_anchored_logical_windows(
                     card_candidates,
                     parent_cards,
                     window_size=6,
                     step=3,
                 )
+                timings["window_expand"] = round(
+                    _time.perf_counter() - window_expand_started, 6
+                )
+                window_rerank_started = _time.perf_counter()
                 ranked_units = self.assembler.rerank_candidates(
                     query,
                     anchored_units,
                     unit_name="anchored_logical_window",
+                )
+                timings["window_rerank"] = round(
+                    _time.perf_counter() - window_rerank_started, 6
                 )
                 retrieval_res["evidence_units"] = ranked_units
                 retrieval_res["anchored_parent_cards"] = parent_cards
@@ -321,22 +342,30 @@ class EndToEndPedagogicalRAGPipeline:
                 card_candidates = list(retrieval_res.get("misconceptions", []) or []) + list(
                     retrieval_res.get("strategies", []) or []
                 )
+                window_expand_started = _time.perf_counter()
                 retrieval_res["evidence_units"] = self.retriever.expand_card_candidates_to_evidence_units(
                     card_candidates,
                     window_size=6,
                     step=3,
                 )
+                timings["window_expand"] = round(
+                    _time.perf_counter() - window_expand_started, 6
+                )
                 retrieval_res.setdefault("trace", {})["rerank_unit"] = "logical_evidence"
                 retrieval_res["trace"]["evidence_unit_count"] = len(
                     retrieval_res["evidence_units"]
                 )
-        timings["retrieval"] = round(_time.time() - t0, 3)
-        t0 = _time.time()
+        timings["retrieval"] = round(_time.perf_counter() - retrieval_started, 6)
+        assembly_started = _time.perf_counter()
         gold_ctx = self.assembler.assemble(
             raw_query=query,
             retrieval_results=retrieval_res,
         )
-        timings["assembly"] = round(_time.time() - t0, 3)
+        timings["assembly"] = round(_time.perf_counter() - assembly_started, 6)
+        timings["context_prepare"] = round(
+            _time.perf_counter() - prepare_started, 6
+        )
+        gold_ctx.stage_timings = dict(timings)
         return retrieval_res, gold_ctx, timings
 
     def prepare_context(
@@ -523,7 +552,7 @@ class EndToEndPedagogicalRAGPipeline:
         resp.rendered_markdown = self._render_pretty_markdown(resp, gold_ctx, debug_sources)
         return resp
 
-    def _generate_with_llm(
+    def _generate_with_llm_streaming(
         self,
         query: str,
         gold_ctx: GoldAssembledContext,
@@ -531,8 +560,37 @@ class EndToEndPedagogicalRAGPipeline:
         *,
         contract_version: str | None = None,
     ) -> PedagogicalGuidanceResponse:
+        """Generate through the provider stream and validate the full JSON."""
+
+        return self._generate_with_llm(
+            query,
+            gold_ctx,
+            retrieval_res,
+            contract_version=contract_version,
+            stream_response=True,
+        )
+
+    def _generate_with_llm(
+        self,
+        query: str,
+        gold_ctx: GoldAssembledContext,
+        retrieval_res: Dict[str, Any],
+        *,
+        contract_version: str | None = None,
+        stream_response: bool = False,
+    ) -> PedagogicalGuidanceResponse:
         """调用 LLM；两次尝试均失败时显式抛错，不在内部静默降级。"""
         import time as _time
+
+        generation_stream: Dict[str, Any] = {
+            "stream_requested": stream_response,
+            "chunk_count": 0,
+            "content_chars": 0,
+            "ttft": None,
+            "stream_complete": None,
+            "request_seconds": None,
+            "contract_validation_seconds": None,
+        }
 
         if not self.api_key:
             raise RAGGenerationError("缺少 LLM_API_KEY，无法执行 LLM 生成")
@@ -595,24 +653,53 @@ class EndToEndPedagogicalRAGPipeline:
         for attempt in range(2):
             try:
                 # 探针: LLM API 调用 (核心瓶颈)
-                t_llm = _time.time()
-                llm_response = client.chat.completions.create(
-                    model=self.model_name,
-                    messages=[
+                t_llm = _time.perf_counter()
+                request_kwargs = {
+                    "model": self.model_name,
+                    "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt},
                     ],
-                    temperature=0.2,
-                    response_format={"type": "json_object"},
-                )
-                llm_elapsed = round(_time.time() - t_llm, 3)
-
-                raw_content = llm_response.choices[0].message.content
+                    "temperature": 0.2,
+                    "response_format": {"type": "json_object"},
+                }
+                if stream_response:
+                    request_kwargs["stream"] = True
+                    llm_response = client.chat.completions.create(**request_kwargs)
+                    content_parts: List[str] = []
+                    stream_usage = None
+                    for event in llm_response:
+                        choices = getattr(event, "choices", None) or []
+                        if choices:
+                            delta = getattr(choices[0], "delta", None)
+                            piece = getattr(delta, "content", None) if delta else None
+                            if piece:
+                                if generation_stream["ttft"] is None:
+                                    generation_stream["ttft"] = round(
+                                        _time.perf_counter() - t_llm, 6
+                                    )
+                                content_parts.append(str(piece))
+                                generation_stream["chunk_count"] += 1
+                                generation_stream["content_chars"] += len(str(piece))
+                        event_usage = getattr(event, "usage", None)
+                        if event_usage is not None:
+                            stream_usage = event_usage
+                    raw_content = "".join(content_parts)
+                    generation_stream["stream_complete"] = round(
+                        _time.perf_counter() - t_llm, 6
+                    )
+                    generation_stream["request_seconds"] = generation_stream["stream_complete"]
+                    usage = stream_usage
+                    llm_elapsed = generation_stream["stream_complete"]
+                else:
+                    llm_response = client.chat.completions.create(**request_kwargs)
+                    llm_elapsed = round(_time.perf_counter() - t_llm, 6)
+                    raw_content = llm_response.choices[0].message.content
+                    usage = getattr(llm_response, "usage", None)
                 if not raw_content:
                     raise ValueError("LLM 返回空内容")
 
                 # 探针: 响应元信息
-                usage = getattr(llm_response, "usage", None)
                 if usage:
                     logger.info(
                         f"  🤖 [探针] LLM API 调用: {llm_elapsed}s | "
@@ -623,7 +710,7 @@ class EndToEndPedagogicalRAGPipeline:
                     )
 
                 # 探针: JSON 解析 + Pydantic 校验
-                t_parse = _time.time()
+                t_parse = _time.perf_counter()
                 payload_type = (
                     GeneratorGuidancePayloadV2
                     if effective_contract == "v2"
@@ -646,7 +733,13 @@ class EndToEndPedagogicalRAGPipeline:
                         student_evidence_ids=payload.student_evidence_ids,
                         tutor_evidence_ids=payload.tutor_evidence_ids,
                     )
-                logger.info(f"  🔧 [探针] JSON 解析+校验: {round(_time.time()-t_parse, 3)}s")
+                generation_stream["contract_validation_seconds"] = round(
+                    _time.perf_counter() - t_parse, 6
+                )
+                logger.info(
+                    f"  🔧 [探针] JSON 解析+校验: "
+                    f"{generation_stream['contract_validation_seconds']}s"
+                )
 
                 break
             except (json.JSONDecodeError, ValidationError, ValueError, AttributeError, IndexError) as exc:
@@ -747,6 +840,7 @@ class EndToEndPedagogicalRAGPipeline:
                 claim.model_dump() for claim in payload.claims
             ]
             response.__dict__["generator_context_text"] = generator_context
+            response.__dict__["generation_stream"] = generation_stream
             response.rendered_markdown = self._render_pretty_markdown(response, gold_ctx, debug_sources)
             return response
 
@@ -789,6 +883,7 @@ class EndToEndPedagogicalRAGPipeline:
             retrieved_sources_debug=debug_sources,
             audit_status="PENDING",
         )
+        response.__dict__["generation_stream"] = generation_stream
         response.rendered_markdown = self._render_pretty_markdown(response, gold_ctx, debug_sources)
         return response
 
@@ -944,15 +1039,52 @@ class EndToEndPedagogicalRAGPipeline:
 
         return "\n".join(lines)
 
+    @staticmethod
+    def _emit_stream_text(text: str, on_chunk: Callable[[str], None], chunk_size: int = 160) -> None:
+        """Emit already audited output in bounded chunks for interactive clients."""
+
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be positive")
+        for offset in range(0, len(text), chunk_size):
+            on_chunk(text[offset : offset + chunk_size])
+
+    def ask_stream(
+        self,
+        query: str,
+        mode: str = "auto",
+        top_k_each: int = 3,
+        fetch_evidence: bool = True,
+        *,
+        on_chunk: Callable[[str], None],
+    ) -> PedagogicalGuidanceResponse:
+        """Run the pipeline and emit only the final audited response in chunks."""
+
+        if not callable(on_chunk):
+            raise TypeError("on_chunk must be callable")
+        return self.ask(
+            query,
+            mode=mode,
+            top_k_each=top_k_each,
+            fetch_evidence=fetch_evidence,
+            stream=True,
+            on_chunk=on_chunk,
+        )
+
     def ask(
         self,
         query: str,
         mode: str = "auto",
         top_k_each: int = 3,
-        fetch_evidence: bool = True
+        fetch_evidence: bool = True,
+        *,
+        stream: bool = False,
+        on_chunk: Callable[[str], None] | None = None,
     ) -> PedagogicalGuidanceResponse:
         """端到端问答核心入口；deterministic 必须由调用方显式选择。"""
         import time as _time
+
+        if on_chunk is not None and not stream:
+            raise ValueError("on_chunk requires stream=True")
 
         if self.retriever is None:
             raise RuntimeError("DualMetricRetriever 未初始化，无法执行检索！")
@@ -963,7 +1095,8 @@ class EndToEndPedagogicalRAGPipeline:
                 "auto 模式缺少 LLM_API_KEY；如需真实确定性生成，请显式传 mode='deterministic'"
             )
 
-        timings = {}
+        request_started = _time.perf_counter()
+        timings: Dict[str, float] = {}
         logger.info(f"🚀 [Step5_RAG] 接收提问: '{query}' (mode={mode})")
 
         # 1. 检索与 MMR 黄金装配
@@ -975,25 +1108,51 @@ class EndToEndPedagogicalRAGPipeline:
         timings.update(prepare_timings)
 
         # 3. 生成
-        t0 = _time.time()
+        generation_started = _time.perf_counter()
         if mode in {"llm", "auto"}:
-            response = self._generate_with_llm(query, gold_ctx, retrieval_res)
+            response = (
+                self._generate_with_llm_streaming(query, gold_ctx, retrieval_res)
+                if stream
+                else self._generate_with_llm(query, gold_ctx, retrieval_res)
+            )
         else:
             response = self._synthesize_deterministic_grounding(query, gold_ctx, retrieval_res)
-        timings["generation"] = round(_time.time() - t0, 3)
+        timings["generation"] = round(_time.perf_counter() - generation_started, 6)
+        generation_profile = response.__dict__.get("generation_stream", {})
+        timings["ttft"] = float(generation_profile.get("ttft") or 0.0)
+        timings["stream_complete"] = float(
+            generation_profile.get("stream_complete") or 0.0
+        )
+        timings["contract_validation"] = float(
+            generation_profile.get("contract_validation_seconds") or 0.0
+        )
 
         # 4. 引用防伪审计
-        t0 = _time.time()
+        audit_started = _time.perf_counter()
         self._audit_citations(response, gold_ctx)
         response.rendered_markdown = self._render_pretty_markdown(
             response,
             gold_ctx,
             response.retrieved_sources_debug,
         )
-        timings["audit_render"] = round(_time.time() - t0, 3)
+        timings["audit_render"] = round(_time.perf_counter() - audit_started, 6)
 
-        timings["total"] = round(sum(timings.values()), 3)
+        if stream and on_chunk is not None:
+            output_started = _time.perf_counter()
+            self._emit_stream_text(response.rendered_markdown or response.answer_content or "", on_chunk)
+            timings["output_ttft"] = round(
+                _time.perf_counter() - request_started, 6
+            )
+            timings["output_stream_seconds"] = round(
+                _time.perf_counter() - output_started, 6
+            )
+        else:
+            timings["output_ttft"] = 0.0
+            timings["output_stream_seconds"] = 0.0
+
+        timings["total"] = round(_time.perf_counter() - request_started, 6)
         response._profiling = timings
+        gold_ctx.stage_timings = dict(timings)
 
         logger.info(
             f"✅ [Step5_RAG] 完成 | "

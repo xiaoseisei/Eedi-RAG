@@ -408,6 +408,163 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert "quote_text=" not in sent[0]["messages"][1]["content"]
 
 
+def test_generator_v2_streaming_api_requests_stream_and_assembles_validated_response(monkeypatch):
+    content = json.dumps({
+        "subject_path": "Number",
+        "answer": "The student confused decimal places.",
+        "misconception_diagnosis": "The student treated 1dp as two decimal places.",
+        "evidence_explanation": "The dialogue contains the exact answer.",
+        "key_aha_question": "Which digit decides?",
+        "scaffolding_steps": [],
+        "pedagogical_intervention": [],
+        "recommended_talk_moves": [],
+        "claims": [{
+            "claim_id": "C1",
+            "claim_text": "The student gave 5.45.",
+            "claim_type": "fact",
+            "evidence_ids": ["E001"],
+        }],
+        "dialogue_citations": [{"evidence_id": "E001"}],
+        "transfer_question": None,
+    })
+
+    class Stream:
+        def __iter__(self):
+            midpoint = len(content) // 2
+            return iter([
+                SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=content[:midpoint]))]),
+                SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=content[midpoint:]))]),
+            ])
+
+    class Completions:
+        def create(self, **kwargs):
+            assert kwargs["stream"] is True
+            return Stream()
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
+        ],
+    )
+
+    response = pipeline._generate_with_llm_streaming("q", ctx, {})
+
+    assert response.answer_content.startswith("The student confused")
+    assert response.audit_status == "PENDING"
+    assert response.__dict__["generation_stream"]["stream_requested"] is True
+    assert response.__dict__["generation_stream"]["chunk_count"] == 2
+
+
+def test_generator_v2_streaming_does_not_return_before_contract_validation(monkeypatch):
+    invalid = json.dumps({"subject_path": "Number"})
+    class Stream:
+        def __iter__(self):
+            return iter([SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=invalid))])])
+
+    class Completions:
+        def create(self, **kwargs):
+            return Stream()
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
+        ],
+    )
+
+    with pytest.raises(RAGGenerationError):
+        pipeline._generate_with_llm_streaming("q", ctx, {})
+
+
+def test_ask_stream_emits_only_after_final_audit(monkeypatch):
+    content = json.dumps({
+        "subject_path": "Number",
+        "answer": "Direct answer.",
+        "misconception_diagnosis": "Diagnosis.",
+        "evidence_explanation": "Evidence.",
+        "key_aha_question": "Which digit decides?",
+        "scaffolding_steps": [],
+        "pedagogical_intervention": [],
+        "recommended_talk_moves": [],
+        "claims": [{
+            "claim_id": "C1",
+            "claim_text": "The student gave the observed answer.",
+            "claim_type": "fact",
+            "evidence_ids": ["E001"],
+        }],
+        "dialogue_citations": [{"evidence_id": "E001"}],
+        "transfer_question": None,
+    })
+
+    class Stream:
+        def __iter__(self):
+            return iter([
+                SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=content))]),
+            ])
+
+    class Completions:
+        def create(self, **kwargs):
+            assert kwargs["stream"] is True
+            return Stream()
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=SimpleNamespace(),
+        api_key="test-key",
+        model_name="test-model",
+        generator_contract_version="v2",
+    )
+    ctx = GoldAssembledContext(
+        raw_query="q",
+        prompt_context_markdown="ctx",
+        evidence_turns=[
+            {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "Observed evidence."}
+        ],
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "_prepare_context_with_timings",
+        lambda query, top_k_each, fetch_evidence: ({}, ctx, {"retrieval": 0.01, "assembly": 0.02}),
+    )
+    audit_observed = []
+
+    def audit(response, context):
+        audit_observed.append(response.audit_status)
+        response.audit_status = "AUDITED_100_VERIFIED"
+
+    monkeypatch.setattr(pipeline, "_audit_citations", audit)
+    chunks = []
+
+    response = pipeline.ask_stream("q", mode="llm", on_chunk=chunks.append)
+
+    assert audit_observed == ["PENDING"]
+    assert response.audit_status == "AUDITED_100_VERIFIED"
+    assert chunks
+    assert "Direct answer." in "".join(chunks)
+    assert response._profiling["ttft"] >= 0
+    assert response._profiling["stream_complete"] >= response._profiling["ttft"]
+
+
 def test_generator_v2_rejects_context_over_total_budget(monkeypatch):
     class Completions:
         def create(self, **kwargs):

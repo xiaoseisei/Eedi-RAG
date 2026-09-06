@@ -321,6 +321,7 @@ def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
                 "claim_coverage": {"claim_count": 2, "fact_claim_count": 1, "fact_claim_coverage": 1.0, "cited_evidence_count": 1},
                 "deepeval_context_node_count": 3,
                 "generator_context_chars": 100,
+                "profiling": {"retrieval": 0.2, "generation": 0.8, "total": 1.0},
                 "gold_alignment_warnings": [{"case_id": "c1", "field": "error_choice"}],
             },
             {
@@ -328,6 +329,7 @@ def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
                 "claim_coverage": {"claim_count": 4, "fact_claim_count": 2, "fact_claim_coverage": 0.5, "cited_evidence_count": 2},
                 "deepeval_context_node_count": 4,
                 "generator_context_chars": 200,
+                "profiling": {"retrieval": 0.4, "generation": 1.2, "total": 1.6},
                 "gold_alignment_warnings": [{"case_id": "c1", "field": "error_choice"}],
             },
         ]
@@ -337,6 +339,7 @@ def test_trace_diagnostics_aggregate_claims_nodes_and_unique_warnings() -> None:
     assert result["claim_coverage"]["gold"]["measured"] == 2
     assert result["claim_coverage"]["gold"]["mean_fact_claim_coverage"] == 0.75
     assert result["context_nodes"]["gold"]["mean_node_count"] == 3.5
+    assert result["timing"]["gold"]["stages"]["generation"]["mean_seconds"] == 1.0
 
 
 def test_context_coverage_reports_turn_and_claim_recall_separately() -> None:

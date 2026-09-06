@@ -819,6 +819,7 @@ def _aggregate_trace_diagnostics(
     coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     context_coverage_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
     budget_by_track: dict[str, list[dict[str, Any]]] = {"gold": [], "real": []}
+    timing_by_track: dict[str, list[dict[str, float]]] = {"gold": [], "real": []}
     node_stats_by_track: dict[str, list[dict[str, int]]] = {"gold": [], "real": []}
     for row in trace_rows:
         track = str(row.get("track", ""))
@@ -847,10 +848,26 @@ def _aggregate_trace_diagnostics(
                 "budget_violation": bool(row.get("budget_violation", False)),
             }
         )
+        profiling = row.get("profiling")
+        if isinstance(profiling, dict):
+            timing_by_track[track].append(
+                {
+                    str(name): float(value)
+                    for name, value in profiling.items()
+                    if isinstance(value, (int, float))
+                }
+            )
 
     def mean_field(rows: list[dict[str, Any]], field: str) -> float | None:
         values = [float(row[field]) for row in rows if row.get(field) is not None]
         return sum(values) / len(values) if values else None
+
+    def percentile_field(rows: list[dict[str, float]], field: str, percentile: float) -> float | None:
+        values = sorted(float(row[field]) for row in rows if row.get(field) is not None)
+        if not values:
+            return None
+        index = min(len(values) - 1, max(0, int((len(values) - 1) * percentile)))
+        return round(values[index], 6)
 
     deep_eval_metrics = metric_rows or []
     return {
@@ -941,6 +958,24 @@ def _aggregate_trace_diagnostics(
                 "budget_violations": sum(bool(row.get("budget_violation")) for row in rows),
             }
             for track, rows in budget_by_track.items()
+        },
+        "timing": {
+            track: {
+                "measured": len(rows),
+                "stages": {
+                    stage: {
+                        "mean_seconds": mean_field(rows, stage),
+                        "p50_seconds": percentile_field(rows, stage, 0.50),
+                        "p95_seconds": percentile_field(rows, stage, 0.95),
+                        "max_seconds": max(
+                            (float(row[stage]) for row in rows if row.get(stage) is not None),
+                            default=None,
+                        ),
+                    }
+                    for stage in sorted({stage for row in rows for stage in row})
+                },
+            }
+            for track, rows in timing_by_track.items()
         },
     }
 
@@ -1164,6 +1199,7 @@ def main(argv: list[str] | None = None) -> int:
                 case_metric_rows: list[dict[str, Any]] = []
                 for track in ("gold", "real"):
                     started = time.perf_counter()
+                    stage_timings: dict[str, float] = {}
                     retrieval_trace: dict[str, Any] = {}
                     errors: list[str] = []
                     gold_alignment_warnings: list[dict[str, str]] = []
@@ -1185,6 +1221,9 @@ def main(argv: list[str] | None = None) -> int:
                                 top_k_each=route["reranker_pool_size"],
                                 fetch_evidence=True,
                             )
+                            stage_timings.update(
+                                getattr(context, "stage_timings", {}) or {}
+                            )
                         except Exception as exc:
                             errors.append(f"retrieval/assembly {type(exc).__name__}: {exc}")
                             context = None
@@ -1194,10 +1233,36 @@ def main(argv: list[str] | None = None) -> int:
                     response = None
                     if context is not None:
                         try:
-                            response = pipeline._generate_with_llm(case["question"], context, retrieval_trace)
+                            generation_started = time.perf_counter()
+                            response = pipeline._generate_with_llm_streaming(
+                                case["question"], context, retrieval_trace
+                            )
+                            stage_timings["generation"] = round(
+                                time.perf_counter() - generation_started, 6
+                            )
+                            generation_stream = response.__dict__.get(
+                                "generation_stream", {}
+                            )
+                            if isinstance(generation_stream, dict):
+                                for key in (
+                                    "ttft",
+                                    "stream_complete",
+                                    "request_seconds",
+                                    "contract_validation_seconds",
+                                ):
+                                    value = generation_stream.get(key)
+                                    if isinstance(value, (int, float)):
+                                        stage_timings[key] = float(value)
+                            audit_started = time.perf_counter()
                             pipeline._audit_citations(response, context)
+                            stage_timings["audit"] = round(
+                                time.perf_counter() - audit_started, 6
+                            )
                         except Exception as exc:
                             errors.append(f"generation/audit {type(exc).__name__}: {exc}")
+                    stage_timings["total"] = round(
+                        time.perf_counter() - started, 6
+                    )
                     citation = None
                     if response is not None:
                         output = [
@@ -1303,6 +1368,12 @@ def main(argv: list[str] | None = None) -> int:
                             if generator_context_text is not None
                             else 0
                         ),
+                        "generation_stream": _safe(
+                            response.__dict__.get("generation_stream", {})
+                        )
+                        if response is not None
+                        else {},
+                        "profiling": _safe(stage_timings),
                         "retrieval_trace": _safe(retrieval_trace),
                         "assembler_evidence": _safe(context.evidence_turns if context is not None else []),
                         "citation_audit": citation,
@@ -1491,6 +1562,20 @@ def main(argv: list[str] | None = None) -> int:
             f"{coverage['mean_turn_recall']} | {coverage['mean_claim_recall']} | "
             f"{deep_eval['mean_contextual_recall']} | {deep_eval['mean_faithfulness']} |"
         )
+    lines.extend([
+        "",
+        "## Stage timing diagnostics",
+        "",
+        "| Track | Stage | Measured | Mean (s) | P50 (s) | P95 (s) | Max (s) |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ])
+    for track in ("gold", "real"):
+        for stage, values in diagnostics["timing"][track]["stages"].items():
+            lines.append(
+                f"| {track} | {stage} | {diagnostics['timing'][track]['measured']} | "
+                f"{values['mean_seconds']} | {values['p50_seconds']} | "
+                f"{values['p95_seconds']} | {values['max_seconds']} |"
+            )
     lines.extend(["", "## Reproduce", "", f"`.venv\\Scripts\\python.exe scripts\\run_l2_deepeval.py --db {args.db} --chroma {args.chroma} --l1-closeout {args.l1_closeout} --l1-manifest {args.l1_manifest} --expected-artifact-hash {expected_artifact_hash} --dataset-output {args.dataset_output} --output-root {args.output_root} --run-id <new-run-id> --case-start {args.case_start} --max-cases {args.max_cases} --generator-timeout-seconds {args.generator_timeout_seconds} --max-prompt-tokens {args.max_prompt_tokens} --judge-model {judge_model or '<DEEPEVAL_MODEL>'} --judge-api-key-env {judge_key_env or '<DEEPEVAL_API_KEY_ENV>'} --judge-base-url {judge_base_url or '<DEEPEVAL_BASE_URL>'} --reranker-backend {route['reranker_backend']} --rerank-unit {route['rerank_unit']} --reranker-pool-size {route['reranker_pool_size']} --parent-card-count {route['parent_card_count']} --evidence-selection-count {route['evidence_selection_count']} --retrieval-mode {args.retrieval_mode} --bm25-weight {args.bm25_weight} --allow-l1-blocked`", ""])
     (run_dir / "report.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"run_id": args.run_id, "release_decision": release_decision, "judge_status": readiness_payload.get("status"), "trace_count": len(trace_rows), "metric_count": len(metric_rows), "report_dir": str(run_dir), "artifact_hash": artifact_hash}, ensure_ascii=False))

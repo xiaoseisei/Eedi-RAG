@@ -72,6 +72,10 @@ class GoldAssembledContext(BaseModel):
     context_budget_tokens: int = Field(default=0, ge=0)
     catalog_token_count: int = Field(default=0, ge=0)
     generator_context_token_count: int = Field(default=0, ge=0)
+    stage_timings: Dict[str, float] = Field(
+        default_factory=dict,
+        description="检索、重排、装配等阶段的实际耗时（秒）",
+    )
 
 
 def compute_text_jaccard_similarity(text_a: str, text_b: str) -> float:

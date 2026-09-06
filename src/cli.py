@@ -248,13 +248,35 @@ class PedagogicalCLI:
                 start_t = time.perf_counter()
                 print("\n🧠 正在检索考纲知识库与真实辅导对白实录...", flush=True)
 
-                response = self.pipeline.ask(user_input, mode=self.mode)
+                if self.mode in {"auto", "llm"}:
+                    response = self.pipeline.ask_stream(
+                        user_input,
+                        mode=self.mode,
+                        on_chunk=lambda chunk: print(chunk, end="", flush=True),
+                    )
+                    print()
+                else:
+                    response = self.pipeline.ask(user_input, mode=self.mode)
                 elapsed_ms = (time.perf_counter() - start_t) * 1000.0
 
-                print("\n" + "=" * 88)
-                print(response.rendered_markdown)
+                if self.mode in {"auto", "llm"}:
+                    print("\n" + "=" * 88)
+                else:
+                    print("\n" + "=" * 88)
+                    print(response.rendered_markdown)
                 print("=" * 88)
-                print(f"⏱️ 耗时: {elapsed_ms:.1f} ms | 考纲: {response.subject_path} | 真实对白凭据: {len(response.dialogue_citations)} 轮 | 审计: {response.audit_status}\n")
+                profiling = getattr(response, "_profiling", {})
+                print(
+                    f"⏱️ 总耗时: {elapsed_ms:.1f} ms | "
+                    f"检索: {profiling.get('retrieval', 0.0) * 1000:.1f} ms | "
+                    f"装配: {profiling.get('assembly', 0.0) * 1000:.1f} ms | "
+                    f"生成: {profiling.get('generation', 0.0) * 1000:.1f} ms | "
+                    f"首字: {profiling.get('output_ttft', 0.0) * 1000:.1f} ms | "
+                    f"审计: {profiling.get('audit_render', 0.0) * 1000:.1f} ms\n"
+                    f"考纲: {response.subject_path} | "
+                    f"真实对白凭据: {len(response.dialogue_citations)} 轮 | "
+                    f"审计: {response.audit_status}\n"
+                )
 
             except KeyboardInterrupt:
                 print("\n\n👋 接收到退出信号，正在安全退出...")
@@ -285,7 +307,7 @@ def main():
     parser.add_argument("--evidence-selection-count", type=int, default=5)
     parser.add_argument("--reranker-pool-size", type=int, default=None)
     parser.add_argument("--parent-card-count", type=int, default=3)
-    parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v1")
+    parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v2")
     args = parser.parse_args()
     cli = PedagogicalCLI(
         db_path=args.db_path,

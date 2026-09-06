@@ -226,6 +226,51 @@ def test_cli_initialize_wires_generator_contract_to_pipeline(monkeypatch) -> Non
     assert captured["pipeline"]["generator_contract_version"] == "v2"
 
 
+def test_pipeline_ask_exposes_stage_timings() -> None:
+    class PreparedRetriever:
+        retrieval_mode = "bm25_dense"
+
+        def retrieve_multi_perspective_rrf(self, *, raw_query, top_k_each, fetch_evidence):
+            return {
+                "chunk_strategy": "fallback",
+                "windows": [{
+                    "chunk_id": "w1",
+                    "document": "[Turn 1] [student] I chose 5.45",
+                    "metadata": {
+                        "session_id": 10,
+                        "window_start_turn": 1,
+                        "window_end_turn": 1,
+                        "source_turn_ids": [1],
+                        "subject_path": "Number",
+                    },
+                    "evidence_turns": [{
+                        "session_id": 10, "turn_id": 1, "speaker": "student", "text": "I chose 5.45"
+                    }],
+                }],
+                "misconceptions": [],
+                "strategies": [],
+                "rewritten_queries": {"extracted_keywords": []},
+            }
+
+        def retrieve_fallback_windows(self, query, top_k, fetch_evidence):
+            return self.retrieve_multi_perspective_rrf(
+                raw_query=query, top_k_each=top_k, fetch_evidence=fetch_evidence
+            )["windows"]
+
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=PreparedRetriever(),
+        assembler=PedagogicalGoldAssembler(chunk_strategy="fallback", rerank_unit="card"),
+        chunk_strategy="fallback",
+    )
+
+    response = pipeline.ask("q", mode="deterministic")
+
+    assert set(response._profiling) >= {
+        "retrieval", "assembly", "generation", "audit_render", "total"
+    }
+    assert all(value >= 0 for value in response._profiling.values())
+
+
 def test_pipeline_prepare_context_exposes_anchored_route_without_generation() -> None:
     class PreparedRetriever:
         retrieval_mode = "bm25_dense"

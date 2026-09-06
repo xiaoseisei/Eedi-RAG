@@ -28,16 +28,22 @@ def run_demo(query: str):
         embedding_backend="deterministic",
     )
     retriever = DualMetricRetriever(storage_manager=storage, query_rewrite_mode="deterministic")
-    pipeline = EndToEndPedagogicalRAGPipeline(retriever=retriever)
+    pipeline = EndToEndPedagogicalRAGPipeline(
+        retriever=retriever,
+        generator_contract_version="v2",
+    )
 
     print("\n" + "=" * 80)
     print(f"🎯 正在执行端到端 RAG 教研分析与生成...")
     print(f"📝 教师输入: {query}")
     print("=" * 80 + "\n")
 
-    result = pipeline.ask(query, mode="auto")
-
-    print(result.rendered_markdown)
+    result = pipeline.ask_stream(
+        query,
+        mode="auto",
+        on_chunk=lambda chunk: print(chunk, end="", flush=True),
+    )
+    print()
     print("\n" + "=" * 80)
     print(f"📊 结构化元数据快照:")
     print(f"  * 考纲路径: {result.subject_path}")
