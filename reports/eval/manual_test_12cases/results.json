@@ -1,0 +1,801 @@
+[
+  {
+    "id": 1,
+    "query": "四舍五入 5.4598 到 1 位小数时，学生为什么会选 5.45？",
+    "expected": "学生混淆 1dp 和 2dp，把四舍五入误当成截断；引用 Session 10 的学生原话",
+    "elapsed_seconds": 30.271,
+    "status": "SUCCESS",
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "session_id": 10,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生错误地认为四舍五入到特定位数不会改变数字的值（例如，认为5.45到一位小数应保持不变），这表明其混淆了“保留位数”与“数值变化”的关系。",
+    "misconception_diagnosis": "学生错误地认为四舍五入到一位小数意味着保留数字本身不变（5.45保持为5.45），而非根据下一位数字（5.459...中的5）进行进位并恰好保留一位小数。",
+    "key_aha_question": "Can you round 5.45 to one decimal place?",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [],
+    "answer_content": "学生错误地认为四舍五入到特定位数不会改变数字的值（例如，认为5.45到一位小数应保持不变），这表明其混淆了“保留位数”与“数值变化”的关系。\n\n诊断：学生错误地认为四舍五入到一位小数意味着保留数字本身不变（5.45保持为5.45），而非根据下一位数字（5.459...中的5）进行进位并恰好保留一位小数。\n\n证据解释：学生选择5.45的事实由E004（Turn 10）中学生的回答“5.45 Maybe or not sure”直接支持。其错误认知（认为数值不应改变）由E010（Turn 22）中学生的陈述“5.45 to one decimal should be the same no changes”推断得出。\n\n教学干预：\n",
+    "citations": [
+      {
+        "session_id": 10,
+        "turn_id": 8,
+        "speaker": "student",
+        "quote_text": "Both are wrong Or Sophie is correct",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 10,
+        "turn_id": 17,
+        "speaker": "tutor",
+        "quote_text": "Can you round 5.45 to one decimal place?",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.673769,
+      "retrieval": 0.673779,
+      "assembly": 0.000657,
+      "context_prepare": 0.674438,
+      "generation": 29.596007,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.000253,
+      "audit_render": 0.000106,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 30.270591
+    }
+  },
+  {
+    "id": 2,
+    "query": "学生为什么会认为任意两个数的 LCM 就是乘积？导师如何用反例引导？",
+    "expected": "说明互质数时乘积成立，再用 4 和 6 反例说明不总成立；引用导师的 “Can you prove it?”",
+    "elapsed_seconds": 118.697,
+    "status": "ERROR",
+    "error": "Generator v2 evidence contract failed: tutor_evidence_ids must identify tutor evidence"
+  },
+  {
+    "id": 3,
+    "query": "“四舍五入到最近 0.02”和保留两位小数有什么区别？",
+    "expected": "使用 0.02 乘法表找 3.14、3.16，再判断 3.153 更接近 3.16",
+    "elapsed_seconds": 35.502,
+    "status": "SUCCESS",
+    "subject_path": "Number > Rounding and Estimating > Rounding to Decimal Places",
+    "session_id": 10,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "两者核心区别在于‘基准间距’不同。‘保留两位小数’是四舍五入到最近的0.01，而‘四舍五入到最近0.02’是四舍五入到0.02的整数倍（如0.00, 0.02, 0.04...）。",
+    "misconception_diagnosis": "学生典型错因是不熟悉按特定间隔（如0.02）四舍五入，将其等同于常规的保留小数位数（如两位小数）。",
+    "key_aha_question": "把数轴上0, 0.02, 0.04... 这些点标出来，5.45离哪个点最近？",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "步骤1：明确‘保留两位小数’即四舍五入到0.01的整数倍（如5.41, 5.42, 5.43...）。",
+      "步骤2：引导学生列出或想象0.02的倍数表（如5.42, 5.44, 5.46...）。",
+      "步骤3：将原数（如5.45）标在数轴上，与最近的两个0.02倍数点（如5.44和5.46）比较距离。",
+      "步骤4：确定并完成四舍五入到最近的0.02。"
+    ],
+    "answer_content": "两者核心区别在于‘基准间距’不同。‘保留两位小数’是四舍五入到最近的0.01，而‘四舍五入到最近0.02’是四舍五入到0.02的整数倍（如0.00, 0.02, 0.04...）。\n\n诊断：学生典型错因是不熟悉按特定间隔（如0.02）四舍五入，将其等同于常规的保留小数位数（如两位小数）。\n\n证据解释：结论基于：1) 学情诊断明确指出混淆点为‘0.02倍数表’与‘按间隔四舍五入的数轴定位’（关联证据E001）。2) 学生在Session #33的Turn 4直接提问‘What is the 0.02 times table value?’，证实了对此概念的困惑（证据E001）。3) 导师在Session #10的Turn 17、Turn 19等通过5.45的例子，强调了‘保留小数位数’的规则（证据E002）。\n\n教学干预：\n- 教学动作1：设计对比练习，分别让学生将同一数字（如5.47）‘保留两位小数’和‘四舍五入到最近0.02’，计算结果并比较。\n- 教学动作2：强化‘0.02倍数表’的口头或书面构建练习，作为按此间隔四舍五入的第一步。",
+    "citations": [
+      {
+        "session_id": 10,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "Do you have any thoughts about what either Alex or Sophie said? Do you think either of them is right or wrong?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 10,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "OK. So if Alex is wrong, what do you think would be the right answer for his question?",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.129783,
+      "retrieval": 0.129792,
+      "assembly": 0.000419,
+      "context_prepare": 0.130214,
+      "generation": 35.37117,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.000101,
+      "audit_render": 8.1e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 35.501617
+    }
+  },
+  {
+    "id": 4,
+    "query": "学生为什么先计算 58÷2，而不是先计算 (54+58)？",
+    "expected": "说明学生没有理解分数线的分组作用，混用了 BIDMAS；不能把学生错误说成正确规则",
+    "elapsed_seconds": 96.111,
+    "status": "SUCCESS",
+    "subject_path": "Number > Basic Arithmetic > Mental Multiplication and Division",
+    "session_id": 14,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生错误地将分数表达式 \\\\(\\\\frac{54+58}{2}\\\\) 解析为 54 + 58/2，因此先计算了 58÷2，而不是先计算分子之和 (54+58)。",
+    "misconception_diagnosis": "学生存在分数表达式解析错误，误解了分数线的含义，导致运算顺序混淆。",
+    "key_aha_question": "「so we have 112/2 what does that line mean?」",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>",
+      "<Revoicing>",
+      "<Keep Together>"
+    ],
+    "scaffolding_steps": [
+      "引导学生重新审视题干中的问题含义",
+      "引导学生优先计算分子部分",
+      "通过数字分解简化心算过程",
+      "通过提问揭示分数线的数学含义",
+      "验证最终计算结果并确认理解"
+    ],
+    "answer_content": "学生错误地将分数表达式 \\\\(\\\\frac{54+58}{2}\\\\) 解析为 54 + 58/2，因此先计算了 58÷2，而不是先计算分子之和 (54+58)。\n\n诊断：学生存在分数表达式解析错误，误解了分数线的含义，导致运算顺序混淆。\n\n证据解释：学生在对话中陈述为 'the value of 54+58/2'（证据 E002），表明他们解析为 54 + (58/2)，这支持了错因诊断。\n\n教学干预：\n- 使用苏格拉底提问法引导学生理解分数表达式的运算顺序\n- 通过关键问题促使学生反思分数线的含义",
+    "citations": [
+      {
+        "session_id": 14,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "the value of 54+58/2",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.105183,
+      "retrieval": 0.105192,
+      "assembly": 0.000331,
+      "context_prepare": 0.105525,
+      "generation": 96.004852,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 9.5e-05,
+      "audit_render": 6.7e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 96.110455
+    }
+  },
+  {
+    "id": 5,
+    "query": "展开 -3(1-2p) 时学生最容易错在哪里？",
+    "expected": "指出负数乘负数和乘法/加法混淆，并说明导师如何拆成两个乘法步骤",
+    "elapsed_seconds": 63.398,
+    "status": "SUCCESS",
+    "subject_path": "Algebra > Solving Equations > Function Machines",
+    "session_id": 115,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生最容易错在只将系数乘到括号内的第一项，而遗漏了第二项，导致漏乘。例如，错误地展开为 -3 -2p，而不是正确的 -3 + 6p。",
+    "misconception_diagnosis": "学生未能正确应用乘法分配律，错误地只将系数乘以前项而遗漏后项，这反映对括号展开规则理解不完整。",
+    "key_aha_question": "展开括号时，系数需要乘到括号内的每一项吗？",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "1. 引导学生回顾乘法分配律的基本规则。",
+      "2. 让学生分步计算每一项的乘积。",
+      "3. 检查展开结果是否包含所有项，并比较正确结果。"
+    ],
+    "answer_content": "学生最容易错在只将系数乘到括号内的第一项，而遗漏了第二项，导致漏乘。例如，错误地展开为 -3 -2p，而不是正确的 -3 + 6p。\n\n诊断：学生未能正确应用乘法分配律，错误地只将系数乘以前项而遗漏后项，这反映对括号展开规则理解不完整。\n\n证据解释：学生错误行为由 E001 支持，该证据显示学生在展开表达式时只乘了第一项，如将 2(p-3) 错误展开为 2p-3，验证了漏乘第二项的错因。\n\n教学干预：\n- 教研员应通过分步示范强调分配律的应用，确保学生理解系数需乘到括号内每一项，可使用具体例子进行对比练习。",
+    "citations": [
+      {
+        "session_id": 115,
+        "turn_id": 6,
+        "speaker": "tutor",
+        "quote_text": "good thank you let's have a look at this question? What does expand mean?",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.110601,
+      "retrieval": 0.11061,
+      "assembly": 0.000503,
+      "context_prepare": 0.111118,
+      "generation": 63.286703,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 8.5e-05,
+      "audit_render": 6.4e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 63.397899
+    }
+  },
+  {
+    "id": 6,
+    "query": "为什么 -2m > 12 会得到 m > -6？",
+    "expected": "指出除以负数后不等号必须翻转，正确结果是 m < -6",
+    "elapsed_seconds": 106.433,
+    "status": "SUCCESS",
+    "subject_path": "Algebra > Inequalities > Graphing Linear Inequalities (Shading Regions)",
+    "session_id": 69,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "解不等式 -2m > 12 时，两边同时除以 -2。由于除以一个负数，不等号方向必须翻转，因此得到 m < -6。如果忘记翻转不等号，会错误地得到 m > -6。",
+    "misconception_diagnosis": "未观察到学生错因证据。数学上，常见错误是除以负数时未翻转不等号。",
+    "key_aha_question": "当你在不等式两边除以一个负数时，不等号的方向会发生什么变化？",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "Step 1: 识别不等式 -2m > 12，两边需要除以 -2 来解出 m。",
+      "Step 2: 执行除法运算：-2m / -2 = m，12 / -2 = -6。",
+      "Step 3: 应用关键规则：因为除数是负数，不等号方向必须翻转，所以 > 变为 <。",
+      "Step 4: 写出最终不等式：m < -6。"
+    ],
+    "answer_content": "解不等式 -2m > 12 时，两边同时除以 -2。由于除以一个负数，不等号方向必须翻转，因此得到 m < -6。如果忘记翻转不等号，会错误地得到 m > -6。\n\n诊断：未观察到学生错因证据。数学上，常见错误是除以负数时未翻转不等号。\n\n证据解释：证据 E005（导师在 Turn 15 的陈述）直接教导了当不等式两边除以负数时需要翻转不等号的规则。基于此规则，对不等式 -2m > 12 进行操作可得 m < -6。\n\n教学干预：\n- 强调不等式求解中除以负数时翻转符号的规则。\n- 通过具体例子演示正确和错误解法的对比。",
+    "citations": [
+      {
+        "session_id": 69,
+        "turn_id": 15,
+        "speaker": "tutor",
+        "quote_text": "Now there's one other thing we need to do when we divide by negatives if we use inequalities, we have to flip the inequality sign around :)",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.108952,
+      "retrieval": 0.108963,
+      "assembly": 0.000443,
+      "context_prepare": 0.109408,
+      "generation": 106.323499,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 9.7e-05,
+      "audit_render": 6.6e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 106.432986
+    }
+  },
+  {
+    "id": 7,
+    "query": "导师如何帮助学生理解“水深—时间”图像对应的容器形状？",
+    "expected": "把斜率变化和容器底部宽窄联系起来，不能只复述图像结论",
+    "elapsed_seconds": 104.764,
+    "status": "SUCCESS",
+    "subject_path": "Algebra > Other Graphs > Real Life Graphs",
+    "session_id": 258,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "导师可以通过苏格拉底式提问帮助学生：先询问学生对图像斜率的理解（如“图像的斜率代表什么？”），诊断其误解；然后引导学生发现斜率代表深度变化率，并解释深度变化率与容器横截面积成反比（窄底部导致填充更快，斜率更陡），从而建立图像与容器形状的对应关系。",
+    "misconception_diagnosis": "学生误解图形斜率与物理形状关系，错误认为宽底部会导致快速填充（斜率陡），而实际上窄底部导致快速填充（斜率陡），这源于速率-面积反比关系的认知障碍。",
+    "key_aha_question": "「Can you tell me what you understand by the slope of the graph?」（可调整为：图像斜率与容器形状有什么关系？）",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "Step 1: 使用‘Press for Accuracy’追问学生对图像斜率的理解，诊断其概念起点（如E006）。",
+      "Step 2: 在学生给出错误理解后，使用‘Revoicing’给出正确反馈，明确斜率与变化率的联系（如E010）。",
+      "Step 3: 引导学生描述或计算斜率与容器横截面积的关系，强调反比性质。",
+      "Step 4: 通过额外问题（如不同斜率对应何种形状）巩固学习，搭建认知脚手架。"
+    ],
+    "answer_content": "导师可以通过苏格拉底式提问帮助学生：先询问学生对图像斜率的理解（如“图像的斜率代表什么？”），诊断其误解；然后引导学生发现斜率代表深度变化率，并解释深度变化率与容器横截面积成反比（窄底部导致填充更快，斜率更陡），从而建立图像与容器形状的对应关系。\n\n诊断：学生误解图形斜率与物理形状关系，错误认为宽底部会导致快速填充（斜率陡），而实际上窄底部导致快速填充（斜率陡），这源于速率-面积反比关系的认知障碍。\n\n证据解释：学生错因诊断基于 Session 258 中学生的对白（E001-E005），显示学生不理解问题并提及“wide?”等关键词。导师策略基于 Session 872 中导师的对白（E006-E015），展示使用苏格拉底式提问引导学生澄清概念并建立关系。\n\n教学干预：\n- 设计一系列问题，聚焦图像斜率与容器面积的反比关系。\n- 使用苏格拉底式提问引导学生自主发现，避免直接告知答案。\n- 提供具体示例，如对比窄底与宽底容器的图像差异。",
+    "citations": [
+      {
+        "session_id": 258,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "yeah please I really don't get the question",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 4,
+        "speaker": "tutor",
+        "quote_text": "Can you tell me what you understand by edges?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 12,
+        "speaker": "tutor",
+        "quote_text": "how many edges does this shape have? Don't forget the back too :)",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 258,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "wide?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 258,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "so the answer is d but I still don't understand how you figured it out when I find it difficult umm Sophia,are you there?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 258,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "so the answer is d",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 258,
+        "turn_id": 14,
+        "speaker": "student",
+        "quote_text": "oh I see well no thanks",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 6,
+        "speaker": "tutor",
+        "quote_text": "ok, this question asks about edges what do you think the edges of a shape are?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 8,
+        "speaker": "tutor",
+        "quote_text": "not quite (that's one of the others)",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 10,
+        "speaker": "tutor",
+        "quote_text": "fantastic!! so the edges are the lines... the corners are also called vertices",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 16,
+        "speaker": "tutor",
+        "quote_text": "Bonus qu: ;) how many vertices (corners) does it have?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 18,
+        "speaker": "tutor",
+        "quote_text": "not quite how many vertices on the front face?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 20,
+        "speaker": "tutor",
+        "quote_text": "excellent.. and how many do you think are at the back?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 22,
+        "speaker": "tutor",
+        "quote_text": "so how many vertices is that in total?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 872,
+        "turn_id": 24,
+        "speaker": "tutor",
+        "quote_text": "excellent!! so we have 18 edges and 12 vertices great Anika",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.108533,
+      "retrieval": 0.10854,
+      "assembly": 0.000422,
+      "context_prepare": 0.108964,
+      "generation": 104.65481,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.000156,
+      "audit_render": 0.0001,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 104.763885
+    }
+  },
+  {
+    "id": 8,
+    "query": "已知平均数为 4，求缺失数时学生卡在哪里？",
+    "expected": "说明平均数 × 数据个数 = 总和，并引用导师用旧题类比的脚手架",
+    "elapsed_seconds": 38.221,
+    "status": "SUCCESS",
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "session_id": 276,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生卡在“已知平均数反推总和”这一逆运算步骤上，不理解如何从平均数4和数据个数5计算出总和20，反而试图进行错误的减法操作。",
+    "misconception_diagnosis": "平均值逆运算概念缺失与操作步骤混淆。学生未能建立“总和 = 平均数 × 数据个数”这一核心逆运算关系，思维停留在正向求平均值的步骤上。",
+    "key_aha_question": "Great and if their mean is 4... What does that mean the total of the numbers will be?",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "1. 通过提问确认数据点总数（5个）。",
+      "2. 通过核心提问（如上）引导学生思考“平均数是4”对“总和”意味着什么，建立“总数 = 平均数 × 个数”的联系。",
+      "3. 引导学生计算出正确的总和（5 × 4 = 20）。",
+      "4. 引导学生计算已知数的和，并与目标总和比较，从而求出缺失值。"
+    ],
+    "answer_content": "学生卡在“已知平均数反推总和”这一逆运算步骤上，不理解如何从平均数4和数据个数5计算出总和20，反而试图进行错误的减法操作。\n\n诊断：平均值逆运算概念缺失与操作步骤混淆。学生未能建立“总和 = 平均数 × 数据个数”这一核心逆运算关系，思维停留在正向求平均值的步骤上。\n\n证据解释：学生的卡顿点由E001（“I‘m stuck”）、E003（明确指出“This‘s where I am stuck!”）及E006（提出错误的“减法”操作）直接支持。错因诊断（逆运算缺失）基于学生在E003和E006中表现出的困惑与错误策略，由E001-E006等多处对话整体支撑。导师的突破性提问E005旨在建立“平均数→总和”的逆运算联系。\n\n教学干预：\n- 针对“逆运算”难点，设计专项微练习，强化“从平均数和个数求总数”的转化训练。\n- 在教学中显性对比“求平均数”和“已知平均求数”的正反向思维过程。",
+    "citations": [
+      {
+        "session_id": 276,
+        "turn_id": 3,
+        "speaker": "student",
+        "quote_text": "Im stuck you see what sums do you need to do?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 276,
+        "turn_id": 6,
+        "speaker": "tutor",
+        "quote_text": "Great and if their mean is 4... What does that mean the total of the numbers will be? 🤩",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 276,
+        "turn_id": 8,
+        "speaker": "tutor",
+        "quote_text": "Remember an earlier question where we had 7 numbers and the average was 4 so we did 7 x 4 = 28 for the total? 😀",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 276,
+        "turn_id": 10,
+        "speaker": "tutor",
+        "quote_text": "So we now have a mean of 4 and 5 numbers... How will we work out the total? 😁",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.105224,
+      "retrieval": 0.105235,
+      "assembly": 0.000409,
+      "context_prepare": 0.105646,
+      "generation": 38.115679,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.000111,
+      "audit_render": 6.7e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 38.221403
+    }
+  },
+  {
+    "id": 9,
+    "query": "混合小数和分数求众数时，学生为什么找不到重复值？",
+    "expected": "识别 0.4 = 2/5，说明导师让学生统一表示法",
+    "elapsed_seconds": 35.662,
+    "status": "SUCCESS",
+    "subject_path": "Data and Statistics > Data Processing > Averages (mean, median, mode) from a List of Data",
+    "session_id": 469,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生找不到重复值的核心原因是，他们未能主动进行分数与小数之间的转换，从而无法识别出列表中数值的等价性。在学生眼中，像分数 `2/5` 和小数 `0.4` 是不同的数字实体，因此无法匹配出相同的“值”来应用众数的定义。",
+    "misconception_diagnosis": "学生的错因在于分数与小数形式差异导致值等价识别障碍。他们误认为不同表示形式的数值（分数与小数）是不同的实体，未能将分数（如 2/5）与等值小数（0.4）视为相同的“值”，从而无法找到列表中出现次数最多的那个值。",
+    "key_aha_question": "「Have you tried converting the fractions into decimals?」",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>",
+      "<Revoicing>"
+    ],
+    "scaffolding_steps": [
+      "引导学生回顾众数定义，强调寻找的是具有相同“值”的数字。",
+      "明确提示学生，要比较列表中的数是否相同，可以将分数统一转换为小数形式。",
+      "指导学生计算 2/5 等于 0.4，并与列表中的小数 0.4 进行匹配。",
+      "确认转换后 0.4 出现了两次，从而确定众数。"
+    ],
+    "answer_content": "学生找不到重复值的核心原因是，他们未能主动进行分数与小数之间的转换，从而无法识别出列表中数值的等价性。在学生眼中，像分数 `2/5` 和小数 `0.4` 是不同的数字实体，因此无法匹配出相同的“值”来应用众数的定义。\n\n诊断：学生的错因在于分数与小数形式差异导致值等价识别障碍。他们误认为不同表示形式的数值（分数与小数）是不同的实体，未能将分数（如 2/5）与等值小数（0.4）视为相同的“值”，从而无法找到列表中出现次数最多的那个值。\n\n证据解释：学生的困惑（E006）和导师的回应（E007、E008）直接支持了上述诊断。Turn 6 中学生回答“no”，表明其未能识别出等价值（E006）。Turn 7 中导师明确提出“Have you tried converting the fractions into decimals?”，点明了问题的解决关键（E008）。Turn 4 中学生将众数理解为“the most common number”（E004），Turn 5 中导师将其修正为“the most common value”（E005），这一修正暗示了数值等价性的关键，但学生仍未理解，从而在 Turn 6 中表示看不到相同值。\n\n教学干预：\n- 在教学中，当数据列表混合了分数和小数时，应明确强调“值等价性”的概念，并提示学生先进行统一转换再进行分析。\n- 设计针对性练习，要求学生先转换形式再求众数、中位数等统计量，固化这一思维习惯。",
+    "citations": [
+      {
+        "session_id": 469,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "Right! In this question, it's helpful to think of it as the most common value. Can you see any numbers there that have the same value as each other?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 469,
+        "turn_id": 6,
+        "speaker": "student",
+        "quote_text": "no",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 469,
+        "turn_id": 7,
+        "speaker": "tutor",
+        "quote_text": "Have you tried converting the fractions into decimals?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 469,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Let's have a look at that then. What about 1/4 first, do you know what that is as a decimal?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 469,
+        "turn_id": 11,
+        "speaker": "tutor",
+        "quote_text": "Great, does that match any other values?",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.108945,
+      "retrieval": 0.108953,
+      "assembly": 0.000669,
+      "context_prepare": 0.109625,
+      "generation": 35.552211,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.000134,
+      "audit_render": 9.9e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 35.661947
+    }
+  },
+  {
+    "id": 10,
+    "query": "学生说“体积就是把所有面的面积加起来”说明什么？",
+    "expected": "区分体积和表面积，并给出导师用长×宽×高的点拨",
+    "elapsed_seconds": 106.327,
+    "status": "SUCCESS",
+    "subject_path": "Algebra > Straight Line Graphs > Gradient as change in y over change in x",
+    "session_id": 672,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "学生说“体积就是把所有面的面积加起来”表明可能混淆了体积和表面积的概念，误以为体积是各二维表面的面积总和，而实际上体积是三维空间的占据量。基于知识基座中类似的圆柱表面积计算误解（学生误将单个底面积视为需添加的全部），这反映了学生对不同数学概念（体积 vs. 表面积）和部分与整体关系的认知脱节。",
+    "misconception_diagnosis": "学生错因可能是对体积和表面积概念区分不清，或将表面积的计算方法错误应用于体积。在给定证据中，学生在圆柱表面积问题中，未能正确识别所有组成部分（两个底面），误以为单个底面积就是需要添加的全部。",
+    "key_aha_question": "体积是三维空间的大小，而表面积是所有面的面积之和——那么，计算体积时应该关注什么？",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>",
+      "<Revoicing>",
+      "<Keep Together>"
+    ],
+    "scaffolding_steps": [
+      "Step 1: 通过提问澄清体积和表面积的定义，引导学生区分三维占据量和二维表面总和。",
+      "Step 2: 使用具体几何体（如长方体）举例，让学生计算体积和表面积，对比结果。",
+      "Step 3: 引导学生反思“所有面的面积加起来”适用于什么计算，并纠正到体积的正确计算方法。"
+    ],
+    "answer_content": "学生说“体积就是把所有面的面积加起来”表明可能混淆了体积和表面积的概念，误以为体积是各二维表面的面积总和，而实际上体积是三维空间的占据量。基于知识基座中类似的圆柱表面积计算误解（学生误将单个底面积视为需添加的全部），这反映了学生对不同数学概念（体积 vs. 表面积）和部分与整体关系的认知脱节。\n\n诊断：学生错因可能是对体积和表面积概念区分不清，或将表面积的计算方法错误应用于体积。在给定证据中，学生在圆柱表面积问题中，未能正确识别所有组成部分（两个底面），误以为单个底面积就是需要添加的全部。\n\n证据解释：证据来自会话对白：Turn 12（E006）学生计算单个底面积为25π；Turn 14（E008）学生在引导下计算总添加部分为50π，显示从部分到整体的混淆。Turn 22（E011）学生误以为答案是D（25π），Turn 24（E013）和Turn 26（E015）的纠正过程进一步支持学生在部分与整体关系上的误解。这些证据类比到体积问题，表明学生可能类似地错误应用概念。\n\n教学干预：\n- 设计对比练习，同时计算同一几何体的体积和表面积，强调概念差异。\n- 使用苏格拉底式提问，如“如果所有面的面积加起来是表面积，那么体积应该怎么算？”，促使学生自主区分。\n- 引入视觉教具或动画，展示体积的填充过程和表面积的展开过程，增强直观理解。",
+    "citations": [
+      {
+        "session_id": 672,
+        "turn_id": 12,
+        "speaker": "student",
+        "quote_text": "25pi can i get some bonus coins g",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 14,
+        "speaker": "student",
+        "quote_text": "50pi",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 22,
+        "speaker": "student",
+        "quote_text": "so the answers D?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 10,
+        "speaker": "student",
+        "quote_text": "circle innit",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 13,
+        "speaker": "tutor",
+        "quote_text": "Once you've got the correct answer you can 😊👍 One of the area is 25 pi therefore what do you need to add on in total? 😃",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 24,
+        "speaker": "student",
+        "quote_text": "oh so its E then?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 26,
+        "speaker": "student",
+        "quote_text": "50",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 3,
+        "speaker": "tutor",
+        "quote_text": "Let's have a look 👀 So we have the curved surface area, happy with what the question means by that? 😁",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "That's the rectangle part that curves round... So what other faces do we have on the cylinder? 🧠👀😊👍",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 9,
+        "speaker": "tutor",
+        "quote_text": "Let's stay focused and sensible 😊 What other faces do we need to include? 🧠",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 11,
+        "speaker": "tutor",
+        "quote_text": "Exactly, two circles! The base and the top ✅✅✅✅ Well done! What is the area for one of these circles? Any ideas? 💡",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 15,
+        "speaker": "tutor",
+        "quote_text": "BOOM 💥💥💥💥💥 FANTASTIC WORKING OUT 😃🏆👍💥⭐😊😁✅ So which of A, B, C or D must be correct? 😊👌 ???",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 21,
+        "speaker": "tutor",
+        "quote_text": "So you worked out that you still need the top and base which are 25 pi each so altogether 50 pi is what you need to add on 😊👍 Happy with that?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 23,
+        "speaker": "tutor",
+        "quote_text": "That would be the value of JUST the base but we need to add on the base AND the top...",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 25,
+        "speaker": "tutor",
+        "quote_text": "curved surface + 25 pi + 25 pi = total surface area 😃👍 So what have you added on overall? So which is the correct option? 😊",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 672,
+        "turn_id": 27,
+        "speaker": "tutor",
+        "quote_text": "Exactly, C ✅✅✅ Ready to go back to eedi? 🤖",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.105747,
+      "retrieval": 0.105753,
+      "assembly": 0.000444,
+      "context_prepare": 0.106199,
+      "generation": 106.22063,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 0.00015,
+      "audit_render": 0.000112,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 106.326952
+    }
+  },
+  {
+    "id": 11,
+    "query": "“ten to twelve” 为什么不是 10:12？",
+    "expected": "说明 to 表示距离十二点还差十分钟，结果是 11:50 或 23:50",
+    "elapsed_seconds": 35.805,
+    "status": "SUCCESS",
+    "subject_path": "Geometry and Measure > Volume and Surface Area > Volume of Prisms",
+    "session_id": 80,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "因为‘ten to twelve’是一个英语时间口语表达，其意思是‘差10分到12点’，即11:50（若在晚上则是23:50），而不是数字10和12的简单组合（10:12）。学生混淆了时间表达词‘to’（差…分到）的语义。",
+    "misconception_diagnosis": "学生未能正确解析英语时间口语表达'ten to twelve'（意为'差10分到12点'）的语义，将其机械对应为数字'10'和'12'的组合（10:12），反映出对时间表达词'to'的根本性误解。",
+    "key_aha_question": "What time does B show?",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>"
+    ],
+    "scaffolding_steps": [
+      "1. 引导学生明确A选项所表示的具体时间（12 minutes past 10，即10:12），确认其与题目口头表达'ten to twelve'是否相符。",
+      "2. 追问B、C选项所表示的时间，引导学生运用'to'（差...分到）和'past'（过...分）的规则进行解读，从而排除这些选项。",
+      "3. 最后引导学生验证D选项，并将其与'ten to twelve at night'的含义（晚上11:50，即23:50）进行关联，确认正确答案。"
+    ],
+    "answer_content": "因为‘ten to twelve’是一个英语时间口语表达，其意思是‘差10分到12点’，即11:50（若在晚上则是23:50），而不是数字10和12的简单组合（10:12）。学生混淆了时间表达词‘to’（差…分到）的语义。\n\n诊断：学生未能正确解析英语时间口语表达'ten to twelve'（意为'差10分到12点'）的语义，将其机械对应为数字'10'和'12'的组合（10:12），反映出对时间表达词'to'的根本性误解。\n\n证据解释：1. 学生误解的事实（选择A选项，即12 minutes past 10，对应10:12）由证据E001（Turn 5，导师指出学生选择了A，A是12 minutes past 10）直接支持。2. 对'ten to twelve'的正确解释（差10分到12点）及其与24小时制（at night）的关联，由证据E002（Turn 11，导师确认D显示10 to 12 at night-time，即23:50）支持。\n\n教学干预：\n- 1. 在教学中明确对比讲解时间表达中'to'（如 ten to eleven = 10:50）与'past'（如 ten past eleven = 11:10）的核心区别。\n- 2. 设计专项练习，让学生将英语时间口头表达（如 'quarter to three'，'twenty past seven'）转换为数字时钟格式，反之亦然。\n- 3. 结合24小时制，训练学生根据语境（如 'at night'，'in the morning'）将12小时制表达准确转换为24小时制。",
+    "citations": [
+      {
+        "session_id": 80,
+        "turn_id": 4,
+        "speaker": "student",
+        "quote_text": "i need help on this question",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 80,
+        "turn_id": 5,
+        "speaker": "tutor",
+        "quote_text": "You went for A, which is 12 minutes past 10 What time does B show?",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.101305,
+      "retrieval": 0.101311,
+      "assembly": 0.000258,
+      "context_prepare": 0.101572,
+      "generation": 35.702858,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 8.7e-05,
+      "audit_render": 5.8e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 35.804499
+    }
+  },
+  {
+    "id": 12,
+    "query": "密度题中为什么 kg/m² 不是密度单位？",
+    "expected": "密度是质量 ÷ 体积，体积单位应为立方单位，不能把面积单位当体积单位",
+    "elapsed_seconds": 93.333,
+    "status": "SUCCESS",
+    "subject_path": "Geometry and Measure > Compound Measures > Density",
+    "session_id": 739,
+    "audit_status": "AUDITED_100_VERIFIED",
+    "core_answer": "因为密度定义为质量除以体积，单位应是质量单位除以体积单位（如 kg/m³）。kg/m² 是质量除以面积，不符合密度单位的核心结构，所以不是密度单位。",
+    "misconception_diagnosis": "学生混淆了密度单位中‘质量除以体积’的结构，错误地将面积单位（如 m²）当作体积单位（如 m³），未能识别体积单位必须是立方的。",
+    "key_aha_question": "If we look at the options above are there any that don't have mass or a volume?",
+    "recommended_talk_moves": [
+      "<Press for Accuracy>",
+      "<Revoicing>"
+    ],
+    "scaffolding_steps": [
+      "Step 1: 定义密度并强化体积单位为立方形式，通过提问让学生识别体积特征。",
+      "Step 2: 引导学生列举质量和体积单位示例，并检查 kg/m² 中的单位组合。",
+      "Step 3: 通过关键提问促使学生排除非体积单位，解释平方与立方的区别。"
+    ],
+    "answer_content": "因为密度定义为质量除以体积，单位应是质量单位除以体积单位（如 kg/m³）。kg/m² 是质量除以面积，不符合密度单位的核心结构，所以不是密度单位。\n\n诊断：学生混淆了密度单位中‘质量除以体积’的结构，错误地将面积单位（如 m²）当作体积单位（如 m³），未能识别体积单位必须是立方的。\n\n证据解释：结论基于以下证据：导师在 Turn 2 (E002) 明确密度是质量除以体积，单位必须是质量和体积；学生在 Turn 3 (E003) 识别体积单位是立方的；导师在 Turn 4 (E004) 确认体积单位是立方的。这些对话支持密度单位需要立方体积单位的事实。\n\n教学干预：\n- 使用 Socratic 提问引导学生分析单位结构，强调密度是复合度量。\n- 通过选项对比让学生识别非密度单位，强化质量与体积的关联。",
+    "citations": [
+      {
+        "session_id": 739,
+        "turn_id": 2,
+        "speaker": "tutor",
+        "quote_text": "Hello [STUDENT_NAME] :) sure so density is a measurement of mass per volume So essentially how much weight is occupied in a given space we measure denisty in mass per volume so we need to make sure our units are a mass and a volume Farhan do you know how we recognise volume units?",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 739,
+        "turn_id": 3,
+        "speaker": "student",
+        "quote_text": "v3 V cube",
+        "verifiable_in_duckdb": true
+      },
+      {
+        "session_id": 739,
+        "turn_id": 4,
+        "speaker": "tutor",
+        "quote_text": "Super so units are cubed :) and mass can be measured in kg, grams, tonnes etc",
+        "verifiable_in_duckdb": true
+      }
+    ],
+    "profiling": {
+      "retrieval_base": 0.103662,
+      "retrieval": 0.103673,
+      "assembly": 0.000545,
+      "context_prepare": 0.10422,
+      "generation": 93.228672,
+      "ttft": 0.0,
+      "stream_complete": 0.0,
+      "contract_validation": 9.3e-05,
+      "audit_render": 7.5e-05,
+      "output_ttft": 0.0,
+      "output_stream_seconds": 0.0,
+      "total": 93.33298
+    }
+  }
+]
