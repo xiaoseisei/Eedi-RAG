@@ -180,7 +180,6 @@ class PedagogicalCLI:
             lambda_diversity=0.7,
             model_reranker=model_reranker,
             chunk_strategy=self.chunk_strategy,
-            generator_contract_version=self.generator_contract_version,
             rerank_unit=self.rerank_unit,
             evidence_selection_count=self.evidence_selection_count,
             reranker_pool_size=self.reranker_pool_size,
@@ -190,6 +189,7 @@ class PedagogicalCLI:
             retriever=self.retriever,
             assembler=assembler,
             chunk_strategy=self.chunk_strategy,
+            generator_contract_version=self.generator_contract_version,
         )
         print(" ✅ 就绪！\n")
 

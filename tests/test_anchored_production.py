@@ -195,6 +195,37 @@ def test_cli_generator_contract_v2_is_explicit() -> None:
     assert cli.generator_contract_version == "v2"
 
 
+def test_cli_initialize_wires_generator_contract_to_pipeline(monkeypatch) -> None:
+    captured: dict[str, dict] = {}
+
+    class FakeStorage:
+        def __init__(self, **kwargs):
+            captured["storage"] = kwargs
+
+    class FakeRetriever:
+        def __init__(self, **kwargs):
+            captured["retriever"] = kwargs
+
+    class FakeAssembler:
+        def __init__(self, **kwargs):
+            captured["assembler"] = kwargs
+
+    class FakePipeline:
+        def __init__(self, **kwargs):
+            captured["pipeline"] = kwargs
+
+    monkeypatch.setattr("src.cli.DualEngineStorageManager", FakeStorage)
+    monkeypatch.setattr("src.cli.DualMetricRetriever", FakeRetriever)
+    monkeypatch.setattr("src.cli.PedagogicalGoldAssembler", FakeAssembler)
+    monkeypatch.setattr("src.cli.EndToEndPedagogicalRAGPipeline", FakePipeline)
+
+    cli = PedagogicalCLI(generator_contract_version="v2")
+    cli.initialize()
+
+    assert "generator_contract_version" not in captured["assembler"]
+    assert captured["pipeline"]["generator_contract_version"] == "v2"
+
+
 def test_pipeline_prepare_context_exposes_anchored_route_without_generation() -> None:
     class PreparedRetriever:
         retrieval_mode = "bm25_dense"
