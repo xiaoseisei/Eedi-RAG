@@ -26,7 +26,7 @@ import unicodedata
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError, field_validator
 
 try:
     from dotenv import load_dotenv
@@ -126,6 +126,15 @@ class _SemanticMisconceptionPayload(BaseModel):
     confusion_triggers: List[NonEmptyStr] = Field(min_length=1)
     verbatim_student_quotes: List[NonEmptyStr] = Field(min_length=1)
     source_turn_ids: List[int] = Field(default_factory=list)
+
+    @field_validator("error_choice", mode="before")
+    @classmethod
+    def blank_error_choice_is_missing(cls, value: Any) -> Any:
+        """A session may have no selected option; normalize an empty value to None."""
+
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return None
+        return value
 
 
 class _SemanticTutorStrategyPayload(BaseModel):
@@ -504,11 +513,12 @@ def _parse_and_ground_payload(
             if turn is None or turn.is_tutor:
                 raise ValueError(f"学生 source_turn_ids 包含不存在或非学生轮次: {turn_id}")
             student_turns.append(turn)
-    for quote in payload.misconception.verbatim_student_quotes:
-        if not any(validate_verbatim_grounding(quote, [turn])[0] for turn in student_turns):
-            raise ValueError(
-                f"学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): {quote!r}"
-            )
+    if not semantic_only:
+        for quote in payload.misconception.verbatim_student_quotes:
+            if not any(validate_verbatim_grounding(quote, [turn])[0] for turn in student_turns):
+                raise ValueError(
+                    f"学生原声引用未匹配其 source_turn_ids 对应的学生原文 (Grounding Gate Failed): {quote!r}"
+                )
 
     if semantic_only:
         tutor_turns = all_tutor_turns
@@ -519,7 +529,7 @@ def _parse_and_ground_payload(
             if turn is None or not turn.is_tutor:
                 raise ValueError(f"导师 source_turn_ids 包含不存在或非导师轮次: {turn_id}")
             tutor_turns.append(turn)
-    if not any(
+    if not semantic_only and not any(
         _canonicalize_evidence_text(payload.tutor_strategy.key_aha_question)
         in _canonicalize_evidence_text(turn.text)
         for turn in tutor_turns
@@ -534,6 +544,9 @@ def _parse_and_ground_payload(
         # Compatibility values are complete role sets until the external
         # evidence index replaces them with its logical-chain binding.
         misc_data["source_turn_ids"] = [turn.turn_id for turn in all_student_turns]
+        misc_data["verbatim_student_quotes"] = [
+            turn.text for turn in all_student_turns if not turn.is_greeting_or_noise
+        ] or [turn.text for turn in all_student_turns]
     misc_data.update(
         session_id=session.intervention_id,
         question_id=session.question_id,
@@ -542,6 +555,13 @@ def _parse_and_ground_payload(
     strategy_data = payload.tutor_strategy.model_dump()
     if semantic_only:
         strategy_data["source_turn_ids"] = [turn.turn_id for turn in all_tutor_turns]
+        if not any(
+            _canonicalize_evidence_text(payload.tutor_strategy.key_aha_question)
+            in _canonicalize_evidence_text(turn.text)
+            for turn in tutor_turns
+        ):
+            eligible = [turn for turn in all_tutor_turns if not turn.is_greeting_or_noise]
+            strategy_data["key_aha_question"] = (eligible or all_tutor_turns)[0].text
     strategy_data.update(session_id=session.intervention_id, question_id=session.question_id)
     return ExtractedPIU(
         session_id=session.intervention_id,
@@ -563,6 +583,7 @@ def extract_knowledge_from_session(
     evidence_audit: bool = False,
     allow_none_on_failure: bool = False,
     semantic_only: bool = False,
+    timeout_seconds: Optional[float] = None,
 ) -> ExtractedPIU:
     """
     对单个 CleanedSession 执行知识蒸馏抽取，内置“错误反馈自纠重试循环 (Self-Correction Loop)”。
@@ -616,7 +637,15 @@ def extract_knowledge_from_session(
             from openai import OpenAI
         except ImportError as exc:
             raise LLMUnavailableError("缺少 openai 依赖，无法执行真实 LLM 抽取。") from exc
-        kwargs = {"api_key": effective_api_key}
+        if timeout_seconds is None:
+            raw_timeout = os.environ.get("LLM_TIMEOUT_SECONDS", "120")
+            try:
+                timeout_seconds = float(raw_timeout)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("LLM_TIMEOUT_SECONDS must be a positive number") from exc
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        kwargs = {"api_key": effective_api_key, "timeout": float(timeout_seconds)}
         if effective_base_url:
             kwargs["base_url"] = effective_base_url
         client = OpenAI(**kwargs)

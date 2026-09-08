@@ -411,6 +411,8 @@ def _build_gold_context_v2(
     misconception_rows = storage.query_misconceptions_sql()
     strategy_rows = storage.query_strategies_sql()
     context_nodes: list[str] = []
+    selected_misconception: dict[str, Any] | None = None
+    selected_strategy: dict[str, Any] | None = None
     derived_facts = case.get("derived_facts", [])
     if derived_facts:
         if not isinstance(derived_facts, list) or any(
@@ -454,6 +456,27 @@ def _build_gold_context_v2(
         ):
             matching = [row for row in rows if int(row.get("session_id", -1)) == session_id]
             for row in matching:
+                # Gold context is evaluation-only, but the streaming generator
+                # still needs the same real card metadata that production
+                # assembly exposes (especially subject_path).  Preserve the
+                # first source-session card as a minimal selected candidate so
+                # Gold and Real tracks share the same response adapter.
+                metadata = {
+                    key: row.get(key)
+                    for key in (
+                        "session_id", "question_id", "subject_path",
+                        "misconception_name", "error_choice", "deep_mechanism",
+                        "pedagogical_goal", "strategy_category", "key_aha_question",
+                    )
+                    if has_value(row.get(key))
+                }
+                metadata.setdefault("session_id", session_id)
+                metadata.setdefault("subject_path", subject_path)
+                candidate = {"metadata": metadata, "document": ""}
+                if label == "misconception" and selected_misconception is None:
+                    selected_misconception = candidate
+                if label == "strategy" and selected_strategy is None:
+                    selected_strategy = candidate
                 safe_fields = {
                     key: row.get(key)
                     for key in (
@@ -542,6 +565,8 @@ def _build_gold_context_v2(
         raw_query=case["question"],
         prompt_context_markdown=prompt,
         evidence_turns=evidence_turns,
+        selected_misconception=selected_misconception,
+        selected_strategy=selected_strategy,
         deepeval_context_nodes=context_nodes,
         estimated_token_count=estimated,
         budget_violation=False,

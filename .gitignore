@@ -1,25 +1,30 @@
 # Python
+.env
+.venv/
 __pycache__/
 *.pyc
-.pytest_cache/
-.venv/
-
-# Test/evaluation runtime output (archive under reports/runtime when retained)
+data/db/
+data/chroma/
+tests/db/
+src/data/
+scripts/data/
+reports/eval/**/chroma/
+reports/eval/.scratch/
+reports/smoke/
+reports/staging/
 .test-tmp*/
 .audit-tmp*/
+
+# Test/evaluation runtime output (archive under reports/runtime when retained)
 .uv-cache-audit/
 reports/runtime/
-reports/eval/.scratch/
-reports/eval/**/chroma/
 reports/eval/chroma-migrated-*/
 
 # IDE
 .idea/
 
 # 环境变量（父级 AgentLearn/.gitignore 已忽略，此处兜底）
-.env
 
 # 运行时生成的存储引擎数据（可由 pipeline 重建，不入库）
-data/chroma/
 data/chroma-backups/
-data/db/
+

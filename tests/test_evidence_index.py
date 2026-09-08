@@ -122,6 +122,23 @@ def test_bind_card_replaces_llm_pointers_with_non_noise_role_turns():
     assert bound.source_turn_ids != [2]
 
 
+def test_bind_card_removes_quotes_from_noise_turns_and_keeps_real_text():
+    evidence_index = build_evidence_index(_session(), window_size=3, step=2)
+    card = StudentMisconceptionProfile(
+        session_id=42,
+        question_id=99,
+        subject_path="Number > Arithmetic",
+        misconception_name="Order of operations confusion",
+        deep_mechanism="The student applies division before multiplication incorrectly.",
+        verbatim_student_quotes=["yes"],
+        source_turn_ids=[3],
+    )
+
+    bound = bind_card_to_evidence_index(card, evidence_index)
+
+    assert bound.verbatim_student_quotes == ["I think the answer is B"]
+
+
 def test_bind_strategy_uses_non_noise_tutor_turns_and_is_deterministic():
     evidence_index = build_evidence_index(_session(), window_size=3, step=2)
     card = TutorStrategyProfile(

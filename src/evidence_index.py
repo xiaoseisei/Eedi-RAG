@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import unicodedata
 from typing import Dict, List, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -27,6 +29,17 @@ EVIDENCE_BINDING_POLICY = "deterministic_role_non_noise_v1"
 
 EvidenceRole = Literal["student", "tutor"]
 Card = Union[StudentMisconceptionProfile, TutorStrategyProfile]
+
+
+def _canonicalize_evidence_text(text: str) -> str:
+    """Normalize harmless formatting differences for deterministic rebinding."""
+
+    value = unicodedata.normalize("NFKC", str(text)).replace("\u200b", "")
+    value = value.translate(str.maketrans({
+        "‘": "'", "’": "'", "“": '"', "”": '"',
+        "–": "-", "—": "-", "−": "-", "…": "...",
+    }))
+    return re.sub(r"\s+", " ", value).strip()
 
 
 class EvidenceIndexWindow(BaseModel):
@@ -77,6 +90,7 @@ class EvidenceIndex(BaseModel):
     windows: List[EvidenceIndexWindow] = Field(default_factory=list)
     turn_ids: List[int] = Field(default_factory=list)
     turn_roles: Dict[int, EvidenceRole] = Field(default_factory=dict)
+    turn_texts: Dict[int, str] = Field(default_factory=dict)
     noise_turn_ids: List[int] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -86,6 +100,8 @@ class EvidenceIndex(BaseModel):
         turn_set = set(self.turn_ids)
         if set(self.turn_roles) != turn_set:
             raise ValueError("turn_roles 必须覆盖且仅覆盖所有 turn_ids")
+        if self.turn_texts and set(self.turn_texts) != turn_set:
+            raise ValueError("turn_texts 必须覆盖且仅覆盖所有 turn_ids")
         if not set(self.noise_turn_ids).issubset(turn_set):
             raise ValueError("noise_turn_ids 必须属于 turn_ids")
         covered = {
@@ -178,6 +194,7 @@ def _hash_index_payload(index: EvidenceIndex) -> str:
         "chain_id": index.chain_id,
         "turn_ids": index.turn_ids,
         "turn_roles": {str(key): value for key, value in sorted(index.turn_roles.items())},
+        "turn_texts": {str(key): value for key, value in sorted(index.turn_texts.items())},
         "noise_turn_ids": index.noise_turn_ids,
         "windows": [
             {
@@ -260,6 +277,7 @@ def build_evidence_index(
         windows=windows,
         turn_ids=turn_ids,
         turn_roles=turn_roles,
+        turn_texts={turn.turn_id: turn.text for turn in turns},
         noise_turn_ids=noise_turn_ids,
     )
     return index.model_copy(update={"evidence_index_hash": _hash_index_payload(index)})
@@ -299,13 +317,31 @@ def bind_card_to_evidence_index(card: Card, evidence_index: EvidenceIndex) -> Ca
     if not source_index_ids:
         raise ValueError("证据索引没有覆盖可绑定的角色 Turn，拒绝生成空指针")
 
-    update = {
+    turn_texts = getattr(evidence_index, "turn_texts", {}) or {}
+    update: dict[str, object] = {
         "source_turn_ids": eligible_turn_ids,
         "source_index_ids": source_index_ids,
         "evidence_binding_policy": EVIDENCE_BINDING_POLICY,
         "evidence_index_version": evidence_index.evidence_index_version,
         "evidence_index_hash": evidence_index.evidence_index_hash,
     }
+    if turn_texts:
+        eligible_texts = [
+            _canonicalize_evidence_text(turn_texts[turn_id])
+            for turn_id in eligible_turn_ids
+        ]
+        if isinstance(card, StudentMisconceptionProfile):
+            quotes = [
+                quote for quote in card.verbatim_student_quotes
+                if any(_canonicalize_evidence_text(quote) in text for text in eligible_texts)
+            ]
+            update["verbatim_student_quotes"] = quotes or [eligible_texts[0]]
+        elif not any(
+            _canonicalize_evidence_text(card.key_aha_question) in text
+            for text in eligible_texts
+        ):
+            update["key_aha_question"] = eligible_texts[0]
+
     return type(card).model_validate({**card.model_dump(), **update})
 
 

@@ -408,25 +408,8 @@ def test_generator_v2_uses_evidence_ids_and_materializes_exact_quotes(monkeypatc
     assert "quote_text=" not in sent[0]["messages"][1]["content"]
 
 
-def test_generator_v2_streaming_api_requests_stream_and_assembles_validated_response(monkeypatch):
-    content = json.dumps({
-        "subject_path": "Number",
-        "answer": "The student confused decimal places.",
-        "misconception_diagnosis": "The student treated 1dp as two decimal places.",
-        "evidence_explanation": "The dialogue contains the exact answer.",
-        "key_aha_question": "Which digit decides?",
-        "scaffolding_steps": [],
-        "pedagogical_intervention": [],
-        "recommended_talk_moves": [],
-        "claims": [{
-            "claim_id": "C1",
-            "claim_text": "The student gave 5.45.",
-            "claim_type": "fact",
-            "evidence_ids": ["E001"],
-        }],
-        "dialogue_citations": [{"evidence_id": "E001"}],
-        "transfer_question": None,
-    })
+def test_streaming_api_forwards_plain_text_without_json_validation(monkeypatch):
+    content = "The student confused decimal places."
 
     class Stream:
         def __iter__(self):
@@ -439,7 +422,9 @@ def test_generator_v2_streaming_api_requests_stream_and_assembles_validated_resp
     class Completions:
         def create(self, **kwargs):
             assert kwargs["stream"] is True
+            kwargs_seen.append(kwargs)
             return Stream()
+    kwargs_seen = []
 
     fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
     monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=lambda **kwargs: fake_client))
@@ -455,24 +440,37 @@ def test_generator_v2_streaming_api_requests_stream_and_assembles_validated_resp
         evidence_turns=[
             {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
         ],
+        selected_strategy={"metadata": {"subject_path": "Number"}},
     )
 
-    response = pipeline._generate_with_llm_streaming("q", ctx, {})
+    response_chunks = []
+    response = pipeline._generate_with_llm_streaming(
+        "q", ctx, {}, on_chunk=response_chunks.append
+    )
 
-    assert response.answer_content.startswith("The student confused")
+    assert "".join(response_chunks) == content
+    assert response.answer_content == content
+    assert response.__dict__["generator_grounding_text"] == content
     assert response.audit_status == "PENDING"
     assert response.__dict__["generation_stream"]["stream_requested"] is True
     assert response.__dict__["generation_stream"]["chunk_count"] == 2
+    assert response.__dict__["generation_stream"]["contract_validation_seconds"] == 0.0
+    assert "response_format" not in kwargs_seen[0]
+    streaming_prompt = kwargs_seen[0]["messages"][0]["content"]
+    assert "【最高优先级红线】" in streaming_prompt
+    assert "严格输出 JSON" not in streaming_prompt
+    assert "直接输出给用户的回答正文" in streaming_prompt
 
 
-def test_generator_v2_streaming_does_not_return_before_contract_validation(monkeypatch):
-    invalid = json.dumps({"subject_path": "Number"})
+def test_streaming_accepts_text_that_is_not_json(monkeypatch):
+    invalid = "This is a valid plain-text answer, even though it is not JSON."
     class Stream:
         def __iter__(self):
             return iter([SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=invalid))])])
 
     class Completions:
         def create(self, **kwargs):
+            assert "response_format" not in kwargs
             return Stream()
 
     fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
@@ -489,31 +487,15 @@ def test_generator_v2_streaming_does_not_return_before_contract_validation(monke
         evidence_turns=[
             {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "What does it round to?"}
         ],
+        selected_strategy={"metadata": {"subject_path": "Number"}},
     )
 
-    with pytest.raises(RAGGenerationError):
-        pipeline._generate_with_llm_streaming("q", ctx, {})
+    response = pipeline._generate_with_llm_streaming("q", ctx, {})
+    assert response.answer_content == invalid
 
 
-def test_ask_stream_emits_only_after_final_audit(monkeypatch):
-    content = json.dumps({
-        "subject_path": "Number",
-        "answer": "Direct answer.",
-        "misconception_diagnosis": "Diagnosis.",
-        "evidence_explanation": "Evidence.",
-        "key_aha_question": "Which digit decides?",
-        "scaffolding_steps": [],
-        "pedagogical_intervention": [],
-        "recommended_talk_moves": [],
-        "claims": [{
-            "claim_id": "C1",
-            "claim_text": "The student gave the observed answer.",
-            "claim_type": "fact",
-            "evidence_ids": ["E001"],
-        }],
-        "dialogue_citations": [{"evidence_id": "E001"}],
-        "transfer_question": None,
-    })
+def test_ask_stream_emits_before_final_audit(monkeypatch):
+    content = "Direct answer."
 
     class Stream:
         def __iter__(self):
@@ -540,24 +522,28 @@ def test_ask_stream_emits_only_after_final_audit(monkeypatch):
         evidence_turns=[
             {"session_id": 7, "turn_id": 9, "speaker": "tutor", "text": "Observed evidence."}
         ],
+        selected_strategy={"metadata": {"subject_path": "Number"}},
     )
     monkeypatch.setattr(
         pipeline,
         "_prepare_context_with_timings",
         lambda query, top_k_each, fetch_evidence: ({}, ctx, {"retrieval": 0.01, "assembly": 0.02}),
     )
-    audit_observed = []
+    events = []
 
     def audit(response, context):
-        audit_observed.append(response.audit_status)
+        events.append(("audit", response.audit_status))
         response.audit_status = "AUDITED_100_VERIFIED"
 
     monkeypatch.setattr(pipeline, "_audit_citations", audit)
     chunks = []
 
-    response = pipeline.ask_stream("q", mode="llm", on_chunk=chunks.append)
+    response = pipeline.ask_stream(
+        "q", mode="llm", on_chunk=lambda chunk: (chunks.append(chunk), events.append(("chunk", chunk)))
+    )
 
-    assert audit_observed == ["PENDING"]
+    assert events[0][0] == "chunk"
+    assert events[-1] == ("audit", "PENDING")
     assert response.audit_status == "AUDITED_100_VERIFIED"
     assert chunks
     assert "Direct answer." in "".join(chunks)

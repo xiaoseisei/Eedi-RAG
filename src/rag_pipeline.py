@@ -172,6 +172,20 @@ SYSTEM_PEDAGOGICAL_PROMPT_V2 = """你是资深中学数学教研专家。根据�
 """
 
 
+def _streaming_system_prompt() -> str:
+    lines = []
+    in_json = False
+    for line in SYSTEM_PEDAGOGICAL_PROMPT_V2.splitlines():
+        if "【输出格式】" in line or "严格输出 JSON" in line:
+            in_json = True
+            continue
+        if in_json:
+            continue
+        lines.append(line)
+    lines.append("【输出格式】直接输出给用户的回答正文，不要输出 JSON 或元数据。")
+    return "\n".join(lines)
+
+
 class EndToEndPedagogicalRAGPipeline:
     """
     端到端 RAG 问答与意图精准路由教研生成管道。
@@ -283,7 +297,7 @@ class EndToEndPedagogicalRAGPipeline:
                 timings["card_rerank"] = round(
                     _time.perf_counter() - card_rerank_started, 6
                 )
-                parent_limit = getattr(self.assembler, "parent_card_count", 3)
+                parent_limit = getattr(self.assembler, "parent_card_count", 5)
                 parent_cards: List[Dict[str, Any]] = []
                 for lane in ("misconceptions", "strategies"):
                     if ranked_lanes[lane] and len(parent_cards) < parent_limit:
@@ -311,7 +325,7 @@ class EndToEndPedagogicalRAGPipeline:
                 anchored_units = self.retriever.expand_anchored_logical_windows(
                     card_candidates,
                     parent_cards,
-                    window_size=6,
+                    window_size=7,
                     step=3,
                 )
                 timings["window_expand"] = round(
@@ -334,7 +348,7 @@ class EndToEndPedagogicalRAGPipeline:
                         "parent_card_count": len(parent_cards),
                         "parent_card_limit": parent_limit,
                         "evidence_unit_count": len(ranked_units),
-                        "evidence_window_size": 6,
+                        "evidence_window_size": 7,
                         "evidence_window_step": 3,
                     }
                 )
@@ -558,17 +572,145 @@ class EndToEndPedagogicalRAGPipeline:
         gold_ctx: GoldAssembledContext,
         retrieval_res: Dict[str, Any],
         *,
-        contract_version: str | None = None,
+        on_chunk: Callable[[str], None] | None = None,
+        request_started_at: float | None = None,
     ) -> PedagogicalGuidanceResponse:
-        """Generate through the provider stream and validate the full JSON."""
+        import time as _time
+        import openai
 
-        return self._generate_with_llm(
-            query,
-            gold_ctx,
-            retrieval_res,
-            contract_version=contract_version,
-            stream_response=True,
+        if not self.api_key:
+            raise RAGGenerationError("缺少 LLM_API_KEY，无法执行 LLM 生成")
+        if not self.model_name:
+            raise RAGGenerationError("缺少 LLM_MODEL，无法执行 LLM 生成")
+
+        try:
+            client = openai.OpenAI(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.llm_timeout_seconds,
+            )
+        except Exception as exc:
+            raise RAGGenerationError(f"LLM 客户端初始化失败: {exc}") from exc
+
+        context_tokens = getattr(gold_ctx, "generator_context_token_count", None)
+        if context_tokens is None:
+            context_tokens = getattr(gold_ctx, "estimated_token_count", 0)
+        context_budget = getattr(gold_ctx, "context_budget_tokens", None)
+        if context_budget is not None and context_tokens > context_budget:
+            raise RAGGenerationError(
+                "Generator context exceeds token budget: "
+                f"estimated={context_tokens}, budget={context_budget}"
+            )
+        generator_context = getattr(gold_ctx, "prompt_context_markdown", "")
+        user_prompt = (
+            f"【用户教研提问】: {query}\n\n"
+            f"{generator_context}\n\n"
+            "请直接输出回答正文。"
         )
+        request_kwargs: Dict[str, Any] = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": _streaming_system_prompt()},
+                {"role": "user", "content": user_prompt},
+            ],
+            "stream": True,
+            "max_completion_tokens": 1024,
+        }
+        stream_thinking = os.getenv("LLM_STREAM_THINKING", "disabled").strip().lower()
+        if stream_thinking not in {"enabled", "disabled"}:
+            raise ValueError("LLM_STREAM_THINKING must be enabled or disabled")
+        request_kwargs["extra_body"] = {"thinking": {"type": stream_thinking}}
+        if stream_thinking == "disabled":
+            request_kwargs["temperature"] = 0.2
+
+        started = _time.perf_counter()
+        first_chunk: float | None = None
+        parts: List[str] = []
+        try:
+            stream = client.chat.completions.create(**request_kwargs)
+            for event in stream:
+                choices = getattr(event, "choices", None) or []
+                if not choices:
+                    continue
+                delta = getattr(choices[0], "delta", None)
+                piece = getattr(delta, "content", None) if delta is not None else None
+                if not piece:
+                    continue
+                piece = str(piece)
+                if first_chunk is None:
+                    first_chunk = _time.perf_counter() - started
+                parts.append(piece)
+                if on_chunk is not None:
+                    on_chunk(piece)
+        except Exception as exc:
+            if parts:
+                raise RAGGenerationError("LLM 已开始输出，但流式传输中断") from exc
+            raise RAGGenerationError(f"LLM 纯文本流式生成失败: {exc}") from exc
+
+        answer = "".join(parts).strip()
+        if not answer:
+            raise RAGGenerationError("LLM 纯文本流式生成结果为空")
+
+        evidence = list(gold_ctx.evidence_turns)
+        if not evidence:
+            raise CitationAuditError("流式回答缺少可审计的真实对白证据")
+        subject_path = ""
+        session_id: int | None = None
+        misconception = "未观察到充分证据"
+        key_aha = "未观察到充分证据"
+        for candidate in (
+            gold_ctx.selected_misconception,
+            gold_ctx.selected_strategy,
+        ):
+            metadata = (candidate or {}).get("metadata", {})
+            subject_path = subject_path or metadata.get("subject_path", "")
+            session_id = session_id or metadata.get("session_id")
+            misconception = metadata.get("deep_mechanism") or misconception
+            key_aha = metadata.get("key_aha_question") or key_aha
+        if not subject_path:
+            subject_path = str(evidence[0].get("subject_path") or "")
+        if not subject_path:
+            raise RAGGenerationError("流式回答缺少真实 subject_path 来源")
+        session_id = session_id or evidence[0].get("session_id")
+        citations = [
+            DialogueCitation(
+                session_id=int(turn["session_id"]),
+                turn_id=int(turn["turn_id"]),
+                speaker=turn["speaker"],
+                quote_text=turn["text"],
+                verifiable_in_duckdb=False,
+            )
+            for turn in evidence
+        ]
+        response = PedagogicalGuidanceResponse(
+            query=query,
+            subject_path=subject_path,
+            session_id=int(session_id) if session_id is not None else None,
+            answer_content=answer,
+            misconception_diagnosis=misconception,
+            key_aha_question=key_aha,
+            recommended_talk_moves=[],
+            scaffolding_steps=[],
+            dialogue_citations=citations,
+            transfer_question=None,
+            retrieved_sources_debug=self._extract_debug_sources(retrieval_res),
+            audit_status="PENDING",
+        )
+        elapsed = _time.perf_counter() - started
+        response.__dict__["generation_stream"] = {
+            "stream_requested": True,
+            "chunk_count": len(parts),
+            "content_chars": len(answer),
+            "ttft": round(first_chunk or 0.0, 6),
+            "stream_complete": round(elapsed, 6),
+            "answer_stream_complete": round(
+                _time.perf_counter() - (request_started_at or started), 6
+            ),
+            "contract_validation_seconds": 0.0,
+        }
+        response.__dict__["generator_core_answer"] = answer
+        response.__dict__["generator_grounding_text"] = answer
+        return response
 
     def _generate_with_llm(
         self,
@@ -1111,7 +1253,13 @@ class EndToEndPedagogicalRAGPipeline:
         generation_started = _time.perf_counter()
         if mode in {"llm", "auto"}:
             response = (
-                self._generate_with_llm_streaming(query, gold_ctx, retrieval_res)
+                self._generate_with_llm_streaming(
+                    query,
+                    gold_ctx,
+                    retrieval_res,
+                    on_chunk=on_chunk if stream else None,
+                    request_started_at=request_started,
+                )
                 if stream
                 else self._generate_with_llm(query, gold_ctx, retrieval_res)
             )
@@ -1137,7 +1285,13 @@ class EndToEndPedagogicalRAGPipeline:
         )
         timings["audit_render"] = round(_time.perf_counter() - audit_started, 6)
 
-        if stream and on_chunk is not None:
+        if stream and on_chunk is not None and mode in {"auto", "llm"}:
+            generation_profile = response.__dict__.get("generation_stream", {})
+            timings["output_ttft"] = float(generation_profile.get("ttft") or 0.0)
+            timings["output_stream_seconds"] = float(
+                generation_profile.get("stream_complete") or 0.0
+            )
+        elif stream and on_chunk is not None:
             output_started = _time.perf_counter()
             self._emit_stream_text(response.rendered_markdown or response.answer_content or "", on_chunk)
             timings["output_ttft"] = round(

@@ -25,6 +25,7 @@ import os
 import re
 import sys
 import json
+import math
 import logging
 from itertools import combinations
 from pathlib import Path
@@ -99,20 +100,21 @@ class PedagogicalGoldAssembler:
     def __init__(
         self,
         lambda_diversity: float = 0.7,
-        max_prompt_tokens: int = 2000,
+        max_prompt_tokens: int = 4000,
         model_reranker: Any | None = None,
         reranker_pool_size: int = 15,
         chunk_strategy: str = "card",
         rerank_unit: str = "card",
-        evidence_selection_count: int = 5,
-        parent_card_count: int = 3,
+        evidence_selection_count: int = 7,
+        parent_card_count: int = 5,
+        anchored_assembly_strategy: str = "greedy_budget",
     ):
         """
         初始化装配器。
         
         参数:
           lambda_diversity: MMR 平衡参数 (0.0~1.0, 越大越侧重相关性，越小越侧重多样性去重，默认 0.7)
-          max_prompt_tokens: 黄金上下文最大 Token 预算上限 (默认 2000)
+          max_prompt_tokens: 黄金上下文最大 Token 预算上限 (默认 4000)
         """
         self.lambda_param = max(0.0, min(1.0, lambda_diversity))
         self.max_prompt_tokens = max_prompt_tokens
@@ -132,6 +134,9 @@ class PedagogicalGoldAssembler:
         if reranker_pool_size <= 0:
             raise ValueError("reranker_pool_size must be positive")
         self.reranker_pool_size = reranker_pool_size
+        if anchored_assembly_strategy not in {"greedy_budget", "heuristic_combinatorial"}:
+            raise ValueError("anchored_assembly_strategy must be 'greedy_budget' or 'heuristic_combinatorial'")
+        self.anchored_assembly_strategy = anchored_assembly_strategy
 
     def rerank_candidates(
         self,
@@ -686,6 +691,106 @@ class PedagogicalGoldAssembler:
             ),
         )
 
+        if self.anchored_assembly_strategy == "greedy_budget":
+            parent_cards = retrieval_results.get("anchored_parent_cards") or []
+            if not parent_cards:
+                parent_cards = misc_candidates + strat_candidates
+            parent_fact_nodes = self._render_parent_fact_nodes(parent_cards)
+
+            def render(
+                units: List[Dict[str, Any]],
+            ) -> Tuple[str, List[Dict[str, Any]], int, List[str], int]:
+                ordered_units = sorted(
+                    units,
+                    key=lambda unit: (
+                        int(unit.get("reranker_rank", 10**9)),
+                        -float(unit.get("reranker_score", 0.0)),
+                        str(unit.get("chunk_id", "")),
+                    ),
+                )
+                ordered = self._ordered_unit_evidence(ordered_units)
+                if ordered:
+                    catalog_text, evidence_ids = self._render_compact_evidence_catalog(ordered)
+                else:
+                    catalog_text, evidence_ids = "", {}
+                window_nodes = self._render_unique_window_nodes(
+                    ordered_units,
+                    anchored=True,
+                    evidence_ids=evidence_ids,
+                )
+                context_nodes = [*parent_fact_nodes, *window_nodes]
+                lines = [
+                    "# 【权威教研参考知识基座 (Anchored Logical-Window Context)】",
+                    "> Parent Card 提供有来源的派生事实；真实 Turn 仍是唯一可引用的原始证据。",
+                ]
+                if parent_fact_nodes:
+                    lines.extend(["", "## 一、 Parent Card 派生事实", *parent_fact_nodes])
+                lines.extend(["", "## 二、 Anchored Reranker 排序后的真实逻辑链证据", *window_nodes])
+                lines.extend(
+                    [
+                        "",
+                        "## 三、 可引用的真实 Turn 证据",
+                        "- 仅允许引用上方逻辑链窗口中逐字出现的 `[Turn N]` 原文。",
+                    ]
+                )
+                prompt = "\n\n".join(lines)
+                final_context = "\n\n".join(part for part in (prompt, catalog_text) if part)
+                estimated = estimate_text_tokens(final_context)
+                return prompt, ordered, estimated, context_nodes, estimate_text_tokens(catalog_text) if catalog_text else 0
+
+            selected_units: List[Dict[str, Any]] = []
+            seen_turn_keys: Set[Tuple[int, int]] = set()
+            prompt_markdown, ordered_evidence, estimated_tokens, context_nodes, catalog_tokens = render(selected_units)
+
+            for unit in ranked_units:
+                if len(selected_units) >= self.evidence_selection_count:
+                    break
+                unit_turn_keys = {
+                    (int(t.get("session_id", -1)), int(t["turn_id"]))
+                    for t in unit.get("evidence_turns", [])
+                    if t.get("turn_id") is not None
+                }
+                if selected_units and unit_turn_keys and unit_turn_keys.issubset(seen_turn_keys):
+                    continue
+                trial_units = selected_units + [unit]
+                trial_prompt, trial_evidence, trial_tokens, trial_nodes, trial_catalog = render(trial_units)
+                if trial_tokens > self.max_prompt_tokens:
+                    continue
+                selected_units.append(unit)
+                seen_turn_keys.update(unit_turn_keys)
+                prompt_markdown, ordered_evidence, estimated_tokens, context_nodes, catalog_tokens = (
+                    trial_prompt, trial_evidence, trial_tokens, trial_nodes, trial_catalog
+                )
+
+            if not selected_units:
+                raise ValueError("anchored logical-window assembly cannot fit any candidate within the token budget")
+
+            selected_units.sort(
+                key=lambda unit: (
+                    int(unit.get("reranker_rank", 10**9)),
+                    -float(unit.get("reranker_score", 0.0)),
+                    str(unit.get("chunk_id", "")),
+                ),
+            )
+            return GoldAssembledContext(
+                raw_query=raw_query,
+                prompt_context_markdown=prompt_markdown,
+                selected_misconception=selected_misc,
+                selected_strategy=selected_strat,
+                selected_windows=[],
+                selected_evidence_units=selected_units,
+                chunk_strategy="card",
+                rerank_unit="anchored_logical_window",
+                evidence_selection_count=len(selected_units),
+                evidence_turns=ordered_evidence,
+                estimated_token_count=estimated_tokens,
+                compression_ratio=0.0,
+                budget_violation=False,
+                truncation_loss=0,
+                deepeval_context_nodes=context_nodes,
+                catalog_token_count=catalog_tokens,
+            )
+
         # Preserve coverage of the selected Parent card pointers before using
         # the remaining rank budget.  This is deterministic and uses only the
         # parent cards already selected by the production pipeline; it does not
@@ -749,11 +854,7 @@ class PedagogicalGoldAssembler:
                 and str(selected_strat.get("chunk_id", "")).strip() in parent_card_ids
                 else None
             )
-            focused_parent_sessions = (
-                {selected_strategy_session}
-                if selected_strategy_session is not None
-                else strategy_sessions or preferred_parent_sessions
-            )
+            focused_parent_sessions = strategy_sessions or preferred_parent_sessions
         elif asks_student and not asks_tutor:
             misconception_sessions = {
                 session_id
@@ -772,11 +873,7 @@ class PedagogicalGoldAssembler:
                 and str(selected_misc.get("chunk_id", "")).strip() in parent_card_ids
                 else None
             )
-            focused_parent_sessions = (
-                {selected_misc_session}
-                if selected_misc_session is not None
-                else misconception_sessions or preferred_parent_sessions
-            )
+            focused_parent_sessions = misconception_sessions or preferred_parent_sessions
         elif asks_student and asks_tutor:
             max_kind_count = max(
                 (len(kinds) for kinds in session_kind_counts.values()),
@@ -994,67 +1091,87 @@ class PedagogicalGoldAssembler:
         max_selection = min(self.evidence_selection_count, len(candidate_pool))
         best: Tuple[Tuple[Any, ...], List[Dict[str, Any]], str, List[str], int, int] | None = None
         best_with_endpoints: Tuple[Tuple[Any, ...], List[Dict[str, Any]], str, List[str], int, int] | None = None
-        for size in range(1, max_selection + 1):
-            for indexes in combinations(range(len(candidate_pool)), size):
-                units = [candidate_pool[index] for index in indexes]
-                trial_prompt, trial_evidence, trial_tokens, trial_nodes, trial_catalog_tokens = render(units)
-                if trial_tokens > self.max_prompt_tokens:
-                    continue
-                keys = {
-                    (int(item["session_id"]), int(item["turn_id"]))
-                    for item in trial_evidence
-                }
-                covered_parent = len(keys & parent_pointer_keys)
-                card_ids = set().union(*(parent_card_ids_for_unit(unit) for unit in units))
-                roles = {
-                    str(item.get("speaker", "")).strip()
-                    for item in trial_evidence
-                    if str(item.get("speaker", "")).strip()
-                }
-                covered_endpoints = set().union(
-                    *(endpoint_markers_by_unit.get(unit_identity(unit), set()) for unit in units)
-                )
-                sessions = {unit_range(unit)[0] for unit in units}
-                score = (
-                    covered_parent,
-                    len(card_ids),
-                    len(keys),
-                    len(covered_endpoints),
-                    len(roles),
-                    -len(sessions),
-                    -sum(int(unit.get("reranker_rank", 10**9)) for unit in units),
-                    tuple(-int(unit.get("reranker_rank", 10**9)) for unit in units),
-                )
-                if best is None or score > best[0]:
-                    best = (score, units, trial_prompt, trial_nodes, trial_tokens, trial_catalog_tokens)
-                if endpoint_target and endpoint_target <= covered_endpoints:
-                    temporal_score = temporal_coverage_score(keys)
-                    endpoint_score = (
-                        temporal_score[0],
-                        temporal_score[2],
-                        temporal_score[3],
-                        temporal_score[1],
+        total_comb = sum(math.comb(len(candidate_pool), s) for s in range(1, max_selection + 1)) if candidate_pool else 0
+
+        if total_comb <= 25000:
+            for size in range(1, max_selection + 1):
+                for indexes in combinations(range(len(candidate_pool)), size):
+                    units = [candidate_pool[index] for index in indexes]
+                    trial_prompt, trial_evidence, trial_tokens, trial_nodes, trial_catalog_tokens = render(units)
+                    if trial_tokens > self.max_prompt_tokens:
+                        continue
+                    keys = {
+                        (int(item["session_id"]), int(item["turn_id"]))
+                        for item in trial_evidence
+                    }
+                    covered_parent = len(keys & parent_pointer_keys)
+                    card_ids = set().union(*(parent_card_ids_for_unit(unit) for unit in units))
+                    roles = {
+                        str(item.get("speaker", "")).strip()
+                        for item in trial_evidence
+                        if str(item.get("speaker", "")).strip()
+                    }
+                    covered_endpoints = set().union(
+                        *(endpoint_markers_by_unit.get(unit_identity(unit), set()) for unit in units)
+                    )
+                    sessions = {unit_range(unit)[0] for unit in units}
+                    score = (
                         covered_parent,
                         len(card_ids),
+                        len(keys),
                         len(covered_endpoints),
                         len(roles),
                         -len(sessions),
                         -sum(int(unit.get("reranker_rank", 10**9)) for unit in units),
                         tuple(-int(unit.get("reranker_rank", 10**9)) for unit in units),
                     )
-                    if best_with_endpoints is None or endpoint_score > best_with_endpoints[0]:
-                        best_with_endpoints = (
-                            endpoint_score,
-                            units,
-                            trial_prompt,
-                            trial_nodes,
-                            trial_tokens,
-                            trial_catalog_tokens,
+                    if best is None or score > best[0]:
+                        best = (score, units, trial_prompt, trial_nodes, trial_tokens, trial_catalog_tokens)
+                    if endpoint_target and endpoint_target <= covered_endpoints:
+                        temporal_score = temporal_coverage_score(keys)
+                        endpoint_score = (
+                            temporal_score[0],
+                            temporal_score[2],
+                            temporal_score[3],
+                            temporal_score[1],
+                            covered_parent,
+                            len(card_ids),
+                            len(covered_endpoints),
+                            len(roles),
+                            -len(sessions),
+                            -sum(int(unit.get("reranker_rank", 10**9)) for unit in units),
+                            tuple(-int(unit.get("reranker_rank", 10**9)) for unit in units),
                         )
-        if best is None:
-            raise ValueError("anchored logical-window assembly cannot fit any candidate within the token budget")
-        chosen = best_with_endpoints or best
-        _, selected_units, prompt_markdown, context_nodes, estimated_tokens, catalog_tokens = chosen
+                        if best_with_endpoints is None or endpoint_score > best_with_endpoints[0]:
+                            best_with_endpoints = (
+                                endpoint_score,
+                                units,
+                                trial_prompt,
+                                trial_nodes,
+                                trial_tokens,
+                                trial_catalog_tokens,
+                            )
+            if best is None:
+                raise ValueError("anchored logical-window assembly cannot fit any candidate within the token budget")
+            chosen = best_with_endpoints or best
+            _, selected_units, prompt_markdown, context_nodes, estimated_tokens, catalog_tokens = chosen
+        else:
+            selected_units = []
+            seen_turn_keys = set()
+            for unit in candidate_pool:
+                if len(selected_units) >= max_selection:
+                    break
+                unit_turn_keys = {(int(t.get("session_id", -1)), int(t["turn_id"])) for t in unit.get("evidence_turns", [])}
+                if selected_units and unit_turn_keys and unit_turn_keys.issubset(seen_turn_keys):
+                    continue
+                trial_units = selected_units + [unit]
+                trial_prompt, trial_evidence, trial_tokens, trial_nodes, trial_catalog = render(trial_units)
+                if trial_tokens > self.max_prompt_tokens:
+                    continue
+                selected_units.append(unit)
+                seen_turn_keys.update(unit_turn_keys)
+            if not selected_units:
+                raise ValueError("anchored logical-window assembly cannot fit any candidate within the token budget")
         prompt_markdown, ordered_evidence, estimated_tokens, context_nodes, catalog_tokens = render(selected_units)
         selected_units.sort(
             key=lambda unit: (

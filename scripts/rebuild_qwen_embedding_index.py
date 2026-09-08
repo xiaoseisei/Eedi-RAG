@@ -167,6 +167,25 @@ def _load_documents(db_path: Path) -> dict[str, list[dict[str, Any]]]:
         connection.close()
 
 
+def _upsert_rows(
+    collection: Any,
+    rows: list[dict[str, Any]],
+    *,
+    batch_size: int = 5_000,
+) -> None:
+    """Upsert rows in batches below Chroma's local maximum batch size."""
+
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    for start in range(0, len(rows), batch_size):
+        batch = rows[start : start + batch_size]
+        collection.upsert(
+            ids=[row["id"] for row in batch],
+            documents=[row["document"] for row in batch],
+            metadatas=[row["metadata"] for row in batch],
+        )
+
+
 def _load_dotenv_if_available() -> None:
     try:
         from dotenv import load_dotenv
@@ -218,11 +237,7 @@ def main(argv: list[str] | None = None) -> int:
             embedding_function=provider,
         )
         if rows:
-            collection.upsert(
-                ids=[row["id"] for row in rows],
-                documents=[row["document"] for row in rows],
-                metadatas=[row["metadata"] for row in rows],
-            )
+            _upsert_rows(collection, rows)
         collection_counts[collection_name] = len(rows)
 
     from chromadb.api.client import SharedSystemClient

@@ -7,6 +7,32 @@ import json
 import duckdb
 
 
+def test_qwen_index_upserts_large_collection_in_chroma_safe_batches() -> None:
+    from scripts.rebuild_qwen_embedding_index import _upsert_rows
+
+    class RecordingCollection:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, list]] = []
+
+        def upsert(self, *, ids, documents, metadatas) -> None:
+            self.calls.append({
+                "ids": list(ids),
+                "documents": list(documents),
+                "metadatas": list(metadatas),
+            })
+
+    rows = [
+        {"id": f"w-{index}", "document": f"doc-{index}", "metadata": {"index": index}}
+        for index in range(11_337)
+    ]
+    collection = RecordingCollection()
+
+    _upsert_rows(collection, rows)
+
+    assert [len(call["ids"]) for call in collection.calls] == [5_000, 5_000, 1_337]
+    assert [item for call in collection.calls for item in call["ids"]] == [f"w-{index}" for index in range(11_337)]
+
+
 def test_qwen_index_loader_reads_duckdb_without_chroma(tmp_path: Path) -> None:
     from scripts.rebuild_qwen_embedding_index import _load_documents
 

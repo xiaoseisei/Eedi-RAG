@@ -212,6 +212,10 @@ def test_gold_context_v2_has_card_facts_complete_windows_and_boundaries() -> Non
     context = _build_gold_context_v2(case, sessions, Storage())
 
     assert "[CARD_FACT]" in context.prompt_context_markdown
+    assert context.selected_misconception is not None
+    assert context.selected_misconception["metadata"]["subject_path"] == "Number > Rounding and Estimating > Rounding to Decimal Places"
+    assert context.selected_strategy is not None
+    assert context.selected_strategy["metadata"]["subject_path"] == "Number > Rounding and Estimating > Rounding to Decimal Places"
     assert "[AUTHORITATIVE_TURN]" in context.prompt_context_markdown
     assert "[ALLOWED_INFERENCE]" in context.prompt_context_markdown
     assert "place-value confusion" in context.prompt_context_markdown

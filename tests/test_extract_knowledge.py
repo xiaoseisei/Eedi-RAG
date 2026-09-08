@@ -399,6 +399,37 @@ def test_semantic_only_ignores_llm_source_turn_ids_and_grounds_quotes_by_role(
     assert extracted.tutor_strategy.source_turn_ids == [turn.turn_id for turn in tutor_turns]
 
 
+def test_semantic_only_treats_blank_error_choice_as_missing(
+    sample_session: CleanedSession, mock_llm_response: dict
+):
+    response = json.loads(json.dumps(mock_llm_response))
+    response["misconception"]["error_choice"] = ""
+    extracted = extract_knowledge_from_session(
+        sample_session,
+        llm_client=MockTestLLMClient(response),
+        semantic_only=True,
+    )
+    assert extracted.misconception.error_choice is None
+
+
+def test_semantic_only_replaces_non_verbatim_model_quotes_with_real_turns(
+    sample_session: CleanedSession, mock_llm_response: dict
+):
+    response = json.loads(json.dumps(mock_llm_response))
+    response["misconception"]["verbatim_student_quotes"] = ["I GUESSED"]
+    response["tutor_strategy"]["key_aha_question"] = "A corrected model sentence"
+
+    extracted = extract_semantic_cards_from_session(
+        sample_session,
+        llm_client=MockTestLLMClient(response),
+        max_retries=1,
+    )
+    real_students = [turn.text for turn in sample_session.turns if not turn.is_tutor and not turn.is_greeting_or_noise]
+    real_tutors = [turn.text for turn in sample_session.turns if turn.is_tutor and not turn.is_greeting_or_noise]
+    assert extracted.misconception.verbatim_student_quotes == real_students
+    assert extracted.tutor_strategy.key_aha_question == real_tutors[0]
+
+
 def test_grounding_rejects_aha_bound_to_wrong_or_unmatched_turn(
     sample_session: CleanedSession, mock_llm_response: dict
 ):

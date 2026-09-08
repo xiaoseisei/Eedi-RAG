@@ -262,9 +262,9 @@ def test_logical_evidence_rerank_preserves_ranked_units_as_context():
     assert "可引用的真实 Turn 证据" in result.prompt_context_markdown
 
 
-def _overlapping_window(window_id: str, turns: list[int]) -> dict:
+def _overlapping_window(window_id: str, turns: list[int], session_id: int = 10) -> dict:
     evidence = [
-        {"session_id": 10, "turn_id": turn_id, "speaker": "student", "text": f"Turn {turn_id} " + "x" * 60}
+        {"session_id": session_id, "turn_id": turn_id, "speaker": "student", "text": f"Turn {turn_id} " + "x" * 60}
         for turn_id in turns
     ]
     document = "\n".join(
@@ -275,7 +275,7 @@ def _overlapping_window(window_id: str, turns: list[int]) -> dict:
         "chunk_id": window_id,
         "document": document,
         "metadata": {
-            "session_id": 10,
+            "session_id": session_id,
             "window_start_turn": turns[0],
             "window_end_turn": turns[-1],
         },
@@ -460,6 +460,7 @@ def test_anchored_assembler_selects_conversation_endpoints_and_roles():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=2,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "why?",
         {
@@ -488,6 +489,7 @@ def test_anchored_assembler_requires_primary_session_endpoints_when_budget_allow
         rerank_unit="anchored_logical_window",
         evidence_selection_count=2,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "q",
         {
@@ -519,6 +521,7 @@ def test_anchored_assembler_maximizes_unique_turns_after_endpoint_constraint():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=3,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "q",
         {
@@ -551,6 +554,7 @@ def test_anchored_assembler_prefers_primary_session_prefix_after_unique_tie():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=3,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "q",
         {
@@ -598,6 +602,7 @@ def test_anchored_assembler_prioritizes_parent_coverage_over_endpoint_bonus():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=1,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "why?",
         {
@@ -655,6 +660,7 @@ def test_anchored_assembler_prefers_primary_parent_coverage_over_distractor_sess
         rerank_unit="anchored_logical_window",
         evidence_selection_count=1,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "q",
         {
@@ -711,6 +717,7 @@ def test_anchored_assembler_prefers_session_with_both_parent_card_kinds():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=1,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "学生和导师如何处理这个问题？",
         {
@@ -812,6 +819,7 @@ def test_anchored_assembler_prefers_window_that_fills_temporal_gap():
         rerank_unit="anchored_logical_window",
         evidence_selection_count=3,
         max_prompt_tokens=2000,
+        anchored_assembly_strategy="heuristic_combinatorial",
     ).assemble(
         "q",
         {
@@ -830,8 +838,12 @@ def test_anchored_assembler_prefers_window_that_fills_temporal_gap():
     assert [item["chunk_id"] for item in result.selected_evidence_units] == ["left", "right", "tail"]
 
 
-def test_assembler_default_budget_is_two_thousand_tokens():
-    assert PedagogicalGoldAssembler().max_prompt_tokens == 2000
+def test_assembler_default_budget_is_four_thousand_tokens():
+    assembler = PedagogicalGoldAssembler()
+    assert assembler.max_prompt_tokens == 4000
+    assert assembler.evidence_selection_count == 7
+    assert assembler.parent_card_count == 5
+    assert assembler.anchored_assembly_strategy == "greedy_budget"
 
 
 def test_anchored_assembler_preserves_parent_anchor_coverage_when_budget_is_limited():
@@ -846,6 +858,7 @@ def test_anchored_assembler_preserves_parent_anchor_coverage_when_budget_is_limi
         rerank_unit="anchored_logical_window",
         evidence_selection_count=1,
         max_prompt_tokens=1500,
+        anchored_assembly_strategy="heuristic_combinatorial",
     )
 
     windows[0]["metadata"]["parent_contexts"] = [{"card_id": "parent-misconception"}]
@@ -867,3 +880,122 @@ def test_anchored_assembler_preserves_parent_anchor_coverage_when_budget_is_limi
     assert result.evidence_turns
     assert {item["chunk_id"] for item in result.selected_evidence_units} == {"anchor"}
     assert any(item["turn_id"] == 10 for item in result.evidence_turns)
+
+
+def test_anchored_assembler_greedy_fallback_on_combinatorial_explosion():
+    # 28 candidate windows across sessions with max_selection=7 yields > 1.6M combinations.
+    # The assembler must safely fallback to greedy linear budget packing in milliseconds.
+    windows = []
+    for i in range(28):
+        window = _overlapping_window(f"win_{i}", [i * 2 + 1, i * 2 + 2], session_id=100)
+        window["reranker_rank"] = i + 1
+        window["reranker_score"] = 1.0 - i * 0.01
+        windows.append(window)
+
+    assembler = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=7,
+        max_prompt_tokens=4000,
+        anchored_assembly_strategy="heuristic_combinatorial",
+    )
+    result = assembler.assemble(
+        "test query",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [{
+                "chunk_id": "m1",
+                "metadata": {"session_id": 100, "source_turn_ids": [1]},
+                "evidence_turns": [],
+            }],
+            "strategies": [],
+            "evidence_units": windows,
+        },
+    )
+
+    assert len(result.selected_evidence_units) == 7
+    assert result.estimated_token_count <= 4000
+    assert not result.budget_violation
+
+
+def test_anchored_assembler_greedy_budget_packs_by_reranker_rank_and_deduplicates():
+    w1 = _overlapping_window("w1", [1, 2, 3])
+    w1["reranker_rank"] = 1
+    w1["reranker_score"] = 0.95
+    # w2 is a strict subset of w1's turns [2, 3] -> must be skipped by greedy packing
+    w2 = _overlapping_window("w2", [2, 3])
+    w2["reranker_rank"] = 2
+    w2["reranker_score"] = 0.90
+    # w3 brings fresh turns [4, 5] -> must be included
+    w3 = _overlapping_window("w3", [4, 5])
+    w3["reranker_rank"] = 3
+    w3["reranker_score"] = 0.85
+
+    assembler = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=2,
+        max_prompt_tokens=4000,
+        anchored_assembly_strategy="greedy_budget",
+    )
+    result = assembler.assemble(
+        "test query",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [],
+            "strategies": [],
+            "evidence_units": [w1, w2, w3],
+        },
+    )
+
+    selected_ids = [unit["chunk_id"] for unit in result.selected_evidence_units]
+    assert selected_ids == ["w1", "w3"]
+    assert len(result.selected_evidence_units) == 2
+
+
+def test_anchored_assembler_greedy_budget_enforces_token_limit():
+    import pytest
+
+    w1 = _overlapping_window("w1", list(range(1, 10)))
+    w1["reranker_rank"] = 1
+    w1["reranker_score"] = 0.95
+    w2 = _overlapping_window("w2", list(range(10, 30)))
+    w2["reranker_rank"] = 2
+    w2["reranker_score"] = 0.85
+
+    # Budget 800: fits w1 (approx 640 tokens) but rejects w2 (which would exceed 800)
+    assembler_800 = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=2,
+        max_prompt_tokens=800,
+        anchored_assembly_strategy="greedy_budget",
+    )
+    result = assembler_800.assemble(
+        "test query",
+        {
+            "chunk_strategy": "card",
+            "misconceptions": [],
+            "strategies": [],
+            "evidence_units": [w1, w2],
+        },
+    )
+
+    assert result.estimated_token_count <= 800
+    assert [u["chunk_id"] for u in result.selected_evidence_units] == ["w1"]
+
+    # Budget 200: too small even for w1 alone -> raises ValueError
+    assembler_200 = PedagogicalGoldAssembler(
+        rerank_unit="anchored_logical_window",
+        evidence_selection_count=2,
+        max_prompt_tokens=200,
+        anchored_assembly_strategy="greedy_budget",
+    )
+    with pytest.raises(ValueError, match="within the token budget"):
+        assembler_200.assemble(
+            "test query",
+            {
+                "chunk_strategy": "card",
+                "misconceptions": [],
+                "strategies": [],
+                "evidence_units": [w1, w2],
+            },
+        )
+

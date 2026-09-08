@@ -543,7 +543,7 @@ class DualMetricRetriever:
         candidates: List[Dict[str, Any]],
         parent_cards: List[Dict[str, Any]],
         *,
-        window_size: int = 6,
+        window_size: int = 7,
         step: int = 3,
     ) -> List[Dict[str, Any]]:
         """Expand only logical windows anchored by selected parent card pointers.

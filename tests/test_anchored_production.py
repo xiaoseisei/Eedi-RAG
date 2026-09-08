@@ -175,7 +175,7 @@ def test_anchored_reranker_receives_parent_metadata_and_window_document() -> Non
     assert ranked[0]["reranker_unit"] == "anchored_logical_window"
 
 
-def test_cli_real_reranker_defaults_to_anchored_parent3_w5() -> None:
+def test_cli_real_reranker_defaults_to_anchored_parent5_w7() -> None:
     production_cli = PedagogicalCLI(
         embedding_backend="siliconflow",
         reranker_backend="siliconflow",
@@ -184,8 +184,8 @@ def test_cli_real_reranker_defaults_to_anchored_parent3_w5() -> None:
 
     assert production_cli.rerank_unit == "anchored_logical_window"
     assert production_cli.reranker_pool_size == 20
-    assert production_cli.evidence_selection_count == 5
-    assert production_cli.parent_card_count == 3
+    assert production_cli.evidence_selection_count == 7
+    assert production_cli.parent_card_count == 5
     assert local_cli.rerank_unit == "card"
 
 

@@ -13,6 +13,7 @@ import os
 import sys
 import time
 import argparse
+import threading
 import logging
 from pathlib import Path
 from typing import Optional
@@ -91,9 +92,9 @@ class PedagogicalCLI:
         reranker_backend: str = "none",
         chunk_strategy: str = "card",
         rerank_unit: Optional[str] = None,
-        evidence_selection_count: int = 5,
+        evidence_selection_count: int = 7,
         reranker_pool_size: Optional[int] = None,
-        parent_card_count: int = 3,
+        parent_card_count: int = 5,
         generator_contract_version: str = "v1",
     ):
         """
@@ -127,7 +128,7 @@ class PedagogicalCLI:
             raise ValueError("evidence_selection_count must be positive")
         if reranker_pool_size is not None and reranker_pool_size <= 0:
             raise ValueError("reranker_pool_size must be positive")
-        # A real external reranker uses the production Anchored Parent-3/W5
+        # A real external reranker uses the production Anchored Parent-5/W7
         # route by default.  Local deterministic/no-reranker runs retain the
         # legacy card route unless the caller explicitly selects another unit.
         if rerank_unit is None:
@@ -178,6 +179,7 @@ class PedagogicalCLI:
             model_reranker = SiliconFlowQwen3Reranker.from_env()
         assembler = PedagogicalGoldAssembler(
             lambda_diversity=0.7,
+            max_prompt_tokens=4000,
             model_reranker=model_reranker,
             chunk_strategy=self.chunk_strategy,
             rerank_unit=self.rerank_unit,
@@ -249,11 +251,35 @@ class PedagogicalCLI:
                 print("\n🧠 正在检索考纲知识库与真实辅导对白实录...", flush=True)
 
                 if self.mode in {"auto", "llm"}:
-                    response = self.pipeline.ask_stream(
-                        user_input,
-                        mode=self.mode,
-                        on_chunk=lambda chunk: print(chunk, end="", flush=True),
+                    answer_started = threading.Event()
+                    heartbeat_stop = threading.Event()
+
+                    def emit_waiting_feedback() -> None:
+                        while not heartbeat_stop.wait(2.0):
+                            if not answer_started.is_set():
+                                print("\n⏳ 已完成检索，模型正在生成首段答案...", flush=True)
+
+                    heartbeat_thread = threading.Thread(
+                        target=emit_waiting_feedback,
+                        name="eedi-rag-stream-feedback",
+                        daemon=True,
                     )
+                    heartbeat_thread.start()
+
+                    def emit_answer_chunk(chunk: str) -> None:
+                        if chunk.strip():
+                            answer_started.set()
+                        print(chunk, end="", flush=True)
+
+                    try:
+                        response = self.pipeline.ask_stream(
+                            user_input,
+                            mode=self.mode,
+                            on_chunk=emit_answer_chunk,
+                        )
+                    finally:
+                        heartbeat_stop.set()
+                        heartbeat_thread.join(timeout=0.25)
                     print()
                 else:
                     response = self.pipeline.ask(user_input, mode=self.mode)
@@ -302,11 +328,11 @@ def main():
         "--rerank-unit",
         choices=("card", "logical_evidence", "anchored_logical_window"),
         default=None,
-        help="rerank unit; with SiliconFlow defaults to anchored Parent-3/W5",
+        help="rerank unit; with SiliconFlow defaults to anchored Parent-5/W7",
     )
-    parser.add_argument("--evidence-selection-count", type=int, default=5)
+    parser.add_argument("--evidence-selection-count", type=int, default=7)
     parser.add_argument("--reranker-pool-size", type=int, default=None)
-    parser.add_argument("--parent-card-count", type=int, default=3)
+    parser.add_argument("--parent-card-count", type=int, default=5)
     parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v2")
     args = parser.parse_args()
     cli = PedagogicalCLI(
