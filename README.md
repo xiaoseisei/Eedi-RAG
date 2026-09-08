@@ -163,47 +163,81 @@ Eedi-RAG 采用生产级工业解耦架构，主要由五大核心子系统组�
 
 ## 四、整体程序数据流图
 
-下图展示了系统从**离线知识构建**到**在线教研提问处理**的完整流水线：
+系统按照模块化工程思想设计，整体全景架构涵盖**终端接入层**、**查询治理网关**、**离线知识工程流水线**、**核心多路检索与 9.7 极速装配引擎**、**契约生成与对白双向审计**、**双引擎分层存储底座**以及**自动化评测控制面**七大子系统。
 
+<p align="center">
+  <img src="docs/assets/architecture.svg" alt="Eedi-RAG 系统全景架构与端到端程序数据流图" width="100%" />
+</p>
+
+### 4.1 核心数据流转阶段说明
+
+1. **终端交互与查询治理 (Top)**：
+   - 业务教研人员通过 Web 看板或交互式 CLI (`scripts/interactive_cli.py`) 输入自然语言问题；
+   - 查询治理网关执行**保护性实体识别与改写**，100% 保护数学方程式、题号等关键实体，防止检索语义漂移。
+2. **离线知识抽取与指针校验 (Left)**：
+   - 离线全量摄取 1,576 场 Eedi 课堂对话，提取题干、考点与 Student/Tutor 发言；
+   - LLM 抽取**错因机理卡**与**名师启发策略卡**，并对每一张卡片的 `evidence_turn_ids` 执行**底层逐字指针强校验（Fail-Fast 门禁）**，通过后原子同步至 DuckDB 关系表与 ChromaDB 向量库。
+3. **核心多路检索与 9.7 贪心装配 (Center)**：
+   - **双路并行召回**：BM25 稀疏检索（抓取精准数学词）与 Qwen3-Embedding（1024d 稠密向量捕获深层困惑），通过 RRF 倒数秩融合生成 Top-20 混合初筛池；
+   - **Cross-Encoder 深度重排**：Qwen3-Reranker-0.6B 筛选出 Top-5 核心认知卡片；
+   - **Parent-5 锚定与 W7/S3 窗口展开**：前后拓展 3 轮连续对话，并通过 **`greedy_budget` 确定性贪心算法**在 4000 Token 预算下完成极速装配（耗时仅 7.25ms）。
+4. **生成推理与权威对白审计 (Right)**：
+   - LLM 纯文本流式推理（首字延迟 TTFT 约 0.82s），并在回答中内联声明引用标号（如 `[E01]`）；
+   - **DuckDB 双向引用审计**：在底层数据库中严格核查引述真实性，防范凭空捏造与角色张冠李戴；核验通过后，渲染输出包含**学情诊断**、**名师破局一问**与**权威对白出处**的合规教研答复。
+5. **底层双引擎存储底座 (Bottom)**：
+   - **DuckDB 关系底表**：存储不可篡改的 `tutoring_sessions`（1,576 场）与 `session_dialogue_turns`（30,000+ 轮权威对白）；
+   - **ChromaDB 向量库**：物理隔离存储 `student_misconceptions`、`tutor_strategies` 与 `fallback_windows`。
+
+<details>
+<summary><b>🔍 点击展开查看对应的 Mermaid 文本流程图代码</b></summary>
+
+#### 1. 离线知识工程流水线 (Offline Pipeline)
 ```mermaid
 flowchart TD
-    subgraph Offline["【离线知识工程构建流水线】"]
-        RawData["原始 Eedi 对话数据集 (1,576 Sessions)"] --> Clean["会话清洗与元数据规范化"]
-        Clean --> SessionDB[("DuckDB 底表: tutoring_sessions & dialogue_turns")]
-        Clean --> CardExtract["LLM 知识抽取: 错因卡 & 策略卡"]
-        CardExtract --> PointerAudit{"对白指针校验\n(Turn ID & 逐字验证)"}
-        PointerAudit -- "通过 (100%)" --> DualSync["双轨同步存储"]
-        PointerAudit -- "失败" --> Reject["拒绝入库 (Fail-Fast)"]
-        DualSync --> DuckDBCards[("DuckDB: 知识卡片关系表")]
-        DualSync --> ChromaDB[("ChromaDB: 多物理隔离向量库 (Qwen3-1024d)")]
-    end
+    classDef input fill:#EBF5FB,stroke:#2980B9,stroke-width:2px,color:#1A5276,rx:6px,ry:6px;
+    classDef process fill:#F4ECF7,stroke:#8E44AD,stroke-width:2px,color:#512E5F,rx:6px,ry:6px;
+    classDef db fill:#E8F8F5,stroke:#16A085,stroke-width:2px,color:#117A65,rx:6px,ry:6px;
+    classDef gate fill:#FEF9E7,stroke:#F39C12,stroke-width:2px,color:#7D6608,rx:6px,ry:6px;
+    classDef fail fill:#FDEDEC,stroke:#E74C3C,stroke-width:2px,color:#78281F,rx:6px,ry:6px;
+    classDef success fill:#EAFAF1,stroke:#27AE60,stroke-width:2px,color:#145A32,rx:6px,ry:6px;
 
-    subgraph Online["【在线教研问答与生成流水线】"]
-        UserQuery["用户教研提问 (如: 小数四舍五入学生常犯什么错?)"] --> Rewrite["意图识别与保护性查询改写"]
-        
-        Rewrite --> DenseSearch["Chroma 稠密检索 (Qwen3-Embedding)"]
-        Rewrite --> SparseSearch["BM25 稀疏检索 (数学术语精准匹配)"]
-        
-        DenseSearch --> RRF["多路倒数秩融合 (RRF Fusion)"]
-        SparseSearch --> RRF
-        
-        RRF --> Pool["Top-20 混合初筛候选池"]
-        Pool --> Reranker["Qwen3-Reranker-0.6B 深度重排序"]
-        
-        Reranker --> TopCards["Top-5 核心认知卡片 (Parent-5 锚点)"]
-        TopCards --> WinExpand["Window-7 / Stride-3 时序对白窗口展开"]
-        WinExpand --> Assembler["greedy_budget 确定性贪心装配引擎\n(7ms 极速耗时 / 4000 Token 预算)"]
-        
-        Assembler --> AssembledPrompt["充实、连贯、去重后的上下文 Prompt"]
-        AssembledPrompt --> Generator["LLM 纯文本流式生成 (TTFT ~ 0.8s)"]
-        
-        Generator --> RawOutput["模型生成回答 (包含声明的 [E*] 引用)"]
-        RawOutput --> Audit{"内联引用双向审计 (Citation Audit)"}
-        
-        Audit -- "验证无误" --> RenderMarkdown["合规教研答复渲染输出"]
-        Audit -- "存在伪造/越界引用" --> ErrorGuard["抛出 CitationAuditError 拦截假可用"]
-    end
+    RawData["📁 原始 Eedi 对话数据集<br/>(1,576 场真实课堂 / 30,000+ 轮次)"]:::input
+    Clean["🧹 会话数据清洗与规范化<br/>(提取题干、考点、选项与发言角色)"]:::process
+    RawData --> Clean
+
+    Clean --> SessionDB[("🗄️ DuckDB 权威事实底表<br/>tutoring_sessions & dialogue_turns")]:::db
+    Clean --> Extract["🤖 LLM 结构化双轨抽取<br/>(错因机理卡 & 名师启发策略卡)"]:::process
+
+    Extract --> PointerAudit{"🛡️ 对白指针真实验证<br/>(Turn ID 存在性 & 逐字保真度)"}:::gate
+    PointerAudit -- "❌ 存在断号 / 虚构引用" --> Reject["🚫 拒绝入库 (Fail-Fast 拦截)"]:::fail
+    PointerAudit -- "✅ 100% 逐字校验通过" --> DualSync["🔄 双引擎原子同步写入"]:::success
+
+    DualSync --> DuckDBCards[("📊 DuckDB 知识卡片关系表<br/>misconception & strategy_chunks")]:::db
+    DualSync --> ChromaDB[("🧠 ChromaDB 多物理隔离向量库<br/>student_misconceptions & tutor_strategies")]:::db
 ```
+
+#### 2. 在线教研问答流水线 (Online Pipeline)
+```mermaid
+flowchart TD
+    classDef input fill:#EBF5FB,stroke:#2980B9,stroke-width:2px,color:#1A5276,rx:6px,ry:6px;
+    classDef process fill:#F4ECF7,stroke:#8E44AD,stroke-width:2px,color:#512E5F,rx:6px,ry:6px;
+    classDef gate fill:#FEF9E7,stroke:#F39C12,stroke-width:2px,color:#7D6608,rx:6px,ry:6px;
+    classDef success fill:#EAFAF1,stroke:#27AE60,stroke-width:2px,color:#145A32,rx:6px,ry:6px;
+
+    UserQuery["💬 用户教研提问"]:::input --> Rewrite["🔍 保护性改写"]:::process
+    Rewrite --> BM25["⚡ BM25 稀疏检索"]:::process
+    Rewrite --> Dense["🎯 Qwen3-Embedding 稠密检索"]:::process
+    BM25 --> RRF["🔀 倒数秩融合 (RRF Top-20)"]:::gate
+    Dense --> RRF
+    RRF --> Rerank["🧠 Qwen3-Reranker-0.6B 深度重排"]:::process
+    Rerank --> Parent5["📌 Parent-5 核心锚定 + W7/S3 窗口展开"]:::process
+    Parent5 --> Greedy["⚡ greedy_budget 贪心装配引擎 (7ms)"]:::gate
+    Greedy --> LLM["🤖 LLM 纯文本流式生成 (TTFT ~ 0.8s)"]:::process
+    LLM --> Audit{"🛡️ DuckDB 对白内联双向审计"}:::gate
+    Audit -- "✅ 100% 闭环通过" --> FinalOutput["🎉 输出合规教研答复 (含权威引用)"]:::success
+```
+
+</details>
 
 ---
 
