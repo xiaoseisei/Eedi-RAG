@@ -1,0 +1,83 @@
+{"case_id": "micro-student-error-001", "category": "MICRO_STUDENT_ERROR", "query": "学生为什么会把 5.4598 四舍五入成 5.45？"}
+{"case_id": "micro-tutor-method-001", "category": "MICRO_TUTOR_METHOD", "query": "导师如何引导学生理解 5.4598 应该如何四舍五入？"}
+{"case_id": "micro-class-review-001", "category": "MICRO_CLASS_REVIEW", "query": "请回顾这节关于 5.4598 四舍五入的课堂。"}
+{"case_id": "micro-question-reasoning-001", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "这道题的选项和学生推理过程反映了什么？"}
+{"case_id": "macro-student-faq-001", "category": "MACRO_STUDENT_FREQUENT_QUESTIONS", "query": "学生最常提出的问题是什么？"}
+{"case_id": "macro-difficult-concept-001", "category": "MACRO_DIFFICULT_CONCEPT", "query": "哪些概念最难理解？"}
+{"case_id": "macro-recurring-misconception-001", "category": "MACRO_RECURRING_MISCONCEPTION", "query": "哪些学生误区在不同课堂中反复出现？"}
+{"case_id": "macro-exam-error-001", "category": "MACRO_EXAM_ERROR", "query": "学生最常见的考试错误模式是什么？"}
+{"case_id": "macro-tutor-strategy-001", "category": "MACRO_TUTOR_STRATEGY", "query": "导师最常使用哪些教学策略？"}
+{"case_id": "macro-content-improvement-001", "category": "MACRO_CONTENT_IMPROVEMENT", "query": "哪些内容最值得优化为教材或题库解析？"}
+{"case_id": "macro-cross-session-cooccurrence-001", "category": "MACRO_CROSS_SESSION_COOCCURRENCE", "query": "学生误区和导师策略在不同课堂中如何共现？"}
+{"case_id": "mixed-macro-graph-evidence-001", "category": "MIXED_MACRO_GRAPH_MICRO", "query": "统计学生最常见的舍入误区，并给出课堂原声证据。"}
+{"case_id": "mixed-misconception-intervention-001", "category": "MIXED_MISCONCEPTION_INTERVENTION", "query": "学生的舍入误区是什么，导师如何干预？"}
+{"case_id": "mixed-cross-session-pattern-001", "category": "MIXED_CROSS_SESSION_PATTERN", "query": "跨课堂比较相同学生误区及导师策略。"}
+{"case_id": "negative-no-evidence-001", "category": "NO_EVIDENCE", "query": "请给出当前库中不存在的题目 999999 的课堂证据。"}
+{"case_id": "negative-unsupported-001", "category": "UNSUPPORTED", "query": "这些学生重考后分数是否提高？"}
+{"case_id": "negative-failed-001", "category": "FAILED", "query": "在图谱 manifest 与源库哈希不一致时执行该统计。"}
+{"case_id": "micro-student-error-002", "category": "MICRO_STUDENT_ERROR", "query": "围绕真实题目“What is the value of:\n\\(\n\\frac{54+58}{2}\n\\)”进行micro student error分析。"}
+{"case_id": "micro-student-error-003", "category": "MICRO_STUDENT_ERROR", "query": "围绕真实题目“Elijah makes a conjecture:\nTo find the lowest common multiple of two numbers, yo”进行micro student error分析。"}
+{"case_id": "micro-student-error-004", "category": "MICRO_STUDENT_ERROR", "query": "围绕真实题目“The table shows the numbers of TVs in the households of students in a different ”进行micro student error分析。"}
+{"case_id": "micro-student-error-005", "category": "MICRO_STUDENT_ERROR", "query": "围绕真实题目“What is \\( \\mathbf{3 . 1 5 3} \\) rounded to the nearest \\( \\mathbf{0 . 0 2} \\) ?”进行micro student error分析。"}
+{"case_id": "micro-student-error-006", "category": "MICRO_STUDENT_ERROR", "query": "围绕真实题目“Statement 1: \\( \\quad p \\times(-q)=(-p) \\times q \\)\nStatement 2: \\( \\quad-(q)^{2”进行micro student error分析。"}
+{"case_id": "micro-tutor-method-002", "category": "MICRO_TUTOR_METHOD", "query": "导师如何处理 Which is the next prime number greater than \\( 100 ? \\)？"}
+{"case_id": "micro-tutor-method-003", "category": "MICRO_TUTOR_METHOD", "query": "导师如何处理 Leo and Sophie are arguing about solving inequalities.\nLeo says \\( -2 m>12 \\) gi？"}
+{"case_id": "micro-tutor-method-004", "category": "MICRO_TUTOR_METHOD", "query": "导师如何处理 What is the volume of this cuboid?？"}
+{"case_id": "micro-tutor-method-005", "category": "MICRO_TUTOR_METHOD", "query": "导师如何处理 Which clock shows ten to twelve at night?？"}
+{"case_id": "micro-tutor-method-006", "category": "MICRO_TUTOR_METHOD", "query": "导师如何处理 Liam and Sophie are discussing similar shapes\nLiam says these two shapes are sim？"}
+{"case_id": "micro-class-review-002", "category": "MICRO_CLASS_REVIEW", "query": "围绕真实题目“Liam and Emma are discussing this function machine\nLiam says the function could ”进行micro class review分析。"}
+{"case_id": "micro-class-review-003", "category": "MICRO_CLASS_REVIEW", "query": "围绕真实题目“What is the value of \\( a \\) ?”进行micro class review分析。"}
+{"case_id": "micro-class-review-004", "category": "MICRO_CLASS_REVIEW", "query": "围绕真实题目“Which sequence matches this graph?”进行micro class review分析。"}
+{"case_id": "micro-class-review-005", "category": "MICRO_CLASS_REVIEW", "query": "围绕真实题目“Lee and Drew are arguing about equivalent ratios.\nLee says \\( 4: 14 \\) is equiva”进行micro class review分析。"}
+{"case_id": "micro-class-review-006", "category": "MICRO_CLASS_REVIEW", "query": "围绕真实题目“Expand \\( 4(3 c+2) \\)”进行micro class review分析。"}
+{"case_id": "micro-question-options-reasoning-002", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "围绕真实题目“Lina buys a painting for \\( £ 80 \\) and sells it for \\( £ 140 \\).\nWhat percentag”进行micro question options reasoning分析。"}
+{"case_id": "micro-question-options-reasoning-003", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "围绕真实题目“Angle \\( \\square=50^{\\circ} \\) because”进行micro question options reasoning分析。"}
+{"case_id": "micro-question-options-reasoning-004", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "围绕真实题目“At the start of the day, there was \\( £ 1,578 \\) in the till. \\( £ 6,537 \\) was ”进行micro question options reasoning分析。"}
+{"case_id": "micro-question-options-reasoning-005", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "围绕真实题目“How many months have an average temperature above 23⁰C ?”进行micro question options reasoning分析。"}
+{"case_id": "micro-question-options-reasoning-006", "category": "MICRO_QUESTION_OPTIONS_REASONING", "query": "围绕真实题目“Which is the best estimate for \\( (4.2)^{2} \\) ?”进行micro question options reasoning分析。"}
+{"case_id": "macro-student-frequent-questions-002", "category": "MACRO_STUDENT_FREQUENT_QUESTIONS", "query": "全库学生最常问的数学问题 Top-5 是什么？"}
+{"case_id": "macro-student-frequent-questions-003", "category": "MACRO_STUDENT_FREQUENT_QUESTIONS", "query": "按学科统计，学生提问密度最高的主题有哪些？"}
+{"case_id": "macro-student-frequent-questions-004", "category": "MACRO_STUDENT_FREQUENT_QUESTIONS", "query": "哪些问题在学生辅导记录中出现次数最多？"}
+{"case_id": "macro-student-frequent-questions-005", "category": "MACRO_STUDENT_FREQUENT_QUESTIONS", "query": "学生最常请求解释的是哪些数学知识点？"}
+{"case_id": "macro-difficult-concept-002", "category": "MACRO_DIFFICULT_CONCEPT", "query": "历次辅导中，学生最常卡住的概念有哪些？"}
+{"case_id": "macro-difficult-concept-003", "category": "MACRO_DIFFICULT_CONCEPT", "query": "哪些数学主题的困难信号最集中？"}
+{"case_id": "macro-difficult-concept-004", "category": "MACRO_DIFFICULT_CONCEPT", "query": "按学科看，学生最难理解的内容是什么？"}
+{"case_id": "macro-difficult-concept-005", "category": "MACRO_DIFFICULT_CONCEPT", "query": "哪些概念出现了最多次不确定和反复尝试？"}
+{"case_id": "macro-recurring-misconception-002", "category": "MACRO_RECURRING_MISCONCEPTION", "query": "跨课堂反复出现的学生误区有哪些？"}
+{"case_id": "macro-recurring-misconception-003", "category": "MACRO_RECURRING_MISCONCEPTION", "query": "哪些认知错误在不同学生身上重复出现？"}
+{"case_id": "macro-recurring-misconception-004", "category": "MACRO_RECURRING_MISCONCEPTION", "query": "全库最顽固的数学误区排名是什么？"}
+{"case_id": "macro-recurring-misconception-005", "category": "MACRO_RECURRING_MISCONCEPTION", "query": "哪些错因值得优先纳入错题讲解？"}
+{"case_id": "macro-exam-error-002", "category": "MACRO_EXAM_ERROR", "query": "学生在做题时最常见的错误模式是什么？"}
+{"case_id": "macro-exam-error-003", "category": "MACRO_EXAM_ERROR", "query": "哪些考试错误类型跨课堂出现最多？"}
+{"case_id": "macro-exam-error-004", "category": "MACRO_EXAM_ERROR", "query": "从真实辅导记录看，学生最容易漏掉哪些条件？"}
+{"case_id": "macro-exam-error-005", "category": "MACRO_EXAM_ERROR", "query": "学生选择错误选项的主要模式有哪些？"}
+{"case_id": "macro-tutor-strategy-002", "category": "MACRO_TUTOR_STRATEGY", "query": "在真实辅导记录里，导师最常采用哪几类教学策略？"}
+{"case_id": "macro-tutor-strategy-003", "category": "MACRO_TUTOR_STRATEGY", "query": "哪些提问方式在辅导记录中出现最多？"}
+{"case_id": "macro-tutor-strategy-004", "category": "MACRO_TUTOR_STRATEGY", "query": "导师通常如何拆解学生的数学卡点？"}
+{"case_id": "macro-tutor-strategy-005", "category": "MACRO_TUTOR_STRATEGY", "query": "真实课堂里最常见的启发式教学动作是什么？"}
+{"case_id": "macro-content-improvement-002", "category": "MACRO_CONTENT_IMPROVEMENT", "query": "哪些高频误区最值得改进教材和题库解析？"}
+{"case_id": "macro-content-improvement-003", "category": "MACRO_CONTENT_IMPROVEMENT", "query": "哪些内容缺口适合补充例题或选项对比？"}
+{"case_id": "macro-content-improvement-004", "category": "MACRO_CONTENT_IMPROVEMENT", "query": "从学生错误和导师策略看，教材应优先改哪里？"}
+{"case_id": "macro-content-improvement-005", "category": "MACRO_CONTENT_IMPROVEMENT", "query": "哪些知识点需要增加更清晰的教学材料？"}
+{"case_id": "macro-cross-session-cooccurrence-002", "category": "MACRO_CROSS_SESSION_COOCCURRENCE", "query": "哪些学生误区和导师策略经常在同一课堂共现？"}
+{"case_id": "macro-cross-session-cooccurrence-003", "category": "MACRO_CROSS_SESSION_COOCCURRENCE", "query": "跨会话看，哪些错因通常伴随哪些教学策略？"}
+{"case_id": "macro-cross-session-cooccurrence-004", "category": "MACRO_CROSS_SESSION_COOCCURRENCE", "query": "导师的哪些策略最常用于处理特定学生误区？"}
+{"case_id": "macro-cross-session-cooccurrence-005", "category": "MACRO_CROSS_SESSION_COOCCURRENCE", "query": "不同课堂中学生错因与导师干预的共现关系是什么？"}
+{"case_id": "mixed-macro-graph-micro-002", "category": "MIXED_MACRO_GRAPH_MICRO", "query": "围绕真实题目“Martha has answered a question on mass and got an answer of \\( 500 \\).\n\nBehind t”进行mixed macro graph micro分析。"}
+{"case_id": "mixed-macro-graph-micro-003", "category": "MIXED_MACRO_GRAPH_MICRO", "query": "围绕真实题目“Leo and Lila are discussing how to say: \\( 3 q+p q \\)\n\nLeo says it is: \\( 3 \\) m”进行mixed macro graph micro分析。"}
+{"case_id": "mixed-macro-graph-micro-004", "category": "MIXED_MACRO_GRAPH_MICRO", "query": "围绕真实题目“How many metres did the rocket travel between \\( 10 \\) and \\( 40 \\) seconds?”进行mixed macro graph micro分析。"}
+{"case_id": "mixed-macro-graph-micro-005", "category": "MIXED_MACRO_GRAPH_MICRO", "query": "围绕真实题目“What is the size of angle \\( p \\) in this quadrilateral?”进行mixed macro graph micro分析。"}
+{"case_id": "mixed-misconception-intervention-002", "category": "MIXED_MISCONCEPTION_INTERVENTION", "query": "围绕真实题目“Which statement about the temperatures \\( -7^{\\circ} \\mathrm{C} \\) and \\( 5^{\\ci”进行mixed misconception intervention分析。"}
+{"case_id": "mixed-misconception-intervention-003", "category": "MIXED_MISCONCEPTION_INTERVENTION", "query": "围绕真实题目“This pie chart shows how the employees of a company travel to work.\n\nWhich of th”进行mixed misconception intervention分析。"}
+{"case_id": "mixed-misconception-intervention-004", "category": "MIXED_MISCONCEPTION_INTERVENTION", "query": "围绕真实题目“What is the size of angle \\( n \\) ?”进行mixed misconception intervention分析。"}
+{"case_id": "mixed-misconception-intervention-005", "category": "MIXED_MISCONCEPTION_INTERVENTION", "query": "围绕真实题目“The median of these four numbers is \\( 5 \\).\n\\(\n\\begin{array}{cccc}\n3&12&1&?\n\\en”进行mixed misconception intervention分析。"}
+{"case_id": "mixed-cross-session-pattern-002", "category": "MIXED_CROSS_SESSION_PATTERN", "query": "围绕真实题目“Write the following ratio in its simplest form so both sides of the ratio are in”进行mixed cross session pattern分析。"}
+{"case_id": "mixed-cross-session-pattern-003", "category": "MIXED_CROSS_SESSION_PATTERN", "query": "围绕真实题目“If\n\n\\(\n32 \\times 65=2080 \n\\)\n\nthen\n\n\\(\n3.2 \\times 6.5=\n\\)”进行mixed cross session pattern分析。"}
+{"case_id": "mixed-cross-session-pattern-004", "category": "MIXED_CROSS_SESSION_PATTERN", "query": "围绕真实题目“What is the probability of winning only one of the cards games of snap or chase ”进行mixed cross session pattern分析。"}
+{"case_id": "mixed-cross-session-pattern-005", "category": "MIXED_CROSS_SESSION_PATTERN", "query": "围绕真实题目“\\( 0.2 \\div 0.4= \\)”进行mixed cross session pattern分析。"}
+{"case_id": "negative-no_evidence-002", "category": "NO_EVIDENCE", "query": "请给出题目 900002 的真实课堂证据。"}
+{"case_id": "negative-no_evidence-003", "category": "NO_EVIDENCE", "query": "请查找题目 900003 的真实学生原话。"}
+{"case_id": "negative-unsupported-002", "category": "UNSUPPORTED", "query": "这些学生的长期学习增益是否提高？"}
+{"case_id": "negative-unsupported-003", "category": "UNSUPPORTED", "query": "哪些学生的考试分数在重考后提升最多？"}
+{"case_id": "negative-failed-002", "category": "FAILED", "query": "在源库与图谱版本不一致时执行统计。"}
+{"case_id": "negative-failed-003", "category": "FAILED", "query": "当 READY graph manifest 缺失时执行统计。"}

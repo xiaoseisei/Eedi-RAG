@@ -1,0 +1,37 @@
+{
+  "schema_version": "business-graph-gold-manifest/v1",
+  "dataset_version": "business-graph-gold-v1",
+  "review_status": "HUMAN_APPROVED_FOR_THIS_EVALUATION",
+  "review_scope": "this evaluation run only; not a production business-outcome claim",
+  "case_count": 83,
+  "source_db_sha256": "f089c56f162666ab71b3beecef33a871f3e140608721b3f61f96f9ed384b6157",
+  "graph_db_sha256": "6efa0ee42a2b7a2004f194972bb7ffab75224dd69d17f190b96d58cdfefbac98",
+  "taxonomy_sha256": "708151d624bafeb3ca16597aa820462a234778f325eeef3f4e88c6c512b7fde4",
+  "catalog_sha256": "e8e16d92a8e6606a55c77fe59157b9e71fcf3436989c6bd8278d3d95d6d3da34",
+  "gold_sha256": "d01624167376c0fb93ab4883d762531118e833e6b6533d8ef7e3cece4d121875",
+  "window_config": {
+    "window_size": 7,
+    "step": 3,
+    "policy": "W7_S3"
+  },
+  "coverage": {
+    "MICRO_STUDENT_ERROR": 6,
+    "MICRO_TUTOR_METHOD": 6,
+    "MICRO_CLASS_REVIEW": 6,
+    "MICRO_QUESTION_OPTIONS_REASONING": 6,
+    "MACRO_STUDENT_FREQUENT_QUESTIONS": 5,
+    "MACRO_DIFFICULT_CONCEPT": 5,
+    "MACRO_RECURRING_MISCONCEPTION": 5,
+    "MACRO_EXAM_ERROR": 5,
+    "MACRO_TUTOR_STRATEGY": 5,
+    "MACRO_CONTENT_IMPROVEMENT": 5,
+    "MACRO_CROSS_SESSION_COOCCURRENCE": 5,
+    "MIXED_MACRO_GRAPH_MICRO": 5,
+    "MIXED_MISCONCEPTION_INTERVENTION": 5,
+    "MIXED_CROSS_SESSION_PATTERN": 5,
+    "NO_EVIDENCE": 3,
+    "UNSUPPORTED": 3,
+    "FAILED": 3
+  },
+  "truth_policy": "positive evidence is independently validated from source DB; no SUT output is used to author Gold"
+}

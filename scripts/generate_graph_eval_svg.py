@@ -1,0 +1,564 @@
+"""
+生成 Eedi-RAG 知识图谱三层量化评测体系全景架构 SVG 图形。
+设计风格对齐硬件中控/IoT 高密度架构看板（带卡片容器、药丸标题、独立芯片、数据流总线与对抗防御中枢）。
+"""
+
+import os
+from pathlib import Path
+
+svg_content = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1020" width="100%" height="100%">
+  <defs>
+    <!-- Soft Drop Shadows -->
+    <filter id="card-shadow" x="-4%" y="-4%" width="108%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1B3A57" flood-opacity="0.08"/>
+    </filter>
+    <filter id="chip-shadow" x="-4%" y="-6%" width="108%" height="114%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B3A57" flood-opacity="0.05"/>
+    </filter>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2B5B84"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#15803D"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#B91C1C"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#D97706"/>
+    </marker>
+
+    <!-- Canvas & Pill Gradients -->
+    <linearGradient id="bg-canvas" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EBF3FA"/>
+      <stop offset="100%" stop-color="#DEEAF4"/>
+    </linearGradient>
+    <linearGradient id="pill-yellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FEF3C7"/>
+      <stop offset="100%" stop-color="#FDE68A"/>
+    </linearGradient>
+    <linearGradient id="pill-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E0F2FE"/>
+      <stop offset="100%" stop-color="#BAE6FD"/>
+    </linearGradient>
+    <linearGradient id="pill-cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#CCFBF1"/>
+      <stop offset="100%" stop-color="#99F6E4"/>
+    </linearGradient>
+    <linearGradient id="pill-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DCFCE7"/>
+      <stop offset="100%" stop-color="#BBF7D0"/>
+    </linearGradient>
+    <linearGradient id="pill-purple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F3E8FF"/>
+      <stop offset="100%" stop-color="#E9D5FF"/>
+    </linearGradient>
+    <linearGradient id="pill-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FEE2E2"/>
+      <stop offset="100%" stop-color="#FECACA"/>
+    </linearGradient>
+
+    <!-- Chip Gradients -->
+    <linearGradient id="chip-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0F7FF"/>
+      <stop offset="100%" stop-color="#E0EFFF"/>
+    </linearGradient>
+    <linearGradient id="chip-cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDFA"/>
+      <stop offset="100%" stop-color="#CCFBF1"/>
+    </linearGradient>
+    <linearGradient id="chip-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="chip-purple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#F3E8FF"/>
+    </linearGradient>
+    <linearGradient id="chip-amber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="100%" stop-color="#FEF3C7"/>
+    </linearGradient>
+    <linearGradient id="chip-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FEF2F2"/>
+      <stop offset="100%" stop-color="#FEE2E2"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .card-container {
+      fill: #FFFFFF;
+      stroke: #2E5B82;
+      stroke-width: 1.8;
+      stroke-dasharray: 6,4;
+      rx: 14;
+      ry: 14;
+      filter: url(#card-shadow);
+    }
+    .card-container-accent {
+      fill: #FFFFFF;
+      stroke: #0284C7;
+      stroke-width: 2.2;
+      stroke-dasharray: 6,4;
+      rx: 14;
+      ry: 14;
+      filter: url(#card-shadow);
+    }
+    .card-container-danger {
+      fill: #FFFFFF;
+      stroke: #DC2626;
+      stroke-width: 2.0;
+      stroke-dasharray: 6,4;
+      rx: 14;
+      ry: 14;
+      filter: url(#card-shadow);
+    }
+    .pill-header {
+      rx: 14;
+      ry: 14;
+      stroke-width: 1.4;
+    }
+    .pill-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .chip {
+      rx: 8;
+      ry: 8;
+      stroke-width: 1.2;
+      filter: url(#chip-shadow);
+    }
+    .chip-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .chip-sub {
+      font-size: 9.5px;
+      fill: #475569;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .flow-line {
+      fill: none;
+      stroke: #2B5B84;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      marker-end: url(#arrow);
+    }
+    .flow-line-dashed {
+      fill: none;
+      stroke: #0284C7;
+      stroke-width: 2.0;
+      stroke-dasharray: 5,4;
+      marker-end: url(#arrow);
+    }
+    .flow-line-red {
+      fill: none;
+      stroke: #DC2626;
+      stroke-width: 2.0;
+      stroke-dasharray: 5,4;
+      marker-end: url(#arrow-red);
+    }
+    .flow-label {
+      font-size: 10px;
+      font-weight: 700;
+      fill: #1E3A8A;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .flow-label-bg {
+      fill: #FFFFFF;
+      rx: 4;
+      ry: 4;
+      stroke: #93C5FD;
+      stroke-width: 1;
+    }
+    .canvas-title {
+      font-size: 22px;
+      font-weight: 800;
+      fill: #0F2942;
+      letter-spacing: 0.5px;
+    }
+    .canvas-sub {
+      font-size: 12px;
+      font-weight: 500;
+      fill: #47637E;
+    }
+    .badge-gate {
+      font-size: 9px;
+      font-weight: 800;
+      rx: 4;
+      ry: 4;
+    }
+  </style>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1320" height="1020" fill="url(#bg-canvas)" rx="16" ry="16"/>
+
+  <!-- Canvas Header -->
+  <g transform="translate(40, 22)">
+    <text x="0" y="24" class="canvas-title">Eedi-RAG 知识图谱三层量化评测体系与防假阳性全景架构</text>
+    <text x="0" y="44" class="canvas-sub">遵循 AGENTS.md 真实性第一铁律 | 静态拓扑健康度 (42,949 节点) ➔ 宏观统计双轨对齐 ➔ 证据桥切片物化保真 | 5 组主动对抗恶意注入防御</text>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 1. TOP ROW: DATA & ASSET INFRASTRUCTURE (数据底座与权威资产层) -->
+  <!-- ========================================================================================== -->
+
+  <!-- Top 1: 权威源数据库 (Source DB) -->
+  <g id="box-source-db" transform="translate(40, 80)">
+    <rect width="460" height="150" class="card-container"/>
+    <rect x="130" y="-14" width="200" height="28" fill="url(#pill-blue)" stroke="#0284C7" class="pill-header"/>
+    <text x="230" y="0" fill="#0369A1" class="pill-title">💾 权威底层数据源 (Source DB)</text>
+
+    <g transform="translate(16, 26)">
+      <rect width="206" height="48" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="103" y="16" fill="#1E3A8A" class="chip-title">tutoring_sessions (1,576)</text>
+      <text x="103" y="32" class="chip-sub">全量 intervention_id / 真实学科路径</text>
+    </g>
+    <g transform="translate(238, 26)">
+      <rect width="206" height="48" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="103" y="16" fill="#1E3A8A" class="chip-title">session_dialogue_turns (37,186)</text>
+      <text x="103" y="32" class="chip-sub">轮次物理主键 / 真实发言人角色 / 对白字面量</text>
+    </g>
+    <g transform="translate(16, 86)">
+      <rect width="206" height="48" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="103" y="16" fill="#115E59" class="chip-title">misconception_chunks (1,576)</text>
+      <text x="103" y="32" class="chip-sub">学生错因卡原点 / source_turn_ids 溯源</text>
+    </g>
+    <g transform="translate(238, 86)">
+      <rect width="206" height="48" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="103" y="16" fill="#115E59" class="chip-title">tutor_strategy_chunks (1,576)</text>
+      <text x="103" y="32" class="chip-sub">导师策略卡原点 / talk_moves 教学动作</text>
+    </g>
+  </g>
+
+  <!-- Top 2: 知识图谱侧车 (Graph Sidecar DuckDB) -->
+  <g id="box-graph-db" transform="translate(530, 80)">
+    <rect width="470" height="150" class="card-container-accent"/>
+    <rect x="135" y="-14" width="200" height="28" fill="url(#pill-yellow)" stroke="#D97706" class="pill-header"/>
+    <text x="235" y="0" fill="#92400E" class="pill-title">🕸️ Session-Card 知识图谱 (Sidecar)</text>
+
+    <g transform="translate(16, 26)">
+      <rect width="210" height="48" fill="url(#chip-amber)" stroke="#FCD34D" class="chip"/>
+      <text x="105" y="16" fill="#78350F" class="chip-title">graph_nodes (42,949 节点)</text>
+      <text x="105" y="32" class="chip-sub">TURN(3.7w) / SESSION / 卡片 / Q / 学科</text>
+    </g>
+    <g transform="translate(244, 26)">
+      <rect width="210" height="48" fill="url(#chip-amber)" stroke="#FCD34D" class="chip"/>
+      <text x="105" y="16" fill="#78350F" class="chip-title">graph_edges (83,086 关系边)</text>
+      <text x="105" y="32" class="chip-sub">EVIDENCED_BY(3.5w) / HAS_TURN / USES_MOVE</text>
+    </g>
+    <g transform="translate(16, 86)">
+      <rect width="210" height="48" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="105" y="16" fill="#581C87" class="chip-title">graph_label_assignments (26,450)</text>
+      <text x="105" y="32" class="chip-sub">6 类业务分类 / 确定性标签分发记录</text>
+    </g>
+    <g transform="translate(244, 86)">
+      <rect width="210" height="48" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="105" y="16" fill="#14532D" class="chip-title">graph_manifest (单行就绪契约)</text>
+      <text x="105" y="32" class="chip-sub">物理 SHA-256 指纹 / READY 状态强断言</text>
+    </g>
+  </g>
+
+  <!-- Top 3: 受控分类字典 (Controlled Taxonomy) -->
+  <g id="box-taxonomy" transform="translate(1030, 80)">
+    <rect width="250" height="150" class="card-container"/>
+    <rect x="25" y="-14" width="200" height="28" fill="url(#pill-purple)" stroke="#7C3AED" class="pill-header"/>
+    <text x="125" y="0" fill="#6D28D9" class="pill-title">📖 受控分类字典 (Taxonomy)</text>
+
+    <g transform="translate(16, 26)">
+      <rect width="218" height="48" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="109" y="16" fill="#581C87" class="chip-title">graph-taxonomy-v1.json</text>
+      <text x="109" y="32" class="chip-sub">6 大核心标签类型官方受控词汇表</text>
+    </g>
+    <g transform="translate(16, 86)">
+      <rect width="218" height="48" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="109" y="16" fill="#991B1B" class="chip-title">🛡️ 白名单防污染约束</text>
+      <text x="109" y="32" class="chip-sub">未知标签一律判为非法污染 (零容忍)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 2. MIDDLE ROW: THE 3 CORE EVALUATION SUITES (三层垂直量化评测体系) -->
+  <!-- ========================================================================================== -->
+
+  <!-- Layer 1: 静态图谱结构与拓扑健康度 -->
+  <g id="layer-1-box" transform="translate(40, 270)">
+    <rect width="380" height="440" class="card-container"/>
+    <rect x="50" y="-14" width="280" height="28" fill="url(#pill-cyan)" stroke="#0D9488" class="pill-header"/>
+    <text x="190" y="0" fill="#0F766E" class="pill-title">🏛️ 第一层: 静态结构与拓扑健康度</text>
+    <text x="190" y="24" fill="#64748B" font-size="10.5px" text-anchor="middle">Topology _Construction_eval.py | 离线底座门禁</text>
+
+    <!-- Metrics inside Layer 1 -->
+    <g transform="translate(16, 38)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">指针权威有效率 (pointer_validity) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">核验 35,667 条边 ➔ 三方强约束内连接 ➔ 悬空指针零容忍</text>
+    </g>
+    <g transform="translate(16, 92)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">角色归属纯洁度 (role_accuracy) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">错因=学生(False) / 策略=导师(True) ➔ 禁 else:valid+=1</text>
+    </g>
+    <g transform="translate(16, 146)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">孤立节点率 (orphan_node_ratio) [Hard Gate: 0.0%]</text>
+      <text x="174" y="32" class="chip-sub">全量 42,949 节点出入度之和必须 &gt; 0 ➔ 杜绝孤岛断流</text>
+    </g>
+    <g transform="translate(16, 200)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">投影覆盖完整率 (projection_completeness) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">1,576 Sessions 1:1 双射 ➔ 错因/策略/题/学科基数守恒</text>
+    </g>
+    <g transform="translate(16, 254)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">边端点完整性 (edge_endpoint_integrity) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">83,086 关系边两端节点必须 100% 存在于 graph_nodes</text>
+    </g>
+    <g transform="translate(16, 308)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">标签白名单合法率 (taxonomy_label_validity) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">26,450 分配标签 100% 命中受控白名单 ➔ 非法标签 0</text>
+    </g>
+    <g transform="translate(16, 362)">
+      <rect width="348" height="46" fill="url(#chip-amber)" stroke="#FCD34D" class="chip"/>
+      <text x="174" y="16" fill="#78350F" class="chip-title">分类标签覆盖率 (taxonomy_coverage) [Soft Gate: 监控]</text>
+      <text x="174" y="32" class="chip-sub">策略卡 85.93% / 错因卡 1.71% ➔ 如实暴露未归类盲区</text>
+    </g>
+  </g>
+
+  <!-- Layer 2: 宏观统计与拓扑查询准确度 -->
+  <g id="layer-2-box" transform="translate(460, 270)">
+    <rect width="400" height="440" class="card-container"/>
+    <rect x="50" y="-14" width="300" height="28" fill="url(#pill-blue)" stroke="#0284C7" class="pill-header"/>
+    <text x="200" y="0" fill="#0369A1" class="pill-title">📈 第二层: 宏观统计与拓扑查询准确度</text>
+    <text x="200" y="24" fill="#64748B" font-size="10.5px" text-anchor="middle">macro_analytics_eval.py | 宏观业务分析对齐</text>
+
+    <g transform="translate(16, 42)">
+      <rect width="368" height="62" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="184" y="18" fill="#1E3A8A" class="chip-title">聚合结果与真值一致率 (aggregation_parity) [Hard Gate: 100%]</text>
+      <text x="184" y="34" class="chip-sub">🛡️ 双轨独立原生 SQL 金标比对 ➔ 严禁自验自证</text>
+      <text x="184" y="48" class="chip-sub">逐字段核验: Rank / Canonical Name / Event / Session / Share</text>
+    </g>
+
+    <g transform="translate(16, 118)">
+      <rect width="368" height="62" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="184" y="18" fill="#1E3A8A" class="chip-title">学科过滤零泄露率 (subject_filter_accuracy) [Hard Gate: 100%]</text>
+      <text x="184" y="34" class="chip-sub">测试多级学科过滤 (Number / Algebra / 空匹配边界)</text>
+      <text x="184" y="48" class="chip-sub">核验匹配规模一致 ➔ 抽样代表性证据跨学科泄露率 = 0%</text>
+    </g>
+
+    <g transform="translate(16, 194)">
+      <rect width="368" height="62" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="184" y="18" fill="#1E3A8A" class="chip-title">共现拓扑会话同源精度 (cooccurrence_topology_precision) [100%]</text>
+      <text x="184" y="34" class="chip-sub">misconception_strategy_pairs 错因-策略配对审计</text>
+      <text x="184" y="48" class="chip-sub">核验每一对关系 100% 诞生于同一 session ➔ 杜绝跨会话幻觉</text>
+    </g>
+
+    <g transform="translate(16, 270)">
+      <rect width="368" height="62" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="184" y="18" fill="#1E3A8A" class="chip-title">代表性证据引用闭环率 (representative_evidence_integrity) [100%]</text>
+      <text x="184" y="34" class="chip-sub">抽样 6,173 轮次 ➔ 事件存在 / 会话对齐 / 轮次真实 / 角色吻合</text>
+      <text x="184" y="48" class="chip-sub">批量聚合对白核查 ➔ 实质性教学对白严禁为空 (空文本拦截)</text>
+    </g>
+
+    <g transform="translate(16, 346)">
+      <rect width="368" height="62" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="184" y="18" fill="#1E3A8A" class="chip-title">未分类数据透明度 (unclassified_visibility_rate) [Hard Gate: 100%]</text>
+      <text x="184" y="34" class="chip-sub">UNCLASSIFIED 标签如实保留公开 ➔ 严禁静默过滤掩盖</text>
+      <text x="184" y="48" class="chip-sub">UNRESOLVED_ENDING 不可度量维度显式声明透明</text>
+    </g>
+  </g>
+
+  <!-- Layer 3: 图到切片穿透保真度 -->
+  <g id="layer-3-box" transform="translate(900, 270)">
+    <rect width="380" height="440" class="card-container"/>
+    <rect x="40" y="-14" width="300" height="28" fill="url(#pill-purple)" stroke="#9333EA" class="pill-header"/>
+    <text x="190" y="0" fill="#6B21A8" class="pill-title">🌉 第三层: 图到切片穿透保真度</text>
+    <text x="190" y="24" fill="#64748B" font-size="10.5px" text-anchor="middle">evidence_bridge_fidelity_eval.py | 证据桥物化审计</text>
+
+    <g transform="translate(16, 38)">
+      <rect width="348" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="174" y="16" fill="#581C87" class="chip-title">逐字穿透引用保真度 (verbatim_grounding_fidelity) [100%]</text>
+      <text x="174" y="32" class="chip-sub">exact_quote 与源表原始文本逐字逐标点匹配 (0 编辑距离)</text>
+    </g>
+    <g transform="translate(16, 92)">
+      <rect width="348" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="174" y="16" fill="#581C87" class="chip-title">会话与轮次范围收敛率 (scope_confinement_rate) [100%]</text>
+      <text x="174" y="32" class="chip-sub">物化结果必须严格收敛于入参 refs 授权范围 ➔ 越权泄露 0</text>
+    </g>
+    <g transform="translate(16, 146)">
+      <rect width="348" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="174" y="16" fill="#581C87" class="chip-title">角色对齐纯洁度 (role_alignment_fidelity) [Hard Gate: 100%]</text>
+      <text x="174" y="32" class="chip-sub">学生视角=student(False) / 导师视角=tutor(True) ➔ 禁角色倒错</text>
+    </g>
+    <g transform="translate(16, 200)">
+      <rect width="348" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="174" y="16" fill="#581C87" class="chip-title">证据编目双射闭环率 (catalog_bijection_accuracy) [100%]</text>
+      <text x="174" y="32" class="chip-sub">evidence_catalog 与 pointers 形成严格 1:1 双射闭环对齐</text>
+    </g>
+    <g transform="translate(16, 254)">
+      <rect width="348" height="46" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="174" y="16" fill="#991B1B" class="chip-title">对抗异常注入拦截率 (adversarial_rejection_rate) [100%]</text>
+      <text x="174" y="32" class="chip-sub">5 组恶意攻击注入 ➔ 物化器必须 100% 显式抛出 ValueError 阻断</text>
+    </g>
+    <g transform="translate(16, 308)">
+      <rect width="348" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="174" y="16" fill="#581C87" class="chip-title">上下文预算与审计合规率 (context_budget_compliance) [100%]</text>
+      <text x="174" y="32" class="chip-sub">Token 预算严格处于 [1, 4000] ➔ audit_status 必为 AUDITED</text>
+    </g>
+    <g transform="translate(16, 362)">
+      <rect width="348" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="174" y="16" fill="#14532D" class="chip-title">高效批量物化性能保障 [P95 &lt; 15s]</text>
+      <text x="174" y="32" class="chip-sub">代表性样本集中物化 ➔ 消除 42,949 节点反复解析开销</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 3. BOTTOM ROW: ADVERSARIAL ATTACK SUITE & RELEASE GATE (对抗防御与发布裁决) -->
+  <!-- ========================================================================================== -->
+
+  <!-- Bottom Left: 5 组主动对抗恶意注入测试 -->
+  <g id="box-adversarial" transform="translate(40, 750)">
+    <rect width="820" height="230" class="card-container-danger"/>
+    <rect x="250" y="-14" width="320" height="28" fill="url(#pill-red)" stroke="#DC2626" class="pill-header"/>
+    <text x="410" y="0" fill="#991B1B" class="pill-title">🛡️ 防假阳性铁律: 5 组主动对抗恶意样本注入测试</text>
+
+    <!-- 5 Attack Chips -->
+    <g transform="translate(20, 28)">
+      <rect width="144" height="64" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="72" y="18" fill="#991B1B" class="chip-title">攻击 1: 虚构节点</text>
+      <text x="72" y="34" class="chip-sub">注入 bogus-event:999</text>
+      <text x="72" y="48" fill="#DC2626" class="chip-title">预期: 100% 阻断</text>
+    </g>
+
+    <g transform="translate(180, 28)">
+      <rect width="144" height="64" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="72" y="18" fill="#991B1B" class="chip-title">攻击 2: 会话篡改</text>
+      <text x="72" y="34" class="chip-sub">篡改真实节点所属 session</text>
+      <text x="72" y="48" fill="#DC2626" class="chip-title">预期: 100% 阻断</text>
+    </g>
+
+    <g transform="translate(340, 28)">
+      <rect width="144" height="64" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="72" y="18" fill="#991B1B" class="chip-title">攻击 3: 越权轮次</text>
+      <text x="72" y="34" class="chip-sub">传入事件未声明 turn 999</text>
+      <text x="72" y="48" fill="#DC2626" class="chip-title">预期: 100% 阻断</text>
+    </g>
+
+    <g transform="translate(500, 28)">
+      <rect width="144" height="64" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="72" y="18" fill="#991B1B" class="chip-title">攻击 4: 角色颠倒</text>
+      <text x="72" y="34" class="chip-sub">学生错因伪装 TUTOR 视角</text>
+      <text x="72" y="48" fill="#DC2626" class="chip-title">预期: 100% 阻断</text>
+    </g>
+
+    <g transform="translate(660, 28)">
+      <rect width="140" height="64" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="70" y="18" fill="#991B1B" class="chip-title">攻击 5: 空输入</text>
+      <text x="70" y="34" class="chip-sub">传入空 refs 数组</text>
+      <text x="70" y="48" fill="#DC2626" class="chip-title">预期: 100% 阻断</text>
+    </g>
+
+    <!-- Bottom summary banner -->
+    <g transform="translate(20, 110)">
+      <rect width="780" height="100" fill="#FEF2F2" stroke="#FCA5A5" rx="10" ry="10"/>
+      <text x="390" y="24" fill="#991B1B" font-size="12px" font-weight="700" text-anchor="middle">
+        ⚠️ 假阳性防御准则: 评测器若发生任意一次“误放行”或“未抛异常”，该对抗门禁直接归零，总体裁决一票否决！
+      </text>
+      <text x="390" y="48" fill="#7F1D1D" font-size="11px" text-anchor="middle">
+        1. 禁伪造执行 | 2. 禁静默吞异常 | 3. 禁伪造状态码 | 4. 禁过度宽松默认值 (else: valid+=1)
+      </text>
+      <text x="390" y="70" fill="#7F1D1D" font-size="11px" text-anchor="middle">
+        5. 必须三方强约束闭环 JOIN | 6. 必须独立 SQL 双轨金标对验 | 7. 必须单行 Manifest 防御与 Git SHA 绑定
+      </text>
+    </g>
+  </g>
+
+  <!-- Bottom Right: 工业级发版裁决中枢 (Release Decision Console) -->
+  <g id="box-decision" transform="translate(890, 750)">
+    <rect width="390" height="230" class="card-container-accent"/>
+    <rect x="95" y="-14" width="200" height="28" fill="url(#pill-green)" stroke="#16A34A" class="pill-header"/>
+    <text x="195" y="0" fill="#14532D" class="pill-title">🚦 工业级发版裁决中枢</text>
+
+    <g transform="translate(20, 28)">
+      <rect width="165" height="74" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="82" y="20" fill="#14532D" class="chip-title">✅ PASSED (全达标)</text>
+      <text x="82" y="38" class="chip-sub">所有 Hard Gates 100%</text>
+      <text x="82" y="54" fill="#15803D" font-size="10px" font-weight="700" text-anchor="middle">允许生产发布 (Exit 0)</text>
+    </g>
+
+    <g transform="translate(205, 28)">
+      <rect width="165" height="74" fill="url(#chip-red)" stroke="#FCA5A5" class="chip"/>
+      <text x="82" y="20" fill="#991B1B" class="chip-title">❌ FAILED (阻断发版)</text>
+      <text x="82" y="38" class="chip-sub">任意 Hard Gate 失败</text>
+      <text x="82" y="54" fill="#B91C1C" font-size="10px" font-weight="700" text-anchor="middle">流水线硬卡点 (Exit 1)</text>
+    </g>
+
+    <g transform="translate(20, 118)">
+      <rect width="350" height="92" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="175" y="20" fill="#1E3A8A" class="chip-title">🔍 Git 提交追溯与审计凭据</text>
+      <text x="175" y="40" class="chip-sub">报告绑定: git_commit_sha + git_tree_dirty</text>
+      <text x="175" y="58" class="chip-sub">实测证据先行 ➔ 产出完整 Markdown / JSON 审计表</text>
+      <text x="175" y="76" fill="#0369A1" font-size="10px" font-weight="700" text-anchor="middle">
+        当前状态: 3 大套件 / 10 自动化用例 100% 通过
+      </text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 4. DATA FLOW BUSES & CONNECTIONS (数据总线与贯通连接线) -->
+  <!-- ========================================================================================== -->
+
+  <!-- Flow 1: Source DB & Graph DB -> Layer 1 (Static Topology Verification) -->
+  <path d="M 230 230 L 230 270" class="flow-line"/>
+  <rect x="180" y="240" width="100" height="18" class="flow-label-bg" stroke="#93C5FD"/>
+  <text x="230" y="249" class="flow-label">三方闭环内连接</text>
+
+  <!-- Flow 2: Graph DB & Source DB -> Layer 2 (Dual SQL Ground Truth) -->
+  <path d="M 660 230 L 660 270" class="flow-line" stroke="#0284C7"/>
+  <rect x="610" y="240" width="100" height="18" class="flow-label-bg" stroke="#BAE6FD"/>
+  <text x="660" y="249" class="flow-label" fill="#0369A1">独立 SQL 双轨真值</text>
+
+  <!-- Flow 3: Taxonomy -> Layer 1 & 2 -->
+  <path d="M 1150 230 L 1150 250 Q 1150 260 1050 260 L 860 260" class="flow-line" stroke="#7C3AED" marker-end="url(#arrow-purple)"/>
+  <rect x="940" y="250" width="90" height="18" class="flow-label-bg" stroke="#C4B5FD"/>
+  <text x="985" y="259" class="flow-label" fill="#6D28D9">白名单受控校验</text>
+
+  <!-- Flow 4: Layer 2 -> Layer 3 (Representative Refs to Materialize) -->
+  <path d="M 860 490 L 900 490" class="flow-line" stroke="#7C3AED" marker-end="url(#arrow-purple)"/>
+  <rect x="850" y="468" width="60" height="18" class="flow-label-bg" stroke="#C4B5FD"/>
+  <text x="880" y="477" class="flow-label" fill="#6D28D9">抽取代表Refs</text>
+
+  <!-- Flow 5: Adversarial Attacks -> Layer 3 -->
+  <path d="M 860 840 L 990 840 Q 1040 840 1040 730 L 1040 710" class="flow-line-red"/>
+  <rect x="985" y="780" width="110" height="18" class="flow-label-bg" stroke="#FCA5A5"/>
+  <text x="1040" y="789" class="flow-label" fill="#B91C1C">5 组恶意攻击渗透</text>
+
+  <!-- Flow 6: Layer 1, 2, 3 -> Release Decision Console -->
+  <path d="M 1080 710 L 1080 750" class="flow-line" stroke="#16A34A" marker-end="url(#arrow-green)"/>
+  <rect x="1030" y="722" width="100" height="18" class="flow-label-bg" stroke="#86EFAC"/>
+  <text x="1080" y="731" class="flow-label" fill="#15803D">100% 硬门禁审计</text>
+
+</svg>
+"""
+
+output_path = Path(r"E:\PIAgent\10-projects\AgentLearn\Eedi-RAG\evals\graph\assets\graph_evaluation_architecture.svg")
+output_path.parent.mkdir(parents=True, exist_ok=True)
+output_path.write_text(svg_content.strip(), encoding="utf-8")
+
+print(f"✅ 已成功生成三层量化评测体系全景架构 SVG: {output_path} ({len(svg_content)} 字符)")

@@ -1209,6 +1209,22 @@ class PedagogicalGoldAssembler:
             token_count_source="estimated_final_generator_context",
         )
 
+    def assemble_authorized_graph_context(
+        self,
+        raw_query: str,
+        parent_anchors: List[Dict[str, Any]],
+        ranked_units: List[Dict[str, Any]],
+    ) -> GoldAssembledContext:
+        """只装配已经由图证据桥接授权的逻辑链窗口。"""
+        if not parent_anchors or not ranked_units:
+            raise ValueError("authorized graph context requires parent anchors and ranked units")
+        return self.assemble(raw_query, {
+            "chunk_strategy": "card",
+            "misconceptions": parent_anchors,
+            "strategies": [],
+            "evidence_units": ranked_units,
+        })
+
     def assemble(
         self,
         raw_query: str,

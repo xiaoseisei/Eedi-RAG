@@ -29,7 +29,10 @@ import math
 import re
 import hashlib
 import logging
+import time
 from pathlib import Path
+import shutil
+import tempfile
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import duckdb
@@ -192,6 +195,12 @@ class DualEngineStorageManager:
           in_memory: 是否运行纯内存模式 (用于单元测试和极速沙盒验证)
         """
         self.in_memory = in_memory
+        # Chroma 1.x uses one shared ``ephemeral`` system for every
+        # ``chromadb.Client()`` in a process.  That makes independent test
+        # fixtures leak collections into one another.  Keep the relational
+        # database in memory, but give each Chroma fixture a unique persistent
+        # scratch directory so its system identifier is unique as well.
+        self._ephemeral_chroma_dir: Path | None = None
         self.embedding_index_version = embedding_index_version
         if embedding_function is not None and embedding_backend is not None:
             raise ValueError("embedding_function 与 embedding_backend 只能指定一个")
@@ -232,8 +241,11 @@ class DualEngineStorageManager:
         
         # 2. 初始化 ChromaDB 多向量集合
         if in_memory:
-            self.chroma_client = chromadb.Client()
-            self.chroma_dir = None
+            self._ephemeral_chroma_dir = Path(
+                tempfile.mkdtemp(prefix="eedi-rag-chroma-")
+            )
+            self.chroma_dir = self._ephemeral_chroma_dir
+            self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_dir))
         else:
             self.chroma_dir = Path(chroma_dir) if chroma_dir else Path("data/chroma")
             self.chroma_dir.mkdir(parents=True, exist_ok=True)
@@ -342,6 +354,76 @@ class DualEngineStorageManager:
             metadata={"description": "纯规则滑动窗口原文直接检索向量索引库"},
             embedding_function=self.embedding_function
         )
+
+    def _reopen_chroma_after_write(self) -> None:
+        """Close/reopen Chroma so newly written HNSW files are query-visible.
+
+        Chroma's local Rust backend can finish an upsert asynchronously.  A
+        fresh client is an explicit write/read boundary and prevents a reader
+        in the same process from observing a partially materialized segment.
+        For ``in_memory`` managers the directory is an instance-owned scratch
+        path, so this does not touch any production artifact.
+        """
+
+        chroma_dir = getattr(self, "chroma_dir", None)
+        if chroma_dir is None:
+            return
+        close_client = getattr(self.chroma_client, "close", None)
+        if callable(close_client):
+            close_client()
+        self.chroma_client = chromadb.PersistentClient(path=str(chroma_dir))
+        self._init_chromadb_collections()
+
+    def _query_chroma_collection(
+        self,
+        collection_name: str,
+        kwargs: Dict[str, Any],
+        *,
+        max_attempts: int = 3,
+    ) -> Any:
+        """Query a local collection across a bounded HNSW visibility retry.
+
+        Chroma's Rust backend can briefly expose the SQLite metadata before
+        the HNSW segment file is visible on disk.  Only that known transient
+        error is retried; all other provider/index errors are re-raised.  A
+        final failure therefore remains an explicit failure, never an empty
+        result masquerading as a successful retrieval.
+        """
+
+        if max_attempts <= 0:
+            raise ValueError("max_attempts must be positive")
+        for attempt in range(max_attempts):
+            collection = self.chroma_client.get_collection(collection_name)
+            try:
+                return collection.query(**kwargs)
+            except Exception as exc:
+                transient = "Nothing found on disk" in str(exc)
+                if not transient or attempt + 1 >= max_attempts:
+                    raise
+                logger.warning(
+                    "[Storage] Chroma HNSW segment is not visible yet; "
+                    "reopening isolated/persistent client (attempt %s/%s)",
+                    attempt + 1,
+                    max_attempts - 1,
+                )
+                time.sleep(0.05 * (2**attempt))
+                self._reopen_chroma_after_write()
+        raise RuntimeError("unreachable Chroma query retry state")
+
+    def query_collection(self, collection_name: str, kwargs: Dict[str, Any]) -> Any:
+        """Public read entry point shared by legacy and business retrievers."""
+
+        return self._query_chroma_collection(collection_name, kwargs)
+
+    def _query_embedding(self, query: str) -> list[float]:
+        """Encode a query with the same configured function used for indexing."""
+
+        if not isinstance(query, str) or not query.strip():
+            raise ValueError("query must be a non-blank string")
+        vectors = self.embedding_function([query])
+        if len(vectors) != 1 or vectors[0] is None or len(vectors[0]) == 0:
+            raise ValueError("embedding function returned an invalid query vector")
+        return [float(value) for value in vectors[0]]
 
     def _validate_embedding_index_contract(self) -> None:
         """Ensure persistent index metadata matches the query embedding provider."""
@@ -680,6 +762,10 @@ class DualEngineStorageManager:
         if chunks:
             self.ingest_sliding_window_chunks(chunks)
 
+        # Establish an explicit persistence/read boundary before any caller
+        # starts retrieval from this newly built artifact.
+        self._reopen_chroma_after_write()
+
         # 输出白盒持久化审计快照
         self.get_storage_audit_snapshot()
         logger.info("🎉 [step=Step3_Storage|status=SUCCESS] 双引擎存储摄取与持久化 100% 同步完成！")
@@ -852,11 +938,11 @@ class DualEngineStorageManager:
         where_filter: Optional[Dict] = None
     ) -> List[Dict[str, Any]]:
         """在 student_misconceptions 向量集合中执行模糊语义检索。"""
-        kwargs = {"query_texts": [query], "n_results": top_k}
+        kwargs = {"query_embeddings": [self._query_embedding(query)], "n_results": top_k}
         if where_filter:
             kwargs["where"] = where_filter
             
-        results = self.coll_misconceptions.query(**kwargs)
+        results = self._query_chroma_collection("student_misconceptions", kwargs)
         formatted = []
         if results and results.get("ids") and len(results["ids"][0]) > 0:
             for i in range(len(results["ids"][0])):
@@ -876,11 +962,11 @@ class DualEngineStorageManager:
         where_filter: Optional[Dict] = None
     ) -> List[Dict[str, Any]]:
         """在 tutor_strategies 向量集合中执行名师策略模糊语义检索。"""
-        kwargs = {"query_texts": [query], "n_results": top_k}
+        kwargs = {"query_embeddings": [self._query_embedding(query)], "n_results": top_k}
         if where_filter:
             kwargs["where"] = where_filter
             
-        results = self.coll_strategies.query(**kwargs)
+        results = self._query_chroma_collection("tutor_strategies", kwargs)
         formatted = []
         if results and results.get("ids") and len(results["ids"][0]) > 0:
             for i in range(len(results["ids"][0])):
@@ -900,11 +986,11 @@ class DualEngineStorageManager:
         where_filter: Optional[Dict] = None
     ) -> List[Dict[str, Any]]:
         """在 fallback_windows 向量集合中执行纯原文直接检索 (零信任直取模式)。"""
-        kwargs = {"query_texts": [query], "n_results": top_k}
+        kwargs = {"query_embeddings": [self._query_embedding(query)], "n_results": top_k}
         if where_filter:
             kwargs["where"] = where_filter
             
-        results = self.coll_windows.query(**kwargs)
+        results = self._query_chroma_collection("fallback_windows", kwargs)
         formatted = []
         if results and results.get("ids") and len(results["ids"][0]) > 0:
             for i in range(len(results["ids"][0])):
@@ -973,9 +1059,16 @@ class DualEngineStorageManager:
         }
 
     def close(self):
-        """关闭 DuckDB 数据库连接。"""
+        """关闭 DuckDB/Chroma 连接，并清理本实例创建的临时 Chroma。"""
+        chroma_client = getattr(self, "chroma_client", None)
+        close_client = getattr(chroma_client, "close", None)
+        if callable(close_client):
+            close_client()
         if hasattr(self, "duck_conn") and self.duck_conn:
             self.duck_conn.close()
+        if self._ephemeral_chroma_dir is not None and self._ephemeral_chroma_dir.exists():
+            shutil.rmtree(self._ephemeral_chroma_dir)
+            self._ephemeral_chroma_dir = None
 
 
 if __name__ == "__main__":

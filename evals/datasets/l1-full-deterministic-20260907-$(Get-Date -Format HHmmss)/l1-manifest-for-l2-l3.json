@@ -1,0 +1,71 @@
+{
+  "artifact_hashes": {
+    "chroma_sha256": "bde3442252fc65430760138adf8fef12ec67366a680cb0d8622a1ab8806c615f",
+    "combined_sha256": "0ffa78bf3e4cc674bd5e5a9fab944ed7db6fd43158e8f97ef27a2ace13224224",
+    "deterministic_combined_sha256": "68f91751004a1eb1cb238031fcd390ce04428a6b850ee8dd1a5b28ffef7924ab",
+    "duckdb_sha256": "f089c56f162666ab71b3beecef33a871f3e140608721b3f61f96f9ed384b6157",
+    "qwen_combined_sha256": "68f91751004a1eb1cb238031fcd390ce04428a6b850ee8dd1a5b28ffef7924ab"
+  },
+  "artifact_mutated_during_build": true,
+  "component_case_counts": {
+    "assembler": 30,
+    "chunk_structure": 1576,
+    "chunking": 30,
+    "fusion": 30,
+    "grounding": 30,
+    "rewrite": 30
+  },
+  "current_artifact_hash": "68f91751004a1eb1cb238031fcd390ce04428a6b850ee8dd1a5b28ffef7924ab",
+  "current_artifact_hash_verified_at": "2026-09-07",
+  "dataset_version": "golden30-v2",
+  "embedding": {
+    "backend": "deterministic",
+    "model": "FastDeterministicEmbeddingFunction",
+    "version": "128d-v1"
+  },
+  "generated_at": "2026-09-06T18:03:38.798260Z",
+  "golden_case_count": 30,
+  "grounding_output_policy": "explicit-deterministic-system-trace",
+  "indexed_session_count": 1576,
+  "input_artifact_hashes": {
+    "chroma_sha256": "7d4909d8da5b4df37aeff26ee245bff1b5a701b0070d507dfaaf4b7190afc9ad",
+    "combined_sha256": "4f7976dadcf8840c8f2e64c714a9d3374ac127c9c09eea9d295fa10316802b84",
+    "duckdb_sha256": "f089c56f162666ab71b3beecef33a871f3e140608721b3f61f96f9ed384b6157"
+  },
+  "message_count": 37186,
+  "qrels_provenance": {
+    "document_labels": "derived_from_human_quote",
+    "limitation": "document relevance is derived from human quote/session evidence; independent multi-document human judgments are not present",
+    "multi_relevance_annotated": false,
+    "quote_evidence_rows": 85,
+    "unique_query_document_pairs": 30
+  },
+  "qrels_version": "golden-verbatim-v2-derived-document-v1",
+  "retrieval_config": {
+    "mmr_lambda": 0.7,
+    "query_rewrite_mode": "deterministic_rules",
+    "retrieval_backend": "dense-only-chroma"
+  },
+  "schema_version": "l1-component-suite/v2",
+  "source_files": {
+    "data\\cleaned_sessions.jsonl": "71bfc9c1e3b63144d618335f057f2667a328b04c6ddcadbda63c706beaa24903",
+    "data\\golden_test_set.json": "035e4fbb35ad00b75661a792688f8b16821b3d4014c13a9a1839d1ce4555f6b9"
+  },
+  "source_session_count": 1576,
+  "split": {
+    "file": "split_manifest.json",
+    "manifest_file": "split_manifest.json",
+    "manifest_sha256": "93d04422c90ed7029df15df51bc73b1a69b30b2587c68d96d4b95dff3a1f3bf0",
+    "session_leakage_count": 0,
+    "session_split_counts": {
+      "dev": 24,
+      "holdout": 6
+    },
+    "split_counts": {
+      "dev": 24,
+      "holdout": 6
+    },
+    "strategy": "connected-source-session-hash-partition"
+  },
+  "system_config_hash": "8bfc48c730f8e0dfeb02a70b925d2fb59039551baac3c0a01b1b57e233be7605"
+}

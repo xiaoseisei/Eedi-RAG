@@ -1,0 +1,93 @@
+{
+  "artifact_hashes": {
+    "deterministic_chroma_sha256": "b1e5ac252179a80daaa96f3536eff980efd2b0ea7a5afa453b280342c100ffea",
+    "deterministic_combined_sha256": "711f1ed14e8f7014a2a57421665c08037fd8189c80bf922217209b7789718fa4",
+    "duckdb_sha256": "09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad",
+    "qwen_chroma_sha256": "41463ae270da8b71db20d5b5f6604450fdc12ca081380962f34f85d03095cd28",
+    "qwen_combined_sha256": "7e78efeb3ea0dc5118479ef98d61d46540e79794c212d1b7d5da22fbe54ef309",
+    "rollback_chroma_sha256": "27d33059f6884c4970bc4b618fda27e3f0a5251f48677075a6c7b8830672c8ef",
+    "rollback_combined_sha256": "4a035072ab418fd72a928aa6f9cb9f8e766472ba03cf030a7fdfb6d534a0aed3"
+  },
+  "artifact_hashes_after": {
+    "deterministic_chroma_sha256": "b1e5ac252179a80daaa96f3536eff980efd2b0ea7a5afa453b280342c100ffea",
+    "deterministic_combined_sha256": "711f1ed14e8f7014a2a57421665c08037fd8189c80bf922217209b7789718fa4",
+    "duckdb_sha256": "09ef4e7d201f1f61034d5a7dd41345f4a122be01bfffae6713a7aae724b4a3ad",
+    "qwen_chroma_sha256": "41463ae270da8b71db20d5b5f6604450fdc12ca081380962f34f85d03095cd28",
+    "qwen_combined_sha256": "7e78efeb3ea0dc5118479ef98d61d46540e79794c212d1b7d5da22fbe54ef309",
+    "rollback_chroma_sha256": "27d33059f6884c4970bc4b618fda27e3f0a5251f48677075a6c7b8830672c8ef",
+    "rollback_combined_sha256": "4a035072ab418fd72a928aa6f9cb9f8e766472ba03cf030a7fdfb6d534a0aed3"
+  },
+  "artifact_mutated_during_freeze": false,
+  "case_count": 30,
+  "dataset_version": "eedi-golden30-l1-closeout-v1",
+  "experiment_config": {
+    "assembler_top_k_each": 20,
+    "cache_success_only": true,
+    "embedding_batch_size": 32,
+    "embedding_cache_key_fields": [
+      "provider",
+      "model",
+      "index_version",
+      "query_text"
+    ],
+    "embedding_dimension": 1024,
+    "embedding_index_version": "qwen3-embedding-0.6b-v1",
+    "embedding_model": "Qwen/Qwen3-Embedding-0.6B",
+    "embedding_provider": "openai_compatible",
+    "embedding_timeout_seconds": 30.0,
+    "fallback_exact_channel": "dialogue_weighted_numeric_formula_v1",
+    "fusion_strategy": "raw_first",
+    "max_prompt_tokens": 1500,
+    "mmr_lambda": 0.7,
+    "query_rewrite_mode": "deterministic_rules",
+    "rrf_k": 60,
+    "top_k": 20
+  },
+  "files": {
+    "chroma.build.json": "8849655e31e979195d87a14ac576bd7112c2b1a8677e5e804e96d30967614164",
+    "golden_test_set.json": "035e4fbb35ad00b75661a792688f8b16821b3d4014c13a9a1839d1ce4555f6b9",
+    "qrels.jsonl": "a7aa34be0f7668ba747b3edb0b79f10816a72152c3514fc61e587bf8c828316f",
+    "queries.jsonl": "7ac1df2c848320dca52f5c61e7fbc04dc03b1932ad8a0e0fbe56bad24091d0d3"
+  },
+  "generated_at": "2026-09-02T17:47:17.377367Z",
+  "qrel_count": 30,
+  "qrels_provenance": {
+    "business_quality_claim_allowed": false,
+    "document_labels": "derived_from_human_quote",
+    "limitation": "single primary document labels derived from human quote/session evidence; no independent multi-document graded judgments",
+    "multi_relevance_annotated": false
+  },
+  "qrels_version": "golden-verbatim-v2-derived-document-v1",
+  "qwen_collection_counts": {
+    "fallback_windows": 719,
+    "student_misconceptions": 100,
+    "tutor_strategies": 100
+  },
+  "qwen_index_contract": {
+    "base_url": "https://api.siliconflow.cn/v1",
+    "dimension": 1024,
+    "index_version": "qwen3-embedding-0.6b-v1",
+    "model": "Qwen/Qwen3-Embedding-0.6B",
+    "name": "openai_compatible:Qwen/Qwen3-Embedding-0.6B"
+  },
+  "rollback": {
+    "chroma_sha256": "27d33059f6884c4970bc4b618fda27e3f0a5251f48677075a6c7b8830672c8ef",
+    "directory": "E:\\PIAgent\\10-projects\\AgentLearn\\Eedi-RAG\\data\\chroma-backups\\chroma-pre-migration-20260902-105043"
+  },
+  "schema_version": "l1-closeout-inputs/v1",
+  "split": {
+    "file": "split_manifest.json",
+    "session_leakage_count": 0,
+    "session_split_counts": {
+      "dev": 24,
+      "holdout": 6
+    },
+    "sha256": "2fa446fd44fb7b7f8f7a347f1953cc76cdfe2b8a3f64010aaf2b830842baf537",
+    "split_counts": {
+      "dev": 24,
+      "holdout": 6
+    },
+    "strategy": "connected-source-session-hash-partition"
+  },
+  "system_config_hash": "bd6006bbf3f8f3644fe1c7eb5977174063a650fdf44da28b5fe9df287a1b8a30"
+}

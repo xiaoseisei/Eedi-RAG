@@ -1,0 +1,27 @@
+{
+  "artifact_hash": "68f91751004a1eb1cb238031fcd390ce04428a6b850ee8dd1a5b28ffef7924ab",
+  "dataset_manifest": "evals\\datasets\\l1-full-deterministic-20260907-$(Get-Date -Format HHmmss)\\l1-manifest-for-l2-l3.json",
+  "dataset_manifest_sha256": "83de15d03f78e5892ae3fc0991c66bd5a07ca5ea2afa98ac65b89610ffdcf204",
+  "decision": "BLOCKED",
+  "executed_modules": [
+    "grounding",
+    "chunking",
+    "chunk_structure",
+    "rewrite",
+    "fusion",
+    "assembler"
+  ],
+  "hard_blocker_count": 18,
+  "note": "Derived directly from the current deterministic L1 report; L2/L3 execution is explicitly allowed for pipeline validation despite blocked L1.",
+  "release_status": "BLOCKED",
+  "report_path": "reports/eval/l1-full-deterministic-20260907/run.json",
+  "run_id": "l1-full-deterministic-20260907",
+  "schema_version": "l1-closeout/v1",
+  "status_counts": {
+    "DEGRADED": 0,
+    "ERROR": 0,
+    "FAILED": 1026,
+    "SUCCESS": 11339,
+    "UNMEASURED": 260
+  }
+}

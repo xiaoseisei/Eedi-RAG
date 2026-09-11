@@ -201,6 +201,26 @@ def test_search_parallel_and_fuse_with_evidence(in_memory_manager: DualEngineSto
     assert len(top_strat["evidence_turns"]) > 0
 
 
+def test_in_memory_chroma_clients_are_isolated_from_each_other() -> None:
+    """每个内存 fixture 必须拥有独立 Chroma system，不能共享 collection。"""
+
+    left = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    right = DualEngineStorageManager(db_path=":memory:", in_memory=True)
+    try:
+        left.coll_misconceptions.add(
+            ids=["left-card"], documents=["left"], embeddings=[[1.0] * 128]
+        )
+        right.coll_misconceptions.add(
+            ids=["right-card"], documents=["right"], embeddings=[[1.0] * 128]
+        )
+
+        assert left.coll_misconceptions.get(include=["documents"])["ids"] == ["left-card"]
+        assert right.coll_misconceptions.get(include=["documents"])["ids"] == ["right-card"]
+    finally:
+        left.close()
+        right.close()
+
+
 def test_ingest_all_rejects_non_success_before_any_write(sample_sessions, sample_extracted):
     manager = DualEngineStorageManager(db_path=":memory:", in_memory=True)
     invalid = sample_extracted[0].model_copy(

@@ -145,9 +145,20 @@ def test_full_storage_audit_checks_exact_source_session_set():
         sessions = [_session(1)]
         storage.ingest_sessions(sessions)
         result = audit_full_storage(storage, sessions)
+        assert result["status"] == "BLOCKED"
+        assert "independent expected_window_ids manifest" in result["reason"]
+    finally:
+        storage.close()
+
+
+def test_full_storage_audit_reports_unexpected_ids_with_independent_manifest():
+    storage = DualEngineStorageManager(db_path=":memory:", in_memory=True, embedding_backend="deterministic")
+    try:
+        sessions = [_session(1)]
+        storage.ingest_sessions(sessions)
+        result = audit_full_storage(storage, sessions, expected_window_ids=["expected-window"])
         assert result["status"] == "FAILED"
-        assert result["checks"]["session_id_set"] is True
-        assert result["checks"]["misconception_card_count"] is False
-        assert result["checks"]["window_count"] is True
+        assert result["checks"]["window_count"] is False
+        assert "expected-window" in result["missing_window_ids"]
     finally:
         storage.close()

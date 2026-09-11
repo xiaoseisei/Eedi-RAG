@@ -261,7 +261,17 @@ class DualMetricRetriever:
         if where_filter:
             query_kwargs["where"] = where_filter
             
-        raw_res = coll.query(**query_kwargs)
+        query_collection = getattr(self.storage, "query_collection", None)
+        raw_res = (
+            query_collection(collection_name, query_kwargs)
+            if callable(query_collection)
+            else coll.query(**query_kwargs)
+        )
+        # The storage-level query may have reopened Chroma after a transient
+        # HNSW visibility failure.  Reacquire the collection before any
+        # follow-up ``get`` so no stale client handle crosses that boundary.
+        if callable(query_collection):
+            coll = self.storage.chroma_client.get_collection(collection_name)
         raw_res = raw_res or {}
         if not raw_res or not raw_res.get("ids") or len(raw_res["ids"][0]) == 0:
             dense_ids: list[str] = []
@@ -678,7 +688,10 @@ class DualMetricRetriever:
         raw_query: str,
         top_k_each: int = 3,
         fetch_evidence: bool = True,
-        k_constant: int = 60
+        k_constant: int = 60,
+        *,
+        allowed_session_ids: List[int] | None = None,
+        perspectives: tuple[str, ...] = ("student", "tutor"),
     ) -> Dict[str, Any]:
         """
         【黄金组合入口】：多视角子查询派生 + 专业信息动态注入 + RRF 倒数排名融合。
@@ -692,6 +705,13 @@ class DualMetricRetriever:
           3. 实施 RRF 倒数排名融合: RRF(d) = ∑ 1 / (k + Rank_p(d));
           4. 瞬时回溯 DuckDB [Turn N] 原声证据。
         """
+        if not perspectives or not set(perspectives).issubset({"student", "tutor"}):
+            raise ValueError("perspectives must contain student and/or tutor")
+        where_filter = None
+        if allowed_session_ids is not None:
+            if not allowed_session_ids:
+                return {"raw_query": raw_query, "misconceptions": [], "strategies": [], "total_retrieved": 0}
+            where_filter = {"session_id": {"$in": [int(item) for item in allowed_session_ids]}}
         # 1. 多视角派生与专业注入
         rewritten: MultiPerspectiveQueries = self.rewriter.rewrite(raw_query)
 
@@ -703,9 +723,9 @@ class DualMetricRetriever:
         ])
 
         # 2. 错因库多视角检索与 RRF 融合 (3-Way: misconception + curriculum + raw_query)
-        misc_ranks_p1 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.misconception_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.misconception_query)
-        misc_ranks_p2 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query)
-        misc_ranks_p3 = self._retrieve_misconceptions_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query)
+        misc_ranks_p1 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.misconception_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.misconception_query, where_filter=where_filter) if "student" in perspectives else []
+        misc_ranks_p2 = self._retrieve_misconceptions_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query, where_filter=where_filter) if "student" in perspectives else []
+        misc_ranks_p3 = self._retrieve_misconceptions_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query, where_filter=where_filter) if "student" in perspectives else []
         
         misc_rrf_map: Dict[str, Dict[str, Any]] = {}
         for rank_idx, cand in enumerate(misc_ranks_p1, start=1):
@@ -749,9 +769,9 @@ class DualMetricRetriever:
             top_misc_results.append(c)
 
         # 3. 策略库多视角检索与 RRF 融合 (3-Way: strategy + curriculum + raw_query)
-        strat_ranks_p1 = self._retrieve_strategies_by_vector(query_vectors[rewritten.strategy_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.strategy_query)
-        strat_ranks_p2 = self._retrieve_strategies_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query)
-        strat_ranks_p3 = self._retrieve_strategies_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query)
+        strat_ranks_p1 = self._retrieve_strategies_by_vector(query_vectors[rewritten.strategy_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.strategy_query, where_filter=where_filter) if "tutor" in perspectives else []
+        strat_ranks_p2 = self._retrieve_strategies_by_vector(query_vectors[rewritten.curriculum_query], top_k=15, fetch_evidence=False, lexical_query=rewritten.curriculum_query, where_filter=where_filter) if "tutor" in perspectives else []
+        strat_ranks_p3 = self._retrieve_strategies_by_vector(query_vectors[raw_query], top_k=15, fetch_evidence=False, lexical_query=raw_query, where_filter=where_filter) if "tutor" in perspectives else []
 
         lane_trace = {
             "misconception": [

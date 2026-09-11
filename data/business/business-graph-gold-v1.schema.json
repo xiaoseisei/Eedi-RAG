@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "business-graph-gold-v1.schema.json",
+  "title": "Business Graph End-to-End Gold Case",
+  "type": "object",
+  "required": ["case_id", "category", "query", "expected_router", "expected_plan", "expected_sql_scope", "expected_graph_paths", "expected_card_evidence", "expected_window_evidence", "expected_prompt", "expected_citation_contract", "expected_status", "ideal_answer"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 1},
+    "query": {"type": "string", "minLength": 1},
+    "expected_router": {"type": "object", "required": ["intent", "scope", "computation_scope", "perspectives"]},
+    "expected_plan": {"type": "object", "required": ["plan_type", "selected_lever"]},
+    "expected_sql_scope": {"type": "object", "required": ["filters", "keywords"]},
+    "expected_graph_paths": {"type": "array"},
+    "expected_card_evidence": {"type": "array"},
+    "expected_window_evidence": {"type": "array"},
+    "expected_prompt": {"type": "object", "required": ["rerank_unit", "deduplicate_overlapping_windows", "required_window_ids", "required_sections"]},
+    "expected_citation_contract": {"type": "object"},
+    "expected_status": {"enum": ["SUCCESS", "NO_EVIDENCE", "UNSUPPORTED", "FAILED"]},
+    "ideal_answer": {"type": "object", "required": ["required_claims", "forbidden_claims"]}
+  },
+  "additionalProperties": false
+}

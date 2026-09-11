@@ -13,6 +13,8 @@ import os
 import sys
 import time
 import argparse
+import hashlib
+import json
 import threading
 import logging
 from pathlib import Path
@@ -33,9 +35,29 @@ from src.storage_manager import DualEngineStorageManager
 from src.retriever import DualMetricRetriever
 from src.reranker import PedagogicalGoldAssembler
 from src.rag_pipeline import EndToEndPedagogicalRAGPipeline
+from src.business_models import BusinessQueryRequest
 
 # 关闭控制台冗长 INFO 日志，仅保留 WARNING/ERROR，使终端输出极其清爽
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(message)s")
+
+DEFAULT_BUSINESS_GRAPH_DB = (
+    project_root
+    / "reports"
+    / "staging"
+    / "session-card-graph-v1"
+    / "graph-taxonomy-verify-2-20260908.duckdb"
+)
+APPROVED_BUSINESS_GRAPH_SHA256 = (
+    "6efa0ee42a2b7a2004f194972bb7ffab75224dd69d17f190b96d58cdfefbac98"
+)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 BANNER = r"""
@@ -96,6 +118,12 @@ class PedagogicalCLI:
         reranker_pool_size: Optional[int] = None,
         parent_card_count: int = 5,
         generator_contract_version: str = "v1",
+        pipeline_mode: str = "legacy",
+        graph_db: str | Path = DEFAULT_BUSINESS_GRAPH_DB,
+        embedding_mode: str = "disabled",
+        debug_graph: bool = False,
+        allow_candidate_graph: bool = False,
+        intent_model: Optional[str] = None,
     ):
         """
         Args:
@@ -143,6 +171,10 @@ class PedagogicalCLI:
             raise ValueError("parent_card_count must be positive")
         if generator_contract_version not in {"v1", "v2"}:
             raise ValueError("generator_contract_version must be v1 or v2")
+        if pipeline_mode not in {"legacy", "business-graph"}:
+            raise ValueError("pipeline_mode must be legacy or business-graph")
+        if embedding_mode not in {"disabled", "isolated-copy"}:
+            raise ValueError("embedding_mode must be disabled or isolated-copy")
         self.embedding_backend = embedding_backend
         self.retrieval_mode = retrieval_mode
         self.bm25_weight = bm25_weight
@@ -153,13 +185,92 @@ class PedagogicalCLI:
         self.reranker_pool_size = reranker_pool_size
         self.parent_card_count = parent_card_count
         self.generator_contract_version = generator_contract_version
+        self.pipeline_mode = pipeline_mode
+        self.graph_db = Path(graph_db)
+        self.embedding_mode = embedding_mode
+        self.debug_graph = bool(debug_graph)
+        self.allow_candidate_graph = bool(allow_candidate_graph)
+        self.intent_model = intent_model
         self.storage: Optional[DualEngineStorageManager] = None
         self.retriever: Optional[DualMetricRetriever] = None
         self.pipeline: Optional[EndToEndPedagogicalRAGPipeline] = None
+        self.business_pipeline = None
+
+    def _validate_business_graph_artifact(self) -> dict[str, str]:
+        """Require explicit opt-in before starting from an unapproved Graph."""
+
+        graph_path = self.graph_db.resolve(strict=True)
+        graph_hash = _sha256_file(graph_path)
+        if graph_hash.lower() != APPROVED_BUSINESS_GRAPH_SHA256 and not self.allow_candidate_graph:
+            raise ValueError(
+                "graph artifact is not Gold-approved; pass --allow-candidate-graph explicitly"
+            )
+        return {
+            "sha256": graph_hash,
+            "approval_status": (
+                "GOLD_APPROVED"
+                if graph_hash.lower() == APPROVED_BUSINESS_GRAPH_SHA256
+                else "PENDING_GOLD_REAPPROVAL"
+            ),
+        }
 
     def initialize(self):
         """初始化底层双引擎与 RAG 管道。"""
         print("⏳ 正在初始化双引擎存储与教研生成管道...", end="", flush=True)
+        if self.pipeline_mode == "business-graph":
+            from src.business_graph_pipeline import (
+                BusinessGraphPipeline,
+                BusinessGraphRuntimeConfig,
+            )
+            from src.intent_classifier import OpenAICompatibleIntentClassifier
+
+            source_path = Path(self.db_path).resolve(strict=True)
+            graph_path = self.graph_db.resolve(strict=True)
+            chroma_path = Path(self.chroma_dir).resolve(strict=True)
+            graph_provenance = self._validate_business_graph_artifact()
+            embedding_retriever = None
+            if self.embedding_mode == "isolated-copy":
+                from src.business_graph_embedding import ChromaCardEmbeddingRetriever
+
+                embedding_retriever = ChromaCardEmbeddingRetriever(
+                    chroma_path,
+                    embedding_backend=self.embedding_backend,
+                    retrieval_mode=self.retrieval_mode,
+                    bm25_weight=self.bm25_weight,
+                )
+            intent_classifier = OpenAICompatibleIntentClassifier.try_from_env(
+                model=self.intent_model
+            )
+            try:
+                self.business_pipeline = BusinessGraphPipeline(
+                    source_db=source_path,
+                    graph_db=graph_path,
+                    chroma_dir=chroma_path,
+                    runtime_config=BusinessGraphRuntimeConfig(
+                        source_sha256=_sha256_file(source_path),
+                        model_reranker_available=False,
+                        generator_available=False,
+                    ),
+                    embedding_retriever=embedding_retriever,
+                    intent_classifier=intent_classifier,
+                )
+            except Exception:
+                close_embedding = getattr(embedding_retriever, "close", None)
+                if callable(close_embedding):
+                    close_embedding()
+                raise
+            classifier_info = (
+                f"LLM 意图识别器={intent_classifier.model}"
+                if intent_classifier is not None
+                else "LLM 意图识别器=未配置(冲突/模糊问题诚实返回 UNMEASURED)"
+            )
+            print(
+                " ✅ Graph Business 管道就绪 "
+                f"(Graph={graph_provenance['approval_status']}；{classifier_info}；"
+                "默认不启用 embedding；需 --embedding-mode isolated-copy)！\n"
+            )
+            return
+
         self.storage = DualEngineStorageManager(
             db_path=self.db_path,
             chroma_dir=self.chroma_dir,
@@ -194,6 +305,80 @@ class PedagogicalCLI:
             generator_contract_version=self.generator_contract_version,
         )
         print(" ✅ 就绪！\n")
+
+    def _generate_business_stream(
+        self,
+        query: str,
+        assembled_prompt: str,
+        on_chunk: Optional[Any] = None,
+    ) -> str:
+        """调用大模型基于业务证据与统计事实流式生成自然语言教研回答。"""
+        import openai
+
+        api_key = os.getenv("LLM_API_KEY")
+        base_url = os.getenv("LLM_BASE_URL")
+        model = os.getenv("LLM_MODEL")
+        if not api_key:
+            key_ref = os.getenv(
+                "GENERATOR_API_KEY_ENV",
+                os.getenv("EMBEDDING_API_KEY_ENV", "SILICONFLOW_API_KEY"),
+            )
+            api_key = os.getenv(key_ref) if key_ref and not key_ref.startswith("sk-") else key_ref
+            base_url = os.getenv(
+                "GENERATOR_BASE_URL",
+                os.getenv("EMBEDDING_BASE_URL", "https://api.siliconflow.cn/v1"),
+            )
+            model = os.getenv("GENERATOR_MODEL", "Qwen/Qwen3.5-4B")
+
+        if not api_key:
+            raise RuntimeError("LLM API Key 未配置，无法执行生成")
+
+        client = openai.OpenAI(
+            api_key=api_key,
+            base_url=base_url or "https://api.siliconflow.cn/v1",
+            timeout=float(os.getenv("LLM_TIMEOUT_SECONDS", "60")),
+        )
+        target_model = model or "Qwen/Qwen3.5-4B"
+
+        system_msg = (
+            "你是由 Eedi-RAG 驱动的权威名师教研备课与学情洞察专家。\n"
+            "请严格基于系统提供的真实课堂对白证据与宏观图谱统计事实，专业、详实地解答用户的教研与学情问题。\n"
+            "原则要求：\n"
+            "1. 真实守信：只引用上下文中确实存在的误区卡、策略、数据或对白，绝不凭空捏造因果关系或虚假证据。\n"
+            "2. 深度剖析：针对宏观问题提炼规律与考点分布；针对微观单题深入挖掘学生深层认知障碍并提供苏格拉底启发式引导话术。\n"
+            "3. 清晰结构：采用教研报告排版，条理清晰，言之有据。"
+        )
+        user_msg = (
+            f"【教研提问】\n{query}\n\n"
+            f"【检索到的真实课堂证据与图谱上下文】\n{assembled_prompt}"
+        )
+
+        request_kwargs: dict[str, Any] = {
+            "model": target_model,
+            "messages": [
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+            "stream": True,
+            "temperature": 0.2,
+        }
+        if "qwen" in target_model.lower():
+            request_kwargs["extra_body"] = {"enable_thinking": False}
+
+        parts: list[str] = []
+        stream = client.chat.completions.create(**request_kwargs)
+        for event in stream:
+            choices = getattr(event, "choices", None) or []
+            if not choices:
+                continue
+            delta = getattr(choices[0], "delta", None)
+            piece = getattr(delta, "content", None) if delta is not None else None
+            if not piece:
+                continue
+            parts.append(piece)
+            if on_chunk is not None:
+                on_chunk(piece)
+        return "".join(parts).strip()
 
     def run(self):
         """启动交互式 REPL 循环。"""
@@ -249,6 +434,117 @@ class PedagogicalCLI:
                 query_count += 1
                 start_t = time.perf_counter()
                 print("\n🧠 正在检索考纲知识库与真实辅导对白实录...", flush=True)
+
+                if self.pipeline_mode == "business-graph":
+                    if self.business_pipeline is None:
+                        raise RuntimeError("business-graph pipeline 未初始化")
+                    response = self.business_pipeline.ask_business(
+                        BusinessQueryRequest(query=user_input, debug=self.debug_graph),
+                        mode="deterministic",
+                    )
+                    elapsed_retrieval_ms = (time.perf_counter() - start_t) * 1000.0
+                    intent_val = (
+                        response.understanding.primary_intent.value
+                        if response.understanding
+                        else "UNKNOWN"
+                    )
+                    route_src = (
+                        response.understanding.route_source
+                        if response.understanding
+                        else "UNKNOWN"
+                    )
+                    print("\n" + "=" * 88)
+                    print(
+                        f"🎯 业务意图: {intent_val} | 路由来源: {route_src} | "
+                        f"状态: {response.status.value}"
+                    )
+
+                    # 越界拒答 (UNSUPPORTED)
+                    if response.status.value == "UNSUPPORTED":
+                        print("=" * 88)
+                        print(f"🛑 {response.summary}")
+                        if response.limitations:
+                            print("📌 限制原因: " + "；".join(response.limitations))
+                        print("=" * 88)
+                        continue
+
+                    # 无证据 (NO_EVIDENCE)
+                    if response.status.value == "NO_EVIDENCE":
+                        print("=" * 88)
+                        print(f"⚠️ {response.summary}")
+                        print("=" * 88)
+                        continue
+
+                    # deterministic 纯白盒模式：打印结构化 JSON 载荷
+                    if self.mode == "deterministic":
+                        print("=" * 88)
+                        print(response.summary)
+                        if response.result is not None:
+                            print(json.dumps(response.result.payload, ensure_ascii=False, indent=2))
+                        print(
+                            f"状态: {response.status.value} | 审计: {response.audit_status} | "
+                            f"证据: {len(response.evidence)} 条 | 检索耗时: {elapsed_retrieval_ms:.1f} ms"
+                        )
+                        if response.limitations:
+                            print("限制: " + "；".join(response.limitations))
+                        print("=" * 88)
+                        continue
+
+                    # auto / llm 模式：流式自然语言回答
+                    assembled_prompt = ""
+                    if response.result is not None:
+                        assembled_prompt = response.result.payload.get("assembled_prompt", "")
+                    if not assembled_prompt and response.result is not None:
+                        assembled_prompt = json.dumps(response.result.payload, ensure_ascii=False)
+
+                    print(
+                        f"📊 课堂证据: {len(response.evidence)} 条 | "
+                        f"检索分析耗时: {elapsed_retrieval_ms:.1f} ms"
+                    )
+                    print("=" * 88)
+                    print("💬 【名师教研洞察解答】:\n")
+
+                    answer_started = threading.Event()
+                    heartbeat_stop = threading.Event()
+
+                    def emit_business_feedback() -> None:
+                        while not heartbeat_stop.wait(2.0):
+                            if not answer_started.is_set():
+                                print("⏳ 证据已就绪，大模型正在生成解答...", flush=True)
+
+                    heartbeat_thread = threading.Thread(
+                        target=emit_business_feedback,
+                        name="eedi-rag-business-stream-feedback",
+                        daemon=True,
+                    )
+                    heartbeat_thread.start()
+
+                    def emit_business_chunk(chunk: str) -> None:
+                        if chunk.strip():
+                            answer_started.set()
+                        print(chunk, end="", flush=True)
+
+                    try:
+                        self._generate_business_stream(
+                            user_input,
+                            assembled_prompt=assembled_prompt,
+                            on_chunk=emit_business_chunk,
+                        )
+                    except Exception as exc:
+                        print(f"\n❌ 模型生成遇到异常: {exc}")
+                    finally:
+                        heartbeat_stop.set()
+                        heartbeat_thread.join(timeout=0.25)
+
+                    print("\n\n" + "=" * 88)
+                    total_elapsed_ms = (time.perf_counter() - start_t) * 1000.0
+                    print(
+                        f"⏱️ 端到端总耗时: {total_elapsed_ms:.1f} ms | "
+                        f"证据链条: {len(response.evidence)} 条 | "
+                        f"审计状态: {response.audit_status}"
+                    )
+                    print("=" * 88)
+                    continue
 
                 if self.mode in {"auto", "llm"}:
                     answer_started = threading.Event()
@@ -312,6 +608,8 @@ class PedagogicalCLI:
 
         if self.storage:
             self.storage.close()
+        if self.business_pipeline:
+            self.business_pipeline.close()
 
 
 def main():
@@ -319,6 +617,23 @@ def main():
     parser = argparse.ArgumentParser(description="Eedi-RAG interactive pedagogical CLI (BM25 + Dense + optional Qwen reranker)")
     parser.add_argument("--db-path", default="data/db/tutoring_knowledge.duckdb")
     parser.add_argument("--chroma-dir", default="data/chroma")
+    parser.add_argument(
+        "--pipeline",
+        "--route",
+        dest="pipeline_mode",
+        choices=("legacy", "business-graph"),
+        default="legacy",
+        help="explicitly select the legacy or business-graph route",
+    )
+    parser.add_argument("--graph-db", default=str(DEFAULT_BUSINESS_GRAPH_DB))
+    parser.add_argument(
+        "--embedding-mode",
+        choices=("disabled", "isolated-copy"),
+        default="disabled",
+        help="business-graph dense Card lane; isolated-copy never opens production Chroma in place",
+    )
+    parser.add_argument("--debug-graph", action="store_true")
+    parser.add_argument("--allow-candidate-graph", action="store_true")
     parser.add_argument("--embedding-backend", choices=("deterministic", "siliconflow"), default="deterministic")
     parser.add_argument("--retrieval-mode", choices=("dense", "bm25_dense"), default="bm25_dense")
     parser.add_argument("--bm25-weight", type=float, default=0.35)
@@ -334,10 +649,22 @@ def main():
     parser.add_argument("--reranker-pool-size", type=int, default=None)
     parser.add_argument("--parent-card-count", type=int, default=5)
     parser.add_argument("--generator-contract", choices=("v1", "v2"), default="v2")
+    parser.add_argument(
+        "--intent-model",
+        default=None,
+        help="second-layer intent classifier model (e.g. Qwen/Qwen3.5-4B; defaults to INTENT_MODEL in .env)",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("auto", "llm", "deterministic"),
+        default="auto",
+        help="generation mode: auto (default), llm, or deterministic",
+    )
     args = parser.parse_args()
     cli = PedagogicalCLI(
         db_path=args.db_path,
         chroma_dir=args.chroma_dir,
+        default_mode=args.mode,
         embedding_backend=args.embedding_backend,
         retrieval_mode=args.retrieval_mode,
         bm25_weight=args.bm25_weight,
@@ -348,6 +675,12 @@ def main():
         reranker_pool_size=args.reranker_pool_size,
         parent_card_count=args.parent_card_count,
         generator_contract_version=args.generator_contract,
+        pipeline_mode=args.pipeline_mode,
+        graph_db=args.graph_db,
+        embedding_mode=args.embedding_mode,
+        debug_graph=args.debug_graph,
+        allow_candidate_graph=args.allow_candidate_graph,
+        intent_model=args.intent_model,
     )
     cli.run()
 

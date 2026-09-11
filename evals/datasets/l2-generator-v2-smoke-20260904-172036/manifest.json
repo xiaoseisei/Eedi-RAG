@@ -1,0 +1,69 @@
+{
+  "artifact_hash": "b45860c80d02b999c9c9bf6d960c50779b84aad1b76fa74bef02da6ac9a8aeb9",
+  "case_count": 30,
+  "dataset_version": "eedi-l2-golden30-v1",
+  "files": {
+    "expected_answers.jsonl": "3a242e3a48090c629bdcff17d015b2086a322c8db1a5fe8e31b1eb1147bf3076",
+    "expected_evidence.jsonl": "e6c6fe4cd453f62b72b8fe8c73f0fd8c061e5bdb49f100849f45fc1c3e3d3948",
+    "queries.jsonl": "76c09a80a719475980dbf4bb1814cc8df1b60ac88e8088adae4b8c28604a89cd",
+    "split_manifest.json": "2fa446fd44fb7b7f8f7a347f1953cc76cdfe2b8a3f64010aaf2b830842baf537"
+  },
+  "generated_at": "2026-09-04T09:20:38.519088Z",
+  "generator": {
+    "config": {
+      "bm25_weight": 0.35,
+      "citation_contract": "quadruple",
+      "evidence_selection_count": 5,
+      "generator_contract": "v2",
+      "gold_context_version": "v2",
+      "mode": "production_llm",
+      "parent_card_count": 3,
+      "rerank_unit": "anchored_logical_window",
+      "reranker_backend": "siliconflow",
+      "reranker_pool_size": 20,
+      "retrieval_mode": "bm25_dense",
+      "rubric_version": "v2"
+    },
+    "model": "mimo-v2.5"
+  },
+  "l1_manifest_sha256": "2d59880583f03e6ce8caeb23f9c73ce9500b816773f6a32bffafebf5e75fef3d",
+  "qrels_version": "golden-verbatim-v2-derived-document-v1",
+  "schema_version": "l2-deepeval-dataset/v1",
+  "session_leakage_count": 0,
+  "split_counts": {
+    "dev": 24,
+    "holdout": 6
+  },
+  "system_config": {
+    "generator_config": {
+      "bm25_weight": 0.35,
+      "citation_contract": "quadruple",
+      "evidence_selection_count": 5,
+      "generator_contract": "v2",
+      "gold_context_version": "v2",
+      "mode": "production_llm",
+      "parent_card_count": 3,
+      "rerank_unit": "anchored_logical_window",
+      "reranker_backend": "siliconflow",
+      "reranker_pool_size": 20,
+      "retrieval_mode": "bm25_dense",
+      "rubric_version": "v2"
+    },
+    "generator_model": "mimo-v2.5",
+    "gold_context_policy": "evaluation_only_not_in_production_retrieval",
+    "layer": "L2",
+    "metrics": [
+      "faithfulness",
+      "answer_relevancy",
+      "contextual_recall",
+      "contextual_precision",
+      "pedagogical_geval",
+      "citation_audit"
+    ],
+    "tracks": [
+      "gold",
+      "real"
+    ]
+  },
+  "system_config_hash": "b4612842d0204a41c9ca70239c8467d774299a82c3a1f11edbe5c9eabbe1491a"
+}

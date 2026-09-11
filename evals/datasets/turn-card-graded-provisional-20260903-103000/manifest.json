@@ -1,0 +1,199 @@
+{
+  "aggregates": {
+    "card_graded_mrr": {
+      "dev_mean": 0.8333333333333334,
+      "holdout_mean": 0.8333333333333334,
+      "mean": 0.8333333333333334,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "card_graded_ndcg_at_5": {
+      "dev_mean": 0.9070100793902407,
+      "holdout_mean": 0.862754440710482,
+      "mean": 0.8981589516542889,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "card_graded_precision_at_5": {
+      "dev_mean": 0.35833333333333334,
+      "holdout_mean": 0.3666666666666667,
+      "mean": 0.36,
+      "measured_cases": 30,
+      "p95": 0.6
+    },
+    "card_graded_recall_at_20": {
+      "dev_mean": 0.8333333333333334,
+      "holdout_mean": 0.8333333333333334,
+      "mean": 0.8333333333333334,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "card_graded_recall_at_3": {
+      "dev_mean": 0.8333333333333334,
+      "holdout_mean": 0.8333333333333334,
+      "mean": 0.8333333333333334,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "card_graded_recall_at_5": {
+      "dev_mean": 0.8333333333333334,
+      "holdout_mean": 0.8333333333333334,
+      "mean": 0.8333333333333334,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_mrr": {
+      "dev_mean": 0.8076073232323232,
+      "holdout_mean": 1.0,
+      "mean": 0.8460858585858586,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_ndcg_at_5": {
+      "dev_mean": 0.7889100283484427,
+      "holdout_mean": 0.8992511568096009,
+      "mean": 0.8109782540406744,
+      "measured_cases": 30,
+      "p95": 0.9891413446337513
+    },
+    "graded_precision_at_5": {
+      "dev_mean": 0.8666666666666667,
+      "holdout_mean": 0.8333333333333334,
+      "mean": 0.86,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_recall_at_10": {
+      "dev_mean": 0.8756944444444444,
+      "holdout_mean": 0.8472222222222222,
+      "mean": 0.87,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_recall_at_20": {
+      "dev_mean": 0.9291666666666667,
+      "holdout_mean": 1.0,
+      "mean": 0.9433333333333334,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_recall_at_3": {
+      "dev_mean": 0.5493055555555556,
+      "holdout_mean": 0.7083333333333333,
+      "mean": 0.5811111111111111,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "graded_recall_at_5": {
+      "dev_mean": 0.7861111111111111,
+      "holdout_mean": 0.8472222222222222,
+      "mean": 0.7983333333333333,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "latency_ms": {
+      "dev_mean": 624.1474166666667,
+      "holdout_mean": 450.656,
+      "mean": 589.4491333333333,
+      "measured_cases": 30,
+      "p95": 535.746
+    },
+    "turn_coverage_at_1": {
+      "dev_mean": 0.4236111111111111,
+      "holdout_mean": 0.6666666666666666,
+      "mean": 0.4722222222222222,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "turn_coverage_at_3": {
+      "dev_mean": 0.7569444444444444,
+      "holdout_mean": 0.9444444444444444,
+      "mean": 0.7944444444444444,
+      "measured_cases": 30,
+      "p95": 1.0
+    },
+    "turn_coverage_at_5": {
+      "dev_mean": 0.875,
+      "holdout_mean": 1.0,
+      "mean": 0.9,
+      "measured_cases": 30,
+      "p95": 1.0
+    }
+  },
+  "artifact_hash_after": "6bb387b4b9698009fffca6193a35d02b98b0424d017fc4add166f89428e9d67a",
+  "artifact_hash_before": "6bb387b4b9698009fffca6193a35d02b98b0424d017fc4add166f89428e9d67a",
+  "artifact_mutated": false,
+  "attribution": {
+    "card_pointer_loss_cases": [
+      "eedi-turn-graded-0002",
+      "eedi-turn-graded-0003",
+      "eedi-turn-graded-0004",
+      "eedi-turn-graded-0005",
+      "eedi-turn-graded-0006",
+      "eedi-turn-graded-0008",
+      "eedi-turn-graded-0011",
+      "eedi-turn-graded-0013",
+      "eedi-turn-graded-0017",
+      "eedi-turn-graded-0020",
+      "eedi-turn-graded-0021",
+      "eedi-turn-graded-0024",
+      "eedi-turn-graded-0029",
+      "eedi-turn-graded-0030"
+    ],
+    "card_pointer_role_correct_mean": 0.6833333333333333,
+    "full_window_coverage_at_5_mean": 0.9,
+    "interpretation": "If card pointer recall is low while full window coverage is complete, the first loss is extraction/pointer selection. If pointer coverage is complete but top-k Turn coverage is low, the loss is window retrieval/ranking. Assembler and Generator must be evaluated separately against final context and citation traces.",
+    "retrieval_rank_loss_cases": [
+      "eedi-turn-graded-0002",
+      "eedi-turn-graded-0006",
+      "eedi-turn-graded-0008",
+      "eedi-turn-graded-0009",
+      "eedi-turn-graded-0011",
+      "eedi-turn-graded-0014",
+      "eedi-turn-graded-0016",
+      "eedi-turn-graded-0017",
+      "eedi-turn-graded-0022",
+      "eedi-turn-graded-0024",
+      "eedi-turn-graded-0025",
+      "eedi-turn-graded-0028"
+    ],
+    "window_generation_loss_cases": []
+  },
+  "card_slot_fallback_cases": [
+    "eedi-turn-graded-0024"
+  ],
+  "case_count": 30,
+  "config": {
+    "embedding_dimension": 1024,
+    "embedding_model": "Qwen/Qwen3-Embedding-0.6B",
+    "fusion_strategy": "raw_first",
+    "top_k": 20
+  },
+  "dataset_version": "eedi-turn-graded-provisional-v1",
+  "files": {
+    "card_graded_qrels.jsonl": "7e3fffbc2704fa4ed89f463dcd0542093dfd84d5244be7ff5f1a0fead75ebbf3",
+    "graded_qrels.jsonl": "a14e42c39362c6b25ed7228644bf12017caeb1e2ccd0d637d15480c75ad494b1",
+    "raw_cases.jsonl": "4dd87f83a6ab1c2cc2c8e93d9ee3236fda6c4db99f9a4624214745eee699e5df"
+  },
+  "l1_manifest_sha256": "2d59880583f03e6ce8caeb23f9c73ce9500b816773f6a32bffafebf5e75fef3d",
+  "label_source": "provisional_rule_from_human_turns_v1",
+  "limitations": [
+    "These graded labels are deterministic derivations, not independent human judgments.",
+    "A window with relevance 1 is topical/session-related but not proven evidence for the answer.",
+    "Do not use these qrels to claim business accuracy until human reviewers approve multi-document relevance."
+  ],
+  "needs_human_review": true,
+  "qrel_count": 21570,
+  "qrels_version": "turn-window-graded-provisional-rule-v1",
+  "relevance_scale": {
+    "0": "unrelated",
+    "1": "same session/subject without direct required turn",
+    "2": "covers a subset of required turns",
+    "3": "covers all required turns"
+  },
+  "schema_version": "turn-graded-eval/v1",
+  "split_counts": {
+    "dev": 24,
+    "holdout": 6
+  }
+}

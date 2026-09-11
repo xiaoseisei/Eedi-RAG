@@ -1,0 +1,25 @@
+{
+  "by_document_type": {
+    "card": 600,
+    "window": 606
+  },
+  "by_priority": {
+    "HIGH": 323,
+    "MEDIUM": 883
+  },
+  "generated_at": "2026-09-03T02:44:16.418251Z",
+  "review_queue_file": {
+    "path": "E:\\PIAgent\\10-projects\\AgentLearn\\Eedi-RAG\\evals\\datasets\\graded-qrels-review-queue-20260903-112500\\review_queue.jsonl",
+    "sha256": "0079d096f04f6aa2de53ad35b9f9dc2b622e2f3017fe5e39e94059efd3ea7ab7"
+  },
+  "row_count": 1206,
+  "rule": "Queue includes every Top-K ranked candidate and all provisional relevance>=2 documents; all labels remain PENDING until human review.",
+  "schema_version": "graded-qrels-review-queue/v1",
+  "source_dataset_dir": "E:\\PIAgent\\10-projects\\AgentLearn\\Eedi-RAG\\evals\\datasets\\turn-card-graded-provisional-20260903-110000",
+  "source_files": {
+    "card_graded_qrels.jsonl": "7e3fffbc2704fa4ed89f463dcd0542093dfd84d5244be7ff5f1a0fead75ebbf3",
+    "graded_qrels.jsonl": "a14e42c39362c6b25ed7228644bf12017caeb1e2ccd0d637d15480c75ad494b1",
+    "manifest.json": "51c34aa547b5d671a04669f0b5c5970424ef02498d994caa7527fc73355ab71b",
+    "raw_cases.jsonl": "7a7f8e817eab816d7278d9309fdc54915a434371498279fa7e85f991174eeeae"
+  }
+}

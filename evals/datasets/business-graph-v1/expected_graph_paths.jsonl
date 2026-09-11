@@ -1,0 +1,83 @@
+{"case_id": "micro-student-error-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-001", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-reasoning-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "macro-student-faq-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-difficult-concept-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-recurring-misconception-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-exam-error-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-tutor-strategy-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-content-improvement-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT"]}]}
+{"case_id": "macro-cross-session-cooccurrence-001", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "mixed-macro-graph-evidence-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "TYPE_OF", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "MISCONCEPTION_CONCEPT", "TURN"]}]}
+{"case_id": "mixed-misconception-intervention-001", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "HAS_STRATEGY", "CO_OCCURS_WITH"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "mixed-cross-session-pattern-001", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "negative-no-evidence-001", "expected_graph_paths": []}
+{"case_id": "negative-unsupported-001", "expected_graph_paths": []}
+{"case_id": "negative-failed-001", "expected_graph_paths": []}
+{"case_id": "micro-student-error-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-student-error-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-student-error-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-student-error-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-student-error-006", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-002", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-003", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-004", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-005", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-tutor-method-006", "expected_graph_paths": [{"edges": ["HAS_STRATEGY", "EVIDENCED_BY"], "nodes": ["SESSION", "TUTOR_STRATEGY_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-class-review-006", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-options-reasoning-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-options-reasoning-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-options-reasoning-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-options-reasoning-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "micro-question-options-reasoning-006", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "macro-student-frequent-questions-002", "expected_graph_paths": []}
+{"case_id": "macro-student-frequent-questions-003", "expected_graph_paths": []}
+{"case_id": "macro-student-frequent-questions-004", "expected_graph_paths": []}
+{"case_id": "macro-student-frequent-questions-005", "expected_graph_paths": []}
+{"case_id": "macro-difficult-concept-002", "expected_graph_paths": []}
+{"case_id": "macro-difficult-concept-003", "expected_graph_paths": []}
+{"case_id": "macro-difficult-concept-004", "expected_graph_paths": []}
+{"case_id": "macro-difficult-concept-005", "expected_graph_paths": []}
+{"case_id": "macro-recurring-misconception-002", "expected_graph_paths": []}
+{"case_id": "macro-recurring-misconception-003", "expected_graph_paths": []}
+{"case_id": "macro-recurring-misconception-004", "expected_graph_paths": []}
+{"case_id": "macro-recurring-misconception-005", "expected_graph_paths": []}
+{"case_id": "macro-exam-error-002", "expected_graph_paths": []}
+{"case_id": "macro-exam-error-003", "expected_graph_paths": []}
+{"case_id": "macro-exam-error-004", "expected_graph_paths": []}
+{"case_id": "macro-exam-error-005", "expected_graph_paths": []}
+{"case_id": "macro-tutor-strategy-002", "expected_graph_paths": []}
+{"case_id": "macro-tutor-strategy-003", "expected_graph_paths": []}
+{"case_id": "macro-tutor-strategy-004", "expected_graph_paths": []}
+{"case_id": "macro-tutor-strategy-005", "expected_graph_paths": []}
+{"case_id": "macro-content-improvement-002", "expected_graph_paths": []}
+{"case_id": "macro-content-improvement-003", "expected_graph_paths": []}
+{"case_id": "macro-content-improvement-004", "expected_graph_paths": []}
+{"case_id": "macro-content-improvement-005", "expected_graph_paths": []}
+{"case_id": "macro-cross-session-cooccurrence-002", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "macro-cross-session-cooccurrence-003", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "macro-cross-session-cooccurrence-004", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "macro-cross-session-cooccurrence-005", "expected_graph_paths": [{"edges": ["TYPE_OF", "CO_OCCURS_WITH"], "nodes": ["MISCONCEPTION_CONCEPT", "MISCONCEPTION_EVENT", "TUTOR_STRATEGY_EVENT"]}]}
+{"case_id": "mixed-macro-graph-micro-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-macro-graph-micro-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-macro-graph-micro-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-macro-graph-micro-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-misconception-intervention-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-misconception-intervention-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-misconception-intervention-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-misconception-intervention-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-cross-session-pattern-002", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-cross-session-pattern-003", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-cross-session-pattern-004", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "mixed-cross-session-pattern-005", "expected_graph_paths": [{"edges": ["HAS_MISCONCEPTION", "EVIDENCED_BY"], "nodes": ["SESSION", "MISCONCEPTION_EVENT", "TURN"]}]}
+{"case_id": "negative-no_evidence-002", "expected_graph_paths": []}
+{"case_id": "negative-no_evidence-003", "expected_graph_paths": []}
+{"case_id": "negative-unsupported-002", "expected_graph_paths": []}
+{"case_id": "negative-unsupported-003", "expected_graph_paths": []}
+{"case_id": "negative-failed-002", "expected_graph_paths": []}
+{"case_id": "negative-failed-003", "expected_graph_paths": []}

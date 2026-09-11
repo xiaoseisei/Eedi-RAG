@@ -44,6 +44,10 @@ class BatchAudit:
     missing_strategy_vector_ids: tuple[str, ...] = ()
     missing_window_vector_ids: tuple[str, ...] = ()
     duplicate_ids: tuple[str, ...] = ()
+    unexpected_session_ids: tuple[int, ...] = ()
+    unexpected_misconception_card_ids: tuple[str, ...] = ()
+    unexpected_strategy_card_ids: tuple[str, ...] = ()
+    unexpected_window_ids: tuple[str, ...] = ()
     details: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -145,15 +149,8 @@ def audit_batch(
     expected_misc = {f"session_{item}_misconception" for item in session_ids}
     expected_strategy = {f"session_{item}_tutor_strategy" for item in session_ids}
     if expected_window_ids is None:
-        expected_windows: set[str] = set()
-        for session in sessions:
-            rows = storage.duck_conn.execute(
-                "SELECT chunk_id FROM sliding_window_chunks WHERE session_id = ?",
-                [session.intervention_id],
-            ).fetchall()
-            expected_windows.update(str(row[0]) for row in rows)
-    else:
-        expected_windows = {str(item) for item in expected_window_ids}
+        raise ValueError("audit_batch requires an independent expected_window_ids manifest")
+    expected_windows = {str(item) for item in expected_window_ids}
 
     placeholders = ",".join("?" for _ in session_ids)
     actual_sessions = _query_ids(
@@ -188,6 +185,10 @@ def audit_batch(
     missing_misc_vectors = tuple(sorted(expected_misc - actual_misc_vectors))
     missing_strategy_vectors = tuple(sorted(expected_strategy - actual_strategy_vectors))
     missing_window_vectors = tuple(sorted(expected_windows - actual_window_vectors))
+    unexpected_sessions = tuple(sorted(int(item) for item in actual_sessions - expected_session_ids))
+    unexpected_misc = tuple(sorted(actual_misc - expected_misc))
+    unexpected_strategy = tuple(sorted(actual_strategy - expected_strategy))
+    unexpected_windows = tuple(sorted(actual_windows - expected_windows))
     status = "PASSED" if not (
         missing_sessions
         or missing_misc
@@ -196,6 +197,10 @@ def audit_batch(
         or missing_misc_vectors
         or missing_strategy_vectors
         or missing_window_vectors
+        or unexpected_sessions
+        or unexpected_misc
+        or unexpected_strategy
+        or unexpected_windows
     ) else "FAILED"
     return BatchAudit(
         batch_id=batch_id,
@@ -221,6 +226,10 @@ def audit_batch(
         missing_misconception_vector_ids=missing_misc_vectors,
         missing_strategy_vector_ids=missing_strategy_vectors,
         missing_window_vector_ids=missing_window_vectors,
+        unexpected_session_ids=unexpected_sessions,
+        unexpected_misconception_card_ids=unexpected_misc,
+        unexpected_strategy_card_ids=unexpected_strategy,
+        unexpected_window_ids=unexpected_windows,
     )
 
 
@@ -265,7 +274,12 @@ def promote_batch(
     return audit
 
 
-def audit_full_storage(storage: Any, sessions: Sequence[CleanedSession]) -> dict[str, Any]:
+def audit_full_storage(
+    storage: Any,
+    sessions: Sequence[CleanedSession],
+    *,
+    expected_window_ids: Iterable[str] | None = None,
+) -> dict[str, Any]:
     """Verify that the complete source session set is represented in storage."""
 
     expected = {str(int(item.intervention_id)) for item in sessions}
@@ -278,26 +292,29 @@ def audit_full_storage(storage: Any, sessions: Sequence[CleanedSession]) -> dict
     actual_strategy = _query_ids(storage, "SELECT chunk_id FROM tutor_strategy_chunks")
     actual_misc_vectors = _collection_ids(storage, "coll_misconceptions", expected_misc)
     actual_strategy_vectors = _collection_ids(storage, "coll_strategies", expected_strategy)
-    expected_windows: set[str] = set()
-    for session in sessions:
-        rows = storage.duck_conn.execute(
-            "SELECT chunk_id FROM sliding_window_chunks WHERE session_id = ?",
-            [session.intervention_id],
-        ).fetchall()
-        expected_windows.update(str(row[0]) for row in rows)
+    if expected_window_ids is None:
+        return {
+            "status": "BLOCKED",
+            "reason": "independent expected_window_ids manifest is required; refusing self-derived expectation",
+            "checks": {},
+        }
+    expected_windows = {str(item) for item in expected_window_ids}
     actual_windows = _query_ids(storage, "SELECT chunk_id FROM sliding_window_chunks")
     actual_window_vectors = _collection_ids(storage, "coll_windows", expected_windows)
     missing_misc = tuple(sorted(expected_misc - actual_misc))
     missing_strategy = tuple(sorted(expected_strategy - actual_strategy))
     missing_misc_vectors = tuple(sorted(expected_misc - actual_misc_vectors))
     missing_strategy_vectors = tuple(sorted(expected_strategy - actual_strategy_vectors))
+    unexpected_misc = tuple(sorted(actual_misc - expected_misc))
+    unexpected_strategy = tuple(sorted(actual_strategy - expected_strategy))
+    unexpected_windows = tuple(sorted(actual_windows - expected_windows))
     checks = {
         "session_id_set": not missing and not unexpected,
-        "misconception_card_count": len(actual_misc) == len(expected_misc),
-        "strategy_card_count": len(actual_strategy) == len(expected_strategy),
+        "misconception_card_count": not missing_misc and not unexpected_misc,
+        "strategy_card_count": not missing_strategy and not unexpected_strategy,
         "misconception_vector_count": len(actual_misc_vectors) == len(expected_misc),
         "strategy_vector_count": len(actual_strategy_vectors) == len(expected_strategy),
-        "window_count": len(actual_windows) == len(expected_windows),
+        "window_count": not (expected_windows - actual_windows) and not unexpected_windows,
         "window_vector_count": len(actual_window_vectors) == len(expected_windows),
     }
     return {
@@ -321,6 +338,9 @@ def audit_full_storage(storage: Any, sessions: Sequence[CleanedSession]) -> dict
         "missing_strategy_vector_ids": missing_strategy_vectors,
         "missing_window_ids": tuple(sorted(expected_windows - actual_windows)),
         "missing_window_vector_ids": tuple(sorted(expected_windows - actual_window_vectors)),
+        "unexpected_misconception_card_ids": unexpected_misc,
+        "unexpected_strategy_card_ids": unexpected_strategy,
+        "unexpected_window_ids": unexpected_windows,
         "checks": checks,
     }
 
