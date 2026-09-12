@@ -1,0 +1,683 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 1080" width="100%" height="100%">
+  <defs>
+    <!-- Soft Shadows -->
+    <filter id="card-shadow" x="-3%" y="-3%" width="106%" height="106%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1B3A57" flood-opacity="0.09"/>
+    </filter>
+    <filter id="chip-shadow" x="-4%" y="-6%" width="108%" height="114%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B3A57" flood-opacity="0.06"/>
+    </filter>
+    <filter id="glow-purple" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#8B5CF6" flood-opacity="0.25"/>
+    </filter>
+    <filter id="glow-teal" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#0D9488" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2B5B84"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#1B8755"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0D9488"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EA580C"/>
+    </marker>
+
+    <!-- Canvas Gradients -->
+    <linearGradient id="bg-canvas" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8F1F8"/>
+      <stop offset="100%" stop-color="#DAE6F2"/>
+    </linearGradient>
+
+    <!-- Pill Header Gradients -->
+    <linearGradient id="pill-yellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FEF3C7"/>
+      <stop offset="100%" stop-color="#FDE68A"/>
+    </linearGradient>
+    <linearGradient id="pill-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E0F2FE"/>
+      <stop offset="100%" stop-color="#BAE6FD"/>
+    </linearGradient>
+    <linearGradient id="pill-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DCFCE7"/>
+      <stop offset="100%" stop-color="#BBF7D0"/>
+    </linearGradient>
+    <linearGradient id="pill-purple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F3E8FF"/>
+      <stop offset="100%" stop-color="#E9D5FF"/>
+    </linearGradient>
+    <linearGradient id="pill-teal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#CCFBF1"/>
+      <stop offset="100%" stop-color="#99F6E4"/>
+    </linearGradient>
+    <linearGradient id="pill-orange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFEDD5"/>
+      <stop offset="100%" stop-color="#FED7AA"/>
+    </linearGradient>
+
+    <!-- Chip Gradients -->
+    <linearGradient id="chip-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0F7FF"/>
+      <stop offset="100%" stop-color="#E1EFFF"/>
+    </linearGradient>
+    <linearGradient id="chip-cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDFA"/>
+      <stop offset="100%" stop-color="#CCFBF1"/>
+    </linearGradient>
+    <linearGradient id="chip-purple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#F3E8FF"/>
+    </linearGradient>
+    <linearGradient id="chip-amber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="100%" stop-color="#FEF3C7"/>
+    </linearGradient>
+    <linearGradient id="chip-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="chip-graph" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5F3FF"/>
+      <stop offset="100%" stop-color="#EDE9FE"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .card-container {
+      fill: #FFFFFF;
+      stroke: #2E5B82;
+      stroke-width: 1.8;
+      stroke-dasharray: 6,4;
+      rx: 14;
+      ry: 14;
+      filter: url(#card-shadow);
+    }
+    .card-graph-accent {
+      fill: #FFFFFF;
+      stroke: #7C3AED;
+      stroke-width: 2.2;
+      rx: 14;
+      ry: 14;
+      filter: url(#glow-purple);
+    }
+    .card-rag-accent {
+      fill: #FFFFFF;
+      stroke: #0284C7;
+      stroke-width: 2.2;
+      rx: 14;
+      ry: 14;
+      filter: url(#card-shadow);
+    }
+    .card-bridge-accent {
+      fill: #F0FDF4;
+      stroke: #16A34A;
+      stroke-width: 2;
+      rx: 12;
+      ry: 12;
+      filter: url(#glow-teal);
+    }
+    .pill-header {
+      rx: 14;
+      ry: 14;
+      stroke-width: 1.2;
+    }
+    .pill-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .chip {
+      rx: 8;
+      ry: 8;
+      stroke-width: 1.2;
+      filter: url(#chip-shadow);
+    }
+    .chip-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .chip-sub {
+      font-size: 9px;
+      fill: #4B647A;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .flow-line {
+      fill: none;
+      stroke: #2B5B84;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      marker-end: url(#arrow);
+    }
+    .flow-line-dashed {
+      fill: none;
+      stroke: #0284C7;
+      stroke-width: 2;
+      stroke-dasharray: 5,4;
+      marker-end: url(#arrow);
+    }
+    .flow-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      fill: #1E3A8A;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .flow-label-bg {
+      fill: #FFFFFF;
+      rx: 4;
+      ry: 4;
+      stroke: #93C5FD;
+      stroke-width: 1;
+    }
+    .canvas-title {
+      font-size: 23px;
+      font-weight: 800;
+      fill: #0F2942;
+      letter-spacing: 0.5px;
+    }
+    .canvas-sub {
+      font-size: 11.5px;
+      font-weight: 500;
+      fill: #47637E;
+    }
+    /* Graph Node Styling */
+    .g-node {
+      rx: 20;
+      ry: 20;
+      stroke-width: 1.5;
+    }
+    .g-edge {
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+  </style>
+
+  <!-- Canvas Background -->
+  <rect x="0" y="0" width="1360" height="1080" fill="url(#bg-canvas)" rx="16" ry="16"/>
+
+  <!-- ========================================================================================== -->
+  <!-- HEADER -->
+  <!-- ========================================================================================== -->
+  <g transform="translate(40, 22)">
+    <text x="0" y="22" class="canvas-title">Eedi-RAG 业务知识图谱增强生成系统全景架构与数据流图 (Graph-RAG 工业全链路版)</text>
+    <text x="0" y="42" class="canvas-sub">真实初等数学课堂对白 | 离线拓扑投影 ➔ 三态意图解耦与规划 ➔ 7大算子宏观SQL聚合 + 7Win微观检索 ➔ 证据桥与五维Prompt装配 ➔ 契约生成与逐字审计</text>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 1. TOP ROW: Client Interaction / Tri-State Intent Gateway / Evaluation Control Plane -->
+  <!-- ========================================================================================== -->
+
+  <!-- Card 1: 客户端交互层 (Top Left) -->
+  <g id="box-clients" transform="translate(40, 80)">
+    <rect width="330" height="165" class="card-container"/>
+    <rect x="55" y="-14" width="220" height="28" fill="url(#pill-yellow)" stroke="#D97706" class="pill-header"/>
+    <text x="165" y="0" fill="#92400E" class="pill-title">🖥️ 用户交互与接入终端</text>
+    
+    <g transform="translate(18, 22)">
+      <rect width="140" height="46" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="70" y="16" fill="#1E3A8A" class="chip-title">教研人员 Web 终端</text>
+      <text x="70" y="32" class="chip-sub">宏观统计 / 微观备课诊断</text>
+    </g>
+    <g transform="translate(172, 22)">
+      <rect width="140" height="46" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="70" y="16" fill="#1E3A8A" class="chip-title">交互式流式 CLI 控制台</text>
+      <text x="70" y="32" class="chip-sub">cli.py --stream / 双线程心跳</text>
+    </g>
+    <g transform="translate(18, 76)">
+      <rect width="294" height="74" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="147" y="18" fill="#134E4A" class="chip-title">⚡ 极速流式输出 &amp; 白盒审计模式</text>
+      <text x="147" y="36" class="chip-sub">首字延迟 TTFT ~ 0.82s (P95: 1.38s) Token 实时吐字</text>
+      <text x="147" y="54" class="chip-sub">:mode deterministic 毫秒直出 JSON 载荷与授权证据指针</text>
+    </g>
+  </g>
+
+  <!-- Card 2: 三态意图路由与规划网关 (Top Center) -->
+  <g id="box-gateway" transform="translate(400, 80)">
+    <rect width="560" height="165" class="card-container"/>
+    <rect x="150" y="-14" width="260" height="28" fill="url(#pill-blue)" stroke="#0284C7" class="pill-header"/>
+    <text x="280" y="0" fill="#0369A1" class="pill-title">🔀 三态意图解耦与规划编排网关</text>
+    
+    <g transform="translate(20, 22)">
+      <rect width="250" height="46" fill="url(#chip-amber)" stroke="#FCD34D" class="chip"/>
+      <text x="125" y="16" fill="#78350F" class="chip-title">🛡️ 数学公式与受保护 Token 提取</text>
+      <text x="125" y="32" class="chip-sub">公式 (-2)^2 / 分数 5/7-1/4 / 题号原样切片保护</text>
+    </g>
+    <g transform="translate(290, 22)">
+      <rect width="250" height="46" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="125" y="16" fill="#581C87" class="chip-title">🤖 双层混合分类器 (Hybrid Classifier)</text>
+      <text x="125" y="32" class="chip-sub">Layer 1 特征规则 + Layer 2 Qwen3.5 模型消歧</text>
+    </g>
+    <g transform="translate(20, 76)">
+      <rect width="250" height="74" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="125" y="16" fill="#134E4A" class="chip-title">⚖️ 三态意图解耦门禁 (Tri-State Gate)</text>
+      <text x="125" y="34" class="chip-sub">🟢 RESOLVED ➔ 派发执行计划</text>
+      <text x="125" y="48" class="chip-sub">🟡 UNRESOLVED ➔ UNMEASURED 阻断(拒猜)</text>
+      <text x="125" y="62" class="chip-sub">🔴 UNSUPPORTED ➔ REJECT 显式拒答</text>
+    </g>
+    <g transform="translate(290, 76)">
+      <rect width="250" height="74" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="125" y="16" fill="#1E3A8A" class="chip-title">📋 算子编排与能力矩阵探测</text>
+      <text x="125" y="34" class="chip-sub">BusinessQueryPlanner 调度 3 级执行杠杆</text>
+      <text x="125" y="48" class="chip-sub">DataCapabilities 探测底表就绪 (DIALOGUE/COHORT)</text>
+      <text x="125" y="62" class="chip-sub">框定结构化 sql_scope (subject_filters, QID)</text>
+    </g>
+  </g>
+
+  <!-- Card 3: 自动化评测与真实性门禁 (Top Right) -->
+  <g id="box-eval" transform="translate(990, 80)">
+    <rect width="330" height="165" class="card-container"/>
+    <rect x="55" y="-14" width="220" height="28" fill="url(#pill-purple)" stroke="#9333EA" class="pill-header"/>
+    <text x="165" y="0" fill="#6B21A8" class="pill-title">📊 自动化评测与真实性控制面</text>
+    
+    <g transform="translate(18, 22)">
+      <rect width="140" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="70" y="16" fill="#14532D" class="chip-title">L1 对白召回门禁</text>
+      <text x="70" y="32" class="chip-sub">Turn Recall 81.11%</text>
+    </g>
+    <g transform="translate(172, 22)">
+      <rect width="140" height="46" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="70" y="16" fill="#14532D" class="chip-title">L2 事实覆盖度</text>
+      <text x="70" y="32" class="chip-sub">Contextual Recall 98.3%</text>
+    </g>
+    <g transform="translate(18, 76)">
+      <rect width="294" height="74" fill="url(#chip-amber)" stroke="#FCD34D" class="chip"/>
+      <text x="147" y="18" fill="#78350F" class="chip-title">🎯 打假复查与双向逐字审计跟踪</text>
+      <text x="147" y="36" class="chip-sub">揭穿 98.8% 伪路由，锚定真实基线 28.92%</text>
+      <text x="147" y="50" class="chip-sub">逐字原声一致率 97.59% | 引用精确率 97.59%</text>
+      <text x="147" y="64" class="chip-sub">装配耗时 P95 7.25ms | 51 项核心单测 100% 全绿</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 2. MIDDLE ROW: DUAL-TRACK CORE EXECUTION (GRAPH ANALYTICS vs DIALOGUE RAG) -->
+  <!-- ========================================================================================== -->
+
+  <!-- TRACK 1: 宏观图谱拓扑分析分支 (Middle Left - Width 420) -->
+  <g id="box-track-graph" transform="translate(40, 275)">
+    <rect width="420" height="410" class="card-graph-accent"/>
+    <rect x="50" y="-14" width="320" height="28" fill="url(#pill-purple)" stroke="#7C3AED" class="pill-header"/>
+    <text x="210" y="0" fill="#581C87" class="pill-title">🌐 轨道一：宏观图谱拓扑聚合分析 (DuckDB SQL)</text>
+
+    <!-- 7 Graph Analytics Operators -->
+    <g transform="translate(18, 20)">
+      <rect width="384" height="58" fill="url(#chip-purple)" stroke="#C4B5FD" class="chip"/>
+      <text x="192" y="16" fill="#581C87" class="chip-title">📊 7 大确定性图谱分析算子矩阵 (GraphAnalytics)</text>
+      <text x="192" y="32" class="chip-sub">①高频学生问题 ②难点概念停留 ③共性误区TOP-N ④考试错误模式</text>
+      <text x="192" y="46" class="chip-sub">⑤名师引导策略 ⑥错因-策略共现拓扑 ⑦微课立项改进机会</text>
+    </g>
+
+    <!-- Visual Graph Topology Network Sub-Diagram -->
+    <g transform="translate(18, 88)">
+      <rect width="384" height="235" fill="url(#chip-graph)" stroke="#DDD6FE" rx="10" ry="10"/>
+      <text x="192" y="16" fill="#4C1D95" font-size="11px" font-weight="700" text-anchor="middle">🕸️ Session 四层拓扑投影网络 (物化实体与关系)</text>
+
+      <!-- Graph Nodes and Edges inside SVG -->
+      <!-- Session Node (Center Top) -->
+      <circle cx="192" cy="50" r="22" fill="#7C3AED" stroke="#4C1D95" stroke-width="2"/>
+      <text x="192" y="48" fill="#FFFFFF" font-size="9.5px" font-weight="700" text-anchor="middle">Session</text>
+      <text x="192" y="58" fill="#E9D5FF" font-size="7.5px" text-anchor="middle">第一公民</text>
+
+      <!-- Question Node (Left Top) -->
+      <circle cx="65" cy="50" r="20" fill="#2563EB" stroke="#1D4ED8" stroke-width="1.5"/>
+      <text x="65" y="48" fill="#FFFFFF" font-size="9px" font-weight="700" text-anchor="middle">Question</text>
+      <text x="65" y="58" fill="#BFDBFE" font-size="7px" text-anchor="middle">题干/选项</text>
+
+      <!-- Connection: Session -> Question -->
+      <path d="M 170 50 L 85 50" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+      <text x="128" y="44" fill="#6D28D9" font-size="7.5px" font-weight="700" text-anchor="middle">:ANCHORS</text>
+
+      <!-- Misconception Card Node (Left Mid) -->
+      <rect x="25" y="115" width="105" height="34" rx="6" ry="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5"/>
+      <text x="77" y="128" fill="#991B1B" font-size="9px" font-weight="700" text-anchor="middle">Misconception</text>
+      <text x="77" y="140" fill="#B91C1C" font-size="7.5px" text-anchor="middle">学情障碍机理卡</text>
+
+      <!-- Tutor Strategy Card Node (Right Mid) -->
+      <rect x="254" y="115" width="105" height="34" rx="6" ry="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+      <text x="306" y="128" fill="#92400E" font-size="9px" font-weight="700" text-anchor="middle">Tutor Strategy</text>
+      <text x="306" y="140" fill="#B45309" font-size="7.5px" text-anchor="middle">名师启发策略卡</text>
+
+      <!-- Connections from Session to Cards -->
+      <path d="M 175 62 L 105 115" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+      <path d="M 209 62 L 279 115" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+
+      <!-- Cross-Session Co-occurrence edge between cards -->
+      <path d="M 130 132 L 254 132" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrow-purple)"/>
+      <rect x="156" y="123" width="72" height="16" fill="#FFFFFF" stroke="#C4B5FD" rx="3" ry="3"/>
+      <text x="192" y="134" fill="#6D28D9" font-size="7.5px" font-weight="700" text-anchor="middle">:CO_OCCURS_WITH</text>
+
+      <!-- Turn Window Nodes (Bottom) -->
+      <rect x="25" y="185" width="155" height="36" rx="6" ry="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+      <text x="102" y="198" fill="#14532D" font-size="8.5px" font-weight="700" text-anchor="middle">Window-7 (W7/S3)</text>
+      <text x="102" y="211" fill="#15803D" font-size="7.5px" text-anchor="middle">连续 7 话步原声上下文</text>
+
+      <rect x="204" y="185" width="155" height="36" rx="6" ry="6" fill="#E0F2FE" stroke="#0284C7" stroke-width="1.5"/>
+      <text x="281" y="198" fill="#0C4A6E" font-size="8.5px" font-weight="700" text-anchor="middle">Turn 逐字发言底表</text>
+      <text x="281" y="211" fill="#0369A1" font-size="7.5px" text-anchor="middle">DuckDB SSOT (30,000+ 轮)</text>
+
+      <!-- Connection: Card to Window -->
+      <path d="M 77 149 L 77 185" stroke="#16A34A" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+      <path d="M 180 203 L 204 203" stroke="#0284C7" stroke-width="1.5" marker-end="url(#arrow)"/>
+    </g>
+
+    <!-- Bottom Result of Track 1 -->
+    <g transform="translate(18, 335)">
+      <rect width="384" height="60" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="192" y="18" fill="#1E3A8A" class="chip-title">📈 宏观统计事实物化 (无幻觉 DuckDB 确定性输出)</text>
+      <text x="192" y="34" class="chip-sub">COUNT(DISTINCT source_session_id) 全库频次、占比、难点停留指数</text>
+      <text x="192" y="48" class="chip-sub">物化输出规范化 JSON 行集，杜绝大模型心算统计幻觉</text>
+    </g>
+  </g>
+
+  <!-- CENTER: 确定性图谱证据桥 (Evidence Bridge & 5-Part Prompt Assembly - Width 440) -->
+  <g id="box-bridge" transform="translate(480, 275)">
+    <rect width="400" height="410" class="card-bridge-accent"/>
+    <rect x="50" y="-14" width="300" height="28" fill="url(#pill-teal)" stroke="#0D9488" class="pill-header"/>
+    <text x="200" y="0" fill="#0F766E" class="pill-title">🌉 确定性图谱证据桥 &amp; 五维双轨装配</text>
+
+    <!-- Evidence Bridge Component -->
+    <g transform="translate(18, 20)">
+      <rect width="364" height="64" fill="#FFFFFF" stroke="#0D9488" stroke-width="1.8" class="chip"/>
+      <text x="182" y="18" fill="#0F766E" class="chip-title" font-size="12px">🌉 确定性图谱证据桥 (GraphEvidenceBridge)</text>
+      <text x="182" y="36" class="chip-sub">为左侧宏观统计前排的每一行，强制挂载 1~2 场真实原声对白指针</text>
+      <text x="182" y="50" class="chip-sub">注入授权编号 [E01], [E02]，实现“宏观有统计骨架，微观有对白原声”</text>
+    </g>
+
+    <!-- 5-Part Prompt Assembly Engine -->
+    <g transform="translate(18, 96)">
+      <rect width="364" height="230" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" rx="10" ry="10"/>
+      <text x="182" y="18" fill="#92400E" font-size="11.5px" font-weight="700" text-anchor="middle">🧩 五维结构化双轨 Prompt 动态装配载荷</text>
+
+      <!-- 5 Compartments -->
+      <g transform="translate(14, 30)">
+        <rect width="336" height="32" fill="#F3E8FF" stroke="#C4B5FD" rx="5" ry="5"/>
+        <text x="10" y="16" fill="#581C87" font-size="9.5px" font-weight="700" dominant-baseline="central">1️⃣【宏观统计事实】</text>
+        <text x="120" y="16" fill="#6B21A8" font-size="8.5px" dominant-baseline="central">DuckDB SQL 聚合 JSON 行集 (排序与占比)</text>
+      </g>
+
+      <g transform="translate(14, 68)">
+        <rect width="336" height="32" fill="#EDE9FE" stroke="#DDD6FE" rx="5" ry="5"/>
+        <text x="10" y="16" fill="#4C1D95" font-size="9.5px" font-weight="700" dominant-baseline="central">2️⃣【图关系与拓扑路径】</text>
+        <text x="120" y="16" fill="#5B21B6" font-size="8.5px" dominant-baseline="central">已物化拓扑边 ([:CO_OCCURS_WITH] 跨课堂共现)</text>
+      </g>
+
+      <g transform="translate(14, 106)">
+        <rect width="336" height="32" fill="#FEF3C7" stroke="#FCD34D" rx="5" ry="5"/>
+        <text x="10" y="16" fill="#78350F" font-size="9.5px" font-weight="700" dominant-baseline="central">3️⃣【学生错因/策略卡】</text>
+        <text x="120" y="16" fill="#92400E" font-size="8.5px" dominant-baseline="central">Parent-5 卡片元数据 (深层机理与破局一问)</text>
+      </g>
+
+      <g transform="translate(14, 144)">
+        <rect width="336" height="32" fill="#DCFCE7" stroke="#86EFAC" rx="5" ry="5"/>
+        <text x="10" y="16" fill="#14532D" font-size="9.5px" font-weight="700" dominant-baseline="central">4️⃣【7轮课堂原声】</text>
+        <text x="120" y="16" fill="#166534" font-size="8.5px" dominant-baseline="central">Window-7 连续师生发言实录 ([Turn] [SPEAKER])</text>
+      </g>
+
+      <g transform="translate(14, 182)">
+        <rect width="336" height="34" fill="#FEE2E2" stroke="#FCA5A5" rx="5" ry="5"/>
+        <text x="10" y="17" fill="#991B1B" font-size="9.5px" font-weight="700" dominant-baseline="central">5️⃣【数据来源与限制】</text>
+        <text x="120" y="17" fill="#B91C1C" font-size="8.5px" dominant-baseline="central">仅准依据证据；引用必须带 [E*]；严禁脑补</text>
+      </g>
+    </g>
+
+    <!-- Bottom Mode Splitter -->
+    <g transform="translate(18, 338)">
+      <rect width="364" height="58" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.5" class="chip"/>
+      <text x="182" y="16" fill="#1E40AF" class="chip-title">⚙️ 运行时执行模式分流 (Mode Selector)</text>
+      <text x="182" y="32" class="chip-sub">deterministic 模式 ➔ 纯白盒直出结构化 JSON 载荷与证据指针</text>
+      <text x="182" y="46" class="chip-sub">auto / llm 模式 ➔ 输送大模型流式推理生成并执行双向逐字审计</text>
+    </g>
+  </g>
+
+  <!-- TRACK 2: 微观师生原声检索分支 (Middle Right - Width 420) -->
+  <g id="box-track-rag" transform="translate(900, 275)">
+    <rect width="420" height="410" class="card-rag-accent"/>
+    <rect x="50" y="-14" width="320" height="28" fill="url(#pill-blue)" stroke="#0284C7" class="pill-header"/>
+    <text x="210" y="0" fill="#0369A1" class="pill-title">🔍 轨道二：微观师生原声极速检索装配 (ChromaDB)</text>
+
+    <!-- Dual Retrieval Row -->
+    <g transform="translate(18, 20)">
+      <rect width="186" height="48" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="93" y="16" fill="#134E4A" class="chip-title">⚡ BM25 稀疏检索</text>
+      <text x="93" y="32" class="chip-sub">精确命中数字、公式、专业术语</text>
+    </g>
+    <g transform="translate(216, 20)">
+      <rect width="186" height="48" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="93" y="16" fill="#134E4A" class="chip-title">🎯 Qwen3-Embedding (1024d)</text>
+      <text x="93" y="32" class="chip-sub">稠密语义向量，捕获深层困惑</text>
+    </g>
+
+    <!-- RRF & Reranker -->
+    <g transform="translate(18, 76)">
+      <rect width="384" height="46" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="192" y="16" fill="#1E3A8A" class="chip-title">🔀 RRF 倒数秩融合 ➔ Qwen3-Reranker-0.6B 交叉编码精排</text>
+      <text x="192" y="32" class="chip-sub">初筛 Top-20 黄金覆盖率 100% ➔ 深度重排锁定 Top-5 甜味点卡片</text>
+    </g>
+
+    <!-- 9.7 Breakthrough: Parent-5 & Window-7 -->
+    <g transform="translate(18, 130)">
+      <rect width="186" height="58" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="93" y="18" fill="#14532D" class="chip-title">📌 Parent-5 核心卡片锚定</text>
+      <text x="93" y="34" class="chip-sub">锁定 Top-5 错因与策略卡</text>
+      <text x="93" y="46" class="chip-sub">以 source_turns 锁定对白锚点</text>
+    </g>
+    <g transform="translate(216, 130)">
+      <rect width="186" height="58" fill="url(#chip-green)" stroke="#86EFAC" class="chip"/>
+      <text x="93" y="18" fill="#14532D" class="chip-title">🪟 Window-7/Stride-3 展开</text>
+      <text x="93" y="34" class="chip-sub">前后双向扩展各 3 轮交互</text>
+      <text x="93" y="46" class="chip-sub">覆盖连续 7 轮真实对白时序弧线</text>
+    </g>
+
+    <!-- Greedy Budget -->
+    <g transform="translate(18, 196)">
+      <rect width="384" height="48" fill="url(#chip-amber)" stroke="#F59E0B" class="chip"/>
+      <text x="192" y="16" fill="#78350F" class="chip-title">⚡ greedy_budget 确定性贪心装配引擎 (9.7 突破)</text>
+      <text x="192" y="32" class="chip-sub">消除 DP 超时，装配延迟由 8,178ms 降至 7.25ms (提速 1,128 倍) | 4000 Token 零越界</text>
+    </g>
+
+    <!-- Bottom Result of Track 2 -->
+    <g transform="translate(18, 252)">
+      <rect width="384" height="142" fill="url(#chip-green)" stroke="#22C55E" class="chip"/>
+      <text x="192" y="20" fill="#14532D" class="chip-title" font-size="12px">🗣️ 真实师生原声上下文提取 (Turn Recall 81.11%)</text>
+      <text x="192" y="40" class="chip-sub">以 W7/S3 逻辑窗口原汁原味展开师生来回试探、卡壳与破局全过程</text>
+      <line x1="20" y1="55" x2="364" y2="55" stroke="#BBF7D0" stroke-width="1"/>
+      <text x="25" y="72" fill="#166534" font-size="8.5px">[Turn 12] [STUDENT] 5.45 四舍五入到一位小数是 5.4 吗？</text>
+      <text x="25" y="88" fill="#166534" font-size="8.5px">[Turn 13] [TUTOR] 5.45 位于哪两个十分位数正中间呢？</text>
+      <text x="25" y="104" fill="#166534" font-size="8.5px">[Turn 14] [STUDENT] 5.4 和 5.5！</text>
+      <text x="25" y="120" fill="#166534" font-size="8.5px">[Turn 15] [TUTOR] 位于正中间时，我们的黄金准则是向哪边入？</text>
+      <text x="25" y="134" fill="#166534" font-size="8.5px">[Turn 16] [STUDENT] 向上入！所以是 5.5！</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 3. THIRD ROW: CONTRACT GENERATION & VERBATIM GROUNDING AUDIT (Width 1280) -->
+  <!-- ========================================================================================== -->
+
+  <g id="box-generation-audit" transform="translate(40, 705)">
+    <rect width="1280" height="115" class="card-container"/>
+    <rect x="490" y="-14" width="300" height="28" fill="url(#pill-green)" stroke="#16A34A" class="pill-header"/>
+    <text x="640" y="0" fill="#15803D" class="pill-title">🤖 契约生成、双向逐字审计与响应封装</text>
+
+    <!-- 3 Sub-Cards inside Row 3 -->
+    <g transform="translate(24, 22)">
+      <rect width="380" height="76" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="190" y="18" fill="#1E3A8A" class="chip-title">🤖 LLM 流式推理与结构约束生成</text>
+      <text x="190" y="36" class="chip-sub">输入五维双轨 Prompt，支持 DeepSeek / Qwen 模型</text>
+      <text x="190" y="52" class="chip-sub">约束仅准基于装配证据推理，并显式标注 [E01], [E02] 出处引用</text>
+    </g>
+
+    <g transform="translate(424, 22)">
+      <rect width="430" height="76" fill="url(#chip-amber)" stroke="#F59E0B" class="chip"/>
+      <text x="215" y="18" fill="#78350F" class="chip-title">🛡️ 双向逐字引用审计闸门 (Grounding Audit Gate)</text>
+      <text x="215" y="36" class="chip-sub">引文逐字核验 exact_quote_match: 97.59% (直接比对 DuckDB 底表原声)</text>
+      <text x="215" y="50" class="chip-sub">指针授权核验 citation_precision: 97.59% (严格属于授权证据池)</text>
+      <text x="215" y="64" class="chip-sub">出现脱靶立即降级标记 GROUNDING_DEGRADED，坚守零幻觉底线</text>
+    </g>
+
+    <g transform="translate(874, 22)">
+      <rect width="380" height="76" fill="url(#chip-purple)" stroke="#D8B4FE" class="chip"/>
+      <text x="190" y="18" fill="#581C87" class="chip-title">📦 BusinessResponseEnvelope 不可变响应包</text>
+      <text x="190" y="36" class="chip-sub">统一交付 data_scope, result, evidence, limitations</text>
+      <text x="190" y="52" class="chip-sub">audit_status 审计核验结论与 24 位全链路 trace_id 追踪哈希</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 4. BOTTOM ROW: TRIPLE-ENGINE STORAGE & OFFLINE GRAPH PROJECTION (Width 1280) -->
+  <!-- ========================================================================================== -->
+
+  <g id="box-storage" transform="translate(40, 840)">
+    <rect width="1280" height="215" class="card-container"/>
+    <rect x="420" y="-16" width="440" height="32" fill="url(#pill-blue)" stroke="#0284C7" class="pill-header"/>
+    <text x="640" y="0" fill="#0369A1" class="pill-title" font-size="14px">🗄️ 离线知识工程流水线与三轨分层数据存储底座 (Triple-Engine Storage Base)</text>
+
+    <!-- Col 1: Offline Pipeline -->
+    <g transform="translate(24, 26)">
+      <rect width="210" height="170" fill="url(#chip-amber)" stroke="#F59E0B" class="chip"/>
+      <text x="105" y="22" fill="#78350F" class="chip-title">📁 离线知识构建流水线</text>
+      <line x1="16" y1="36" x2="194" y2="36" stroke="#FDE68A" stroke-width="1"/>
+      <text x="105" y="54" class="chip-sub">1,576 场实录 / 30,000+ 轮对白</text>
+      <text x="105" y="74" class="chip-sub">双轨错因卡与名师策略卡抽取</text>
+      <text x="105" y="94" class="chip-sub">100% 对白指针合法性强校验</text>
+      <text x="105" y="114" class="chip-sub">四层拓扑投影 (0 额外 LLM 消耗)</text>
+      <text x="105" y="134" class="chip-sub">三引擎原子同步持久化写入</text>
+      <text x="105" y="154" class="chip-sub">graph_manifest 状态 READY 门禁</text>
+    </g>
+
+    <!-- Col 2: DuckDB Sessions -->
+    <g transform="translate(248, 26)">
+      <rect width="190" height="170" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="95" y="22" fill="#1E3A8A" class="chip-title">🗄️ DuckDB 会话事实表</text>
+      <text x="95" y="42" class="chip-sub">tutoring_sessions</text>
+      <line x1="16" y1="54" x2="174" y2="54" stroke="#BFDBFE" stroke-width="1"/>
+      <text x="95" y="74" class="chip-sub">1,576 场完整实录</text>
+      <text x="95" y="94" class="chip-sub">原题题干 / 选项分布</text>
+      <text x="95" y="114" class="chip-sub">标准答案 / 错误项绑定</text>
+      <text x="95" y="134" class="chip-sub">全量元数据单一事实源</text>
+      <text x="95" y="154" class="chip-sub">毫秒级外键级联检索</text>
+    </g>
+
+    <!-- Col 3: DuckDB Turns -->
+    <g transform="translate(452, 26)">
+      <rect width="190" height="170" fill="url(#chip-blue)" stroke="#93C5FD" class="chip"/>
+      <text x="95" y="22" fill="#1E3A8A" class="chip-title">🗄️ DuckDB 对白实录底表</text>
+      <text x="95" y="42" class="chip-sub">session_dialogue_turns</text>
+      <line x1="16" y1="54" x2="174" y2="54" stroke="#BFDBFE" stroke-width="1"/>
+      <text x="95" y="74" class="chip-sub">30,000+ 轮时序原声</text>
+      <text x="95" y="94" class="chip-sub">Student / Tutor 角色对齐</text>
+      <text x="95" y="114" class="chip-sub">不可篡改权威文本 SSOT</text>
+      <text x="95" y="134" class="chip-sub">权威引用逐字比对基石</text>
+      <text x="95" y="154" class="chip-sub">支撑 Window-7 动态展开</text>
+    </g>
+
+    <!-- Col 4: DuckDB Business Graph (Highlighted) -->
+    <g transform="translate(656, 26)">
+      <rect width="210" height="170" fill="url(#chip-purple)" stroke="#8B5CF6" stroke-width="1.8" class="chip"/>
+      <text x="105" y="22" fill="#581C87" class="chip-title">🌐 DuckDB 业务知识图谱</text>
+      <text x="105" y="42" class="chip-sub">graph.duckdb (核心图库)</text>
+      <line x1="16" y1="54" x2="194" y2="54" stroke="#DDD6FE" stroke-width="1"/>
+      <text x="105" y="74" class="chip-sub">graph_nodes / edges 拓扑表</text>
+      <text x="105" y="94" class="chip-sub">Session-Card-Win-Turn 4层</text>
+      <text x="105" y="114" class="chip-sub">CO_OCCURS_WITH 物化边</text>
+      <text x="105" y="134" class="chip-sub">支撑 7 大算子确定性 SQL</text>
+      <text x="105" y="154" class="chip-sub">graph_manifest 状态校验</text>
+    </g>
+
+    <!-- Col 5: ChromaDB Misconception & Strategy -->
+    <g transform="translate(880, 26)">
+      <rect width="180" height="170" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="90" y="22" fill="#134E4A" class="chip-title">🧠 Chroma 错因与策略库</text>
+      <text x="90" y="42" class="chip-sub">双集合物理隔离</text>
+      <line x1="16" y1="54" x2="164" y2="54" stroke="#99F6E4" stroke-width="1"/>
+      <text x="90" y="74" class="chip-sub">Qwen3-Embedding (1024d)</text>
+      <text x="90" y="94" class="chip-sub">严防学情与策略交叉污染</text>
+      <text x="90" y="114" class="chip-sub">元数据过滤: QID / 考纲</text>
+      <text x="90" y="134" class="chip-sub">指数退避重试存储硬化</text>
+      <text x="90" y="154" class="chip-sub">毫秒级 Dense 近邻检索</text>
+    </g>
+
+    <!-- Col 6: ChromaDB Fallback Windows -->
+    <g transform="translate(1074, 26)">
+      <rect width="180" height="170" fill="url(#chip-cyan)" stroke="#5EEAD4" class="chip"/>
+      <text x="90" y="22" fill="#134E4A" class="chip-title">⚡ Chroma 冷备滑动窗口</text>
+      <text x="90" y="42" class="chip-sub">fallback_windows</text>
+      <line x1="16" y1="54" x2="164" y2="54" stroke="#99F6E4" stroke-width="1"/>
+      <text x="90" y="74" class="chip-sub">Window=7, Stride=3 切块</text>
+      <text x="90" y="94" class="chip-sub">零信任纯原文向量索引</text>
+      <text x="90" y="114" class="chip-sub">当卡片失焦时兜底检索</text>
+      <text x="90" y="134" class="chip-sub">覆盖全量对话时序切块</text>
+      <text x="90" y="154" class="chip-sub">独立物理沙箱测试隔离</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================================== -->
+  <!-- 5. CONNECTING DATA FLOW LINES & ANNOTATIONS -->
+  <!-- ========================================================================================== -->
+
+  <!-- Top: Client -> Gateway -->
+  <path d="M 370 162 L 400 162" class="flow-line"/>
+
+  <!-- Top: Gateway -> Dual-Track Execution (Branching) -->
+  <!-- Branch to Left Graph Track -->
+  <path d="M 520 245 L 520 260 L 250 260 L 250 275" class="flow-line" stroke="#7C3AED" marker-end="url(#arrow-purple)"/>
+  <rect x="290" y="248" width="120" height="18" class="flow-label-bg" stroke="#C4B5FD"/>
+  <text x="350" y="257" class="flow-label" fill="#6D28D9">Lever 2: 宏观图谱分析</text>
+
+  <!-- Branch to Right Dialogue RAG Track -->
+  <path d="M 760 245 L 760 260 L 1110 260 L 1110 275" class="flow-line" stroke="#0284C7" marker-end="url(#arrow)"/>
+  <rect x="880" y="248" width="120" height="18" class="flow-label-bg" stroke="#BAE6FD"/>
+  <text x="940" y="257" class="flow-label" fill="#0369A1">Lever 1: 微观原声RAG</text>
+
+  <!-- Horizontal Connections to Center Evidence Bridge -->
+  <!-- Left Track 1 -> Center Evidence Bridge -->
+  <path d="M 460 480 L 480 480" class="flow-line" stroke="#7C3AED" marker-end="url(#arrow-purple)"/>
+  <rect x="440" y="462" width="40" height="16" class="flow-label-bg" stroke="#C4B5FD"/>
+  <text x="460" y="470" class="flow-label" fill="#6D28D9">JSON行</text>
+
+  <!-- Right Track 2 -> Center Evidence Bridge -->
+  <path d="M 900 480 L 880 480" class="flow-line" stroke="#16A34A" marker-end="url(#arrow-green)"/>
+  <rect x="878" y="462" width="44" height="16" class="flow-label-bg" stroke="#86EFAC"/>
+  <text x="900" y="470" class="flow-label" fill="#15803D">原声对白</text>
+
+  <!-- Center Bridge -> Row 3 Generation & Audit -->
+  <path d="M 680 685 L 680 705" class="flow-line" stroke="#0D9488" marker-end="url(#arrow-teal)"/>
+  <rect x="625" y="688" width="110" height="18" class="flow-label-bg" stroke="#99F6E4"/>
+  <text x="680" y="697" class="flow-label" fill="#0F766E">五维Prompt动态载荷</text>
+
+  <!-- Storage -> Left Graph Track (SQL queries on graph.duckdb) -->
+  <path d="M 760 840 L 760 760 L 300 760 L 300 685" class="flow-line" stroke="#7C3AED" marker-end="url(#arrow-purple)"/>
+  <rect x="420" y="752" width="130" height="18" class="flow-label-bg" stroke="#DDD6FE"/>
+  <text x="485" y="761" class="flow-label" fill="#5B21B6">拓扑遍历与SQL COUNT聚合</text>
+
+  <!-- Storage -> Right RAG Track (Dense + Turn retrieval) -->
+  <path d="M 970 840 L 970 760 L 1050 760 L 1050 685" class="flow-line" stroke="#0284C7" marker-end="url(#arrow)"/>
+  <rect x="990" y="752" width="120" height="18" class="flow-label-bg" stroke="#BAE6FD"/>
+  <text x="1050" y="761" class="flow-label" fill="#0369A1">向量匹配与对白窗口回溯</text>
+
+  <!-- Row 3 Generation -> Storage (Turn ID Verbatim Audit) -->
+  <path d="M 550 820 L 550 840" class="flow-line" stroke="#16A34A" marker-end="url(#arrow-green)"/>
+  <rect x="485" y="822" width="130" height="18" class="flow-label-bg" stroke="#86EFAC"/>
+  <text x="550" y="831" class="flow-label" fill="#15803D">Turn ID 对白逐字核验 (SSOT)</text>
+
+  <!-- Row 3 Response -> Top Client (SSE Streaming & BusinessResponseEnvelope) -->
+  <path d="M 1240 705 L 1240 215 Q 1240 180 1100 180 L 990 180" class="flow-line-dashed"/>
+  <path d="M 400 180 L 370 180" class="flow-line-dashed"/>
+  <rect x="1170" y="190" width="140" height="18" class="flow-label-bg" stroke="#BAE6FD"/>
+  <text x="1240" y="199" class="flow-label" fill="#0369A1">SSE 流式响应 / 契约包交付</text>
+
+</svg>
